@@ -1,5 +1,5 @@
 ---
-title: 已弃用
+title: 回收站🗑️
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# 已弃用
+# 回收站🗑️
 
 共 11 篇
 

@@ -1,5 +1,5 @@
 ---
-title: 英语学习
+title: 英语
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# 英语学习
+# 英语
 
 共 2 篇
 

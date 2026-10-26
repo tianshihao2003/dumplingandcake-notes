@@ -1,5 +1,5 @@
 ---
-title: AI学习
+title: AI
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# AI学习
+# AI
 
 共 5 篇
 

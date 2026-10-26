@@ -48,27 +48,45 @@ function hasNotes(dir) {
 	return false;
 }
 
-const navItems = listDirs(postsDir)
-	.filter((top) => hasNotes(path.join(postsDir, top)))
-	.map((top) => {
-		const subs = listDirs(path.join(postsDir, top)).filter((sub) =>
-			hasNotes(path.join(postsDir, top, sub)),
-		);
-		const topLink = `/posts/${encodeURIComponent(top)}/`;
-		if (subs.length === 0) {
-			return { text: top, link: topLink };
-		}
-		return {
-			text: top,
-			items: [
-				{ text: "全部", link: topLink },
-				...subs.map((sub) => ({
-					text: sub,
-					link: `${topLink}${encodeURIComponent(sub)}/`,
-				})),
-			],
-		};
-	});
+/**
+ * 固定排在导航末尾的目录名，**数组顺序即显示顺序（从左到右）**。
+ * 须与 docs/posts 下的文件夹名完全一致（含 emoji）；写了不存在的名字会被静默忽略。
+ * 例：["其他学习", "回收站🗑️"] → 「回收站🗑️」在最后一个，「其他学习」在它左边。
+ */
+const pinnedNavDirs = ["其他学习", "回收站🗑️"];
+
+/** 一个顶层目录 → 一个导航条目（有子目录时带「全部 + 子目录」下拉） */
+function buildNavItem(top) {
+	const subs = listDirs(path.join(postsDir, top)).filter((sub) =>
+		hasNotes(path.join(postsDir, top, sub)),
+	);
+	const topLink = `/posts/${encodeURIComponent(top)}/`;
+	if (subs.length === 0) {
+		return { text: top, link: topLink };
+	}
+	return {
+		text: top,
+		items: [
+			{ text: "全部", link: topLink },
+			...subs.map((sub) => ({
+				text: sub,
+				link: `${topLink}${encodeURIComponent(sub)}/`,
+			})),
+		],
+	};
+}
+
+const topDirs = listDirs(postsDir).filter((top) =>
+	hasNotes(path.join(postsDir, top)),
+);
+const normalItems = topDirs
+	.filter((top) => !pinnedNavDirs.includes(top))
+	.map(buildNavItem);
+// 按 pinnedNavDirs 的数组顺序输出（不是按目录排序），以保证指定的相对位置
+const pinnedItems = pinnedNavDirs
+	.filter((top) => topDirs.includes(top))
+	.map(buildNavItem);
+const navItems = [...normalItems, ...pinnedItems];
 
 export default defineConfig({
 	extends: blogTheme,
