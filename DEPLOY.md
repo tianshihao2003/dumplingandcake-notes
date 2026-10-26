@@ -208,35 +208,67 @@ ls docs/.vitepress/dist/pagefind | wc -l             # → 14
 选「不含中国大陆」= 完全没加速效果，白干。所以 **ICP 备案是这条路能否走通的唯一门槛**
 （博客用的 `tsh520.cn` 应该已经在腾讯侧备过，子域通常能复用备案）。
 
-#### 最大的坑：不要把 `.vercel.app` 当回源地址
+#### 第二个坑：不要把访客域名直接绑给 Vercel
+
+**不要**图省事把 `notes.tsh520.cn` 同时给 Vercel 和 EdgeOne 用。
+
+Vercel 要靠 DNS 验证域名才能签发 HTTPS 证书。但访客域名的 DNS 最终**必须**指向 EdgeOne
+（不然流量根本不过加速节点），于是 Vercel 一直判定 `Invalid Configuration`、
+**签不出证书** → EdgeOne 回源走 HTTPS 握手失败。
+
+> 网上有些教程确实是一个域名硬套的，多半靠「先指 Vercel 拿到证书再改回 CDN」。
+> 短期能用，但 Vercel 证书到期要重新验证，早晚掉链子。**别赌这个。**
+
+#### 正确做法：两个子域分工（推荐）
+
+| 域名 | 用途 | DNS 指向 |
+|---|---|---|
+| `notes.tsh520.cn` | **访客唯一入口**，EdgeOne 加速域名 | CNAME → **EdgeOne 给的** `*.eo.dnse5.com` |
+| `notes-origin.tsh520.cn` | 只给 Vercel 验证 + EdgeOne 回源 | CNAME → **Vercel 给的** `cname.vercel-dns.com` |
+
+这样 Vercel 的 DNS 验证永远成立，证书能正常签发和自动续期；EdgeOne 独立做加速，两边互不干扰。
+
+> 代价（可接受）：别人知道 `notes-origin.tsh520.cn` 也能直接访问，绕过加速。
+> 内容一样，只是没加速。
+> ⚠️ **别在 Vercel 里把它设成 redirect 到主域** —— 那样 EdgeOne 回源会拿到 3xx 而不是正文。
+
+#### 第三个坑：不要把 `.vercel.app` 当回源地址
 
 Vercel **自己也是一层 CDN**，它的边缘节点会校验请求里的 `Host` 头。
-如果你在 EdgeOne 的「源站地址」直接填 `xxx.vercel.app`，回源时 Host 头是 `notes.tsh520.cn`，
+如果你在 EdgeOne 的「源站地址」直接填 `xxx.vercel.app`，回源时 Host 头是 `notes-origin.tsh520.cn`，
 Vercel 不认这个域名 → 校验失败 → 回源超时 → 页面 522。这是网上所有教程里最常踩的一个。
 
-#### 正确配法（三步）
+#### 配置步骤
 
-**第 1 步｜在 Vercel 加自定义域名，拿它的 CNAME 值**
+**第 1 步｜Vercel 加源站域名**
 
-Project → Settings → Domains → Add `notes.tsh520.cn`，Vercel 会给你一个 CNAME 目标值。
+Project → Settings → Domains → Add **`notes-origin.tsh520.cn`**，抄下 Vercel 给的 CNAME 目标值。
 
-> 关键：**这个 CNAME 值不要配到 DNS 上去**。它是给 EdgeOne 回源用的，不是给访客用的。
+**第 2 步｜DNS 指向 Vercel，等证书**
 
-**第 2 步｜在 EdgeOne / CDN 配置回源**
+在 DNS 服务商加记录，等 Vercel 面板显示 `Valid`（通常几分钟）：
+
+| 主机记录 | 类型 | 记录值 |
+|---|---|---|
+| `notes-origin` | CNAME | `cname.vercel-dns.com`（或 Vercel 面板显示的值） |
+
+**第 3 步｜EdgeOne 配置回源**
 
 | 配置项 | 填什么 |
 |---|---|
 | 加速域名 | `notes.tsh520.cn` |
 | 加速区域 | 中国大陆（或全球）—— 需要备案 |
-| 源站地址 | **第 1 步拿到的那个 Vercel CNAME 值** ← 不是 `.vercel.app` |
-| **回源 HOST** | **`notes.tsh520.cn`** ← 必须显式指回去，否则又是 522 |
+| 源站地址 | **第 1 步拿到的 Vercel CNAME 值** ← 不是 `.vercel.app` |
+| **回源 HOST** | **`notes-origin.tsh520.cn`** ← 必须显式指回去，否则又是 522 |
 | 回源协议 | **HTTPS**（写 HTTP 会被 Vercel 308 重定向打成死循环） |
 | 回源端口 | 443 |
 
-**第 3 步｜DNS 把域名指到 EdgeOne**
+> 源站地址填 `notes-origin.tsh520.cn` 也可以，和填 Vercel 的 CNAME 值等价、更好记。
 
-EdgeOne 会分配一个 `*.eo.dnse5.com`（或 `.eo.dnsv1.com`）格式的 CNAME，
-去你的 DNS 服务商把 `notes` 的 CNAME 记录值改成 **EdgeOne 给的那个**，不是 Vercel 给的。
+**第 4 步｜DNS 把访客域名指到 EdgeOne**
+
+EdgeOne 分配 `*.eo.dnse5.com`（或 `.eo.dnsv1.com`）格式的 CNAME，
+把 `notes` 的 CNAME 记录值改成 **EdgeOne 给的那个**，不是 Vercel 给的。
 
 ```bash
 nslookup notes.tsh520.cn
@@ -244,6 +276,16 @@ nslookup notes.tsh520.cn
 ```
 
 > 证书签发有延迟，DNS 生效后立刻访问可能报证书不受信，等几分钟再试。
+
+#### 排错速查
+
+| 现象 | 原因 |
+|---|---|
+| 页面 **522 回源超时** | 回源 HOST 没写回 Vercel 上绑的域名，或源站地址填成了 `.vercel.app` |
+| EdgeOne 报回源证书错误 | Vercel 那边的域没 `Valid` —— 多半是 DNS 没真指到 Vercel |
+| 首页无限 308 | 回源协议写成 HTTP 了 |
+| 能打开但明显没加速 | 加速区域选了「不含中国大陆」，或 DNS 没指到 EdgeOne |
+| 国内能开、内容却是旧的 | EdgeOne 缓存，去控制台刷新缓存 |
 
 ### 3.5 如果之后想让笔记站不公开
 
