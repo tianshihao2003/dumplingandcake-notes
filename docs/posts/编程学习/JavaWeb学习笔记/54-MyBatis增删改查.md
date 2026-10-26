@@ -344,10 +344,10 @@ PPT 这两页的问答是本节的口头考点：
 四个操作对应的测试都在 `SpringbootMybatisQuickstartApplicationTests` 里（`testFindAll`、`testDeleteById`、`testInsert`、`testUpdate`、`testFindByUsernameAndPassword` 五个），本机把这一套跑下来是 **5 个测试全过**。自己动手时按 [51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)的辅助配置把日志打开（`mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl`），就能像上面那样把每条 SQL 和参数都看见。
 
 > [!WARNING]
-> 课程 `jdbc-demo` 工程里除 `JdbcTest` 外还有一个 `FileTest`，它硬编码了课程作者本机的路径 `C:\Users\deng\Desktop\filename.txt`，跑起来会报：
+> 课程 `jdbc-demo` 工程里除 `JdbcTest` 外还有一个 `FileTest`，它硬编码了课程作者本机的路径 `C:\Users\你的用户名\Desktop\filename.txt`，跑起来会报：
 >
 > ```text
-> java.io.FileNotFoundException: C:\Users\deng\Desktop\filename.txt (系统找不到指定的路径。)
+> java.io.FileNotFoundException: C:\Users\你的用户名\Desktop\filename.txt (系统找不到指定的路径。)
 > ```
 >
 > **这不是你的环境坏了**——那是作者自己的临时测试类，跑不过可以直接删掉或忽略。（这也提醒一件事：读课程代码时，凡是硬编码了别人机器路径的地方都要换成自己的。）

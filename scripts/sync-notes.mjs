@@ -29,6 +29,11 @@ const DRY_RUN = args.includes("--dry-run");
 
 const ZERO_WIDTH = /[\u200b\ufeff]/g;
 const OBSIDIAN_IMG_SIZE = /!\[([^\]]*?)\|\d+(?:x\d+)?\]\(/g;
+
+// 本机 home 目录路径（`C:\Users\张三\...`、`/Users/张三/...`）。
+// 要求 Users 前面必须有盘符或斜杠，避免把正文里普通的 "Users/" 字样误脱敏。
+// 第 1 个捕获组 = `C:\Users\` / `/Users/` 前缀，第 2 个 = 用户名，替换时只换第 2 个。
+const LOCAL_USER_HOME = /((?:[A-Za-z]:[\\/]|[\\/])Users[\\/])([^\\/\n`'")]+)/g;
 const FIELD_ALIAS = [["published", "date"]];
 
 // 这些目录下的笔记不进首页列表（导航、分类页、直接链接仍可访问）。
@@ -275,6 +280,12 @@ function sanitize(text, opts = {}) {
 	const vueInterp = (out.match(/\{\{/g) ?? []).length;
 	out = out.replace(/\{\{/g, "&#123;&#123;");
 
+	// 笔记里偶尔会贴本机绝对路径，仓库是公开的 → 会泄露 Windows 用户名和目录结构。
+	// 只把用户名那一段换成占位符，盘符和 Users 保留，读起来还能看出是本机路径。
+	// 占位符用中文而不是 <用户名>：尖括号形态存在被 markdown 当成 HTML 标签吞掉的风险。
+	const redacted = (out.match(LOCAL_USER_HOME) ?? []).length;
+	out = out.replace(LOCAL_USER_HOME, "$1你的用户名");
+
 	// frontmatter 单独拆出来，避免被当成正文处理
 	const allLines = out.split("\n");
 	const fm = splitFrontmatter(allLines);
@@ -335,6 +346,7 @@ function sanitize(text, opts = {}) {
 		zeroWidth,
 		escapedBlocks: angle.escapedBlocks,
 		imgFixed,
+		redacted,
 		dateAdded,
 		coverAdded,
 		hiddenAdded,
@@ -375,6 +387,7 @@ const stat = {
 	zeroWidth: 0,
 	escaped: 0,
 	img: 0,
+	redacted: 0,
 	date: 0,
 	cover: 0,
 	hidden: 0,
@@ -402,7 +415,7 @@ for (const { full, rel } of files) {
 	// 源文件可能是 CRLF，副本统一用 LF，避免 git 在不同机器上抖
 	const normalized = raw.replace(/\r\n/g, "\n");
 	titles.set(rel, extractTitle(normalized, rel));
-	const { text, zeroWidth, escapedBlocks, imgFixed, dateAdded, coverAdded, hiddenAdded } =
+	const { text, zeroWidth, escapedBlocks, imgFixed, redacted, dateAdded, coverAdded, hiddenAdded } =
 		sanitize(normalized, {
 			hideFromHome: HIDDEN_FROM_HOME.some(
 				(dir) => rel === dir || rel.startsWith(`${dir}${path.sep}`),
@@ -412,6 +425,7 @@ for (const { full, rel } of files) {
 	if (zeroWidth > 0) stat.zeroWidth++;
 	if (escapedBlocks > 0) stat.escaped++;
 	if (imgFixed) stat.img++;
+	if (redacted > 0) stat.redacted++;
 	if (dateAdded) stat.date++;
 	if (coverAdded) stat.cover++;
 	if (hiddenAdded) stat.hidden++;
@@ -573,6 +587,7 @@ console.log(`  同步文件      : ${stat.copied} / ${stat.total}`);
 console.log(`  删零宽字符    : ${stat.zeroWidth} 篇`);
 console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
+console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
 console.log(`  补 date       : ${stat.date} 篇`);
 console.log(`  补 cover      : ${stat.cover} 篇`);
 console.log(`  首页隐藏      : ${stat.hidden} 篇`);

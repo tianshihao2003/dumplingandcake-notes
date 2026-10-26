@@ -38,7 +38,7 @@ cover: false
 | 风格参考图 1 | 学密度和气质（不照搬版式） | 同目录 `details-api-security-practices.8ZIhxhkz_Z2dpXoF.webp` |
 | 风格参考图 2（可选） | 备用密度参考 | 同目录 `details-web-performance-optimization.B8Z6Zq9y_qDsv0.webp` |
 
-参考图目录：`C:/Users/dumplingandcake/Downloads/Google Chrome/参考图片/`
+参考图目录：`C:/Users/你的用户名/Downloads/Google Chrome/参考图片/`
 
 **注意**：风格参考图只用来学「信息密度和黑板手绘气质」，提示词里必须明确「不要照搬参考图的版式」，否则会生成一堆一模一样的构图。
 
