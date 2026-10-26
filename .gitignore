@@ -1,0 +1,16 @@
+# 依赖与构建产物
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+docs/.vitepress/.temp/
+
+# 注意：docs/posts 是 `pnpm sync` 从 Obsidian 库生成的「真副本」，**需要提交**。
+# 线上 CI 没有你本地那个 Obsidian 库，只能从仓库里拿内容。
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+*.log
+
+# 调试时截的预览图（项目根目录下的 png 不入库；站点自己的图片放 docs/public/）
+/*.png

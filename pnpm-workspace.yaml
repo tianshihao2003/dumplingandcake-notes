@@ -1,0 +1,8 @@
+# 用 pnpm 11（本机全局版本）
+# nodeLinker=hoisted：扁平 node_modules，绕开 pnpm 严格符号链接在 Windows 上
+# 把 vite / vue 等未作用域包漏链导致 "Cannot find package 'vite'" 的问题。
+nodeLinker: hoisted
+
+allowBuilds:
+  esbuild: true
+  sharp: true
