@@ -111,7 +111,15 @@ pnpm serve
 
 ## 第三步：建仓库 + 部署
 
-### 3.1 建站点仓库（私有）
+### 3.1 建站点仓库（私有）— ✅ 已完成（2026-10-26）
+
+远端：<https://github.com/tianshihao2003/dumplingandcake-notes>（**PRIVATE**），`main` 分支，
+本地提交 `4dc3676 feat: 笔记站初始化（@sugarat/theme + VitePress）` 已推送。
+
+核对结果：`298` 个文件，其中 `docs/posts` 有 `287` 个（269 篇笔记 + 18 个目录落地页）；
+`node_modules/ dist/ cache/ .temp/` 和根目录 `*.png` 全部没进去。
+
+当时用的命令：
 
 ```bash
 cd "E:/GithubProgect/MyRunProject/dumplingandcake-notes"
@@ -192,6 +200,17 @@ git push
 | 浏览器里/构建时 `ENOENT ... .vitepress/.temp/xxx.js` | 主题热更新插件的 bug，已在 `config.mts` 的 `watch.ignored` 里绕过。升级主题后复发就检查那段还在不在 |
 | **`pnpm build` 打印完 `vitepress v1.6.4` 就崩，退出码 `3221226505`** | 这是 Windows 的 `0xC0000409`（栈缓冲区溢出），进程直接被杀，不是 VitePress 的 JS 报错，所以没有堆栈。**先做下面三步，80% 能解决**（2026-10-26 实测有效） |
 | 构建报 `Cannot find package 'vite'` | pnpm 装坏了（换过 pnpm 版本）。删 `node_modules` 后 `pnpm install` 重来 |
+| `gh repo create ... --push` 报 `schannel: failed to receive handshake, SSL/TLS connection failed` | **只有 `gh` 会这样，`git` 自己是好的**。原因是 `gh` 不吃 `~/.gitconfig` 里的 `http.proxy`，转而用了别的代理。**绕过办法**：`gh` 只负责建空仓库，推送交给 git —— `gh repo create <name> --private --source=. --remote=origin` 然后手动 `git push -u origin main`。详见下面 |
+
+### 推送时的网络出口（本机实测，2026-10-26）
+
+| 方式 | 结果 |
+|---|---|
+| `git push`（走 `~/.gitconfig` 的 `http.proxy=http://127.0.0.1:7890`，FlClash） | ✅ **正常**，298 个文件一次推完 |
+| `git push` 直连（`-c http.proxy= -c https.proxy=`） | ❌ `Recv failure: Connection was reset`（这台机器到 GitHub 必须走代理） |
+| `gh repo create --push` | ❌ schannel TLS 握手失败 |
+
+**结论：本机推 GitHub 一律用 `git push`，别让 `gh` 代劳推送。** 代理挂了才试直连。
 
 ### 退出码 3221226505 的自救流程
 
