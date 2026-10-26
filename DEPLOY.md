@@ -138,38 +138,112 @@ gh repo create dumplingandcake-notes --private --source=. --remote=origin --push
 
 > ⚠️ `docs/posts` 一定要提交。CI 上没有你本地那个 Obsidian 库，`sync` 会自动跳过，直接拿仓库里这份内容构建。
 
-### 3.2 接到 EdgeOne Pages
+### 3.2 仓库可见性 — 已定为 **公开**（2026-10-26 站长拍板）
 
-| 配置项 | 值 |
+<https://github.com/tianshihao2003/dumplingandcake-notes> 已从 `PRIVATE` 改为 `PUBLIC`。
+
+```bash
+gh repo edit tianshihao2003/dumplingandcake-notes --visibility public --accept-visibility-change-consequences
+```
+
+> ⚠️ 新版 `gh`（2.98+）改可见性**必须**带 `--accept-visibility-change-consequences`，否则只打印用法不报错、也不生效。
+>
+> 注意：**这一步不可逆**。公开后别人的 fork / 存档不会被你后续转回私有删掉。
+
+**没跟着转公开的：`content-backup`**（`src/content` 里那个备份仓库）—— 那里除了笔记还有别的不上传内容，保持私有。
+
+### 3.3 部署到 Vercel
+
+站点仓库现在是公开的，Vercel **Hobby（免费）** 直连 GitHub 就能自动构建，私有授权的麻烦全部没有。
+
+在 Vercel 新建 Project → Import Git Repository → 选 `dumplingandcake-notes`。
+
+仓库里已经有 `vercel.json`，导入时这些会被自动填好，照着核对一遍就行：
+
+| 配置项 | 值 | 说明 |
+|---|---|---|
+| Framework Preset | **Other**（`framework: null`） | 别选 VitePress 预设，我们的输出目录是自定义深度 |
+| Build Command | `pnpm build` | 内部会先跑 `sync-notes.mjs`，CI 上它打印 `[跳过]` 后 `exit 0`，用仓库里的 `docs/posts` |
+| Output Directory | **`docs/.vitepress/dist`** | 最容易填错的一项 |
+| Install Command | `pnpm install` | |
+| Node.js Version | **22.x** | 在项目 Settings → Node.js Version 手动选（仓库里的 `engines.node: ">=22"` 只做下限约束，别指望它） |
+| 环境变量 | `ENABLE_EXPERIMENTAL_COREPACK=1` | 让 corepack 照 `packageManager: pnpm@11.7.0` 走，否则可能用旧 pnpm 炸在 `pnpm-workspace.yaml` 的 `allowBuilds` 上 |
+
+**vercel.json 里刻意没开的**：`cleanUrls` / `trailingSlash`。
+
+> 因为 VitePress 生成的是 **`xxx.html` 实体文件**（如 `/posts/AI学习/某篇笔记.html`），不是目录。
+> 开了 `cleanUrls: true` 会让你同时拥有两套 URL（`/x.html` 和 `/x`），对 SEO 和分享链接都不友好。保持默认。
+
+**CI 上不用操心搜索索引**：VitePress 在 `vitepress build` 收尾会自动跑 pagefind，
+所以每次部署完 `dist/pagefind/` 都是齐的。（`devDependencies` 里的 `pagefind` 别删。）
+
+**只想知道有没有构建成功**：
+
+```bash
+# 本地先跑一遍，出 289 个 html + dist/pagefind/ 才 push
+pnpm build
+find docs/.vitepress/dist -name "*.html" | wc -l     # → 289
+ls docs/.vitepress/dist/pagefind | wc -l             # → 14
+```
+
+### 3.4 用腾讯云 EdgeOne / CDN 给 Vercel 加速（国内能打开的关键）
+
+#### 前提：域名必须有 ICP 备案
+
+腾讯云官方文档写死了：
+
+> 加速区域选择「中国大陆」或「全球可用区」的域名**必须先完成 ICP 备案**；
+> 未备案域名只能选「全球可用区（不含中国大陆）」。
+
+选「不含中国大陆」= 完全没加速效果，白干。所以 **ICP 备案是这条路能否走通的唯一门槛**
+（博客用的 `tsh520.cn` 应该已经在腾讯侧备过，子域通常能复用备案）。
+
+#### 最大的坑：不要把 `.vercel.app` 当回源地址
+
+Vercel **自己也是一层 CDN**，它的边缘节点会校验请求里的 `Host` 头。
+如果你在 EdgeOne 的「源站地址」直接填 `xxx.vercel.app`，回源时 Host 头是 `notes.tsh520.cn`，
+Vercel 不认这个域名 → 校验失败 → 回源超时 → 页面 522。这是网上所有教程里最常踩的一个。
+
+#### 正确配法（三步）
+
+**第 1 步｜在 Vercel 加自定义域名，拿它的 CNAME 值**
+
+Project → Settings → Domains → Add `notes.tsh520.cn`，Vercel 会给你一个 CNAME 目标值。
+
+> 关键：**这个 CNAME 值不要配到 DNS 上去**。它是给 EdgeOne 回源用的，不是给访客用的。
+
+**第 2 步｜在 EdgeOne / CDN 配置回源**
+
+| 配置项 | 填什么 |
 |---|---|
-| 构建命令 | `pnpm install && pnpm build` |
-| 输出目录 | `docs/.vitepress/dist` |
-| Node 版本 | 22（≥22 即可） |
-| pnpm 版本 | **11.x**（见下方注意） |
+| 加速域名 | `notes.tsh520.cn` |
+| 加速区域 | 中国大陆（或全球）—— 需要备案 |
+| 源站地址 | **第 1 步拿到的那个 Vercel CNAME 值** ← 不是 `.vercel.app` |
+| **回源 HOST** | **`notes.tsh520.cn`** ← 必须显式指回去，否则又是 522 |
+| 回源协议 | **HTTPS**（写 HTTP 会被 Vercel 308 重定向打成死循环） |
+| 回源端口 | 443 |
 
-> ⚠️ **pnpm 版本要 ≥10**。项目的 `pnpm-workspace.yaml` 用了 `allowBuilds`（pnpm 11 才认），
-> 用 pnpm 9 会直接报 `packages field missing or empty`，构建失败。
-> `package.json` 里已写 `packageManager: pnpm@11.7.0`，平台支持 corepack 就会自动用它；
-> 如果不支持，在平台设置里手动把 pnpm 版本指到 11。
+**第 3 步｜DNS 把域名指到 EdgeOne**
 
-### 3.3 部署方式的两个选择
+EdgeOne 会分配一个 `*.eo.dnse5.com`（或 `.eo.dnsv1.com`）格式的 CNAME，
+去你的 DNS 服务商把 `notes` 的 CNAME 记录值改成 **EdgeOne 给的那个**，不是 Vercel 给的。
 
-**A. 平台 Git 集成（push 自动构建）** —— 需要平台支持私有仓库授权。
-- 好处：改完 push 就上线，和你的博客一致。
-- 风险：我没法替你确认 EdgeOne Pages 对私有仓库的支持情况，你建项目时会看到能不能选。
+```bash
+nslookup notes.tsh520.cn
+# 期望看到：Aliases: notes.tsh520.cn.eo.dnse5.com  ← 说明 EdgeOne 已接管
+```
 
-**B. 本地构建 + 直接上传 `dist`** —— 平台不需要访问你的仓库。
-- `pnpm build` 后把 `docs/.vitepress/dist` 整个上传。
-- 好处：笔记仓库可以一直保持私有，内容永远不进任何公开服务。
-- 代价：每次更新要手动 build + 上传。
+> 证书签发有延迟，DNS 生效后立刻访问可能报证书不受信，等几分钟再试。
 
-> 如果 A 走不通（只支持公开仓库），就走 B。**我不建议为了自动化把 269 篇私人笔记放到公开仓库。**
+### 3.5 如果之后想让笔记站不公开
 
-### 3.4 上线前必须想清楚的一件事
+现在仓库和站点都是公开的，谁都能看全部 269 篇。万一改主意：
 
-**部署出来的站点默认是公开的**，谁拿到链接都能看全部 269 篇笔记。
-- 如果你接受公开 → 直接部署。
-- 如果只想自己看 → 静态托管平台一般没有内置密码，可行路线是 Cloudflare Pages + Cloudflare Access（免费额度内做邮箱验证），或者干脆不部署、只 `pnpm serve` 本机看。
+| 想要的效果 | 怎么做 |
+|---|---|
+| 部署本身加密 | Vercel **Password Protection**：Hobby 没有，要 Pro（$20/月/项目） |
+| 免费锁起来 | Vercel **Vercel Authentication**：所有套餐免费（含 Hobby），只有登录你的 Vercel 账号才看得见。选了记得把保护范围改成 **All Deployments**，默认的 Standard Protection **不保护生产域名** |
+| 内容本身收回 | 仓库转私有即可，但**已被 fork / 抓取的内容收不回来** |
 
 ---
 
@@ -180,16 +254,20 @@ gh repo create dumplingandcake-notes --private --source=. --remote=origin --push
 # 2. 同步到站点副本（dev/build 会自动跑，单独跑也行）
 pnpm sync
 
-# 3. 看一眼效果
+# 3. 本地确认（可选，但第一次、或在 Obsidian 里改了目录结构后建议跑）
 pnpm dev
 
-# 4. 提交
+# 4. 提交 —— push 之后 Vercel 自动重新构建，一分钟内上线
 git add docs/posts
 git commit -m "docs: 更新笔记"
 git push
 ```
 
-走方案 B（手动上传）的话，第 4 步换成 `pnpm build` 再上传 `docs/.vitepress/dist`。
+push 后到 Vercel 的 Deployments 页面看构建状态。失败了点进去看 Build Logs，
+绝大多数情况会是 Node / pnpm 版本或输出目录没配对（回去核对 3.3 那张表）。
+
+> EdgeOne 侧日常**不用动**。它会按你配的缓存规则回源拉新内容。
+> 但改了 Vercel 的自定义域名或重置过部署，回源配置要重新核一遍。
 
 ---
 
