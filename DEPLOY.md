@@ -101,6 +101,33 @@ pnpm build
 > 想在站点看手绘图，见下面「思维导图怎么放到站点上」。
 > 临时需要同步：`node scripts/sync-notes.mjs --keep-excalidraw`。
 
+### 笔记里的 HTML 样式（Editing Toolbar 上色 / 高亮）
+
+Editing Toolbar 之类的插件会把样式写成行内 HTML，站点上能不能生效看同步规则：
+
+| 源库写法 | 同步后 | 站点效果 |
+|---|---|---|
+| `<font color="#ff0000">文字</font>` | `<span style="color:#ff0000">文字</span>` | ✅ 变红 |
+| `<span style="color:gray">文字</span>` | 原样保留 | ✅ |
+| `<mark>` `<u>` `<s>` `<sup>` `<sub>` `<b>` `<i>` | 原样保留 | ✅ |
+| `&lt;label for="x"&gt;` `<clinit>` 这类非格式标签 | 仍转成 `&lt;…` 文字 | ✅ 当代码展示 |
+
+规则（`fixAngleBrackets` 里）：
+
+- `<font>` 会被 `convertLegacyFont()` 换成等价的 `<span style="color:…">`。
+  `font` 是 HTML 废弃标签，Vue 编译时不在原生标签表里，有被当成未知组件的风险，所以不直接用。
+  `face` / `size` 属性丢弃。
+- 段落**没配平** → 整段标签转成文字（VitePress 把 md 当 Vue 模板编译，半截标签会直接构建失败）。
+- 段落**配平** → 只转义 `SAFE_INLINE_TAGS` 之外的标签，纯格式标签原样保留。
+  `SAFE_INLINE_TAGS` 只放没有布局/交互副作用的：
+  `br hr b i em strong u s del ins sub sup mark span small kbd abbr q cite code font`。
+  故意不含 `label` / `input` / `iframe` / `div`，否则笔记里的 HTML 示例会变成真的表单和布局。
+- 围栏代码块和行内代码完全不碰。
+
+> ⚠️ 副作用：如果某篇笔记是**在讲解** HTML/CSS（比如"行内样式怎么写"），
+> 那里的 `<span style="…">` 会被当成真样式渲染，而不是显示成代码。
+> 这种内容请**用反引号包起来**写成行内代码，或者放进 ``` 围栏里。
+
 ### 右侧「相关文章」什么时候显示
 
 站长的规则：**只有导航下拉里的「全部」那一页不显示，其余落地页全部显示**。

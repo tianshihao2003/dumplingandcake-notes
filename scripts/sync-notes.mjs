@@ -157,13 +157,34 @@ function escapeUnknownTags(s) {
 	);
 }
 
-/** 散文里真正要保留的行内标签：只有换行和分隔线，别的都当文字 */
-const SAFE_INLINE_TAGS = new Set(["br", "hr"]);
+/** 散文里真正要保留的行内标签：只放纯格式类，不会带布局/交互副作用 */
+const SAFE_INLINE_TAGS = new Set([
+	"br", "hr", "b", "i", "em", "strong", "u", "s", "del", "ins",
+	"sub", "sup", "mark", "span", "small", "kbd", "abbr", "q", "cite", "code",
+	// font 会先被 convertLegacyFont 换成 span；留着是兜底，防止漏改写时反被转义
+	"font",
+]);
 
-/** 转义散文里的行内标签（只留 br / hr，它们不会带乱七八糟的属性） */
-function escapeInlineTags(s) {
+/**
+ * Editing Toolbar 之类插件会写 `<font color="#ff0000">`。
+ * font 是 HTML 废弃标签，Vue 编译时不在原生标签表里，可能当成未知组件；
+ * 换成等价的 `<span style="color:...">`，显示效果一样但绝对安全。
+ * face / size 之类属性直接丢掉（colors 才是插件实际用的）。
+ */
+function convertLegacyFont(s) {
+	return s
+		.replace(/<font\b([^>]*?)\/?>/gi, (_full, attrs) => {
+			const m = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(attrs);
+			const color = m ? m[1] ?? m[2] ?? m[3] : "";
+			return color ? `<span style="color:${color}">` : "<span>";
+		})
+		.replace(/<\/font\s*>/gi, "</span>");
+}
+
+/** 只转义不在 allow 集合里的标签 */
+function escapeTagsNotIn(s, allow) {
 	return s.replace(/<(\/?)([A-Za-z][\w-]*)/g, (full, slash, name) =>
-		SAFE_INLINE_TAGS.has(name.toLowerCase()) ? full : `&lt;${slash}${name}`,
+		allow.has(name.toLowerCase()) ? full : `&lt;${slash}${name}`,
 	);
 }
 
@@ -193,20 +214,29 @@ function fixAngleBrackets(text) {
 					if (seg === "" || /^\n[ \t]*\n$/.test(seg)) return seg;
 					// 先把行内代码挖出来占位，避免被当成标签
 					const codes = [];
-					const masked = seg.replace(/`[^`]*`/g, (m) => {
-						codes.push(m);
-						return `\u0000${codes.length - 1}\u0000`;
-					});
+					const masked = convertLegacyFont(
+						seg.replace(/`[^`]*`/g, (m) => {
+							codes.push(m);
+							return `\u0000${codes.length - 1}\u0000`;
+						}),
+					);
 					const { balanced, unknown } = analyzeBlock(masked);
 					// 行首就是标签 = 块级 HTML（视频 iframe、布局 div 之类），检查是否配平
-					// 否则是散文里的行内标签（`<label for="name">`、`<clinit>`、`List<String>`），
-					// 一律转成文字：markdown-it 会把它们拆成半截，导致 Vue 报 "missing end tag"
+					// 否则是散文里的行内标签（`<label for="name">`、`<clinit>`、`List<String>`）：
+					// - 没配平 → 整段标签转文字（Vue 编译到半截标签会报 missing end tag）
+					// - 配平 → 只转义「不安全」的，纯格式标签（span/mark/u 之类）原样保留，
+					//   这样 Editing Toolbar 写的颜色、高亮才能在站点上真正生效
 					const blockLevel = /^\s*(?:>\s*)*</.test(masked);
 					let next = masked;
 					if (!blockLevel) {
-						const after = escapeInlineTags(masked);
-						if (after !== masked) escapedBlocks += 1;
-						next = after;
+						if (!balanced) {
+							next = escapeAllTags(masked);
+							escapedBlocks += 1;
+						} else {
+							const after = escapeTagsNotIn(masked, SAFE_INLINE_TAGS);
+							if (after !== masked) escapedBlocks += 1;
+							next = after;
+						}
 					} else if (!balanced) {
 						next = escapeAllTags(masked);
 						escapedBlocks += 1;
