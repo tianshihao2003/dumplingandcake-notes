@@ -6,14 +6,22 @@
 //      生成 <p><div></div></p> 非法嵌套，报 "Element is missing end tag"
 //   2. 散文里的尖括号转义 —— VitePress 把 md 当 Vue 模板编译，`<clinit>` / `List<String>`
 //      会被当成未闭合组件标签，同样报错。白名单外的 <xxx 一律转成 &lt;xxx
-//   3. Obsidian 图片尺寸语法 ![x|500](url) -> ![x](url)
+//   3. Obsidian 图片语法 -> 标准 markdown
+//        ![x|500](url) -> ![x](url)        （带尺寸的标准写法，丢弃宽度）
+//        ![[x.png]]    -> ![](./assets/x.png)（双链，按文件名全库索引解析）
+//        ![[x.png|300]] -> ![](./assets/x.png)（|数字 = 宽度，丢弃）
+//        ![[x.png|说明]] -> ![说明](./assets/x.png)（|文字 = alt）
 //   4. 补 sugar 主题要的字段：published -> date、image -> cover
+//   5. 脱敏本机绝对路径里的用户名（仓库公开，别泄露 C:\Users\xxx）
 //
 // 用法：
-//   node scripts/sync-notes.mjs            同步（默认）
-//   node scripts/sync-notes.mjs --dry-run  只报告
-//   node scripts/sync-notes.mjs --src <目录>  换源目录
+//   node scripts/sync-notes.mjs                  同步（默认）
+//   node scripts/sync-notes.mjs --dry-run        只报告，不写文件
+//   node scripts/sync-notes.mjs --src <目录>     换源目录
+//   node scripts/sync-notes.mjs --dest <目录>    换输出目录（测试用，别指到 docs/posts）
+//   node scripts/sync-notes.mjs --keep-excalidraw  连 .excalidraw.md 一起同步（默认跳过）
 import { access, copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 const DEFAULT_SRC =
@@ -24,11 +32,16 @@ const getArg = (name) => {
 	return i === -1 ? undefined : args[i + 1];
 };
 const SRC = path.resolve(getArg("src") ?? DEFAULT_SRC);
-const DEST = path.resolve(import.meta.dirname, "../docs/posts");
+// --dest 只给测试用：可以输出到临时目录验证转换效果，不覆盖真正的 docs/posts
+const DEST = path.resolve(getArg("dest") ?? path.join(import.meta.dirname, "../docs/posts"));
 const DRY_RUN = args.includes("--dry-run");
 
 const ZERO_WIDTH = /[\u200b\ufeff]/g;
 const OBSIDIAN_IMG_SIZE = /!\[([^\]]*?)\|\d+(?:x\d+)?\]\(/g;
+// Obsidian 双链图片：![[文件名]] / ![[文件名|宽度]] / ![[文件名|alt]]
+const OBSIDIAN_WIKI_IMG = /!\[\[([^\]|]+?)(?:\|([^\]]*?))?\]\]/g;
+// 标准 markdown 图片：[alt](url)。url 里不取空白和右括号，够覆盖实际用法。
+const MD_IMG = /!\[([^\]]*)\]\(([^)\s]+)\)/g;
 
 // 本机 home 目录路径（`C:\Users\张三\...`、`/Users/张三/...`）。
 // 要求 Users 前面必须有盘符或斜杠，避免把正文里普通的 "Users/" 字样误脱敏。
@@ -306,6 +319,42 @@ function sanitize(text, opts = {}) {
 	);
 	const imgFixed = body !== imgBefore;
 
+	// Obsidian 双链图片 ![[xxx.png]] / ![[xxx.png|300]] / ![[xxx.png|说明]]
+	// VitePress 不认这个语法，原样输出会变成一行文字，必须转成标准 markdown。
+	// | 后面是纯数字 → Obsidian 的宽度；否则是 alt 文本。
+	// 宽度没法用标准 markdown 表达（跟上面 OBSIDIAN_IMG_SIZE 一样丢弃），
+	// 真要控宽度就在笔记里改用 HTML <img width="300">。
+	let wikiImg = 0;
+	let wikiMiss = 0;
+	if (typeof opts.resolveImage === "function") {
+		body = transformOutsideCode(body, (line) =>
+			line.replace(OBSIDIAN_WIKI_IMG, (whole, target, pipe) => {
+				const url = opts.resolveImage(target.trim());
+				if (!url) {
+					wikiMiss++;
+					return whole; // 找不到就原样留着，别悄悄吞掉
+				}
+				wikiImg++;
+				const alt = pipe && !/^\d+(?:x\d+)?$/.test(pipe.trim()) ? pipe.trim() : "";
+				return `![${alt}](${url})`;
+			}),
+		);
+	}
+
+	// 标准 markdown 图片但路径是错的（Obsidian 拖图默认只写裸文件名 ![](x.png)）：
+	// 按「笔记目录下找不到 → 拿文件名全库搜」补全成正确相对路径。
+	let pathFixed = 0;
+	if (typeof opts.fixImagePath === "function") {
+		body = transformOutsideCode(body, (line) =>
+			line.replace(MD_IMG, (whole, alt, url) => {
+				const fixed = opts.fixImagePath(url);
+				if (!fixed) return whole;
+				pathFixed++;
+				return `![${alt}](${fixed})`;
+			}),
+		);
+	}
+
 	// frontmatter 补字段
 	let dateAdded = false;
 	let coverAdded = false;
@@ -347,6 +396,9 @@ function sanitize(text, opts = {}) {
 		escapedBlocks: angle.escapedBlocks,
 		imgFixed,
 		redacted,
+		wikiImg,
+		wikiMiss,
+		pathFixed,
 		dateAdded,
 		coverAdded,
 		hiddenAdded,
@@ -378,6 +430,74 @@ try {
 	process.exit(0);
 }
 
+const allFiles = await walk(SRC);
+
+// Obsidian 的双链是「按文件名在整个库里找」，不是按相对路径。
+// 所以要先建一层 文件名 -> 仓库内相对路径 的索引，才能把 ![[file-x.png]]
+// 解析成 ![](./assets/xxx/file-x.png)。
+// 同一文件名出现多次时，取路径最短的那个（和 Obsidian「最短路径」的默认行为一致）。
+const assetIndex = new Map();
+for (const { rel } of allFiles) {
+	if (rel.endsWith(".md")) continue;
+	const base = path.basename(rel);
+	const prev = assetIndex.get(base);
+	if (!prev || rel.length < prev.length) assetIndex.set(base, rel);
+}
+
+const STAT_IMG_EXT = /\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i;
+
+// 文件名里的这些字符会破坏 markdown 链接语法，或让 VitePress 的
+// decodeURIComponent() 抛 URIError（裸 % 就是），统一百分号编码。
+// VitePress 解析 src 前会先 decodeURIComponent，所以编码后能还原成真实路径。
+const encodeMdUrl = (p) =>
+	p
+		.replace(/%/g, "%25")
+		.replace(/ /g, "%20")
+		.replace(/\(/g, "%28")
+		.replace(/\)/g, "%29")
+		.replace(/#/g, "%23");
+
+/** 把双链里的文件名解析成「相对当前笔记」的 URL，解析不了返回 null */
+function makeImageResolver(noteRel) {
+	const noteDir = path.dirname(noteRel);
+	const toUrl = (hit) => {
+		const relUrl = path.relative(noteDir, hit).split(path.sep).join("/");
+		return `./${encodeMdUrl(relUrl)}`;
+	};
+
+	/** ![[xxx.png]] 这种：只有文件名，靠全库索引找 */
+	const byName = (target) => {
+		if (!target) return null;
+		const direct = path.normalize(target);
+		const hit = assetIndex.get(path.basename(direct)) ?? (direct !== path.basename(direct) ? direct : null);
+		if (!hit) return null;
+		if (!STAT_IMG_EXT.test(hit)) return null;
+		return toUrl(hit);
+	};
+
+	/**
+	 * ![](xxx.png) 这种标准 markdown，但路径是错的（Obsidian 拖图默认只写裸文件名）：
+	 * 先按笔记目录拼绝对路径看文件在不在；不在就拿文件名去索引里找。
+	 * 本来就正确的、外链的、data: 的，一律返回 null 不动。
+	 */
+	const fixPath = (url) => {
+		if (!url) return null;
+		if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("//") || url.startsWith("/")) return null;
+		let clean = url;
+		try {
+			clean = decodeURIComponent(url);
+		} catch {
+			// 含非法 % 转义，按原文处理
+		}
+		if (existsSync(path.resolve(SRC, noteDir, clean))) return null; // 路径本来就对
+		const hit = assetIndex.get(path.basename(clean));
+		if (!hit || !STAT_IMG_EXT.test(hit)) return null;
+		return toUrl(hit);
+	};
+
+	return { byName, fixPath };
+}
+
 // 这些文件只对 Obsidian 插件有意义，站点渲染出来是「源码」而非内容，直接不同步。
 // .excalidraw.md：Excalidraw 插件的原生格式 = 明文文本 + base64 压图数据。
 //   站点没有该插件，会把它当普通 markdown 渲染成「一堆散装文字 + 70KB JSON 代码块」。
@@ -385,7 +505,7 @@ try {
 // 想临时看原文：删除下面的过滤或加 --keep-excalidraw。
 const SKIP_SUFFIX = [".excalidraw.md", ".excalidraw"];
 
-const files = (await walk(SRC)).filter(
+const files = allFiles.filter(
 	(f) => args.includes("--keep-excalidraw") || !SKIP_SUFFIX.some((s) => f.rel.endsWith(s)),
 );
 
@@ -398,6 +518,9 @@ const stat = {
 	escaped: 0,
 	img: 0,
 	redacted: 0,
+	wikiImg: 0,
+	wikiMiss: 0,
+	pathFixed: 0,
 	date: 0,
 	cover: 0,
 	hidden: 0,
@@ -425,17 +548,34 @@ for (const { full, rel } of files) {
 	// 源文件可能是 CRLF，副本统一用 LF，避免 git 在不同机器上抖
 	const normalized = raw.replace(/\r\n/g, "\n");
 	titles.set(rel, extractTitle(normalized, rel));
-	const { text, zeroWidth, escapedBlocks, imgFixed, redacted, dateAdded, coverAdded, hiddenAdded } =
-		sanitize(normalized, {
-			hideFromHome: HIDDEN_FROM_HOME.some(
-				(dir) => rel === dir || rel.startsWith(`${dir}${path.sep}`),
-			),
-		});
+	const imgResolver = makeImageResolver(rel);
+	const {
+		text,
+		zeroWidth,
+		escapedBlocks,
+		imgFixed,
+		redacted,
+		wikiImg,
+		wikiMiss,
+		pathFixed,
+		dateAdded,
+		coverAdded,
+		hiddenAdded,
+	} = sanitize(normalized, {
+		hideFromHome: HIDDEN_FROM_HOME.some(
+			(dir) => rel === dir || rel.startsWith(`${dir}${path.sep}`),
+		),
+		resolveImage: imgResolver.byName,
+		fixImagePath: imgResolver.fixPath,
+	});
 
 	if (zeroWidth > 0) stat.zeroWidth++;
 	if (escapedBlocks > 0) stat.escaped++;
 	if (imgFixed) stat.img++;
 	if (redacted > 0) stat.redacted++;
+	if (wikiImg > 0) stat.wikiImg++;
+	if (wikiMiss > 0) stat.wikiMiss++;
+	if (pathFixed > 0) stat.pathFixed++;
 	if (dateAdded) stat.date++;
 	if (coverAdded) stat.cover++;
 	if (hiddenAdded) stat.hidden++;
@@ -598,6 +738,11 @@ console.log(`  删零宽字符    : ${stat.zeroWidth} 篇`);
 console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
 console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
+console.log(`  双链图片转换  : ${stat.wikiImg} 篇`);
+console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
+if (stat.wikiMiss > 0) {
+	console.log(`  ⚠ 双链图片失配: ${stat.wikiMiss} 篇（文件名在库里找不到，已原样保留）`);
+}
 console.log(`  补 date       : ${stat.date} 篇`);
 console.log(`  补 cover      : ${stat.cover} 篇`);
 console.log(`  首页隐藏      : ${stat.hidden} 篇`);
