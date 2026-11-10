@@ -94,6 +94,26 @@ pnpm build
 > - 占位符用中文而**不是 `<用户名>`** —— 尖括号形态有被 markdown 当成 HTML 标签吞掉、页面上一片空白的风险
 > - 只改 `docs/posts` 这份副本，**不动 Obsidian 原库**
 
+**不同步的文件**：`*.excalidraw.md`（以及 `*.excalidraw`）。
+
+> Excalidraw 插件的原生格式 = 明文文本 + base64 压图数据，只有装了插件才能还原成图。
+> 站点会把它当普通 markdown，渲染成「275 行散装文字（每行尾巴带 `^块ID`）+ 70KB JSON 代码块 + 原样的 `%%`」。
+> 想在站点看手绘图，见下面「思维导图怎么放到站点上」。
+> 临时需要同步：`node scripts/sync-notes.mjs --keep-excalidraw`。
+
+### 思维导图 / 手绘图怎么放到站点上
+
+| 方案 | 做法 | 取舍 |
+|---|---|---|
+| **A. 导出成图片**（推荐） | Obsidian 里 Excalidraw 图 → ⋯ → Export image → PNG 或 SVG → 拖进笔记（图床插件自动上传）→ `![](https://img.tsh520.cn/...)` | 视觉 100% 一致；但站点上是位图，不能搜索、不跟随暗色主题 |
+| **B. 改用 mermaid `mindmap`** | 笔记里写 ```` ```mermaid ```` + `mindmap` 语法 | 矢量、可搜索、自动适配主题；但自由布局/手绘风格会丢，要重新画 |
+| **C. 只在 Obsidian 看** | 不同步（默认行为） | 最省事，站点上看不到 |
+
+> 方案 B 的前提确认：主题依赖里带了 `mermaid@10`、`vitepress-plugin-mermaid` 和
+> `@mermaid-js/mermaid-mindmap`，所以 `mindmap` 图类型开箱可用（**尚未实测，要用先验一版**）。
+> ⚠️ 站点**不复制本地图片文件** —— 269 篇笔记的图全是 `img.tsh520.cn` 外链，
+> 所以导出的图片必须先传图床，直接放本地路径会 404。
+
 ```bash
 # 页面数应该是 269 篇笔记 + 18 个目录落地页 + index + 404 = 289
 find docs/.vitepress/dist -name "*.html" | wc -l      # → 289

@@ -378,7 +378,17 @@ try {
 	process.exit(0);
 }
 
-const files = await walk(SRC);
+// 这些文件只对 Obsidian 插件有意义，站点渲染出来是「源码」而非内容，直接不同步。
+// .excalidraw.md：Excalidraw 插件的原生格式 = 明文文本 + base64 压图数据。
+//   站点没有该插件，会把它当普通 markdown 渲染成「一堆散装文字 + 70KB JSON 代码块」。
+//   要在站点展示手绘图，请在 Obsidian 里导出 PNG/SVG 传图床，再用 ![](...) 引用。
+// 想临时看原文：删除下面的过滤或加 --keep-excalidraw。
+const SKIP_SUFFIX = [".excalidraw.md", ".excalidraw"];
+
+const files = (await walk(SRC)).filter(
+	(f) => args.includes("--keep-excalidraw") || !SKIP_SUFFIX.some((s) => f.rel.endsWith(s)),
+);
+
 const stat = {
 	total: files.length,
 	copied: 0,
