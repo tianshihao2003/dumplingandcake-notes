@@ -9,7 +9,7 @@ sidebar: true
 
 # python
 
-共 8 篇
+共 7 篇
 
 ## 子分类
 
