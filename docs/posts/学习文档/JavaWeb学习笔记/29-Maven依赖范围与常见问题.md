@@ -64,7 +64,7 @@ PPT 第 67 页给的就是 junit 加上范围的写法：
 
 `<scope>` 写在 **`<dependency>` 里面**（和 groupId、artifactId、version 平级），**值就是 `compile`、`test`、`provided`、`runtime` 这四个词**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 67 页这个例子里 junit 的版本写的是 **5.9.3**，而 PPT 第 55 页（快速入门）和课程代码 `maven-project01/pom.xml` 里写的都是 **5.9.1**——同一份讲义里前后不一致，**按课程代码的版本（5.9.1）写就对**，可以理解为 PPT 这页只是拿 junit 举"依赖范围"的例子，顺手换了个版本号。
 
 课程代码里那个 junit 依赖就正好是 PPT 快速入门 + 依赖范围两页的合体：
@@ -91,7 +91,7 @@ PPT 第 67 页给的就是 junit 加上范围的写法：
 
 依赖范围不是"写在 pom 里给人看的"，它真的会影响 Maven 的解析结果。本机用一个最小项目把四种取值各配一个依赖，跑 `mvn dependency:tree` 的真实输出：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）——四个依赖分别是 `log4j:log4j:1.2.12`（不写 scope）、`org.junit.jupiter:junit-jupiter:5.9.1`（`test`）、`jakarta.servlet:jakarta.servlet-api:6.0.0`（`provided`）、`com.mysql:mysql-connector-j:8.3.0`（`runtime`）：
 >
 > ```text
@@ -116,7 +116,7 @@ PPT 第 67 页给的就是 junit 加上范围的写法：
 
 "主程序 ❌"是什么意思？——**在 `src/main/java` 里的代码，根本引用不到这个 jar**。本机实测：在 `main` 目录里加一个类、`import org.junit.jupiter.api.Test`，然后编译：
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机实测（Maven 3.9.14 / JDK 17）——`scope=test` 的 junit，在 `src/main/java` 里引用它：
 >
 > ```java
@@ -149,7 +149,7 @@ PPT 第 67 页给的就是 junit 加上范围的写法：
 
 "主程序 / 测试程序 / 打包运行"这三个范围，在 Maven 里其实对应三条 **classpath（编译/运行时要加载哪些 jar 的清单）**。本机用 maven-dependency-plugin 把三条清单都打出来（`-DincludeScope=compile` 是主程序编译时、`runtime` 是打包运行后、`test` 是测试程序，默认值）：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17），用的是上面那个"四个依赖各一种 scope"的项目，只保留 jar 文件名：
 >
 > | 命令 | 打出来的 jar（主程序编译 / 打包运行 / 测试程序） |
@@ -258,7 +258,7 @@ del /s *.lastUpdated
 
 `del` 是删除、`/s` 是**递归**（当前目录及下面所有子目录）、`*.lastUpdated` 是匹配所有这类文件。课程的安装包目录里就放了一个现成的 `del.bat`，内容只有这一行（双击即可执行）。
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Windows 11 / Git Bash）：在仓库目录执行 `cmd /c "del /s *.lastUpdated"`，它会把删掉的每一个文件都打印出来，真实输出如下：
 >
 > ```text
@@ -324,25 +324,33 @@ PPT 第 3 条说的就是这种情况：**依赖其实已经下载好了，Maven
   3. 在文件末尾的注释里回答：加上它以后，`src/main/java` 里还能不能 `import org.junit.jupiter.api.Test`？为什么？
   （练习文件 `test_29_junit依赖范围.xml` 里已经给了 pom 骨架和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：测试框架这种东西，"上线打包"肯定不要；"主程序"也不该用它——所以四个取值里，只有"只在测试程序有效"的那一个合适
-  > **二级 · 方法**：在 `<dependency>` 里加 `<scope>` 标签，值是四个候选值之一
-  > **三级 · 骨架**：`<dependency> ... <scope>____</scope> </dependency>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <dependencies>
-  >     <!--junit依赖-->
-  >     <dependency>
-  >         <groupId>org.junit.jupiter</groupId>
-  >         <artifactId>junit-jupiter</artifactId>
-  >         <version>5.9.1</version>
-  >         <!--依赖范围：test —— 只在测试程序范围有效（主程序不能引用、也不参与打包）-->
-  >         <scope>test</scope>
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > 3. 两个答案：**不能**。`test` 范围意味着这个 jar 不在主程序的编译 classpath 上，`src/main/java` 里的类一旦 `import` 它，编译就会失败。本机实测（Maven 3.9.14 / JDK 17）报错原文是 `程序包org.junit.jupiter.api不存在` 和 `找不到符号 类 Test`，最后 `BUILD FAILURE`；把那个引用删掉立刻 `BUILD SUCCESS`。
+  **一级 · 思路**：测试框架这种东西，"上线打包"肯定不要；"主程序"也不该用它——所以四个取值里，只有"只在测试程序有效"的那一个合适
+  **二级 · 方法**：在 `<dependency>` 里加 `<scope>` 标签，值是四个候选值之一
+  **三级 · 骨架**：`<dependency> ... <scope>____</scope> </dependency>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <dependencies>
+      <!--junit依赖-->
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
+          <version>5.9.1</version>
+          <!--依赖范围：test —— 只在测试程序范围有效（主程序不能引用、也不参与打包）-->
+          <scope>test</scope>
+      </dependency>
+  </dependencies>
+  ```
+  3. 两个答案：**不能**。`test` 范围意味着这个 jar 不在主程序的编译 classpath 上，`src/main/java` 里的类一旦 `import` 它，编译就会失败。本机实测（Maven 3.9.14 / JDK 17）报错原文是 `程序包org.junit.jupiter.api不存在` 和 `找不到符号 类 Test`，最后 `BUILD FAILURE`；把那个引用删掉立刻 `BUILD SUCCESS`。
+
+  :::
+
 
 - [ ] **2-2 判断四个依赖该配什么范围**
   一个 Java Web 项目要用到下面四样东西，请分别判断它们该写哪个 `<scope>`，并把四个依赖都写进练习文件的 pom 骨架里（每个依赖后面用中文注释说明理由）：
@@ -352,48 +360,56 @@ PPT 第 3 条说的就是这种情况：**依赖其实已经下载好了，Maven
   4. `com.mysql:mysql-connector-j:8.3.0`（MySQL 的 jdbc 驱动，**代码里只用 JDBC 接口、运行时才加载驱动**）。
   （练习文件 `test_29_四个依赖的范围配置.xml` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：对每个依赖问三个问题——**主程序写代码时要不要它**？**写测试时要不要它**？**打包上线后运行时要不要它**？三个答案定了，取值就定了
-  > **二级 · 方法**：要"到处都要"→ 它；要"只有测试要"→ 它；要"只有编译要、运行环境提供"→ 它；要"编译不要、运行要"→ 它
-  > **三级 · 骨架**：`<scope>____</scope>`（四个候选值分别对应：主+测+打包 / 只测 / 主+测 / 测+打包）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <dependencies>
-  >     <!-- 日志：主程序、测试、打包运行都要用 → 默认的 compile（不写 scope 也行） -->
-  >     <dependency>
-  >         <groupId>log4j</groupId>
-  >         <artifactId>log4j</artifactId>
-  >         <version>1.2.12</version>
-  >         <scope>compile</scope>
-  >     </dependency>
-  >
-  >     <!-- 单元测试框架：只有测试程序用得到 → test -->
-  >     <dependency>
-  >         <groupId>org.junit.jupiter</groupId>
-  >         <artifactId>junit-jupiter</artifactId>
-  >         <version>5.9.1</version>
-  >         <scope>test</scope>
-  >     </dependency>
-  >
-  >     <!-- Servlet 规范：编译和测试要，运行时由 Tomcat 提供 → provided -->
-  >     <dependency>
-  >         <groupId>jakarta.servlet</groupId>
-  >         <artifactId>jakarta.servlet-api</artifactId>
-  >         <version>6.0.0</version>
-  >         <scope>provided</scope>
-  >     </dependency>
-  >
-  >     <!-- jdbc 驱动：编译时用不到（代码里只用 java.sql 的接口），运行时才加载 → runtime -->
-  >     <dependency>
-  >         <groupId>com.mysql</groupId>
-  >         <artifactId>mysql-connector-j</artifactId>
-  >         <version>8.3.0</version>
-  >         <scope>runtime</scope>
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > 核对办法：本机实测（Maven 3.9.14 / JDK 17）跑 `mvn dependency:tree`，四行分别是 `log4j:log4j:jar:1.2.12:compile`、`org.junit.jupiter:junit-jupiter:jar:5.9.1:test`、`jakarta.servlet:jakarta.servlet-api:jar:6.0.0:provided`、`com.mysql:mysql-connector-j:jar:8.3.0:runtime`——正好是 PPT 第 67 页表格里那四个范例。
+  **一级 · 思路**：对每个依赖问三个问题——**主程序写代码时要不要它**？**写测试时要不要它**？**打包上线后运行时要不要它**？三个答案定了，取值就定了
+  **二级 · 方法**：要"到处都要"→ 它；要"只有测试要"→ 它；要"只有编译要、运行环境提供"→ 它；要"编译不要、运行要"→ 它
+  **三级 · 骨架**：`<scope>____</scope>`（四个候选值分别对应：主+测+打包 / 只测 / 主+测 / 测+打包）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <dependencies>
+      <!-- 日志：主程序、测试、打包运行都要用 → 默认的 compile（不写 scope 也行） -->
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.12</version>
+          <scope>compile</scope>
+      </dependency>
+  
+      <!-- 单元测试框架：只有测试程序用得到 → test -->
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
+          <version>5.9.1</version>
+          <scope>test</scope>
+      </dependency>
+  
+      <!-- Servlet 规范：编译和测试要，运行时由 Tomcat 提供 → provided -->
+      <dependency>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+          <version>6.0.0</version>
+          <scope>provided</scope>
+      </dependency>
+  
+      <!-- jdbc 驱动：编译时用不到（代码里只用 java.sql 的接口），运行时才加载 → runtime -->
+      <dependency>
+          <groupId>com.mysql</groupId>
+          <artifactId>mysql-connector-j</artifactId>
+          <version>8.3.0</version>
+          <scope>runtime</scope>
+      </dependency>
+  </dependencies>
+  ```
+  核对办法：本机实测（Maven 3.9.14 / JDK 17）跑 `mvn dependency:tree`，四行分别是 `log4j:log4j:jar:1.2.12:compile`、`org.junit.jupiter:junit-jupiter:jar:5.9.1:test`、`jakarta.servlet:jakarta.servlet-api:jar:6.0.0:provided`、`com.mysql:mysql-connector-j:jar:8.3.0:runtime`——正好是 PPT 第 67 页表格里那四个范例。
+
+  :::
+
 
 - [ ] **2-3 写一个只依赖 `test` 范围 jar 的测试类**
   在练习文件里写一个测试类，验证"junit 只在测试程序里有效"这件事：
@@ -401,37 +417,45 @@ PPT 第 3 条说的就是这种情况：**依赖其实已经下载好了，Maven
   2. 在文件末尾的注释里回答两个问题：① 这个类的代码放在哪个目录（`src/main/java` 还是 `src/test/java`）？② 如果把 pom 里 junit 的 `<scope>test</scope>` 改成 `<scope>runtime</scope>`，这个测试类还能编译/运行吗？为什么？
   （练习文件 `test_29_测试类与依赖范围.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：junit 的坐标写在 pom 里、范围是 `test`；测试类的目录也得和范围对得上——先想"哪个目录算测试程序"
-  > **二级 · 方法**：测试代码放 `src/test/java`；断言用 `Assertions.assertEquals(预期, 实际, msg)`；`runtime` 的含义是"主程序不可用、测试可用、打包运行可用"
-  > **三级 · 骨架**：`@Test public void ____(){ Assertions.assertEquals(25, new UserService().getAge("____"), "年龄校验失败"); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **2-3** 测试类：
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Assertions;
-  > import org.junit.jupiter.api.Test;
-  >
-  > public class UserServiceTest {
-  >
-  >     @Test
-  >     public void testGetAge(){
-  >         Integer age = new UserService().getAge("100000200010011011");
-  >         Assertions.assertEquals(25, age, "年龄校验失败");
-  >     }
-  >
-  >     @Test
-  >     public void testGetGender(){
-  >         String gender = new UserService().getGender("100000200010011011");
-  >         Assertions.assertEquals("男", gender, "性别校验失败");
-  >     }
-  > }
-  > ```
-  > 两个问题：
-  > ① **放 `src/test/java`**（目录里带 test 的那个）。`test` 范围的依赖只在"测试程序范围"有效，代码放进 `main` 目录就属于主程序了，引用 junit 会直接编译失败——本机实测报 `程序包org.junit.jupiter.api不存在`；而本机另一份实测（Maven 3.9.14 / JDK 17）把同样的测试类放在 `src/test/java` 跑 `mvn test`，结果是 `Tests run: 2, Failures: 0, Errors: 0` + `BUILD SUCCESS`。
-  > ② **能运行**（但没必要这么改）。`runtime` 的三项是"主程序 -、测试程序 Y、打包运行 Y"——测试程序那一项是 Y，所以测试类照样能编译、能跑；差别在于**它会把 junit 带进打包运行的范围**（这是设计给 jdbc 驱动那种"运行时才加载"的依赖用的），而 junit 只在测试时有用，写成 runtime 等于白白往运行的清单里塞了一个测试框架，所以**规范写法仍然是 `<scope>test</scope>`**。
+  **一级 · 思路**：junit 的坐标写在 pom 里、范围是 `test`；测试类的目录也得和范围对得上——先想"哪个目录算测试程序"
+  **二级 · 方法**：测试代码放 `src/test/java`；断言用 `Assertions.assertEquals(预期, 实际, msg)`；`runtime` 的含义是"主程序不可用、测试可用、打包运行可用"
+  **三级 · 骨架**：`@Test public void ____(){ Assertions.assertEquals(25, new UserService().getAge("____"), "年龄校验失败"); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **2-3** 测试类：
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Assertions;
+  import org.junit.jupiter.api.Test;
+  
+  public class UserServiceTest {
+  
+      @Test
+      public void testGetAge(){
+          Integer age = new UserService().getAge("100000200010011011");
+          Assertions.assertEquals(25, age, "年龄校验失败");
+      }
+  
+      @Test
+      public void testGetGender(){
+          String gender = new UserService().getGender("100000200010011011");
+          Assertions.assertEquals("男", gender, "性别校验失败");
+      }
+  }
+  ```
+  两个问题：
+  ① **放 `src/test/java`**（目录里带 test 的那个）。`test` 范围的依赖只在"测试程序范围"有效，代码放进 `main` 目录就属于主程序了，引用 junit 会直接编译失败——本机实测报 `程序包org.junit.jupiter.api不存在`；而本机另一份实测（Maven 3.9.14 / JDK 17）把同样的测试类放在 `src/test/java` 跑 `mvn test`，结果是 `Tests run: 2, Failures: 0, Errors: 0` + `BUILD SUCCESS`。
+  ② **能运行**（但没必要这么改）。`runtime` 的三项是"主程序 -、测试程序 Y、打包运行 Y"——测试程序那一项是 Y，所以测试类照样能编译、能跑；差别在于**它会把 junit 带进打包运行的范围**（这是设计给 jdbc 驱动那种"运行时才加载"的依赖用的），而 junit 只在测试时有用，写成 runtime 等于白白往运行的清单里塞了一个测试框架，所以**规范写法仍然是 `<scope>test</scope>`**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -455,63 +479,71 @@ PPT 第 3 条说的就是这种情况：**依赖其实已经下载好了，Maven
   | `xxx.lastUpdated` | 失败的"缓存记录"为什么不删就不重试 |
   | 三条处理方案 | 按坐标删文件 / `del /s *.lastUpdated` / 重启 IDEA |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：每个依赖对"主程序 / 测试 / 打包运行"三项打勾，勾的形状决定取值；第 4、5 步是"下载失败"这类问题的固定套路——**先删失败记录、再重新加载、最后重启 IDE**
-  > **二级 · 方法**：日志要到处用 → `compile`；测试框架 → `test`；容器自带的规范包 → `provided`；运行时才加载的驱动 → `runtime`；删失败记录用 `del /s *.lastUpdated`（或按坐标找 `xxx.lastUpdated` 删），然后**重新加载项目**
-  > **三级 · 骨架**：`<scope>____</scope>` ×4；排查顺序 = `删 xxx.lastUpdated` → `重新加载/构建` → `重启 IDEA`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > 1. 四个依赖与范围：
-  >    ```xml
-  >    <dependencies>
-  >        <!-- 日志：主程序 Y、测试程序 Y、打包运行 Y → compile（默认） -->
-  >        <dependency>
-  >            <groupId>log4j</groupId>
-  >            <artifactId>log4j</artifactId>
-  >            <version>1.2.12</version>
-  >            <scope>compile</scope>
-  >        </dependency>
-  >
-  >        <!-- 单元测试：主程序 -、测试程序 Y、打包运行 - → test -->
-  >        <dependency>
-  >            <groupId>org.junit.jupiter</groupId>
-  >            <artifactId>junit-jupiter</artifactId>
-  >            <version>5.9.1</version>
-  >            <scope>test</scope>
-  >        </dependency>
-  >
-  >        <!-- Servlet 规范：主程序 Y、测试程序 Y、打包运行 -（Tomcat 提供）→ provided -->
-  >        <dependency>
-  >            <groupId>jakarta.servlet</groupId>
-  >            <artifactId>jakarta.servlet-api</artifactId>
-  >            <version>6.0.0</version>
-  >            <scope>provided</scope>
-  >        </dependency>
-  >
-  >        <!-- jdbc 驱动：主程序 -、测试程序 Y、打包运行 Y → runtime -->
-  >        <dependency>
-  >            <groupId>com.mysql</groupId>
-  >            <artifactId>mysql-connector-j</artifactId>
-  >            <version>8.3.0</version>
-  >            <scope>runtime</scope>
-  >        </dependency>
-  >    </dependencies>
-  >    ```
-  > 2. `mvn dependency:tree` 的四行（本机实测，Maven 3.9.14 / JDK 17）：
-  >    ```text
-  >    [INFO] +- log4j:log4j:jar:1.2.12:compile
-  >    [INFO] +- org.junit.jupiter:junit-jupiter:jar:5.9.1:test
-  >    [INFO] +- jakarta.servlet:jakarta.servlet-api:jar:6.0.0:provided
-  >    [INFO] \- com.mysql:mysql-connector-j:jar:8.3.0:runtime
-  >    ```
-  > 3. 三种 classpath（本机实测，只列 jar 文件名）：
-  >    - `-DincludeScope=compile`（主程序编译时）：`log4j-1.2.12.jar`、`jakarta.servlet-api-6.0.0.jar` → **junit 和 jdbc 驱动都不见了**（junit 是 test 范围、驱动是 runtime 范围，主程序都用不到）；
-  >    - `-DincludeScope=runtime`（打包运行后）：`log4j-1.2.12.jar`、`mysql-connector-j-8.3.0.jar`、`protobuf-java-3.25.1.jar` → **servlet-api 不见了**（provided 不参与打包运行，运行时由 Tomcat 提供），jdbc 驱动回来了；
-  >    - `-DincludeScope=test`（测试程序）：四类依赖**全都在**（12 个 jar）——因为 `test` 是**包含最广**的那条清单，它把 compile / provided / runtime 的依赖都算进来，这正是 PPT 表格里"测试程序"那一列**四种取值全是 Y** 的原因。
-  > 4. 排查步骤（任答三条即可）：
-  >    ① **看报错里有没有 "was not found ... during a previous attempt / failure was cached"**——有这句就是上次下载失败被缓存了；② **按坐标找到本地仓库里的 `xxx.lastUpdated` 文件删掉**（路径规律是"本地仓库 / groupId 每段 / artifactId / version / 文件名"）；③ 用命令 **`del /s *.lastUpdated`** 在本地仓库目录**批量递归删除**（课程安装包里有现成的 `del.bat`），然后**重新加载项目**（IDEA 点刷新按钮，命令行跑 `mvn compile` 等任一阶段）；④ 顺带确认**网络和坐标**：本地仓库没有的依赖要联网下载，坐标写错会报 `Could not find artifact ...`；⑤ 删完重试之后不再报 "cached"、而是重新出现 `Downloading from aliyunmaven: ...`，说明确实联网重试了（本机实测删除后重新构建就是这个现象）。
-  > 5. 最后一招（PPT 第 3 条）：**关闭 IDEA、重新打开 IDEA 加载此项目**（依赖已下载好、面板仍报红属于界面状态没刷新；等价的快捷键做法是 `File → Invalidate Caches / Restart`）。
+  **一级 · 思路**：每个依赖对"主程序 / 测试 / 打包运行"三项打勾，勾的形状决定取值；第 4、5 步是"下载失败"这类问题的固定套路——**先删失败记录、再重新加载、最后重启 IDE**
+  **二级 · 方法**：日志要到处用 → `compile`；测试框架 → `test`；容器自带的规范包 → `provided`；运行时才加载的驱动 → `runtime`；删失败记录用 `del /s *.lastUpdated`（或按坐标找 `xxx.lastUpdated` 删），然后**重新加载项目**
+  **三级 · 骨架**：`<scope>____</scope>` ×4；排查顺序 = `删 xxx.lastUpdated` → `重新加载/构建` → `重启 IDEA`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  1. 四个依赖与范围：
+     ```xml
+     <dependencies>
+         <!-- 日志：主程序 Y、测试程序 Y、打包运行 Y → compile（默认） -->
+         <dependency>
+             <groupId>log4j</groupId>
+             <artifactId>log4j</artifactId>
+             <version>1.2.12</version>
+             <scope>compile</scope>
+         </dependency>
+  
+         <!-- 单元测试：主程序 -、测试程序 Y、打包运行 - → test -->
+         <dependency>
+             <groupId>org.junit.jupiter</groupId>
+             <artifactId>junit-jupiter</artifactId>
+             <version>5.9.1</version>
+             <scope>test</scope>
+         </dependency>
+  
+         <!-- Servlet 规范：主程序 Y、测试程序 Y、打包运行 -（Tomcat 提供）→ provided -->
+         <dependency>
+             <groupId>jakarta.servlet</groupId>
+             <artifactId>jakarta.servlet-api</artifactId>
+             <version>6.0.0</version>
+             <scope>provided</scope>
+         </dependency>
+  
+         <!-- jdbc 驱动：主程序 -、测试程序 Y、打包运行 Y → runtime -->
+         <dependency>
+             <groupId>com.mysql</groupId>
+             <artifactId>mysql-connector-j</artifactId>
+             <version>8.3.0</version>
+             <scope>runtime</scope>
+         </dependency>
+     </dependencies>
+     ```
+  2. `mvn dependency:tree` 的四行（本机实测，Maven 3.9.14 / JDK 17）：
+     ```text
+     [INFO] +- log4j:log4j:jar:1.2.12:compile
+     [INFO] +- org.junit.jupiter:junit-jupiter:jar:5.9.1:test
+     [INFO] +- jakarta.servlet:jakarta.servlet-api:jar:6.0.0:provided
+     [INFO] \- com.mysql:mysql-connector-j:jar:8.3.0:runtime
+     ```
+  3. 三种 classpath（本机实测，只列 jar 文件名）：
+     - `-DincludeScope=compile`（主程序编译时）：`log4j-1.2.12.jar`、`jakarta.servlet-api-6.0.0.jar` → **junit 和 jdbc 驱动都不见了**（junit 是 test 范围、驱动是 runtime 范围，主程序都用不到）；
+     - `-DincludeScope=runtime`（打包运行后）：`log4j-1.2.12.jar`、`mysql-connector-j-8.3.0.jar`、`protobuf-java-3.25.1.jar` → **servlet-api 不见了**（provided 不参与打包运行，运行时由 Tomcat 提供），jdbc 驱动回来了；
+     - `-DincludeScope=test`（测试程序）：四类依赖**全都在**（12 个 jar）——因为 `test` 是**包含最广**的那条清单，它把 compile / provided / runtime 的依赖都算进来，这正是 PPT 表格里"测试程序"那一列**四种取值全是 Y** 的原因。
+  4. 排查步骤（任答三条即可）：
+     ① **看报错里有没有 "was not found ... during a previous attempt / failure was cached"**——有这句就是上次下载失败被缓存了；② **按坐标找到本地仓库里的 `xxx.lastUpdated` 文件删掉**（路径规律是"本地仓库 / groupId 每段 / artifactId / version / 文件名"）；③ 用命令 **`del /s *.lastUpdated`** 在本地仓库目录**批量递归删除**（课程安装包里有现成的 `del.bat`），然后**重新加载项目**（IDEA 点刷新按钮，命令行跑 `mvn compile` 等任一阶段）；④ 顺带确认**网络和坐标**：本地仓库没有的依赖要联网下载，坐标写错会报 `Could not find artifact ...`；⑤ 删完重试之后不再报 "cached"、而是重新出现 `Downloading from aliyunmaven: ...`，说明确实联网重试了（本机实测删除后重新构建就是这个现象）。
+  5. 最后一招（PPT 第 3 条）：**关闭 IDEA、重新打开 IDEA 加载此项目**（依赖已下载好、面板仍报红属于界面状态没刷新；等价的快捷键做法是 `File → Invalidate Caches / Restart`）。
+
+  :::
+
 
 ---
 

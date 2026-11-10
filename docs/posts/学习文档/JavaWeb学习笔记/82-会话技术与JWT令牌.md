@@ -83,7 +83,7 @@ PPT 第 15 页先给出两个定义：
 2. **不安全，用户可以自己禁用 Cookie**：浏览器设置里把 Cookie 一关，这套方案直接失效；而且 Cookie 内容明文存在客户端；
 3. **Cookie 不能跨域**：PPT 第 16 页的例子——页面在 `http://192.168.150.100:8080`，请求要发到 `http://192.168.150.200:90`，这个请求就带不上那边的 Cookie。**跨域的区分有三个维度：协议、IP/域名、端口**，三者有一个不同就算跨域。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（课程工程里的 `SessionController` 就是演示这两套方案的，连接的就是本机 `tlias` 库、`root`，课程示例密码 `1234`，**动手时把 `password` 换成你自己 MySQL 的密码**）：
 >
 > ```text
@@ -119,7 +119,7 @@ PPT 第 15 页先给出两个定义：
 1. **服务器集群环境下无法直接使用 Session**。PPT 第 19 页画了负载均衡：请求 1 打到服务器 A，Session(1) 建在 A 上；请求 2 被负载均衡分到了服务器 B——B 上根本没有 1 号 Session，用户就"掉线"了。要用 Session 就得额外做 Session 共享或粘性会话；
 2. **Cookie 的缺点它全跑不掉**：毕竟编号是靠 Cookie 传的——移动端 APP 用不了、用户能禁用 Cookie、跨域带不过去。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（同一台机器、同一套连接信息）——三行把"Session 底层靠 Cookie"讲透：
 >
 > ```text
@@ -210,7 +210,7 @@ eyJhbGciOiJIUzI1NiJ9 . eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImV4cCI6MTc5MDY5MzM0N
 - 算出来**和令牌里的第三段一致** → 说明 header、payload 一个字符都没被改过，令牌可信；
 - **不一致** → 要么内容被改了（改了任何字符，算出来的签名都对不上），要么用的秘钥不对。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **Base64 是编码，不是加密**。PPT 第 25 页的定义：
 >
 > > Base64：是一种基于 64 个可打印字符（A-Z a-z 0-9 + /）来表示二进制数据的编码方式。
@@ -283,7 +283,7 @@ public void testParseJwt() throws Exception {
 
 解析是生成的反过程：`Jwts.parser()` 拿到解析器 → `.setSigningKey(秘钥)` 告诉它"用哪个秘钥去核签名" → `.parseClaimsJws(token)` 真正解析（**签名不对、令牌过期，都在这一步抛异常**）→ `.getBody()` 拿回 Payload 里的内容（一个 `Claims` 对象，可以 `get("id")` 这样取值）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **两处秘钥必须完全一致**（PPT 第 27 页把它单列成"注意事项"）：生成时用什么秘钥，解析时就必须用什么秘钥——**秘钥是配套的**。课程里这个秘钥是一段 **Base64 字符串**（jjwt 0.9.1 的 `signWith` / `setSigningKey` 传字符串时，要求是 Base64 编码的秘钥）：PPT 示例里的 `SVRIRUlNQQ==` 解开是 `ITHEIMA`，工程 `JwtUtils` 里用的 `aXRoZWltYQ==` 解开是 `itheima`——都是"拿一个词当秘钥"的意思，真实项目里当然要换成长长的随机串，并且**绝对不能泄露**。
 
 ## 本机实测：生成、过期与篡改（PPT 第 27 页的问答 + 真机对照）
@@ -299,7 +299,7 @@ PPT 第 27 页把这一节的问答收在一起，三个问题都值得背下来
 
 说"会报错"还不够直观，本机把课程的 `JwtTest` 跑了一遍，两个错误现场都能看到：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测（一）：生成成功**
 >
 > ```text
@@ -309,7 +309,7 @@ PPT 第 27 页把这一节的问答收在一起，三个问题都值得背下来
 >
 > 这就是上一节被拆成三段的那枚令牌：Header 段是 `{"alg":"HS256"}`、Payload 段是 `{"id":1,"username":"admin","exp":1790693346}`。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测（二）：解析一个过期的令牌 → `ExpiredJwtException`**
 >
 > 课程 `JwtTest` 里"解析令牌"那个方法，`token` 变量里的令牌是**课程录制时（2024 年）生成**的，早就过期了。照原样跑，控制台直接抛出：
@@ -452,33 +452,41 @@ public class JwtUtils {
   需求：写一个静态方法，接收一个 Map（里面是自定义信息，比如 id、username），生成并返回一个令牌字符串。要求：用 HS256 算法签名（秘钥自己定一个字符串常量），带上自定义信息，并且**12 小时后过期**。
   （练习文件 `test_82_JWT生成与解析.java` 的题目2-1 里给了写作区，pom 依赖片段也在素材里。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：引入 JWT 的库之后，用官方的构造器一步步"拼"出令牌——声明算法与秘钥 → 放自定义信息 → 放过期时间 → 打包成字符串
-  > **二级 · 方法**：`Jwts.builder().signWith(SignatureAlgorithm.HS256, 秘钥).addClaims(claims).setExpiration(new Date(System.currentTimeMillis() + 12*60*60*1000)).compact()`；日期用 `java.util.Date`；秘钥写成一个 `private static final String` 常量
-  > **三级 · 骨架**：`public static String generateToken(Map<String, Object> ____) { return Jwts.builder().signWith(SignatureAlgorithm.____, ____).addClaims(____).setExpiration(new Date(System.currentTimeMillis() + ____)).____(); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > public class JwtUtils {
-  >
-  >     private static final String SECRET_KEY = "aXRoZWltYQ=="; // 秘钥
-  >     private static final long EXPIRATION_TIME = 12 * 60 * 60 * 1000; // 12小时
-  >
-  >     /**
-  >      * 生成JWT令牌
-  >      * @param claims 令牌中包含的信息
-  >      * @return 生成的JWT令牌字符串
-  >      */
-  >     public static String generateToken(Map<String, Object> claims) {
-  >         return Jwts.builder()
-  >                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-  >                 .addClaims(claims)
-  >                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-  >                 .compact();
-  >     }
-  > }
-  > ```
-  > 检查点：① `compact()` 不能漏——它才是真正"打包出字符串"的那一步；② 过期时间是 `new Date(System.currentTimeMillis() + 毫秒数)`，别把参数写成"当前时间"（那就立刻过期了）；③ 秘钥是**一段 Base64 字符串**（jjwt 0.9.1 对 String 形态的秘钥有这个要求），解析时必须用**同一段**。
+  **一级 · 思路**：引入 JWT 的库之后，用官方的构造器一步步"拼"出令牌——声明算法与秘钥 → 放自定义信息 → 放过期时间 → 打包成字符串
+  **二级 · 方法**：`Jwts.builder().signWith(SignatureAlgorithm.HS256, 秘钥).addClaims(claims).setExpiration(new Date(System.currentTimeMillis() + 12*60*60*1000)).compact()`；日期用 `java.util.Date`；秘钥写成一个 `private static final String` 常量
+  **三级 · 骨架**：`public static String generateToken(Map<String, Object> ____) { return Jwts.builder().signWith(SignatureAlgorithm.____, ____).addClaims(____).setExpiration(new Date(System.currentTimeMillis() + ____)).____(); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  public class JwtUtils {
+  
+      private static final String SECRET_KEY = "aXRoZWltYQ=="; // 秘钥
+      private static final long EXPIRATION_TIME = 12 * 60 * 60 * 1000; // 12小时
+  
+      /**
+       * 生成JWT令牌
+       * @param claims 令牌中包含的信息
+       * @return 生成的JWT令牌字符串
+       */
+      public static String generateToken(Map<String, Object> claims) {
+          return Jwts.builder()
+                  .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                  .addClaims(claims)
+                  .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                  .compact();
+      }
+  }
+  ```
+  检查点：① `compact()` 不能漏——它才是真正"打包出字符串"的那一步；② 过期时间是 `new Date(System.currentTimeMillis() + 毫秒数)`，别把参数写成"当前时间"（那就立刻过期了）；③ 秘钥是**一段 Base64 字符串**（jjwt 0.9.1 对 String 形态的秘钥有这个要求），解析时必须用**同一段**。
+
+  :::
+
 
 - [ ] **2-2 写一个"解析令牌"的工具方法**
   需求：写一个静态方法，接收一个令牌字符串，**解析并返回里面的自定义信息**。另外回答两个问题：
@@ -486,62 +494,78 @@ public class JwtUtils {
   ② 本机解析一个 2024 年生成的旧令牌时报了 `ExpiredJwtException`，这说明什么？
   （练习文件 `test_82_JWT生成与解析.java` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：解析是生成的反过程——拿到解析器、告诉它用哪把秘钥去核签名、解析、把有效载荷取出来
-  > **二级 · 方法**：`Jwts.parser().setSigningKey(秘钥).parseClaimsJws(token).getBody()`；返回值类型是 `Claims`（本质上还是个 Map，`get("id")` 能取值）；签名校验和有效期校验都在 `parseClaimsJws` 这一步发生
-  > **三级 · 骨架**：`public static Claims parseToken(String token) throws Exception { return Jwts.parser().setSigningKey(____).____(token).____(); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  >     /**
-  >      * 解析JWT令牌
-  >      * @param token 要解析的JWT令牌字符串
-  >      * @return 包含令牌信息的Claims对象
-  >      * @throws Exception 如果令牌无效或已过期，则抛出异常
-  >      */
-  >     public static Claims parseToken(String token) throws Exception {
-  >         return Jwts.parser()
-  >                 .setSigningKey(SECRET_KEY)
-  >                 .parseClaimsJws(token)
-  >                 .getBody();
-  >     }
-  > ```
-  > ① 两种失败：**令牌被篡改**（内容改了任何字符）或**秘钥不配套** → 签名校验对不上，抛 `SignatureException`；**令牌过期失效** → 抛 `ExpiredJwtException`。
-  > ② 说明那枚令牌的 `exp` 时间点已经过去，JWT 库在解析时**主动做了有效期校验**并把过期当成异常抛出来（原文：`io.jsonwebtoken.ExpiredJwtException: JWT expired at 2024-11-24T17:16:18Z.`）——所以课程里硬编码的那个旧 token 一跑就报错，换成刚生成的令牌就好。这也意味着"过期"这件事**不需要自己判断**，解析通过就说明令牌还在有效期内。
+  **一级 · 思路**：解析是生成的反过程——拿到解析器、告诉它用哪把秘钥去核签名、解析、把有效载荷取出来
+  **二级 · 方法**：`Jwts.parser().setSigningKey(秘钥).parseClaimsJws(token).getBody()`；返回值类型是 `Claims`（本质上还是个 Map，`get("id")` 能取值）；签名校验和有效期校验都在 `parseClaimsJws` 这一步发生
+  **三级 · 骨架**：`public static Claims parseToken(String token) throws Exception { return Jwts.parser().setSigningKey(____).____(token).____(); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+      /**
+       * 解析JWT令牌
+       * @param token 要解析的JWT令牌字符串
+       * @return 包含令牌信息的Claims对象
+       * @throws Exception 如果令牌无效或已过期，则抛出异常
+       */
+      public static Claims parseToken(String token) throws Exception {
+          return Jwts.parser()
+                  .setSigningKey(SECRET_KEY)
+                  .parseClaimsJws(token)
+                  .getBody();
+      }
+  ```
+  ① 两种失败：**令牌被篡改**（内容改了任何字符）或**秘钥不配套** → 签名校验对不上，抛 `SignatureException`；**令牌过期失效** → 抛 `ExpiredJwtException`。
+  ② 说明那枚令牌的 `exp` 时间点已经过去，JWT 库在解析时**主动做了有效期校验**并把过期当成异常抛出来（原文：`io.jsonwebtoken.ExpiredJwtException: JWT expired at 2024-11-24T17:16:18Z.`）——所以课程里硬编码的那个旧 token 一跑就报错，换成刚生成的令牌就好。这也意味着"过期"这件事**不需要自己判断**，解析通过就说明令牌还在有效期内。
+
+  :::
+
 
 - [ ] **2-3 让登录成功后自动生成并返回令牌**
   需求：登录成功（用户名密码对得上）时，生成一枚令牌——令牌里带上这个员工的 id 和用户名；再把 id、用户名、姓名、令牌四样东西组装成登录结果返回。生成令牌的活儿交给 2-1 写的工具方法；秘钥、过期时长都在工具类里。
   （练习文件 `test_82_会话技术与JWT.java` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：在"查到员工之后、返回之前"插两步——① 准备自定义信息（Map，放 id、username）；② 调工具方法生成令牌
-  > **二级 · 方法**：`Map<String, Object> claims = new HashMap<>();` + `claims.put("id", e.getId())`、`claims.put("username", e.getUsername())`；`String jwt = JwtUtils.generateToken(claims);`；最后 `new LoginInfo(e.getId(), e.getUsername(), e.getName(), jwt)`
-  > **三级 · 骨架**：`Map<String, Object> claims = new ____<>(); claims.put("____", e.getId()); claims.put("____", e.getUsername()); String jwt = JwtUtils.____(claims); return new LoginInfo(____, ____, ____, jwt);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  >     @Override
-  >     public LoginInfo login(Emp emp) {
-  >         //1. 调用mapper接口, 根据用户名和密码查询员工信息
-  >         Emp e = empMapper.selectByUsernameAndPassword(emp);
-  >
-  >         //2. 判断: 判断是否存在这个员工, 如果存在, 组装登录成功信息
-  >         if(e != null){
-  >             log.info("登录成功, 员工信息: {}", e);
-  >             //生成JWT令牌
-  >             Map<String, Object> claims = new HashMap<>();
-  >             claims.put("id", e.getId());
-  >             claims.put("username", e.getUsername());
-  >             String jwt = JwtUtils.generateToken(claims);
-  >
-  >             return new LoginInfo(e.getId(), e.getUsername(), e.getName(), jwt);
-  >         }
-  >
-  >         //3. 不存在, 返回null
-  >         return null;
-  >     }
-  > ```
-  > 检查点：① claims 里放的是**数据库里查到的员工**的 id/username（`e`），不是请求里传进来的对象；② 本机实测登录响应里的令牌中段解出来就是 `{"id":1,"username":"shinaian","exp":1790736345}`（`exp` = 生成时刻 + 12 小时）——claims 放什么，令牌里就能解出什么；③ 令牌最终随接口响应 `data.token` 回到前端，之后每次请求放到请求头 `token` 里（接口文档约定）。
+  **一级 · 思路**：在"查到员工之后、返回之前"插两步——① 准备自定义信息（Map，放 id、username）；② 调工具方法生成令牌
+  **二级 · 方法**：`Map<String, Object> claims = new HashMap<>();` + `claims.put("id", e.getId())`、`claims.put("username", e.getUsername())`；`String jwt = JwtUtils.generateToken(claims);`；最后 `new LoginInfo(e.getId(), e.getUsername(), e.getName(), jwt)`
+  **三级 · 骨架**：`Map<String, Object> claims = new ____<>(); claims.put("____", e.getId()); claims.put("____", e.getUsername()); String jwt = JwtUtils.____(claims); return new LoginInfo(____, ____, ____, jwt);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+      @Override
+      public LoginInfo login(Emp emp) {
+          //1. 调用mapper接口, 根据用户名和密码查询员工信息
+          Emp e = empMapper.selectByUsernameAndPassword(emp);
+  
+          //2. 判断: 判断是否存在这个员工, 如果存在, 组装登录成功信息
+          if(e != null){
+              log.info("登录成功, 员工信息: {}", e);
+              //生成JWT令牌
+              Map<String, Object> claims = new HashMap<>();
+              claims.put("id", e.getId());
+              claims.put("username", e.getUsername());
+              String jwt = JwtUtils.generateToken(claims);
+  
+              return new LoginInfo(e.getId(), e.getUsername(), e.getName(), jwt);
+          }
+  
+          //3. 不存在, 返回null
+          return null;
+      }
+  ```
+  检查点：① claims 里放的是**数据库里查到的员工**的 id/username（`e`），不是请求里传进来的对象；② 本机实测登录响应里的令牌中段解出来就是 `{"id":1,"username":"shinaian","exp":1790736345}`（`exp` = 生成时刻 + 12 小时）——claims 放什么，令牌里就能解出什么；③ 令牌最终随接口响应 `data.token` 回到前端，之后每次请求放到请求头 `token` 里（接口文档约定）。
+
+  :::
+
 
 - [ ] **2-4 把三种会话跟踪方案讲清楚，并说明课程为什么选令牌**
   需求：PPT 第 21 页把三种方案摆在一起比较，其中一种被标了"主流方案"。请分别写清楚：
@@ -551,22 +575,30 @@ public class JwtUtils {
   另外补一句：本机实测里 `GET /s2` 一次带 `JSESSIONID`、一次不带，两次结果有什么不同？这说明了什么？
   （练习文件 `test_82_会话技术与JWT.java` 的题目2-4 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"数据存在哪"给三种方案分个类——存浏览器、存服务器、存在令牌自己身上，然后顺着"登录之后谁记住、请求怎么带回来"把原理说一遍
-  > **二级 · 方法**：关键词——`Set-Cookie` / `Cookie`（响应头写、请求头带）、`JSESSIONID`（Session 的底层是 Cookie）、集群/负载均衡（换台机器就找不到 Session）、令牌自包含 + 签名（服务端不存东西）
-  > **三级 · 骨架**：① Cookie：数据存____，服务器用____头写、浏览器用____头带；② Session：数据存____，靠____这个 Cookie 找到它；③ 令牌：数据在____，服务器只负责____和____。优缺点各写 2~3 条，选令牌的理由按"____端、____环境、服务端____"三点说
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **原理**：
-  > - **Cookie**：服务器在响应头里写 `Set-Cookie: name=value`，浏览器存下来，之后每次请求自动在请求头 `Cookie: name=value` 里带回，服务器从请求头读取；
-  > - **Session**：数据存在**服务端**，服务器创建 Session 后返回 `Set-Cookie: JSESSIONID=1`（编号），浏览器之后带着 `Cookie: JSESSIONID=1` 来，服务器按编号找到自己的那格 Session——**底层基于 Cookie**；
-  > - **令牌**：登录成功时服务器**生成**令牌（里面装着自定义信息 + 签名）交给客户端保存，之后客户端每次请求把令牌放在请求头里带上，服务器**校验**（签名、有效期）即可，自己什么都不用存。
-  > ② **优缺点**：
-  > - Cookie：优点——HTTP 协议中支持的技术；缺点——移动端 APP 无法使用、不安全（用户可以自己禁用 Cookie）、不能跨域；
-  > - Session：优点——存储在服务端，安全；缺点——服务器**集群环境下无法直接使用**（负载均衡换台机器就找不到），且 Cookie 的缺点（移动端、可禁用、跨域）它也跑不掉；
-  > - 令牌：优点——支持 PC 端与移动端、解决集群环境下的认证问题、减轻服务器端存储压力；缺点——需要自己实现。
-  > ③ 选令牌的理由就是它那三条优点：**移动端**（APP 里没有 Cookie 机制，但能存字符串）、**集群**（任何一台服务器拿同一把秘钥都能独立校验，不用共享 Session）、**服务端存储**（服务器不存会话数据，压力小）；代价是"需要自己实现"——这个实现就是 JWT（jjwt 库 + `Jwts` 工具类）。
-  > 补充：`GET /s2` 带 `JSESSIONID` 时返回 `{"code":1,"msg":"success","data":"tom"}`（取到了 Session 里存的用户名），不带时返回 `{"code":1,"msg":"success","data":null}`（拿不到）。同一个 JSESSIONID 能换到数据、换一个或没有就换不到——**说明服务器就是靠 Cookie 里这个编号认人**，Session 离了 Cookie 就找不到自己那格数据。
+  **一级 · 思路**：按"数据存在哪"给三种方案分个类——存浏览器、存服务器、存在令牌自己身上，然后顺着"登录之后谁记住、请求怎么带回来"把原理说一遍
+  **二级 · 方法**：关键词——`Set-Cookie` / `Cookie`（响应头写、请求头带）、`JSESSIONID`（Session 的底层是 Cookie）、集群/负载均衡（换台机器就找不到 Session）、令牌自包含 + 签名（服务端不存东西）
+  **三级 · 骨架**：① Cookie：数据存____，服务器用____头写、浏览器用____头带；② Session：数据存____，靠____这个 Cookie 找到它；③ 令牌：数据在____，服务器只负责____和____。优缺点各写 2~3 条，选令牌的理由按"____端、____环境、服务端____"三点说
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **原理**：
+  - **Cookie**：服务器在响应头里写 `Set-Cookie: name=value`，浏览器存下来，之后每次请求自动在请求头 `Cookie: name=value` 里带回，服务器从请求头读取；
+  - **Session**：数据存在**服务端**，服务器创建 Session 后返回 `Set-Cookie: JSESSIONID=1`（编号），浏览器之后带着 `Cookie: JSESSIONID=1` 来，服务器按编号找到自己的那格 Session——**底层基于 Cookie**；
+  - **令牌**：登录成功时服务器**生成**令牌（里面装着自定义信息 + 签名）交给客户端保存，之后客户端每次请求把令牌放在请求头里带上，服务器**校验**（签名、有效期）即可，自己什么都不用存。
+  ② **优缺点**：
+  - Cookie：优点——HTTP 协议中支持的技术；缺点——移动端 APP 无法使用、不安全（用户可以自己禁用 Cookie）、不能跨域；
+  - Session：优点——存储在服务端，安全；缺点——服务器**集群环境下无法直接使用**（负载均衡换台机器就找不到），且 Cookie 的缺点（移动端、可禁用、跨域）它也跑不掉；
+  - 令牌：优点——支持 PC 端与移动端、解决集群环境下的认证问题、减轻服务器端存储压力；缺点——需要自己实现。
+  ③ 选令牌的理由就是它那三条优点：**移动端**（APP 里没有 Cookie 机制，但能存字符串）、**集群**（任何一台服务器拿同一把秘钥都能独立校验，不用共享 Session）、**服务端存储**（服务器不存会话数据，压力小）；代价是"需要自己实现"——这个实现就是 JWT（jjwt 库 + `Jwts` 工具类）。
+  补充：`GET /s2` 带 `JSESSIONID` 时返回 `{"code":1,"msg":"success","data":"tom"}`（取到了 Session 里存的用户名），不带时返回 `{"code":1,"msg":"success","data":null}`（拿不到）。同一个 JSESSIONID 能换到数据、换一个或没有就换不到——**说明服务器就是靠 Cookie 里这个编号认人**，Session 离了 Cookie 就找不到自己那格数据。
+
+  :::
+
 
 ### 三、综合题
 
@@ -596,38 +628,46 @@ public class JwtUtils {
   | 登录成功后生成令牌（PPT 28） | 第 1、7 步——claims 放 id/username，随 `LoginInfo` 返回 |
   | 令牌是"自包含"的（PPT 21、25） | 第 8 步——服务端不存数据也敢信令牌的原因 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先生成一枚"短命"的令牌把三个实验做完（正常解析、过期、篡改），再回到登录接口上看真实业务里的令牌长什么样
-  > **二级 · 方法**：生成 `Jwts.builder().signWith(SignatureAlgorithm.HS256, 秘钥).addClaims(claims).setExpiration(new Date(...)).compact()`；解析 `Jwts.parser().setSigningKey(秘钥).parseClaimsJws(token).getBody()`；解开中段用 Base64 解码工具（在线 Base64 解码或 IDE 里看）；过期令牌在课程 `JwtTest` 里就有现成的
-  > **三级 · 骨架**：① `String jwt = JwtUtils.____(claims);`；③ Base64 解码中段 → `{"id":1,"username":"admin","exp":____}`；④ `Claims claims = JwtUtils.____(token);`；⑤ 异常 `io.jsonwebtoken.____JwtException`；⑥ 改一个字符 / 换秘钥 → `____Exception`；⑦ `POST /login` 响应 `data.token`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. `JwtUtils` 见题目2-1、2-2 的答案（秘钥 `aXRoZWltYQ==`、12 小时过期，两个 `static` 方法）。
-  > 2. 生成方法可参考课程的 `JwtTest.testGenerateJwt`（`id=1`、`username=admin`、过期 1 分钟）。**本机实测**输出：
-  >    ```text
-  >    eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImV4cCI6MTc5MDY5MzM0Nn0.BSgyQPMJ6PV1atT0j6uSkFoLDqsiBWawaoqek_hqJjI
-  >    ```
-  > 3. 三段（用 `.` 分隔）。中段 Base64 解开是：
-  >    ```json
-  >    {"id":1,"username":"admin","exp":1790693346}
-  >    ```
-  >    头段解开是 `{"alg":"HS256"}`；第三段是签名（不可读、供比对）。
-  > 4. 用同一把秘钥解析，`System.out.println(claims)` 打印类似 `{id=1, username=admin, exp=1790693346}`（`Claims` 的 `toString` 是 Map 样式）——取值得用 `claims.get("id")`。
-  > 5. **本机实测**（解析课程里 2024 年生成的旧令牌）：
-  >    ```text
-  >    io.jsonwebtoken.ExpiredJwtException: JWT expired at 2024-11-24T17:16:18Z.
-  >    Current time: 2026-09-29T22:48:07Z, a difference of 58253509112 milliseconds.
-  >    ```
-  >    说明 JWT 库在解析时会把"过期"当异常抛出来；课程里那个硬编码 token 早就过期，换成刚生成的就正常。
-  > 6. 改一个字符、或换一把秘钥，都会抛 **`SignatureException`**（签名与内容/秘钥对不上）。把这两次实验对比着看：**过期**和**签名不对**是两种不同的失败，分别对应 `ExpiredJwtException` 与 `SignatureException`。
-  > 7. 把过期时间改成 `12 * 60 * 60 * 1000` 后接进登录业务（见题目2-3 答案），**本机实测**登录响应：
-  >    ```text
-  >    {"code":1,"msg":"success","data":{
-  >      "id":1,"username":"shinaian","name":"施耐庵",
-  >      "token":"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJzaGluYWlhbiIsImV4cCI6MTc5MDczNjM0NX0.zHEWXHS6ZSoz8L2klv-8fFZQODftFlp4r_Ps1jGJFic"}}
-  >    ```
-  >    中段解出来是 `{"id":1,"username":"shinaian","exp":1790736345}`——claims 里放什么，令牌里就能解出什么。
-  > 8. 回答：
-  >    ① 第三段签名是拿"`header.payload` + 秘钥"按 HS256 算出来的。令牌里改了哪怕一个字符，服务器重新计算时用的"原料"就变了，算出来的签名与令牌里带着的第三段**对不上**——于是判定"被篡改过"，直接解析失败。改动越细微越说明问题：**签名保护的是完整性**，不是保密性。
-  >    ② **不能**。Base64 是编码不是加密，令牌前两段**谁都能解开**（实验第 3 步就解开了）；把密码放进去等于把密码公开传送和公开存储。课程只放 `id` 与 `username` 正是这个道理——这两个信息即便被人看到，也不足以直接登录；真正的敏感数据（密码、身份证号）不放令牌，要放也只能放"服务端拿着能查到的标识"。
-  >    ③ 解析通过能同时证明两件事：**令牌确实由持有正确秘钥的服务器签发**（签名对得上，没被篡改过），以及**令牌还没过期**（`exp` 还没到）。这正是"服务器不存任何会话数据、也敢相信请求者身份"的全部依据——也就是令牌方案"减轻服务端存储压力 / 解决集群认证"的底气。
+  **一级 · 思路**：先生成一枚"短命"的令牌把三个实验做完（正常解析、过期、篡改），再回到登录接口上看真实业务里的令牌长什么样
+  **二级 · 方法**：生成 `Jwts.builder().signWith(SignatureAlgorithm.HS256, 秘钥).addClaims(claims).setExpiration(new Date(...)).compact()`；解析 `Jwts.parser().setSigningKey(秘钥).parseClaimsJws(token).getBody()`；解开中段用 Base64 解码工具（在线 Base64 解码或 IDE 里看）；过期令牌在课程 `JwtTest` 里就有现成的
+  **三级 · 骨架**：① `String jwt = JwtUtils.____(claims);`；③ Base64 解码中段 → `{"id":1,"username":"admin","exp":____}`；④ `Claims claims = JwtUtils.____(token);`；⑤ 异常 `io.jsonwebtoken.____JwtException`；⑥ 改一个字符 / 换秘钥 → `____Exception`；⑦ `POST /login` 响应 `data.token`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. `JwtUtils` 见题目2-1、2-2 的答案（秘钥 `aXRoZWltYQ==`、12 小时过期，两个 `static` 方法）。
+  2. 生成方法可参考课程的 `JwtTest.testGenerateJwt`（`id=1`、`username=admin`、过期 1 分钟）。**本机实测**输出：
+     ```text
+     eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImV4cCI6MTc5MDY5MzM0Nn0.BSgyQPMJ6PV1atT0j6uSkFoLDqsiBWawaoqek_hqJjI
+     ```
+  3. 三段（用 `.` 分隔）。中段 Base64 解开是：
+     ```json
+     {"id":1,"username":"admin","exp":1790693346}
+     ```
+     头段解开是 `{"alg":"HS256"}`；第三段是签名（不可读、供比对）。
+  4. 用同一把秘钥解析，`System.out.println(claims)` 打印类似 `{id=1, username=admin, exp=1790693346}`（`Claims` 的 `toString` 是 Map 样式）——取值得用 `claims.get("id")`。
+  5. **本机实测**（解析课程里 2024 年生成的旧令牌）：
+     ```text
+     io.jsonwebtoken.ExpiredJwtException: JWT expired at 2024-11-24T17:16:18Z.
+     Current time: 2026-09-29T22:48:07Z, a difference of 58253509112 milliseconds.
+     ```
+     说明 JWT 库在解析时会把"过期"当异常抛出来；课程里那个硬编码 token 早就过期，换成刚生成的就正常。
+  6. 改一个字符、或换一把秘钥，都会抛 **`SignatureException`**（签名与内容/秘钥对不上）。把这两次实验对比着看：**过期**和**签名不对**是两种不同的失败，分别对应 `ExpiredJwtException` 与 `SignatureException`。
+  7. 把过期时间改成 `12 * 60 * 60 * 1000` 后接进登录业务（见题目2-3 答案），**本机实测**登录响应：
+     ```text
+     {"code":1,"msg":"success","data":{
+       "id":1,"username":"shinaian","name":"施耐庵",
+       "token":"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJzaGluYWlhbiIsImV4cCI6MTc5MDczNjM0NX0.zHEWXHS6ZSoz8L2klv-8fFZQODftFlp4r_Ps1jGJFic"}}
+     ```
+     中段解出来是 `{"id":1,"username":"shinaian","exp":1790736345}`——claims 里放什么，令牌里就能解出什么。
+  8. 回答：
+     ① 第三段签名是拿"`header.payload` + 秘钥"按 HS256 算出来的。令牌里改了哪怕一个字符，服务器重新计算时用的"原料"就变了，算出来的签名与令牌里带着的第三段**对不上**——于是判定"被篡改过"，直接解析失败。改动越细微越说明问题：**签名保护的是完整性**，不是保密性。
+     ② **不能**。Base64 是编码不是加密，令牌前两段**谁都能解开**（实验第 3 步就解开了）；把密码放进去等于把密码公开传送和公开存储。课程只放 `id` 与 `username` 正是这个道理——这两个信息即便被人看到，也不足以直接登录；真正的敏感数据（密码、身份证号）不放令牌，要放也只能放"服务端拿着能查到的标识"。
+     ③ 解析通过能同时证明两件事：**令牌确实由持有正确秘钥的服务器签发**（签名对得上，没被篡改过），以及**令牌还没过期**（`exp` 还没到）。这正是"服务器不存任何会话数据、也敢相信请求者身份"的全部依据——也就是令牌方案"减轻服务端存储压力 / 解决集群认证"的底气。
+
+  :::
+

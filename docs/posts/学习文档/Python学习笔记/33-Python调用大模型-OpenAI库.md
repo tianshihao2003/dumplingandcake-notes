@@ -30,7 +30,7 @@ cover: false
 | 列出已安装的包 | `pip list` |
 | 查看包详情 | `pip show openai` |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 指定版本必须用**双等号** `==`。写成单个 `=` 会直接报错：`ERROR: Invalid requirement: 'openai=2.13.0' ... Hint: = is not a valid operator. Did you mean == ?`（课程 PPT 上写的是单等号，是笔误，别照着抄）。
 
 ## 为什么调用 DeepSeek 却安装 openai
@@ -47,7 +47,7 @@ DeepSeek 的 API **兼容 OpenAI 的接口格式**，所以可以直接用 `open
 
 ![DeepSeek 官方文档-首次调用 API](https://img.tsh520.cn/file/blog/article/deepseek-api-docs.png)
 
-> [!NOTE]
+> [!NOTE] 注意
 > 官方文档说明：出于与 OpenAI 兼容考虑，`base_url` 也可以设置成 `https://api.deepseek.com/v1` 来使用，但此处的 `v1` 与模型版本无关。
 
 ## 完整调用示例
@@ -83,10 +83,10 @@ print(response.choices[0].message.content)
 | `stream=False` | 非流式：一次性拿到完整回答 |
 | `response.choices[0].message.content` | 取出模型回复的文本。`choices` 是列表，取第一个候选，再取 `message.content` |
 
-> [!TIP]
+> [!TIP] 提示
 > 环境变量的设置方式（Windows PowerShell）：`$env:DEEPSEEK_API_KEY="sk-xxxx"`；CMD：`set DEEPSEEK_API_KEY=sk-xxxx`。在 PyCharm 里也可以直接配置到运行配置的 Environment variables 中。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 调用可能失败（网络断开、余额不足、Key 失效）。写正式程序时建议用 `try...except` 包住，例如 `except Exception as e: print("调用失败:", e)`，避免程序直接崩溃。
 
 ## 下一步
@@ -120,80 +120,104 @@ print(response.choices[0].message.content)
 - [ ] **2-1 最小调用程序**
   写一个程序：从环境变量读 API Key，向 deepseek-chat 提一个问题，把回复打印出来。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先建"打电话的客户端"，再用它发消息，最后从返回结果里挖出文本
-  > **二级 · 方法**：`OpenAI(...)` / `client.chat.completions.create(...)` / `response.choices[0].message.content`
-  > **三级 · 骨架**：`client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import os
-  > from openai import OpenAI
-  > 
-  > client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
-  > 
-  > response = client.chat.completions.create(
-  >     model="deepseek-chat",
-  >     messages=[{"role": "user", "content": "你是谁, 你能帮我做什么?"}],
-  >     stream=False,
-  > )
-  > 
-  > print(response.choices[0].message.content)
-  > ```
+  **一级 · 思路**：先建"打电话的客户端"，再用它发消息，最后从返回结果里挖出文本
+  **二级 · 方法**：`OpenAI(...)` / `client.chat.completions.create(...)` / `response.choices[0].message.content`
+  **三级 · 骨架**：`client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import os
+  from openai import OpenAI
+  
+  client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
+  
+  response = client.chat.completions.create(
+      model="deepseek-chat",
+      messages=[{"role": "user", "content": "你是谁, 你能帮我做什么?"}],
+      stream=False,
+  )
+  
+  print(response.choices[0].message.content)
+  ```
+
+  :::
+
 
 - [ ] **2-2 流式输出**
   把上面的调用改成流式，把回复**逐段**打印到控制台（不是一次性打印）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：让接口一段一段给，而不是等全部生成完
-  > **二级 · 方法**：`stream=True` + `for chunk in response:`
-  > **三级 · 骨架**：`if chunk.choices[0].____.content is not None:`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import os
-  > from openai import OpenAI
-  > 
-  > client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
-  > 
-  > response = client.chat.completions.create(
-  >     model="deepseek-chat",
-  >     messages=[{"role": "user", "content": "用一句话介绍 Python"}],
-  >     stream=True,
-  > )
-  > 
-  > for chunk in response:
-  >     if chunk.choices[0].delta.content is not None:
-  >         print(chunk.choices[0].delta.content, end="", flush=True)
-  > print()
-  > ```
+  **一级 · 思路**：让接口一段一段给，而不是等全部生成完
+  **二级 · 方法**：`stream=True` + `for chunk in response:`
+  **三级 · 骨架**：`if chunk.choices[0].____.content is not None:`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import os
+  from openai import OpenAI
+  
+  client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
+  
+  response = client.chat.completions.create(
+      model="deepseek-chat",
+      messages=[{"role": "user", "content": "用一句话介绍 Python"}],
+      stream=True,
+  )
+  
+  for chunk in response:
+      if chunk.choices[0].delta.content is not None:
+          print(chunk.choices[0].delta.content, end="", flush=True)
+  print()
+  ```
+
+  :::
+
 
 - [ ] **2-3 设定 AI 的身份**
   给 AI 设定身份"你是一名非常可爱的AI助理，名字叫小甜甜"，再问"你是谁"，对比不设身份时的回答有什么不同。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：身份写在 messages 的第一条，角色不是 user
-  > **二级 · 方法**：`{"role": "system", "content": "..."}`
-  > **三级 · 骨架**：`messages=[{"role": "____", "content": 身份}, {"role": "user", "content": "你是谁"}]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import os
-  > from openai import OpenAI
-  > 
-  > client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
-  > 
-  > system_prompt = "你是一名非常可爱的AI助理, 你的名字叫小甜甜, 请你使用温柔可爱的语气回答用户的问题"
-  > 
-  > response = client.chat.completions.create(
-  >     model="deepseek-chat",
-  >     messages=[
-  >         {"role": "system", "content": system_prompt},
-  >         {"role": "user", "content": "你是谁"},
-  >     ],
-  >     stream=False,
-  > )
-  > 
-  > print(response.choices[0].message.content)
-  > # 对比实验：把 system 那条删掉再跑一次，回复就变成通用的助手口吻
-  > ```
+  **一级 · 思路**：身份写在 messages 的第一条，角色不是 user
+  **二级 · 方法**：`{"role": "system", "content": "..."}`
+  **三级 · 骨架**：`messages=[{"role": "____", "content": 身份}, {"role": "user", "content": "你是谁"}]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import os
+  from openai import OpenAI
+  
+  client = OpenAI(api_key=os.environ.get("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
+  
+  system_prompt = "你是一名非常可爱的AI助理, 你的名字叫小甜甜, 请你使用温柔可爱的语气回答用户的问题"
+  
+  response = client.chat.completions.create(
+      model="deepseek-chat",
+      messages=[
+          {"role": "system", "content": system_prompt},
+          {"role": "user", "content": "你是谁"},
+      ],
+      stream=False,
+  )
+  
+  print(response.choices[0].message.content)
+  # 对比实验：把 system 那条删掉再跑一次，回复就变成通用的助手口吻
+  ```
+
+  :::
+

@@ -56,7 +56,7 @@ PPT 第 1-3 页是整章的概念地图：**浏览器**发起请求 → **HTTP �
 | **Spring 框架** | 用来写"动态资源"那部分业务逻辑的框架 | 本篇（Spring 与 SpringBoot 的关系）+ 第 4 章后半部分（SpringMVC、IOC/DI 等） |
 | **B/S 架构** | 我们开发的程序就以"浏览器当客户端"的形式交付 | 整章都在做这件事 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这一节先记住一句话就够了：**后端开发 = 在 Web 服务器上写能接收请求、处理逻辑、返回数据的程序**。其中的"收请求、返回数据"由 Spring 框架帮我们省掉大量样板代码，这也是为什么后面几步就能写出一个 Web 程序。
 
 ## Spring：从"全家桶"到 SpringBoot
@@ -112,7 +112,7 @@ http://localhost:8080/hello?name=Heima     →     "Hello Heima ~"
 
 本机把上面的程序跑起来后，用命令行请求（JDK 17 / Spring Boot 3.2.8 / 内嵌 Tomcat 10.1.26）：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（curl 请求本机 8080）：
 >
 > ```text
@@ -200,7 +200,7 @@ public class HelloController {
 | `@RequestMapping("/hello")` | 加在**方法**上，"**标识请求路径**"——浏览器请求 `/hello` 时执行这个方法 |
 | `String name` 参数 | URL 上的 `?name=Heima` **自动**传进来，不用自己解析 |
 
-> [!TIP]
+> [!TIP] 提示
 > `@RestController` 和 `@RequestMapping` 的具体差别（比如 `@RestController` = `@Controller` + `@ResponseBody`）属于"响应数据"那一块的知识，[36 篇](/posts/编程学习/javaweb学习笔记/36-springboot-web案例-用户列表渲染/)会展开。这里先按 PPT 第 12 页的注释记住它们的**用途**即可。
 
 ### 第 3 步：运行启动类
@@ -252,7 +252,7 @@ PPT 第 14 页给的解决方案是**换一个国内能连通的脚手架**：�
 ![改用阿里云脚手架](https://img.tsh520.cn/file/blog/article/14-改用阿里云脚手架.jpg)
 *图：PPT 第 14 页——弹出 Spring Initializr Server URL 对话框，把 Server URL 改成 `https://start.aliyun.com`，确定后继续 Next 即可正常创建*
 
-> [!WARNING]
+> [!WARNING] 警告
 > 换脚手架只影响"**生成工程骨架**"这一步（就是下载一个工程模板）。工程生成之后，**依赖 jar 走的是 Maven 仓库**（[24 篇](/posts/编程学习/javaweb学习笔记/24-maven的安装与配置/)里配的阿里云私服），和脚手架服务器完全是两回事——所以"脚手架连不上"和"依赖下载不下来"要用两个不同的办法处理。
 
 ## 小结
@@ -294,60 +294,76 @@ PPT 第 14 页给的解决方案是**换一个国内能连通的脚手架**：�
   写一个请求处理类：浏览器访问 `/hello?name=Heima` 时，页面返回 `Hello Heima~`；同时服务端控制台要把收到的名字打印出来。
   （练习文件 `test_30_HelloController.java` 里给了包名、类名骨架和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这个类不是普通 Java 类，它是"接请求"的类——需要**两个注解**：一个告诉 Spring"这个类负责处理请求"，一个告诉 Spring"哪个路径归这个方法管"
-  > **二级 · 方法**：类上用 `@RestController`；方法上用 `@RequestMapping("/hello")`；方法签名写成 `public String hello(String name)`（类名 `HelloController`、方法名 `hello`、包名 `com.itheima`，练习文件骨架里已给出），`name` 会自动接住 URL 上的 `?name=`
-  > **三级 · 骨架**：`@RestController public class HelloController { @RequestMapping("/____") public String hello(String name){ System.out.println("____" + name); return "Hello " + name + "~"; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.springframework.web.bind.annotation.RequestMapping;
-  > import org.springframework.web.bind.annotation.RestController;
-  >
-  > @RestController //标识当前是一个请求处理类
-  > public class HelloController {
-  >
-  >     @RequestMapping("/hello") //标识请求路径
-  >     public String hello(String name){
-  >         System.out.println("Hello Controller ... hello ： " + name);
-  >         return "Hello " + name + "~";
-  >     }
-  >
-  > }
-  > ```
-  > 这就是课程源码 `HelloController.java` 的样子。本机实测（JDK 17 / Spring Boot 3.2.8 / 内嵌 Tomcat 10.1.26）：启动后 `curl -s "http://localhost:8080/hello?name=Heima"` 返回 `Hello Heima~`，服务端控制台出现 `Hello Controller ... hello ： Heima`——**方法里那句打印真的执行了，方法的返回值真的变成了响应体**。反过来，只要类上的注解漏了、或者请求路径写错（`@RequestMapping` 里的值和浏览器里敲的不一致），请求就会变成 **404**（服务器收到了请求，但没有方法接住它）。
+  **一级 · 思路**：这个类不是普通 Java 类，它是"接请求"的类——需要**两个注解**：一个告诉 Spring"这个类负责处理请求"，一个告诉 Spring"哪个路径归这个方法管"
+  **二级 · 方法**：类上用 `@RestController`；方法上用 `@RequestMapping("/hello")`；方法签名写成 `public String hello(String name)`（类名 `HelloController`、方法名 `hello`、包名 `com.itheima`，练习文件骨架里已给出），`name` 会自动接住 URL 上的 `?name=`
+  **三级 · 骨架**：`@RestController public class HelloController { @RequestMapping("/____") public String hello(String name){ System.out.println("____" + name); return "Hello " + name + "~"; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  @RestController //标识当前是一个请求处理类
+  public class HelloController {
+  
+      @RequestMapping("/hello") //标识请求路径
+      public String hello(String name){
+          System.out.println("Hello Controller ... hello ： " + name);
+          return "Hello " + name + "~";
+      }
+  
+  }
+  ```
+  这就是课程源码 `HelloController.java` 的样子。本机实测（JDK 17 / Spring Boot 3.2.8 / 内嵌 Tomcat 10.1.26）：启动后 `curl -s "http://localhost:8080/hello?name=Heima"` 返回 `Hello Heima~`，服务端控制台出现 `Hello Controller ... hello ： Heima`——**方法里那句打印真的执行了，方法的返回值真的变成了响应体**。反过来，只要类上的注解漏了、或者请求路径写错（`@RequestMapping` 里的值和浏览器里敲的不一致），请求就会变成 **404**（服务器收到了请求，但没有方法接住它）。
+
+  :::
+
 
 - [ ] **2-2 一个类里放两个处理方法**
   在同一个请求处理类里再加一个处理方法：浏览器访问 `/hi?name=Tom` 时返回 `Hi Tom 你好~`，并在控制台打印 `hi : Tom`。
   做完再回答：为什么两个不同的请求能由同一个类里的两个方法来处理？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个类里可以有多个"处理方法"，它们靠**路径**区分；给新方法再标一个路径注解就行，类上的"我是处理类"注解不用重复写
-  > **二级 · 方法**：类还是 `HelloController`，新增的方法叫 `hi`；在新方法上写 `@RequestMapping("/hi")`，方法签名同样用 `String name` 接参数
-  > **三级 · 骨架**：`@RequestMapping("/____") public String hi(String name){ ... return "Hi " + name + " 你好~"; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @RestController //标识当前是一个请求处理类
-  > public class HelloController {
-  >
-  >     @RequestMapping("/hello") //标识请求路径
-  >     public String hello(String name){
-  >         System.out.println("Hello Controller ... hello ： " + name);
-  >         return "Hello " + name + "~";
-  >     }
-  >
-  >     @RequestMapping("/hi") //第二个请求路径，同样由这个类处理
-  >     public String hi(String name){
-  >         System.out.println("hi : " + name);
-  >         return "Hi " + name + " 你好~";
-  >     }
-  >
-  > }
-  > ```
-  > 原因：**`@RequestMapping` 标在方法上时，标识的是"这个方法负责哪个请求路径"**——一个类可以有任意多个带不同路径的方法，Spring 收到请求后按路径找到对应的方法执行。所以 `http://localhost:8080/hi?name=Tom` 走 `hi` 方法，`/hello` 走 `hello` 方法，互不干扰。
+  **一级 · 思路**：一个类里可以有多个"处理方法"，它们靠**路径**区分；给新方法再标一个路径注解就行，类上的"我是处理类"注解不用重复写
+  **二级 · 方法**：类还是 `HelloController`，新增的方法叫 `hi`；在新方法上写 `@RequestMapping("/hi")`，方法签名同样用 `String name` 接参数
+  **三级 · 骨架**：`@RequestMapping("/____") public String hi(String name){ ... return "Hi " + name + " 你好~"; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @RestController //标识当前是一个请求处理类
+  public class HelloController {
+  
+      @RequestMapping("/hello") //标识请求路径
+      public String hello(String name){
+          System.out.println("Hello Controller ... hello ： " + name);
+          return "Hello " + name + "~";
+      }
+  
+      @RequestMapping("/hi") //第二个请求路径，同样由这个类处理
+      public String hi(String name){
+          System.out.println("hi : " + name);
+          return "Hi " + name + " 你好~";
+      }
+  
+  }
+  ```
+  原因：**`@RequestMapping` 标在方法上时，标识的是"这个方法负责哪个请求路径"**——一个类可以有任意多个带不同路径的方法，Spring 收到请求后按路径找到对应的方法执行。所以 `http://localhost:8080/hi?name=Tom` 走 `hi` 方法，`/hello` 走 `hello` 方法，互不干扰。
+
+  :::
+
 
 - [ ] **2-3 找错：这段代码为什么访问不了**
   下面这个类在能正常启动的 SpringBoot 工程里，但浏览器访问 `http://localhost:8080/hello?name=Heima` 返回 **404**。请指出缺了什么、为什么缺了就会 404，并把代码补完整：
@@ -362,19 +378,27 @@ PPT 第 14 页给的解决方案是**换一个国内能连通的脚手架**：�
   }
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：Java 代码本身没报错，问题在"Spring 不知道这个类是干什么的"——回想一下 2-1 里这个类比普通类多写了什么
-  > **二级 · 方法**：类上少了标识"请求处理类"的注解，方法上少了标识"请求路径"的注解；404 的含义是"服务器收到了请求，但找不到能处理它的映射/资源"
-  > **三级 · 骨架**：`@____ public class HelloController { @____("/____") public String hello(...) }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 缺两个注解：类上缺 **`@RestController`**（Spring 启动时不会把这个类注册成请求处理类），方法上缺 **`@RequestMapping("/hello")`**（没有路径映射，`/hello` 这个请求没人接）。补完整就是 2-1 的代码。
-  > 404 的意思是"服务器收到了请求，但**找不到对应的资源或映射**"——本机实测访问一个不存在的地址（`/nope`）时也是这个结果：
-  > ```text
-  > $ curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/nope"
-  > 404
-  > ```
-  > 所以写后端时看到 404，第一反应就是查两个地方：**请求路径写对了吗**（`@RequestMapping` 里的值、浏览器里敲的地址）、**这个类被 Spring 认出来了吗**（类上的注解加了吗、类放的位置对不对）。
+  **一级 · 思路**：Java 代码本身没报错，问题在"Spring 不知道这个类是干什么的"——回想一下 2-1 里这个类比普通类多写了什么
+  **二级 · 方法**：类上少了标识"请求处理类"的注解，方法上少了标识"请求路径"的注解；404 的含义是"服务器收到了请求，但找不到能处理它的映射/资源"
+  **三级 · 骨架**：`@____ public class HelloController { @____("/____") public String hello(...) }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  缺两个注解：类上缺 **`@RestController`**（Spring 启动时不会把这个类注册成请求处理类），方法上缺 **`@RequestMapping("/hello")`**（没有路径映射，`/hello` 这个请求没人接）。补完整就是 2-1 的代码。
+  404 的意思是"服务器收到了请求，但**找不到对应的资源或映射**"——本机实测访问一个不存在的地址（`/nope`）时也是这个结果：
+  ```text
+  $ curl -s -o /dev/null -w "%{http_code}" "http://localhost:8080/nope"
+  404
+  ```
+  所以写后端时看到 404，第一反应就是查两个地方：**请求路径写对了吗**（`@RequestMapping` 里的值、浏览器里敲的地址）、**这个类被 Spring 认出来了吗**（类上的注解加了吗、类放的位置对不对）。
+
+  :::
+
 
 - [ ] **2-4 排错：创建工程时脚手架连不上**
   你在 IDEA 里按 2-1 的步骤创建 SpringBoot 工程，Name、Group 都填好了，刚点 Next 就弹出错误窗口，里面写着：
@@ -388,16 +412,24 @@ PPT 第 14 页给的解决方案是**换一个国内能连通的脚手架**：�
 
   请写出你的处理思路（至少三条），并说明"改脚手架"和"依赖下不下来"是不是同一件事。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先判断"是谁连不上谁"——你填的信息没错，是 IDEA 去访问的那个**模板服务器**连不通
-  > **二级 · 方法**：New Module 页面上的 **Server URL** 可以换；国内可选阿里云的脚手架地址
-  > **三级 · 骨架**：Server URL = `https://____.____`（把 `start.spring.io` 换成阿里的域名）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 这**不是填错了信息**，也不是 IDEA 坏了：错误详情 `Cannot download 'https://start.spring.io': Connect timed out` 说明是**访问官方脚手架服务器超时**（默认脚手架在国外）；
-  > ② 处理办法：在 `New Module` 页面把 **Server URL** 从 `start.spring.io` 改成阿里的 **`https://start.aliyun.com`**（点输入框后面的编辑按钮，在弹出对话框里改），再点 Next 就能正常创建工程；
-  > ③ 生成工程之后，照旧要联网下载依赖——这一步走的是 **Maven 仓库**（[24 篇](/posts/编程学习/javaweb学习笔记/24-maven的安装与配置/)配的阿里云私服），和脚手架是两回事；
-  > ④ 所以"改脚手架"和"依赖下不下来"**不是同一件事**：前者解决"工程骨架生成不了"，后者要按 [29 篇](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)的办法看 Maven 报错（`Could not find artifact`、`xxx.lastUpdated` 缓存失败等）。
+  **一级 · 思路**：先判断"是谁连不上谁"——你填的信息没错，是 IDEA 去访问的那个**模板服务器**连不通
+  **二级 · 方法**：New Module 页面上的 **Server URL** 可以换；国内可选阿里云的脚手架地址
+  **三级 · 骨架**：Server URL = `https://____.____`（把 `start.spring.io` 换成阿里的域名）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 这**不是填错了信息**，也不是 IDEA 坏了：错误详情 `Cannot download 'https://start.spring.io': Connect timed out` 说明是**访问官方脚手架服务器超时**（默认脚手架在国外）；
+  ② 处理办法：在 `New Module` 页面把 **Server URL** 从 `start.spring.io` 改成阿里的 **`https://start.aliyun.com`**（点输入框后面的编辑按钮，在弹出对话框里改），再点 Next 就能正常创建工程；
+  ③ 生成工程之后，照旧要联网下载依赖——这一步走的是 **Maven 仓库**（[24 篇](/posts/编程学习/javaweb学习笔记/24-maven的安装与配置/)配的阿里云私服），和脚手架是两回事；
+  ④ 所以"改脚手架"和"依赖下不下来"**不是同一件事**：前者解决"工程骨架生成不了"，后者要按 [29 篇](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)的办法看 Maven 报错（`Could not find artifact`、`xxx.lastUpdated` 缓存失败等）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -422,44 +454,52 @@ PPT 第 14 页给的解决方案是**换一个国内能连通的脚手架**：�
   | 请求处理类 | `@RestController` 标识处理类、`@RequestMapping("/hello")` 标识路径 |
   | 启动与测试 | 运行启动类 → 8080 端口 → 浏览器/curl 请求 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链路是"**生成骨架 → 勾 web 依赖 → 写处理类 → 运行启动类 → 用地址访问**"；第 6 步的 404 和第 7 步的问题都指向同一个东西——**工程里自带的 Web 服务器**
-  > **二级 · 方法**：Server URL 换成 `https://start.aliyun.com`；处理类用 `@RestController` + `@RequestMapping("/hello")`；启动类是带 `@SpringBootApplication` 和 `main` 方法的那个类
-  > **三级 · 骨架**：`@____ public class HelloController { @____("/hello") public String hello(String name){ return "Hello " + name + "~"; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 创建页面上的关键选择：**Type = Maven**、**Language = Java**、**JDK = 17**、**Packaging = Jar**，Server URL 用 `https://start.aliyun.com`（官方脚手架连不上时）；Group 用 `com.itheima`。
-  > 2. 依赖只勾一项：**Spring Web**（Web 分类下），右侧 Added dependencies 里会出现 `Spring Web`。
-  > 3. `HelloController`：
-  >    ```java
-  >    package com.itheima;
-  >
-  >    import org.springframework.web.bind.annotation.RequestMapping;
-  >    import org.springframework.web.bind.annotation.RestController;
-  >
-  >    @RestController //标识当前是一个请求处理类
-  >    public class HelloController {
-  >
-  >        @RequestMapping("/hello") //标识请求路径
-  >        public String hello(String name){
-  >            System.out.println("Hello Controller ... hello ： " + name);
-  >            return "Hello " + name + "~";
-  >        }
-  >
-  >    }
-  >    ```
-  > 4. 运行启动类后控制台的关键行（本机实测，Spring Boot 3.2.8）：
-  >    ```text
-  >    Tomcat initialized with port 8080 (http)
-  >    Starting Servlet engine: [Apache Tomcat/10.1.26]
-  >    Tomcat started on port 8080 (http) with context path ''
-  >    Started SpringbootWebQuickstartApplication in 1.803 seconds
-  >    ```
-  >    完整启动日志的逐行解读在下一篇 [31 篇](/posts/编程学习/javaweb学习笔记/31-springboot工程剖析/)。
-  > 5. 浏览器/命令行实测结果：
-  >    ```text
-  >    $ curl -s "http://localhost:8080/hello?name=Heima"
-  >    Hello Heima~
-  >    ```
-  > 6. `/nope` 的结果是 **404**：请求确实到达了服务器，但**没有任何方法和这个路径对应**（`@RequestMapping` 里只标识了 `/hello`），所以服务器回 404。"打错地址""路径没写对""类没被注册成处理类"都会表现为 404。
-  > 7. 不是自己装的：**Tomcat 是 SpringBoot 自带的内嵌服务器**，跟着工程依赖一起下回来的，`SpringApplication.run(...)` 启动时把它一起拉起来——下一篇文章把这件事讲透。
+  **一级 · 思路**：整条链路是"**生成骨架 → 勾 web 依赖 → 写处理类 → 运行启动类 → 用地址访问**"；第 6 步的 404 和第 7 步的问题都指向同一个东西——**工程里自带的 Web 服务器**
+  **二级 · 方法**：Server URL 换成 `https://start.aliyun.com`；处理类用 `@RestController` + `@RequestMapping("/hello")`；启动类是带 `@SpringBootApplication` 和 `main` 方法的那个类
+  **三级 · 骨架**：`@____ public class HelloController { @____("/hello") public String hello(String name){ return "Hello " + name + "~"; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 创建页面上的关键选择：**Type = Maven**、**Language = Java**、**JDK = 17**、**Packaging = Jar**，Server URL 用 `https://start.aliyun.com`（官方脚手架连不上时）；Group 用 `com.itheima`。
+  2. 依赖只勾一项：**Spring Web**（Web 分类下），右侧 Added dependencies 里会出现 `Spring Web`。
+  3. `HelloController`：
+     ```java
+     package com.itheima;
+  
+     import org.springframework.web.bind.annotation.RequestMapping;
+     import org.springframework.web.bind.annotation.RestController;
+  
+     @RestController //标识当前是一个请求处理类
+     public class HelloController {
+  
+         @RequestMapping("/hello") //标识请求路径
+         public String hello(String name){
+             System.out.println("Hello Controller ... hello ： " + name);
+             return "Hello " + name + "~";
+         }
+  
+     }
+     ```
+  4. 运行启动类后控制台的关键行（本机实测，Spring Boot 3.2.8）：
+     ```text
+     Tomcat initialized with port 8080 (http)
+     Starting Servlet engine: [Apache Tomcat/10.1.26]
+     Tomcat started on port 8080 (http) with context path ''
+     Started SpringbootWebQuickstartApplication in 1.803 seconds
+     ```
+     完整启动日志的逐行解读在下一篇 [31 篇](/posts/编程学习/javaweb学习笔记/31-springboot工程剖析/)。
+  5. 浏览器/命令行实测结果：
+     ```text
+     $ curl -s "http://localhost:8080/hello?name=Heima"
+     Hello Heima~
+     ```
+  6. `/nope` 的结果是 **404**：请求确实到达了服务器，但**没有任何方法和这个路径对应**（`@RequestMapping` 里只标识了 `/hello`），所以服务器回 404。"打错地址""路径没写对""类没被注册成处理类"都会表现为 404。
+  7. 不是自己装的：**Tomcat 是 SpringBoot 自带的内嵌服务器**，跟着工程依赖一起下回来的，`SpringApplication.run(...)` 启动时把它一起拉起来——下一篇文章把这件事讲透。
+
+  :::
+

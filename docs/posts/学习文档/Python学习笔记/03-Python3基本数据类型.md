@@ -830,24 +830,32 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：✅ 正确（`test_var.py` 四个变量赋值和 `type()` 都对，实测输出 `<class 'int'>`、`<class 'float'>`、`<class 'str'>`、`<class 'bool'>`）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先按题面把四个变量建好，再一行一个变量地输出"值 + 类型"；类型不用自己判断，有一个内置函数能问出答案
-  > **二级 · 方法**：查类型用 `type(变量)`；输出用带标签的 f-string，如 `print(f"age = {age}, 类型: {type(age)}")`
-  > **三级 · 骨架**：`print(f"age = {age}, 类型: {____(age)}")`（另外三个变量同理）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > age = 25
-  > height = 1.75
-  > name = "小明"
-  > is_student = True
-  >
-  > print(f"age = {age}, 类型: {type(age)}")
-  > print(f"height = {height}, 类型: {type(height)}")
-  > print(f"name = {name}, 类型: {type(name)}")
-  > print(f"is_student = {is_student}, 类型: {type(is_student)}")
-  > ```
+  **一级 · 思路**：先按题面把四个变量建好，再一行一个变量地输出"值 + 类型"；类型不用自己判断，有一个内置函数能问出答案
+  **二级 · 方法**：查类型用 `type(变量)`；输出用带标签的 f-string，如 `print(f"age = {age}, 类型: {type(age)}")`
+  **三级 · 骨架**：`print(f"age = {age}, 类型: {____(age)}")`（另外三个变量同理）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  age = 25
+  height = 1.75
+  name = "小明"
+  is_student = True
+  
+  print(f"age = {age}, 类型: {type(age)}")
+  print(f"height = {height}, 类型: {type(height)}")
+  print(f"name = {name}, 类型: {type(name)}")
+  print(f"is_student = {is_student}, 类型: {type(is_student)}")
+  ```
+
+  :::
+
 
 - [x] **2-2 多变量赋值**
   创建文件 `test_multi.py`，完成以下操作：
@@ -857,20 +865,28 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：✅ 正确（`test_multi.py` 中链式赋值 `x = y = z = 100` 与拆包赋值 `a, b, c = 1, 2, "hello"` 都写对了，实测输出 `x = 100, y = 100, z = 100` 和 `a = 1, b = 2, c = hello`）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一行里用等号把三个变量串起来就是"都等于同一个值"；一行里用逗号把变量和值一一对应就是"各等于各的值"
-  > **二级 · 方法**：链式赋值 `x = y = z = 100`；拆包赋值 `a, b, c = 1, 2, "hello"`
-  > **三级 · 骨架**：`x = y = ____ = 100` / `a, b, c = 1, 2, "____"` / 再逐行输出
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > x = y = z = 100
-  > a, b, c = 1, 2, "hello"
-  >
-  > print(f"x = {x}, y = {y}, z = {z}")
-  > print(f"a = {a}, b = {b}, c = {c}")
-  > ```
+  **一级 · 思路**：一行里用等号把三个变量串起来就是"都等于同一个值"；一行里用逗号把变量和值一一对应就是"各等于各的值"
+  **二级 · 方法**：链式赋值 `x = y = z = 100`；拆包赋值 `a, b, c = 1, 2, "hello"`
+  **三级 · 骨架**：`x = y = ____ = 100` / `a, b, c = 1, 2, "____"` / 再逐行输出
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  x = y = z = 100
+  a, b, c = 1, 2, "hello"
+  
+  print(f"x = {x}, y = {y}, z = {z}")
+  print(f"a = {a}, b = {b}, c = {c}")
+  ```
+
+  :::
+
 
 - [x] **2-3 数值运算练习**
   创建文件 `test_number.py`，完成以下计算并把每项结果逐行输出（带上算式做标签）：
@@ -882,20 +898,28 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：✅ 正确（`test_number.py` 五项实测 `18`、`6.666666666666667`、`6`、`2`、`1024` 全对）；最后一行标签写成 `2 **10`，少了一个空格。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五项各写一行"标签 + 结果"；标签里保留原算式，方便和结果对照
-  > **二级 · 方法**：算式的值直接写进 f-string 的 `{}` 里（如 `f"15 + 3 = {15 + 3}"`）；除法和整除分别用 `/`、`//`
-  > **三级 · 骨架**：`print(f"20 / 3 = {____}")` / `print(f"20 // 3 = {20 ____ 3}")` / `print(f"2 ** 10 = {2 ____ 10}")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > print(f"15 + 3 = {15 + 3}")      # 18
-  > print(f"20 / 3 = {20 / 3}")     # 6.666666666666667
-  > print(f"20 // 3 = {20 // 3}")   # 6
-  > print(f"20 % 3 = {20 % 3}")     # 2
-  > print(f"2 ** 10 = {2 ** 10}")   # 1024
-  > ```
+  **一级 · 思路**：五项各写一行"标签 + 结果"；标签里保留原算式，方便和结果对照
+  **二级 · 方法**：算式的值直接写进 f-string 的 `{}` 里（如 `f"15 + 3 = {15 + 3}"`）；除法和整除分别用 `/`、`//`
+  **三级 · 骨架**：`print(f"20 / 3 = {____}")` / `print(f"20 // 3 = {20 ____ 3}")` / `print(f"2 ** 10 = {2 ____ 10}")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  print(f"15 + 3 = {15 + 3}")      # 18
+  print(f"20 / 3 = {20 / 3}")     # 6.666666666666667
+  print(f"20 // 3 = {20 // 3}")   # 6
+  print(f"20 % 3 = {20 % 3}")     # 2
+  print(f"2 ** 10 = {2 ** 10}")   # 1024
+  ```
+
+  :::
+
 
 - [x] **2-4 布尔类型练习**
   创建文件 `test_bool.py`，完成以下操作：
@@ -904,25 +928,33 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：⚠️ `test_bool.py` 里 7 个 `bool()` 测试和 `True + 1`、`False + 1` 的取值全对（`False`、`True`、`False`、`True`、`False`、`True`、`False`，以及 `2`、`1`）；两处笔误：① 第 4 项写成 `bool('python')`，题面是 `bool('Python')`（值同为 True，但输出的字串不一样）；② `True + 1` 那行标签拼成了 `Trur`、`=` 后还缺空格，实测输出 `Trur + 1 =2`，应写成 `print(f"True + 1 = {True + 1}")`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把每个值交给"转布尔"的内置函数看它变 True 还是 False；后两项是布尔值直接当数字相加
-  > **二级 · 方法**：布尔转换写 `bool(值)`；相加的直接写 `True + 1` / `False + 1`（True 当 1、False 当 0）
-  > **三级 · 骨架**：`print(f"bool(0) = {____(0)}")` / `print(f"True + 1 = {True ____ 1}")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-4
-  > print(f"bool(0) = {bool(0)}")       # False
-  > print(f"bool(1) = {bool(1)}")       # True
-  > print(f"bool('') = {bool('')}")     # False
-  > print(f"bool('Python') = {bool('Python')}")  # True
-  > print(f"bool([]) = {bool([])}")     # False
-  > print(f"bool([1,2]) = {bool([1,2])}")  # True
-  > print(f"bool(None) = {bool(None)}") # False
-  >
-  > print(f"True + 1 = {True + 1}")   # 2
-  > print(f"False + 1 = {False + 1}") # 1
-  > ```
+  **一级 · 思路**：把每个值交给"转布尔"的内置函数看它变 True 还是 False；后两项是布尔值直接当数字相加
+  **二级 · 方法**：布尔转换写 `bool(值)`；相加的直接写 `True + 1` / `False + 1`（True 当 1、False 当 0）
+  **三级 · 骨架**：`print(f"bool(0) = {____(0)}")` / `print(f"True + 1 = {True ____ 1}")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-4
+  print(f"bool(0) = {bool(0)}")       # False
+  print(f"bool(1) = {bool(1)}")       # True
+  print(f"bool('') = {bool('')}")     # False
+  print(f"bool('Python') = {bool('Python')}")  # True
+  print(f"bool([]) = {bool([])}")     # False
+  print(f"bool([1,2]) = {bool([1,2])}")  # True
+  print(f"bool(None) = {bool(None)}") # False
+  
+  print(f"True + 1 = {True + 1}")   # 2
+  print(f"False + 1 = {False + 1}") # 1
+  ```
+
+  :::
+
 
 - [x] **2-5 字符串操作练习** ❌
   创建文件 `test_string.py`，完成以下操作：
@@ -934,22 +966,30 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：❌ `test_string1.py` 前四项都对（`s[0]` 得 `H`、`s[-1]` 得 `n`、`s[0:5]` 得 `Hello`、`s * 3` 重复三次），但拼接写成了 `s + 'word'`，实测输出 `Hello Pythonword`；题面要求拼接 `" World"`，应写成 `print(f"拼接: {s + ' World'}")`，输出 `Hello Python World`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：取单个字符、取一段切片、重复、拼接是四种不同操作，各写一行；记得拼的内容前面有一个空格
-  > **二级 · 方法**：`s[0]` 首字符、`s[-1]` 末字符、`s[0:5]` 切片（含头不含尾）、`s * 3` 重复、`s + ' World'` 拼接
-  > **三级 · 骨架**：`print(f"第一个字符: {s[____]}")` / `print(f"切片 [0:5]: {s[0:____]}")` / `print(f"拼接: {s ____ ' World'}")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-5
-  > s = "Hello Python"
-  >
-  > print(f"第一个字符: {s[0]}")    # H
-  > print(f"最后一个字符: {s[-1]}") # n
-  > print(f"切片 [0:5]: {s[0:5]}") # Hello
-  > print(f"重复3次: {s * 3}")     # Hello PythonHello PythonHello Python
-  > print(f"拼接: {s + ' World'}") # Hello Python World
-  > ```
+  **一级 · 思路**：取单个字符、取一段切片、重复、拼接是四种不同操作，各写一行；记得拼的内容前面有一个空格
+  **二级 · 方法**：`s[0]` 首字符、`s[-1]` 末字符、`s[0:5]` 切片（含头不含尾）、`s * 3` 重复、`s + ' World'` 拼接
+  **三级 · 骨架**：`print(f"第一个字符: {s[____]}")` / `print(f"切片 [0:5]: {s[0:____]}")` / `print(f"拼接: {s ____ ' World'}")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-5
+  s = "Hello Python"
+  
+  print(f"第一个字符: {s[0]}")    # H
+  print(f"最后一个字符: {s[-1]}") # n
+  print(f"切片 [0:5]: {s[0:5]}") # Hello
+  print(f"重复3次: {s * 3}")     # Hello PythonHello PythonHello Python
+  print(f"拼接: {s + ' World'}") # Hello Python World
+  ```
+
+  :::
+
 
 - [x] **2-6 列表操作练习**
   创建文件 `test_list.py`，完成以下操作：
@@ -961,23 +1001,31 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：✅ 正确（`test_list.py` 五项全对：`fruits[0]` 得 `苹果`、`fruits[-1]` 得 `葡萄`、切片得 `['香蕉', '橘子']`、`+ ['西瓜']` 拼接成功、`fruits[1] = "梨"` 后输出 `['苹果', '梨', '橘子', '葡萄']`）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：列表的索引、切片和字符串一个套路；"接上另一个列表"是拼接出新列表（原列表不变），"改成梨"是直接给某个下标重新赋值
-  > **二级 · 方法**：`fruits[0]`、`fruits[-1]`、`fruits[1:3]` 切片、`fruits + ["西瓜"]` 拼接、`fruits[1] = "梨"` 按下标赋值
-  > **三级 · 骨架**：`print(f"切片 [1:3]: {fruits[____:____]}")` / `print(f"拼接: {fruits ____ ['西瓜']}")` / `fruits[____] = "梨"`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-6
-  > fruits = ["苹果", "香蕉", "橘子", "葡萄"]
-  >
-  > print(f"第一个: {fruits[0]}")    # 苹果
-  > print(f"最后一个: {fruits[-1]}") # 葡萄
-  > print(f"切片 [1:3]: {fruits[1:3]}")  # ['香蕉', '橘子']
-  > print(f"拼接: {fruits + ['西瓜']}")
-  > fruits[1] = "梨"
-  > print(f"修改后: {fruits}")  # ['苹果', '梨', '橘子', '葡萄']
-  > ```
+  **一级 · 思路**：列表的索引、切片和字符串一个套路；"接上另一个列表"是拼接出新列表（原列表不变），"改成梨"是直接给某个下标重新赋值
+  **二级 · 方法**：`fruits[0]`、`fruits[-1]`、`fruits[1:3]` 切片、`fruits + ["西瓜"]` 拼接、`fruits[1] = "梨"` 按下标赋值
+  **三级 · 骨架**：`print(f"切片 [1:3]: {fruits[____:____]}")` / `print(f"拼接: {fruits ____ ['西瓜']}")` / `fruits[____] = "梨"`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-6
+  fruits = ["苹果", "香蕉", "橘子", "葡萄"]
+  
+  print(f"第一个: {fruits[0]}")    # 苹果
+  print(f"最后一个: {fruits[-1]}") # 葡萄
+  print(f"切片 [1:3]: {fruits[1:3]}")  # ['香蕉', '橘子']
+  print(f"拼接: {fruits + ['西瓜']}")
+  fruits[1] = "梨"
+  print(f"修改后: {fruits}")  # ['苹果', '梨', '橘子', '葡萄']
+  ```
+
+  :::
+
 
 - [x] **2-7 元组操作练习** ❌
   创建文件 `test_tuple.py`，完成以下操作：
@@ -988,25 +1036,33 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：❌ `test_tuple.py` 把单元素元组写成了列表：`single = [42,]` 实测输出 `[42]`（方括号，是列表），题面要的是元组，应写 `single = (42,)`；另外"尝试修改元组观察报错"那行 `# colors[0] = '紫'` 被注释掉了，没有真跑出 `TypeError: 'tuple' object does not support item assignment`，去掉注释跑一次才算做完。前两项（`colors[0]` 得 `红`、切片得 `('绿', '蓝')`）正确。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：元组的索引/切片和列表一样；区别在元素**不能改**——改它会当场报类型错误，这正是本题要看的现象；单元素元组要特别写，否则会被当成普通数字
-  > **二级 · 方法**：`colors[0]`、`colors[1:3]`；改元素写 `colors[0] = "紫"`（会抛 `TypeError: 'tuple' object does not support item assignment`）；单元素元组写 `single = (42,)`（逗号不能省）
-  > **三级 · 骨架**：`print(f"切片 [1:3]: {colors[____:____]}")` / `colors[____] = "紫"` / `single = (42,____)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-7
-  > colors = ("红", "绿", "蓝", "黄")
-  >
-  > print(f"第一个: {colors[0]}")      # 红
-  > print(f"切片 [1:3]: {colors[1:3]}")  # ('绿', '蓝')
-  >
-  > # 尝试修改会报错：TypeError: 'tuple' object does not support item assignment
-  > # colors[0] = "紫"
-  >
-  > single = (42,)
-  > print(f"单元素元组: {single}")  # (42,)
-  > ```
+  **一级 · 思路**：元组的索引/切片和列表一样；区别在元素**不能改**——改它会当场报类型错误，这正是本题要看的现象；单元素元组要特别写，否则会被当成普通数字
+  **二级 · 方法**：`colors[0]`、`colors[1:3]`；改元素写 `colors[0] = "紫"`（会抛 `TypeError: 'tuple' object does not support item assignment`）；单元素元组写 `single = (42,)`（逗号不能省）
+  **三级 · 骨架**：`print(f"切片 [1:3]: {colors[____:____]}")` / `colors[____] = "紫"` / `single = (42,____)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-7
+  colors = ("红", "绿", "蓝", "黄")
+  
+  print(f"第一个: {colors[0]}")      # 红
+  print(f"切片 [1:3]: {colors[1:3]}")  # ('绿', '蓝')
+  
+  # 尝试修改会报错：TypeError: 'tuple' object does not support item assignment
+  # colors[0] = "紫"
+  
+  single = (42,)
+  print(f"单元素元组: {single}")  # (42,)
+  ```
+
+  :::
+
 
 - [x] **2-8 集合操作练习**
   创建文件 `test_set.py`，完成以下操作：
@@ -1016,22 +1072,30 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：✅ 正确（`test_set.py` 四项全对：并集 `{1, 2, 3, 4, 5, 6}`、交集 `{3, 4}`、差集 `{1, 2}`、`2 in a` 输出 `True`）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：集合之间的三种运算各有一个运算符；"是不是成员"用成员运算符，结果直接就是布尔值
-  > **二级 · 方法**：并集 `a | b`、交集 `a & b`、差集 `a - b`、成员测试 `2 in a`
-  > **三级 · 骨架**：`print(f"并集 a | b = {a ____ b}")` / `print(f"交集 a & b = {a ____ b}")` / `print(f"差集 a - b = {a ____ b}")` / `print(f"2 in a = {2 ____ a}")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-8
-  > a = {1, 2, 3, 4}
-  > b = {3, 4, 5, 6}
-  >
-  > print(f"并集 a | b = {a | b}")   # {1, 2, 3, 4, 5, 6}
-  > print(f"交集 a & b = {a & b}")   # {3, 4}
-  > print(f"差集 a - b = {a - b}")   # {1, 2}
-  > print(f"2 in a = {2 in a}")      # True
-  > ```
+  **一级 · 思路**：集合之间的三种运算各有一个运算符；"是不是成员"用成员运算符，结果直接就是布尔值
+  **二级 · 方法**：并集 `a | b`、交集 `a & b`、差集 `a - b`、成员测试 `2 in a`
+  **三级 · 骨架**：`print(f"并集 a | b = {a ____ b}")` / `print(f"交集 a & b = {a ____ b}")` / `print(f"差集 a - b = {a ____ b}")` / `print(f"2 in a = {2 ____ a}")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-8
+  a = {1, 2, 3, 4}
+  b = {3, 4, 5, 6}
+  
+  print(f"并集 a | b = {a | b}")   # {1, 2, 3, 4, 5, 6}
+  print(f"交集 a & b = {a & b}")   # {3, 4}
+  print(f"差集 a - b = {a - b}")   # {1, 2}
+  print(f"2 in a = {2 in a}")      # True
+  ```
+
+  :::
+
 
 - [x] **2-9 字典操作练习**
   创建文件 `test_dict.py`，完成以下操作：
@@ -1043,22 +1107,30 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：⚠️ `test_dict.py` 五项操作都做了（打印 `name`、新增 `class`、把 `score` 改成 100、打印所有键/所有值），但初始字典里 `"age"` 存成了字符串 `"18"`（题面是整数 `18`），实测"所有值"输出 `['小明', '18', 100, '一班']`；另外四行都是裸 `print`，没有 `f"name: {...}"` 这类文字标签，输出不易读。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"键"取值和按"键"赋值是同一个写法——中括号里写键：读是取、写是新增或修改；要一次拿到所有键/所有值有现成的方法
-  > **二级 · 方法**：取值/新增/修改都用 `字典[键] = 值` 的形式；所有键 `student.keys()`、所有值 `student.values()`（可以套一层 `list()` 看得更清楚）；输出带标签用 f-string
-  > **三级 · 骨架**：`print(f"name: {student[____]}")` / `student["class"] = "____"` / `print(f"所有键: {list(student.____())}")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-9
-  > student = {"name": "小明", "age": 18, "score": 95}
-  >
-  > print(f"name: {student['name']}")  # 小明
-  > student["class"] = "一班"
-  > student["score"] = 100
-  > print(f"所有键: {list(student.keys())}")  # ['name', 'age', 'score', 'class']
-  > print(f"所有值: {list(student.values())}")  # ['小明', 18, 100, '一班']
-  > ```
+  **一级 · 思路**：按"键"取值和按"键"赋值是同一个写法——中括号里写键：读是取、写是新增或修改；要一次拿到所有键/所有值有现成的方法
+  **二级 · 方法**：取值/新增/修改都用 `字典[键] = 值` 的形式；所有键 `student.keys()`、所有值 `student.values()`（可以套一层 `list()` 看得更清楚）；输出带标签用 f-string
+  **三级 · 骨架**：`print(f"name: {student[____]}")` / `student["class"] = "____"` / `print(f"所有键: {list(student.____())}")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-9
+  student = {"name": "小明", "age": 18, "score": 95}
+  
+  print(f"name: {student['name']}")  # 小明
+  student["class"] = "一班"
+  student["score"] = 100
+  print(f"所有键: {list(student.keys())}")  # ['name', 'age', 'score', 'class']
+  print(f"所有值: {list(student.values())}")  # ['小明', 18, 100, '一班']
+  ```
+
+  :::
+
 
 - [x] **2-10 类型转换练习**
   创建文件 `test_convert.py`，把下面四项各转换一次并逐行输出（一行一项、带上文字标签）：
@@ -1069,23 +1141,31 @@ f-string 最简洁，推荐使用。
 
   > **批改（2026-09-28）**：⚠️ `test_convert.py` 四种转换都做了（`int("123")`、`str(100)`、`tuple(...)`、`bytes("hello", encoding="utf-8")`，实测输出 `123 100 (1, 3, 2, 4) b'hello'`）；两处偏差：① 列表写成了 `[1, 3, 2, 4]`，题面是 `[1, 2, 3]`，元组结果应为 `(1, 2, 3)`；② 四项挤在一行 `print(a, text, t, c)`，看不出哪项是哪个，参考写法是分成四行并带标签，如 `print(f"字符串转整数: {num}, 类型: {type(num)}")`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：转换就用"目标类型同名的内置函数"来包住原值；每项单独一行输出，标签写清"从什么转什么"
-  > **二级 · 方法**：`int("123")`、`str(100)`、`tuple([1, 2, 3])`、`bytes("hello", encoding="utf-8")`；不确定结果类型时可以在标签里再查一次 `type(变量)`
-  > **三级 · 骨架**：`num = ____("123")` / `t = ____([1, 2, 3])` / `b = ____("hello", encoding="____")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-10
-  > num = int("123")
-  > print(f"字符串转整数: {num}, 类型: {type(num)}")  # 123, <class 'int'>
-  >
-  > text = str(100)
-  > print(f"整数转字符串: {text}, 类型: {type(text)}")  # 100, <class 'str'>
-  >
-  > t = tuple([1, 2, 3])
-  > print(f"列表转元组: {t}")  # (1, 2, 3)
-  >
-  > b = bytes("hello", encoding="utf-8")
-  > print(f"字符串转bytes: {b}")  # b'hello'
-  > ```
+  **一级 · 思路**：转换就用"目标类型同名的内置函数"来包住原值；每项单独一行输出，标签写清"从什么转什么"
+  **二级 · 方法**：`int("123")`、`str(100)`、`tuple([1, 2, 3])`、`bytes("hello", encoding="utf-8")`；不确定结果类型时可以在标签里再查一次 `type(变量)`
+  **三级 · 骨架**：`num = ____("123")` / `t = ____([1, 2, 3])` / `b = ____("hello", encoding="____")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-10
+  num = int("123")
+  print(f"字符串转整数: {num}, 类型: {type(num)}")  # 123, <class 'int'>
+  
+  text = str(100)
+  print(f"整数转字符串: {text}, 类型: {type(text)}")  # 100, <class 'str'>
+  
+  t = tuple([1, 2, 3])
+  print(f"列表转元组: {t}")  # (1, 2, 3)
+  
+  b = bytes("hello", encoding="utf-8")
+  print(f"字符串转bytes: {b}")  # b'hello'
+  ```
+
+  :::
+

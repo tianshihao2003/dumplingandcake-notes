@@ -76,7 +76,7 @@ Source（数据源） → Load（加载） → Transform（转换，含切分）
 ![](https://img.tsh520.cn/file/blog/article/ch10-p004-rag六环节总览图.jpg)
 *图：RAG 工作流程总览——Source → Load → Transform → Embed → Store → Retrieve，每个环节的数据形态（原始数据、Document、Text Chunk、向量）都不同*
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 课程特别强调：**拆分/分块是整条链路中最具挑战性的环节之一，它显著影响检索效果**。目前**没有通用方法**能说清哪种分块策略最有效——不同场景、不同数据类型都会影响选择。
 
 ## 环境准备
@@ -120,7 +120,7 @@ print(docs[0].metadata)         # {'source': './test.txt'}
 | HTML | `UnstructuredHTMLLoader` | 需 `unstructured`；`mode="elements"` 会拆成 16 个 Document |
 | 目录 | `DirectoryLoader` | 批量加载整个文件夹；`glob=` 过滤、`loader_cls=` 指定底层加载器 |
 
-> [!NOTE]
+> [!NOTE] 注意
 > **本机实测（conda 环境 `langchain1.2`）**：`TextLoader`、`CSVLoader` **开箱即用**；`WebBaseLoader`（本机已装 `beautifulsoup4`）也能直接抓网页，实测抓 `https://example.com` 得到 1 个 Document，`metadata={'source': ..., 'title': 'Example Domain', 'language': 'en'}`。
 > 而 `PyPDFLoader` 提示 `ImportError: 'pypdf' package not found`（`pip install pypdf`）、`JSONLoader` 提示 `ImportError: jq package not found`（`pip install jq`）、`UnstructuredMarkdownLoader` 提示 `No module named 'unstructured'`、`UnstructuredHTMLLoader` 提示 `ImportError: unstructured package not found`。
 > **结论：用哪个格式的加载器，就按提示补它需要的依赖**——这些都在 `requirements_full.txt` 里。
@@ -165,7 +165,7 @@ print(docs[0].metadata)      # {'source': 'https://example.com', 'title': 'Examp
 print(docs[0].page_content)  # 已经去掉 HTML 标签的正文
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：`WebBaseLoader` 依赖 `beautifulsoup4`，本机已装、可以直接跑。返回的 `metadata` 里多了 `title` 和 `language` 两个字段——**检索时正好拿来做"出处展示"**。
 > 另外抓取时控制台会提示 `USER_AGENT environment variable not set, consider setting it to identify your requests.`：想标识自己的抓取身份，设一个 `USER_AGENT=xxx` 环境变量即可。
 
@@ -193,7 +193,7 @@ docs = loader.load()
 print(len(docs))          # 每个页面一个 Document
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **本机实测**：`PyPDFLoader` 依赖 `pypdf`，而本机 conda 环境 `langchain1.2` **没有装**，直接跑会报
 > `ImportError: 'pypdf' package not found, please install it with 'pip install pypdf'`。
 > 想跑就先补依赖（在 `requirements_full.txt` 里）；本机已装 `pymupdf`，所以**替代方案 `PyMuPDFLoader` 可以直接用**（实测加载同一份 PDF 正常返回 Document，metadata 里带 `page`、`total_pages`、`format` 等）。
@@ -350,7 +350,7 @@ if batch_id:
     download_files(batch_id)
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **本机没有配置 `MINERU_API_TOKEN`，所以这段脚本没有实测**——它走的是 MinerU 在线服务，需要先注册拿 Token。
 > 课程资料里已经用它解析好的产物（`chapter10-RAG/parsed_files/`：`full.md` + `images/` + `*_content_list.json`），可以直接感受解析质量——**PDF 里的公式、表格、图片都被单独抽了出来，还带版面坐标**，这正是 PyPDFLoader 做不到的部分。
 
@@ -371,7 +371,7 @@ print(len(docs))
 print(docs)
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 需要 `unstructured` 包（已在 `requirements_full.txt` 里）。`mode="single"` 整篇一个 Document；`mode="elements"` 会按标题等元素把文档拆成多个 Document——和下面 Markdown 的玩法完全一样。
 
 ### Markdown 加载：UnstructuredMarkdownLoader
@@ -450,7 +450,7 @@ for doc in docs:
     pprint(doc)
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > Word / Markdown / HTML 这三个 unstructured 系加载器的**输出条数（Word 1 条、Markdown single 1 条 / elements 19 条、HTML elements 16 条）取自课程实测**——本机没装 `unstructured`，这几个数字没有在本机复现；本机能确认的是它们的**类名与参数**（类都存在，缺依赖时按提示 `pip install unstructured` 即可）。
 
 ### 目录批量加载：DirectoryLoader
@@ -474,7 +474,7 @@ print(len(docs))
 
 **本机实测**（同一目录下的 4 个 `.py`）：控制台先打印进度条 `100%|██████████| 4/4 [00:00<00:00, 2251.67it/s]`，随后 `len(docs) == 4`，每个 Document 的 metadata 是 `{'source': '..\\asset\\load\\08-fun.py'}` 这种形式。
 
-> [!TIP]
+> [!TIP] 提示
 > `glob` 不只是"按后缀过滤"：`"*.py"`、`"**/*.md"`、`"data_*.csv"` 都能写。
 > **`loader_cls` 决定文件夹里每个文件用哪个加载器**：不传就退回默认的 `UnstructuredFileLoader`（需要 `unstructured`），传了 `PythonLoader` / `TextLoader` 这类就不必装那个重依赖了。
 
@@ -550,7 +550,7 @@ class Document(BaseMedia):
         super().__init__(page_content=page_content, **kwargs)
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **`Document` 用于检索工作流，而不是聊天输入输出**——这是源码注释里的原话。如果你要把文本发给 LLM 对话，应该用 `langchain.messages` 里的消息类型（`HumanMessage` / `SystemMessage` 等，见第 07 篇）。两者的字段长相相似，但**职责完全不同**：`Document` 面向"存储、索引、检索"，Message 面向"对话"。
 >
 > 另外注意 `__str__` 被重写过：打印 `Document` 只会输出 `page_content='...' metadata={...}`，方便你把 Document 直接塞进 prompt 里调试。
@@ -656,7 +656,7 @@ def from_tiktoken_encoder(
     ...
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 想直观看看"文本到底是怎么被切开的"，可以用课程推荐的可视化工具 https://chunkviz.up.railway.app/ ——把文本和自己的切分参数丢进去，它会按块着色显示。
 
 ### 核心参数
@@ -673,7 +673,7 @@ def from_tiktoken_encoder(
 *（原图缺失：'ch10-p028-切块大小与重叠示意.jpg'，待重传图床后补回）*
 *图：`chunk_size` 是每个切块的最大长度，`chunk_overlap` 是相邻两个切块之间的重叠部分（不重叠就不会切出灰块那一段）*
 
-> [!WARNING]
+> [!WARNING] 警告
 > **实测一个反直觉的点**：把 `separator=""` 时表示"**禁用分隔符优先**"。这时切块长度**可能小于 `chunk_size`**（尤其对中文）：
 >
 > ```python
@@ -694,7 +694,7 @@ def from_tiktoken_encoder(
 *（原图缺失：'ch10-p037-递归切分下探与回溯.jpg'，待重传图床后补回）*
 *图：`RecursiveCharacterTextSplitter` 的"先下探、再回溯"——① 按 `separators` 从 `\n\n`、`\n`、` ` 到 `""` 逐级递归切分，超长块继续往下探，合格的块进 `good_splits`；② 再按顺序把小块合并回 chunk，超过 `chunk_size` 就输出并保留 `chunk_overlap`*
 
-> [!WARNING]
+> [!WARNING] 警告
 > **中文场景慎用 `TokenTextSplitter`**。本机实测（同一段中文知识拆成 11 块）**有 9 块出现 `�` 乱码**：
 >
 > ```text
@@ -719,7 +719,7 @@ chunks = splitter.split_documents(documents)     # 直接吃 Document 列表
 print(f"文档共切分为 {len(chunks)} 个 chunk")
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **实战里最值得抄的一招**：在客服知识库案例中，作者给 `separators` 加了一个**自定义业务分隔符**——`"\n==============================\n"`，也就是知识库里条目之间的分隔线。**先按业务边界切，再按自然语言边界切**，这样更容易让每条知识落在同一个 chunk 里。
 >
 > **但要注意一个实测坑**：`RecursiveCharacterTextSplitter` 默认 `keep_separator=True`（把分隔符留在块里），于是**那行分隔线会自己变成一个"只有一行等号"的块**，白占一个向量库名额：
@@ -762,7 +762,7 @@ CharacterTextSplitter(separator="。", chunk_size=20, chunk_overlap=8)
 #   块2(14): '这是第二段内容。最后一段结束'
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **块长可以超过 `chunk_size`**——这不是 bug。当按 separator 切出来的某一段本身就比 `chunk_size` 长、又不能再往下切时，切分器只能打印一句警告后原样输出：
 >
 > ```text
@@ -783,7 +783,7 @@ CharacterTextSplitter(separator="。", chunk_size=20, chunk_overlap=8)
 
 **什么时候要在意它？**处理中文时，句尾标点承载着语气和逻辑，课程自定义中文标点切分就配了 `keep_separator=True`；反过来，用业务分隔线（`"\n=====…=====\n"`）切分时就要设 `False`，免得分隔线自己变成一个块（见上文那招）。
 
-> [!NOTE]
+> [!NOTE] 注意
 > **默认值因切分器而异**：`CharacterTextSplitter`、`TokenTextSplitter` 默认 `keep_separator=False`，而 **`RecursiveCharacterTextSplitter` 默认是 `True`**（本机实测 `RecursiveCharacterTextSplitter()._keep_separator == True`）——所以上文那个"分隔线自己变成一个块"的坑，正是递归切分器的默认行为造成的，必须显式关掉。
 
 ### 中文文档：自定义分隔符
@@ -805,7 +805,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 效果：算法会**优先在句号、感叹号、问号、省略号、逗号处切割**，尽量保持句子完整。`add_start_index=True` 则让每个 Document 的 metadata 里多出一个 `start_index`（本机实测形如 `{'start_index': 0}`）——排查"这句话到底来自原文哪个位置"时特别有用。
 
-> [!TIP]
+> [!TIP] 提示
 > 课程用 `PyPDFLoader` 加载《骆驼祥子》节选做示例（`chunk_size=200, chunk_overlap=0, add_start_index=True`），切出的第二块 metadata 是：
 > `{'producer': 'Microsoft® Word 2019', ..., 'source': '../asset/load/04-load.pdf', 'total_pages': 1, 'page': 0, 'page_label': '1', 'start_index': 198}`
 > ——**PDF 自带的元数据（page、page_label）和切分器添加的 `start_index` 是合并在一起的**，这正是"切分不丢来源信息"的价值：检索命中后能直接说清"来自第几页、第几个字符"。
@@ -830,7 +830,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 处理完成后，就得到了既满足 `chunk_size` 约束、又按 `chunk_overlap` 保留重叠区域的 chunk 列表。
 
-> [!TIP]
+> [!TIP] 提示
 > 一句话记忆：**拆分 = 下探**（对超长块继续递归细分），**合并 = 回溯**（把合格小块按顺序重新组织为最终 chunk，并在相邻 chunk 之间保留 overlap）。配上上文那张"递归切分下探与回溯"的示意图看更直观。
 
 ### Token 与按 Token 切分
@@ -896,7 +896,7 @@ text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
 )
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **Token 数完全取决于编码器，不要背课件里的数字**。课程说 `"ChatGPT"` = 2 个 Token、`"人工智能"` = 2~3 个 Token，但本机实测（用课件自己指定的 `cl100k_base`）对不上：
 >
 > ```text
@@ -949,7 +949,7 @@ docs = text_splitter.create_documents(texts=[state_of_the_union])
 
 **底层逻辑**：先按正则把文本切成 chunk 列表 → 计算相邻 chunk 之间的距离 → 按 `breakpoint_threshold_type` / `breakpoint_threshold_amount` 的规则确定切分位置 → 按切分位置合并相邻块。
 
-> [!NOTE]
+> [!NOTE] 注意
 > **本机实测**：`SemanticChunker` 在 `langchain_experimental` 包里，本机已装、可以跑。用 `DeterministicFakeEmbedding(size=64)` 顶替真嵌入时也能跑通（`percentile` 模式把 4 句中文切成 3 块；`standard_deviation` / `interquartile` 模式切成 1 块）——
 > **但伪嵌入没有语义，切在哪里完全是随机的，没有参考价值**。想真正评估语义分块的效果，必须换成真嵌入模型（要花 API 额度）。
 
@@ -1027,7 +1027,7 @@ docs = splitter.create_documents(texts=[markdown_text])
 
 `_is_separator_regex = True` 就是让"按标题切"这条规则真正生效——本机实测切出的两块正好是 `'# 一级标题\n这是一级标题下的内容'` 和 `'## 二级标题\n- 二级下列表项1\n- 二级下列表项2'`，**列表项没有和自己的标题被拆散**。
 
-> [!TIP]
+> [!TIP] 提示
 > **`MarkdownHeaderTextSplitter` 和 `MarkdownTextSplitter` 不是一回事**：前者按标题切、把标题写进 metadata；后者是"Markdown 语法版的递归字符切分器"，靠正则分隔符（标题行、代码块围栏、分割线、段落、换行）来切。要"章节级"分块用前者，要"块大小可控"用后者。
 
 ## 相关
@@ -1061,10 +1061,14 @@ docs = splitter.create_documents(texts=[markdown_text])
   ④ 依赖体检：故意用 PDF 加载器加载一份 PDF（可以用你手上的，也可以用 Python 现场生成一份），看它报什么错、该按提示补哪个包；然后换成本机可用的 PDF 替代加载器，把同一份 PDF 加载成功，打印每页的页码与总页数。再随手试一个 Word/Markdown/HTML 里的加载器，看它缺什么包。
   最后回答一句：为什么这四种来源的输出可以用同一种方法读？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：加载器只负责"读进来"，产出的统一都是 Document 列表；不同加载器的差别只是"依赖不同"和"一个文件拆成几条"
-  > **二级 · 方法**：`TextLoader` / `WebBaseLoader` / `DirectoryLoader(loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"})` / `PyPDFLoader`（缺 `pypdf`）→ `PyMuPDFLoader`（本机已装 pymupdf）/ `UnstructuredMarkdownLoader`（缺 `unstructured`）
-  > **三级 · 骨架**：`docs = XxxLoader(...).load()`；`print(len(docs), docs[0].page_content, docs[0].metadata)`；缺依赖时用 `try/except ImportError` 打印报错并换替代加载器
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：加载器只负责"读进来"，产出的统一都是 Document 列表；不同加载器的差别只是"依赖不同"和"一个文件拆成几条"
+  **二级 · 方法**：`TextLoader` / `WebBaseLoader` / `DirectoryLoader(loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"})` / `PyPDFLoader`（缺 `pypdf`）→ `PyMuPDFLoader`（本机已装 pymupdf）/ `UnstructuredMarkdownLoader`（缺 `unstructured`）
+  **三级 · 骨架**：`docs = XxxLoader(...).load()`；`print(len(docs), docs[0].page_content, docs[0].metadata)`；缺依赖时用 `try/except ImportError` 打印报错并换替代加载器
+
+  :::
+
 
 - [ ] **2-2 同一个仓库、四种下刀方式：切分器家族都在哪儿用**
   造一段 200 字以上、同时含 Markdown 标题（`#` / `##`）和中文句子的文本，然后：
@@ -1074,10 +1078,14 @@ docs = splitter.create_documents(texts=[markdown_text])
   ④ 用"按标题切并保留标题层级"的那种切分器再切一次（把标题映射成中文键名），打印每块的正文与元数据，说明标题去哪了；
   ⑤ 最后用"按 token 数切"的那种切分器切一段中文，检查有没有乱码，并解释原因和结论。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：切分器分两类——"按字符/语法结构切"（块大小可控）和"按语义/标题切"（结构信息进 metadata）
-  > **二级 · 方法**：`RecursiveCharacterTextSplitter(add_start_index=True)` / `MarkdownTextSplitter(_is_separator_regex = True)` / `MarkdownHeaderTextSplitter(headers_to_split_on=[("#", "标题1"), ("##", "标题2")])` / `TokenTextSplitter`
-  > **三级 · 骨架**：切分器都有 `split_text(text)` 和 `create_documents(texts=[text])`；乱码用 `"\ufffd" in chunk` 判断
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：切分器分两类——"按字符/语法结构切"（块大小可控）和"按语义/标题切"（结构信息进 metadata）
+  **二级 · 方法**：`RecursiveCharacterTextSplitter(add_start_index=True)` / `MarkdownTextSplitter(_is_separator_regex = True)` / `MarkdownHeaderTextSplitter(headers_to_split_on=[("#", "标题1"), ("##", "标题2")])` / `TokenTextSplitter`
+  **三级 · 骨架**：切分器都有 `split_text(text)` 和 `create_documents(texts=[text])`；乱码用 `"\ufffd" in chunk` 判断
+
+  :::
+
 
 - [ ] **2-3 分隔符与重叠的脾气：把切块"调"成想要的样子**
   拿这句话当素材：`这是第一段文本。这是第二段内容。最后一段结束。`
@@ -1085,10 +1093,14 @@ docs = splitter.create_documents(texts=[markdown_text])
   ② 把块上限压到比单个句子还小（比如 6 字），观察控制台警告与每块的实际长度，回答：块上限是"目标"还是"硬约束"？此时重叠还有没有生效？
   ③ 造一份 2~3 条、用 `\n==============================\n` 分隔的知识库文本，按"分隔线优先"的递归切分（块上限 100、不重叠），分别在"保留分隔符"和"不留分隔符"两种设置下切一遍，打印块数与每块内容，解释为什么会出现一个只装等号的分隔线块、以及该怎么消掉它。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分隔符优先于块大小——先按分隔符切，再按块上限合并；分隔符的去留由 `keep_separator` 决定
-  > **二级 · 方法**：`CharacterTextSplitter(separator="。", chunk_size=20, chunk_overlap=8, keep_separator=?)`；业务分隔线要排进 `separators` 的第一位，并配 `keep_separator=False`
-  > **三级 · 骨架**：三种取值分别是 `False` / `True` / `"end"`；判断"垃圾块"的最简写法：`set(chunk.strip()) <= set("= \n")`
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：分隔符优先于块大小——先按分隔符切，再按块上限合并；分隔符的去留由 `keep_separator` 决定
+  **二级 · 方法**：`CharacterTextSplitter(separator="。", chunk_size=20, chunk_overlap=8, keep_separator=?)`；业务分隔线要排进 `separators` 的第一位，并配 `keep_separator=False`
+  **三级 · 骨架**：三种取值分别是 `False` / `True` / `"end"`；判断"垃圾块"的最简写法：`set(chunk.strip()) <= set("= \n")`
+
+  :::
+
 
 ### 三、综合题
 
@@ -1100,261 +1112,269 @@ docs = splitter.create_documents(texts=[markdown_text])
   4. 换"语义分块"再切同一份文本（本机没有嵌入服务，用那条**不联网的确定性伪嵌入**顶替，断点阈值用 percentile / 65.0，句子正则按中文写），比较两种切法的块数，并回答：这个语义分块结果能不能当参考？
   5. 一句话结论：这份中文知识库该用哪个切分器；如果换成 500 份**扫描版 PDF**，"加载"这一步该让位给谁、它比普通 PDF 加载器多出哪些能力（举两样）、向它提交任务时的请求体关键字段有哪些（哪些开关控制 OCR / 公式 / 表格）——这一步只写代码不运行。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：前半段是"工程流水线"，后半段是"选型判断"——LangChain 工具链适合 MVP，复杂文档要换专业解析工具
-  > **二级 · 方法**：`DirectoryLoader(glob="*.txt", loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"})` / `RecursiveCharacterTextSplitter(keep_separator=False, add_start_index=True, separators=[业务分隔线, …])` / `SemanticChunker(embeddings=DeterministicFakeEmbedding(size=64), breakpoint_threshold_type="percentile", breakpoint_threshold_amount=65.0, sentence_split_regex=r"(?<=[。？！])\s+")` / MinerU 的 `is_ocr`、`enable_formula`、`enable_table`、`language`、`data_id`
-  > **三级 · 骨架**：切分器用 `split_documents(docs)`；伪嵌入只需 `import` 后实例化，不需要任何密钥
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> import os
->
-> import pymupdf     # 本机已装；用于现场生成一份测试 PDF，也可直接换成课程资料里的 asset/load/04-sample.pdf
-> from langchain_community.document_loaders import (
->     DirectoryLoader,
->     PyMuPDFLoader,
->     PyPDFLoader,
->     TextLoader,
->     UnstructuredMarkdownLoader,
->     WebBaseLoader,
-> )
-> from langchain_core.embeddings import DeterministicFakeEmbedding
-> from langchain_experimental.text_splitter import SemanticChunker
-> from langchain_text_splitters import (
->     CharacterTextSplitter,
->     MarkdownHeaderTextSplitter,
->     MarkdownTextSplitter,
->     RecursiveCharacterTextSplitter,
->     TokenTextSplitter,
-> )
->
-> BASE = os.path.dirname(os.path.abspath(__file__))
-> WORK = os.path.join(BASE, "work")
-> os.makedirs(WORK, exist_ok=True)
->
-> # ---------- 2-1 ① 本地文件 ----------
-> txt_path = os.path.join(WORK, "note.txt")
-> with open(txt_path, "w", encoding="utf-8") as f:
->     f.write("LangChain 是一个用于开发语言模型应用的框架。\n它提供了统一的接口。\n")
-> docs = TextLoader(txt_path, encoding="utf-8").load()
-> print("① 本地文件：文档数 =", len(docs))
-> print("   正文 =", docs[0].page_content.strip())
-> print("   元数据 =", docs[0].metadata)          # {'source': '...\\work\\note.txt'}
->
-> # ---------- 2-1 ② 网页（example.com 本机实测超时，换成能访问的页面即可） ----------
-> URL = "https://python.langchain.com/docs/introduction/"
-> web_docs = WebBaseLoader(URL).load()
-> print("② 网页：文档数 =", len(web_docs))
-> print("   元数据 =", web_docs[0].metadata)      # 多出 title / language
-> print("   正文前 80 字 =", web_docs[0].page_content[:80].replace("\n", " "))
->
-> # ---------- 2-1 ③ 目录批量加载 ----------
-> raw_dir = os.path.join(WORK, "raw")
-> os.makedirs(raw_dir, exist_ok=True)
-> for i in range(1, 4):
->     with open(os.path.join(raw_dir, f"p{i}.txt"), "w", encoding="utf-8") as f:
->         f.write(f"这是第 {i} 个文件的内容。\n")
-> dir_docs = DirectoryLoader(
->     path=raw_dir,
->     glob="*.txt",
->     use_multithreading=True,
->     loader_cls=TextLoader,
->     loader_kwargs={"encoding": "utf-8"},
-> ).load()
-> print("③ 目录批量：文档数 =", len(dir_docs))   # 3（多线程下顺序不保证）
->
-> # ---------- 2-1 ④ 依赖体检 ----------
-> pdf_path = os.path.join(WORK, "sample.pdf")
-> pdf = pymupdf.open()
-> for i in range(1, 4):
->     pdf.new_page().insert_text((72, 72), f"Page {i}: LangChain RAG notes.")
-> pdf.save(pdf_path)
-> pdf.close()
->
-> try:
->     pdf_docs = PyPDFLoader(pdf_path, extraction_mode="plain").load()
->     print("④ PDF：PyPDFLoader 返回", len(pdf_docs), "页")
-> except ImportError as err:
->     print("④ PDF：PyPDFLoader 报错 ->", err)
->     # `pypdf` package not found, please install it with `pip install pypdf`
->     pdf_docs = PyMuPDFLoader(pdf_path).load()          # 本机已装 pymupdf，可直接用
->     print("   改用 PyMuPDFLoader：", len(pdf_docs), "页")
-> for d in pdf_docs:
->     print(f"   page={d.metadata.get('page')} total_pages={d.metadata.get('total_pages')}")
->
-> try:
->     UnstructuredMarkdownLoader(txt_path, mode="elements").load()
->     print("④ Markdown 加载器：成功")
-> except Exception as err:
->     print("④ Markdown 加载器报错 ->", type(err).__name__, err)
->     # No module named 'unstructured'（Word / HTML 那两个加载器同理）
->
-> # ④ 的结论：四种来源的产物都是 list[Document]，
-> # 所以都能用 .page_content / .metadata 读——统一来自 BaseLoader 抽象与 Document 类
->
-> # ---------- 2-2 四种切分器 ----------
-> text = (
->     "# 客服知识库\n\n"
->     "退换货政策。客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货。\n\n"
->     "## 发货时间\n\n"
->     "订单支付成功后 24 小时内发货，遇到大促会顺延。发货后推送物流单号。\n\n"
->     "## 运费说明\n\n"
->     "单笔订单满 99 元包邮，不满 99 元收取 8 元基础运费。会员每月享有 3 次免运费权益。\n"
-> )
->
-> # ① 递归字符切分 + ② 起始位置
-> rcs = RecursiveCharacterTextSplitter(
->     chunk_size=80, chunk_overlap=20, add_start_index=True
-> )
-> chunks = rcs.split_text(text)
-> print(f"① 递归切分：{len(chunks)} 块")            # 3 块（64 / 53 / 56 字）
-> for i, c in enumerate(chunks, 1):
->     print(f"   块{i}({len(c)}字): {c!r}")
-> print("② 起始位置：", [d.metadata for d in rcs.create_documents(texts=[text])])
-> #   [{'start_index': 0}, {'start_index': 57}, {'start_index': 103}]
->
-> # ③ Markdown 语法版递归切分（默认分隔符是正则，要手动打开开关）
-> mts = MarkdownTextSplitter(chunk_size=80, chunk_overlap=0)
-> mts._is_separator_regex = True
-> print(f"③ Markdown 语法版：{len(mts.split_text(text))} 块")
-> for i, c in enumerate(mts.split_text(text), 1):
->     print(f"   块{i}({len(c)}字): {c!r}")     # 块边界落在标题行前，标题带着自己的正文
->
-> # ④ 按标题切：标题进 metadata，正文才是 page_content
-> mhs = MarkdownHeaderTextSplitter(headers_to_split_on=[("#", "标题1"), ("##", "标题2")])
-> for d in mhs.split_text(text):
->     print("④ content =", repr(d.page_content), "metadata =", d.metadata)
-> #   metadata = {'标题1': '客服知识库', '标题2': '发货时间'}
->
-> # ⑤ 按 token 数切中文：会出现 � 乱码
-> tts = TokenTextSplitter(chunk_size=30, chunk_overlap=0)
-> tt_chunks = tts.split_text(text)
-> bad = sum("\ufffd" in c for c in tt_chunks)
-> print(f"⑤ TokenTextSplitter：{len(tt_chunks)} 块，其中 {bad} 块乱码")
-> #   10 块中 9 块乱码——原因：按字节级 token 边界切开，汉字被劈成两半
-> #   结论：中文用 RecursiveCharacterTextSplitter
->
-> # ---------- 2-3 分隔符与重叠 ----------
-> sentence = "这是第一段文本。这是第二段内容。最后一段结束。"
-> for label, keep in [("默认 False", False), ("True", True), ('"end"', "end")]:
->     sp = CharacterTextSplitter(
->         separator="。", chunk_size=20, chunk_overlap=8, keep_separator=keep
->     )
->     print(f"① keep_separator={label} -> {sp.split_text(sentence)}")
-> #   默认： ['这是第一段文本。这是第二段内容', '这是第二段内容。最后一段结束']       ← 句号丢了
-> #   True ： ['这是第一段文本。这是第二段内容', '。这是第二段内容。最后一段结束。']   ← 留在下一块开头
-> #   "end"： ['这是第一段文本。这是第二段内容。', '这是第二段内容。最后一段结束。']   ← 留在上一块结尾
->
-> small = CharacterTextSplitter(separator="。", chunk_size=6, chunk_overlap=3)
-> for i, c in enumerate(small.split_text(sentence), 1):
->     print(f"② 块{i}({len(c)}字): {c!r}")
-> #   Created a chunk of size 7, which is longer than the specified 6  ← 控制台警告
-> #   块1(7): '这是第一段文本' / 块2(7): '这是第二段内容' / 块3(6): '最后一段结束'
-> #   块上限只是"目标"：单个句子比它还长时无处可拆，重叠也随之失效
->
-> sep = "\n==============================\n"
-> kb = sep.join([
->     "退换货政策：客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货；"
->     "15 个自然日内存在质量问题可以申请换货。质量问题产生的运费由平台承担，非质量问题由客户承担。",
->     "发货时间：正常情况下，订单支付成功后 24 小时内由仓库安排发货，遇到大促或法定节假日会顺延。"
->     "发货后会推送物流单号，可在订单详情页实时查看物流轨迹。",
-> ])
-> for keep in [True, False]:
->     sp = RecursiveCharacterTextSplitter(
->         chunk_size=100, chunk_overlap=0, keep_separator=keep,
->         separators=[sep, "\n\n", "\n", "。", " "],
->     )
->     out = sp.split_text(kb)
->     print(f"③ keep_separator={keep} -> {len(out)} 块")
->     for i, c in enumerate(out, 1):
->         only_sep = set(c.strip()) <= set("= \n")
->         print(f"     块{i}({len(c)}字){'  ← 只有分隔线，垃圾块' if only_sep else ''}: {c[:36]!r}")
-> #   keep_separator=True （递归切分器的默认值）→ 3 块，中间那块只有 30 个等号
-> #   keep_separator=False                    → 2 块，两块都是干净的正文
->
-> # ---------- 3-1 知识库流水线 ----------
-> kb_dir = os.path.join(WORK, "kb")
-> os.makedirs(kb_dir, exist_ok=True)
-> entries = [
->     "退换货政策：客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货；"
->     "15 个自然日内存在质量问题可以申请换货。质量问题产生的运费由平台承担，非质量问题由客户承担。",
->     "发货时间：正常情况下，订单支付成功后 24 小时内由仓库安排发货，遇到大促或法定节假日会顺延。"
->     "发货后会推送物流单号，可在订单详情页实时查看物流轨迹。",
->     "运费说明：单笔订单金额满 99 元包邮；不满 99 元收取 8 元基础运费。偏远地区单独计费，"
->     "具体金额以下单页面显示为准。会员每月享有 3 次免运费权益，当月有效。",
-> ]
-> kb_path = os.path.join(kb_dir, "knowledge.txt")
-> with open(kb_path, "w", encoding="utf-8") as f:
->     f.write(sep.join(entries))
->
-> documents = DirectoryLoader(
->     path=kb_dir, glob="*.txt", use_multithreading=True,
->     loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"},
-> ).load()
-> print("加载条数：", len(documents))                       # 1
->
-> splitter = RecursiveCharacterTextSplitter(
->     chunk_size=120, chunk_overlap=0, keep_separator=False, add_start_index=True,
->     separators=[sep, "\n\n", "\n", "。", " "],
-> )
-> chunks = splitter.split_documents(documents)
-> print(f"切分结果：{len(chunks)} 块")                        # 3
-> for i, c in enumerate(chunks, 1):
->     print(f"  [{i}] {len(c.page_content)}字 start_index={c.metadata.get('start_index')} "
->           f"{c.page_content[:50]}")
-> junk = [c for c in chunks if set(c.page_content.strip()) <= set("= \n")]
-> print("垃圾块（只装分隔线）：", len(junk))                 # 0
->
-> semantic = SemanticChunker(
->     embeddings=DeterministicFakeEmbedding(size=64),
->     breakpoint_threshold_type="percentile",
->     breakpoint_threshold_amount=65.0,
->     sentence_split_regex=r"(?<=[。？！])\s+",
-> )
-> semantic_docs = semantic.create_documents(texts=[sep.join(entries)])
-> print(f"语义分块（伪嵌入）：{len(semantic_docs)} 块")        # 2
-> #   伪嵌入没有语义，切在哪里完全随机 -> 只能证明"代码能跑"，不能当效果参考
->
-> # ---------- 3-1 第 5 步：换成 500 份扫描版 PDF 时（只写不跑） ----------
-> # ① "加载"该让位给 MinerU：它多出 OCR、公式解析、表格解析、图像提取能力，
-> #    产物是 full.md + images/ + *_content_list.json（带版面坐标），LangChain 只负责后续向量化与检索
-> # ② 提交解析任务的请求体关键字段（本机没有 MINERU_API_TOKEN，这段只做语法检查、未实际请求）：
-> import requests
-> from dotenv import load_dotenv
->
-> load_dotenv(override=True)
->
-> file_paths = ["../asset/load/04-sample.pdf"]
-> files_info = [
->     {
->         "name": os.path.basename(p),
->         "is_ocr": True,             # 扫描版 PDF 开 OCR
->         "data_id": f"file_{i}",     # 自定义任务标识，用于对账
->     }
->     for i, p in enumerate(file_paths)
-> ]
-> data = {
->     "enable_formula": True,         # 解析公式
->     "enable_table": True,           # 解析表格
->     "language": "ch",               # 文档语言
->     "files": files_info,
-> }
-> resp = requests.post(
->     "https://mineru.net/api/v4/file-urls/batch",
->     headers={
->         "Content-Type": "application/json",
->         "Authorization": f"Bearer {os.getenv('MINERU_API_TOKEN')}",
->     },
->     json=data,
-> )
-> batch_id = resp.json()["data"]["batch_id"]
-> urls = resp.json()["data"]["file_urls"]                 # 预签名 URL，再用 PUT 上传文件本体
->
-> # ---------- 本机实测输出摘要（conda 环境 langchain1.2） ----------
-> # 2-1：① 本地 1 条；② 网页 1 条（title、language 都在 metadata 里）；③ 目录 3 条
-> #      ④ PyPDFLoader 报 ImportError: `pypdf` package not found；PyMuPDFLoader 正常返回 3 页
-> #         UnstructuredMarkdownLoader 报 ModuleNotFoundError: No module named 'unstructured'
-> # 2-2：① 递归切分 3 块（64/53/56 字）② start_index = 0/57/103 ⑤ 10 块里 9 块带 �
-> # 2-3：① 三种 keep_separator 取值下方块各不相同 ③ 分隔线在默认设置下自成一个 30 字块
-> # 3-1：加载 1 条 → 切 3 块（start_index 0/125/231）、无垃圾块；伪嵌入语义分块 2 块
-> ```
+  **一级 · 思路**：前半段是"工程流水线"，后半段是"选型判断"——LangChain 工具链适合 MVP，复杂文档要换专业解析工具
+  **二级 · 方法**：`DirectoryLoader(glob="*.txt", loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"})` / `RecursiveCharacterTextSplitter(keep_separator=False, add_start_index=True, separators=[业务分隔线, …])` / `SemanticChunker(embeddings=DeterministicFakeEmbedding(size=64), breakpoint_threshold_type="percentile", breakpoint_threshold_amount=65.0, sentence_split_regex=r"(?<=[。？！])\s+")` / MinerU 的 `is_ocr`、`enable_formula`、`enable_table`、`language`、`data_id`
+  **三级 · 骨架**：切分器用 `split_documents(docs)`；伪嵌入只需 `import` 后实例化，不需要任何密钥
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+import os
+
+import pymupdf     # 本机已装；用于现场生成一份测试 PDF，也可直接换成课程资料里的 asset/load/04-sample.pdf
+from langchain_community.document_loaders import (
+    DirectoryLoader,
+    PyMuPDFLoader,
+    PyPDFLoader,
+    TextLoader,
+    UnstructuredMarkdownLoader,
+    WebBaseLoader,
+)
+from langchain_core.embeddings import DeterministicFakeEmbedding
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_text_splitters import (
+    CharacterTextSplitter,
+    MarkdownHeaderTextSplitter,
+    MarkdownTextSplitter,
+    RecursiveCharacterTextSplitter,
+    TokenTextSplitter,
+)
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+WORK = os.path.join(BASE, "work")
+os.makedirs(WORK, exist_ok=True)
+
+# ---------- 2-1 ① 本地文件 ----------
+txt_path = os.path.join(WORK, "note.txt")
+with open(txt_path, "w", encoding="utf-8") as f:
+    f.write("LangChain 是一个用于开发语言模型应用的框架。\n它提供了统一的接口。\n")
+docs = TextLoader(txt_path, encoding="utf-8").load()
+print("① 本地文件：文档数 =", len(docs))
+print("   正文 =", docs[0].page_content.strip())
+print("   元数据 =", docs[0].metadata)          # {'source': '...\\work\\note.txt'}
+
+# ---------- 2-1 ② 网页（example.com 本机实测超时，换成能访问的页面即可） ----------
+URL = "https://python.langchain.com/docs/introduction/"
+web_docs = WebBaseLoader(URL).load()
+print("② 网页：文档数 =", len(web_docs))
+print("   元数据 =", web_docs[0].metadata)      # 多出 title / language
+print("   正文前 80 字 =", web_docs[0].page_content[:80].replace("\n", " "))
+
+# ---------- 2-1 ③ 目录批量加载 ----------
+raw_dir = os.path.join(WORK, "raw")
+os.makedirs(raw_dir, exist_ok=True)
+for i in range(1, 4):
+    with open(os.path.join(raw_dir, f"p{i}.txt"), "w", encoding="utf-8") as f:
+        f.write(f"这是第 {i} 个文件的内容。\n")
+dir_docs = DirectoryLoader(
+    path=raw_dir,
+    glob="*.txt",
+    use_multithreading=True,
+    loader_cls=TextLoader,
+    loader_kwargs={"encoding": "utf-8"},
+).load()
+print("③ 目录批量：文档数 =", len(dir_docs))   # 3（多线程下顺序不保证）
+
+# ---------- 2-1 ④ 依赖体检 ----------
+pdf_path = os.path.join(WORK, "sample.pdf")
+pdf = pymupdf.open()
+for i in range(1, 4):
+    pdf.new_page().insert_text((72, 72), f"Page {i}: LangChain RAG notes.")
+pdf.save(pdf_path)
+pdf.close()
+
+try:
+    pdf_docs = PyPDFLoader(pdf_path, extraction_mode="plain").load()
+    print("④ PDF：PyPDFLoader 返回", len(pdf_docs), "页")
+except ImportError as err:
+    print("④ PDF：PyPDFLoader 报错 ->", err)
+    # `pypdf` package not found, please install it with `pip install pypdf`
+    pdf_docs = PyMuPDFLoader(pdf_path).load()          # 本机已装 pymupdf，可直接用
+    print("   改用 PyMuPDFLoader：", len(pdf_docs), "页")
+for d in pdf_docs:
+    print(f"   page={d.metadata.get('page')} total_pages={d.metadata.get('total_pages')}")
+
+try:
+    UnstructuredMarkdownLoader(txt_path, mode="elements").load()
+    print("④ Markdown 加载器：成功")
+except Exception as err:
+    print("④ Markdown 加载器报错 ->", type(err).__name__, err)
+    # No module named 'unstructured'（Word / HTML 那两个加载器同理）
+
+# ④ 的结论：四种来源的产物都是 list[Document]，
+# 所以都能用 .page_content / .metadata 读——统一来自 BaseLoader 抽象与 Document 类
+
+# ---------- 2-2 四种切分器 ----------
+text = (
+    "# 客服知识库\n\n"
+    "退换货政策。客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货。\n\n"
+    "## 发货时间\n\n"
+    "订单支付成功后 24 小时内发货，遇到大促会顺延。发货后推送物流单号。\n\n"
+    "## 运费说明\n\n"
+    "单笔订单满 99 元包邮，不满 99 元收取 8 元基础运费。会员每月享有 3 次免运费权益。\n"
+)
+
+# ① 递归字符切分 + ② 起始位置
+rcs = RecursiveCharacterTextSplitter(
+    chunk_size=80, chunk_overlap=20, add_start_index=True
+)
+chunks = rcs.split_text(text)
+print(f"① 递归切分：{len(chunks)} 块")            # 3 块（64 / 53 / 56 字）
+for i, c in enumerate(chunks, 1):
+    print(f"   块{i}({len(c)}字): {c!r}")
+print("② 起始位置：", [d.metadata for d in rcs.create_documents(texts=[text])])
+#   [{'start_index': 0}, {'start_index': 57}, {'start_index': 103}]
+
+# ③ Markdown 语法版递归切分（默认分隔符是正则，要手动打开开关）
+mts = MarkdownTextSplitter(chunk_size=80, chunk_overlap=0)
+mts._is_separator_regex = True
+print(f"③ Markdown 语法版：{len(mts.split_text(text))} 块")
+for i, c in enumerate(mts.split_text(text), 1):
+    print(f"   块{i}({len(c)}字): {c!r}")     # 块边界落在标题行前，标题带着自己的正文
+
+# ④ 按标题切：标题进 metadata，正文才是 page_content
+mhs = MarkdownHeaderTextSplitter(headers_to_split_on=[("#", "标题1"), ("##", "标题2")])
+for d in mhs.split_text(text):
+    print("④ content =", repr(d.page_content), "metadata =", d.metadata)
+#   metadata = {'标题1': '客服知识库', '标题2': '发货时间'}
+
+# ⑤ 按 token 数切中文：会出现 � 乱码
+tts = TokenTextSplitter(chunk_size=30, chunk_overlap=0)
+tt_chunks = tts.split_text(text)
+bad = sum("\ufffd" in c for c in tt_chunks)
+print(f"⑤ TokenTextSplitter：{len(tt_chunks)} 块，其中 {bad} 块乱码")
+#   10 块中 9 块乱码——原因：按字节级 token 边界切开，汉字被劈成两半
+#   结论：中文用 RecursiveCharacterTextSplitter
+
+# ---------- 2-3 分隔符与重叠 ----------
+sentence = "这是第一段文本。这是第二段内容。最后一段结束。"
+for label, keep in [("默认 False", False), ("True", True), ('"end"', "end")]:
+    sp = CharacterTextSplitter(
+        separator="。", chunk_size=20, chunk_overlap=8, keep_separator=keep
+    )
+    print(f"① keep_separator={label} -> {sp.split_text(sentence)}")
+#   默认： ['这是第一段文本。这是第二段内容', '这是第二段内容。最后一段结束']       ← 句号丢了
+#   True ： ['这是第一段文本。这是第二段内容', '。这是第二段内容。最后一段结束。']   ← 留在下一块开头
+#   "end"： ['这是第一段文本。这是第二段内容。', '这是第二段内容。最后一段结束。']   ← 留在上一块结尾
+
+small = CharacterTextSplitter(separator="。", chunk_size=6, chunk_overlap=3)
+for i, c in enumerate(small.split_text(sentence), 1):
+    print(f"② 块{i}({len(c)}字): {c!r}")
+#   Created a chunk of size 7, which is longer than the specified 6  ← 控制台警告
+#   块1(7): '这是第一段文本' / 块2(7): '这是第二段内容' / 块3(6): '最后一段结束'
+#   块上限只是"目标"：单个句子比它还长时无处可拆，重叠也随之失效
+
+sep = "\n==============================\n"
+kb = sep.join([
+    "退换货政策：客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货；"
+    "15 个自然日内存在质量问题可以申请换货。质量问题产生的运费由平台承担，非质量问题由客户承担。",
+    "发货时间：正常情况下，订单支付成功后 24 小时内由仓库安排发货，遇到大促或法定节假日会顺延。"
+    "发货后会推送物流单号，可在订单详情页实时查看物流轨迹。",
+])
+for keep in [True, False]:
+    sp = RecursiveCharacterTextSplitter(
+        chunk_size=100, chunk_overlap=0, keep_separator=keep,
+        separators=[sep, "\n\n", "\n", "。", " "],
+    )
+    out = sp.split_text(kb)
+    print(f"③ keep_separator={keep} -> {len(out)} 块")
+    for i, c in enumerate(out, 1):
+        only_sep = set(c.strip()) <= set("= \n")
+        print(f"     块{i}({len(c)}字){'  ← 只有分隔线，垃圾块' if only_sep else ''}: {c[:36]!r}")
+#   keep_separator=True （递归切分器的默认值）→ 3 块，中间那块只有 30 个等号
+#   keep_separator=False                    → 2 块，两块都是干净的正文
+
+# ---------- 3-1 知识库流水线 ----------
+kb_dir = os.path.join(WORK, "kb")
+os.makedirs(kb_dir, exist_ok=True)
+entries = [
+    "退换货政策：客户在收到商品之后 7 个自然日内，如果商品不影响二次销售，可以申请无理由退货；"
+    "15 个自然日内存在质量问题可以申请换货。质量问题产生的运费由平台承担，非质量问题由客户承担。",
+    "发货时间：正常情况下，订单支付成功后 24 小时内由仓库安排发货，遇到大促或法定节假日会顺延。"
+    "发货后会推送物流单号，可在订单详情页实时查看物流轨迹。",
+    "运费说明：单笔订单金额满 99 元包邮；不满 99 元收取 8 元基础运费。偏远地区单独计费，"
+    "具体金额以下单页面显示为准。会员每月享有 3 次免运费权益，当月有效。",
+]
+kb_path = os.path.join(kb_dir, "knowledge.txt")
+with open(kb_path, "w", encoding="utf-8") as f:
+    f.write(sep.join(entries))
+
+documents = DirectoryLoader(
+    path=kb_dir, glob="*.txt", use_multithreading=True,
+    loader_cls=TextLoader, loader_kwargs={"encoding": "utf-8"},
+).load()
+print("加载条数：", len(documents))                       # 1
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=120, chunk_overlap=0, keep_separator=False, add_start_index=True,
+    separators=[sep, "\n\n", "\n", "。", " "],
+)
+chunks = splitter.split_documents(documents)
+print(f"切分结果：{len(chunks)} 块")                        # 3
+for i, c in enumerate(chunks, 1):
+    print(f"  [{i}] {len(c.page_content)}字 start_index={c.metadata.get('start_index')} "
+          f"{c.page_content[:50]}")
+junk = [c for c in chunks if set(c.page_content.strip()) <= set("= \n")]
+print("垃圾块（只装分隔线）：", len(junk))                 # 0
+
+semantic = SemanticChunker(
+    embeddings=DeterministicFakeEmbedding(size=64),
+    breakpoint_threshold_type="percentile",
+    breakpoint_threshold_amount=65.0,
+    sentence_split_regex=r"(?<=[。？！])\s+",
+)
+semantic_docs = semantic.create_documents(texts=[sep.join(entries)])
+print(f"语义分块（伪嵌入）：{len(semantic_docs)} 块")        # 2
+#   伪嵌入没有语义，切在哪里完全随机 -> 只能证明"代码能跑"，不能当效果参考
+
+# ---------- 3-1 第 5 步：换成 500 份扫描版 PDF 时（只写不跑） ----------
+# ① "加载"该让位给 MinerU：它多出 OCR、公式解析、表格解析、图像提取能力，
+#    产物是 full.md + images/ + *_content_list.json（带版面坐标），LangChain 只负责后续向量化与检索
+# ② 提交解析任务的请求体关键字段（本机没有 MINERU_API_TOKEN，这段只做语法检查、未实际请求）：
+import requests
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
+file_paths = ["../asset/load/04-sample.pdf"]
+files_info = [
+    {
+        "name": os.path.basename(p),
+        "is_ocr": True,             # 扫描版 PDF 开 OCR
+        "data_id": f"file_{i}",     # 自定义任务标识，用于对账
+    }
+    for i, p in enumerate(file_paths)
+]
+data = {
+    "enable_formula": True,         # 解析公式
+    "enable_table": True,           # 解析表格
+    "language": "ch",               # 文档语言
+    "files": files_info,
+}
+resp = requests.post(
+    "https://mineru.net/api/v4/file-urls/batch",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {os.getenv('MINERU_API_TOKEN')}",
+    },
+    json=data,
+)
+batch_id = resp.json()["data"]["batch_id"]
+urls = resp.json()["data"]["file_urls"]                 # 预签名 URL，再用 PUT 上传文件本体
+
+# ---------- 本机实测输出摘要（conda 环境 langchain1.2） ----------
+# 2-1：① 本地 1 条；② 网页 1 条（title、language 都在 metadata 里）；③ 目录 3 条
+#      ④ PyPDFLoader 报 ImportError: `pypdf` package not found；PyMuPDFLoader 正常返回 3 页
+#         UnstructuredMarkdownLoader 报 ModuleNotFoundError: No module named 'unstructured'
+# 2-2：① 递归切分 3 块（64/53/56 字）② start_index = 0/57/103 ⑤ 10 块里 9 块带 �
+# 2-3：① 三种 keep_separator 取值下方块各不相同 ③ 分隔线在默认设置下自成一个 30 字块
+# 3-1：加载 1 条 → 切 3 块（start_index 0/125/231）、无垃圾块；伪嵌入语义分块 2 块
+```
+
+:::
+

@@ -59,7 +59,7 @@ Tlias 页面原型里，导航栏下面就是这两个区域：
 </form>
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **表单项要想能够采集数据，必须设置 `name` 属性**，它表示这个表单项的"名字"。后端收到的是 `name=值` 这样成对的数据——**没写 `name` 的输入框，用户填了也提交不上去**。
 
 ## `<form>` 的两个属性：action 与 method
@@ -92,7 +92,7 @@ Tlias 页面原型里，导航栏下面就是这两个区域：
 </form>
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > `method` 不写时默认是 **GET**。课程案例里两个表单一个都没省：搜索表单用 `method="post"`、注册这类都是 `post`。后面学后端时你会再见到这两种请求方式——**这里记住"数据放哪儿"和"有没有大小限制"这两个差别就够了**。
 
 ## 表单项一：`<input>` 的 type 取值
@@ -294,7 +294,7 @@ th {
 }
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > `<table>` 里**直接写 `<tr>` 也是合法的**（浏览器会自动补一层 `<tbody>`），但课程案例的写法是**把 `<thead>` 和 `<tbody>` 都写全**——语义清楚，后面用 CSS/JS 分别控制表头和数据行也方便。另外别把 `<td>` 和 `<th>` 写混：**表头单元格用 `<th>`**（默认加粗居中），数据单元格用 `<td>`。
 
 ## 小结
@@ -339,29 +339,37 @@ th {
   4. 两个表单项都要能被提交出去
   （练习文件 `test_10_搜索表单.html` 里有写作区，页面骨架已备好。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三步——① 用表单标签把这一组控件圈起来并指定"提交到哪、怎么提交"；② 写单行输入框和下拉列表；③ 写按钮
-  > **二级 · 方法**：`<form action="/search" method="post">`；输入框 `<input type="text" name="name">`；下拉 `<select name="gender"><option value="">…</option><option value="1">男</option>…</select>`；按钮 `<button type="submit">查询</button>` / `<button type="reset">清空</button>`
-  > **三级 · 骨架**：`<form action="____" method="____">` … `<input type="____" name="____">` … `<select name="____"><option value="">…</option></select>` … `<button type="____">查询</button>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <form action="/search" method="post">
-  >   <label for="name">姓名：</label>
-  >   <input type="text" id="name" name="name" placeholder="请输入姓名">
-  >
-  >   <label for="gender">性别：</label>
-  >   <select id="gender" name="gender">
-  >     <option value=""></option>
-  >     <option value="1">男</option>
-  >     <option value="2">女</option>
-  >   </select>
-  >
-  >   <button type="submit">查询</button>
-  >   <button type="reset">清空</button>
-  > </form>
-  > ```
-  > 对照课程 `14. Tlias案例-搜索表单区域.html`。三个检查点：`method="post"`（不能用默认的 get，否则姓名会出现在 url 上）；两个控件都写了 `name`；按钮写了 `type="submit"` 才能触发表单提交（`reset` 负责恢复初始值）。
+  **一级 · 思路**：三步——① 用表单标签把这一组控件圈起来并指定"提交到哪、怎么提交"；② 写单行输入框和下拉列表；③ 写按钮
+  **二级 · 方法**：`<form action="/search" method="post">`；输入框 `<input type="text" name="name">`；下拉 `<select name="gender"><option value="">…</option><option value="1">男</option>…</select>`；按钮 `<button type="submit">查询</button>` / `<button type="reset">清空</button>`
+  **三级 · 骨架**：`<form action="____" method="____">` … `<input type="____" name="____">` … `<select name="____"><option value="">…</option></select>` … `<button type="____">查询</button>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <form action="/search" method="post">
+    <label for="name">姓名：</label>
+    <input type="text" id="name" name="name" placeholder="请输入姓名">
+  
+    <label for="gender">性别：</label>
+    <select id="gender" name="gender">
+      <option value=""></option>
+      <option value="1">男</option>
+      <option value="2">女</option>
+    </select>
+  
+    <button type="submit">查询</button>
+    <button type="reset">清空</button>
+  </form>
+  ```
+  对照课程 `14. Tlias案例-搜索表单区域.html`。三个检查点：`method="post"`（不能用默认的 get，否则姓名会出现在 url 上）；两个控件都写了 `name`；按钮写了 `type="submit"` 才能触发表单提交（`reset` 负责恢复初始值）。
+
+  :::
+
 
 - [ ] **2-2 做"员工登记"里的三组控件**
   要求做一块登记信息，包含：
@@ -370,25 +378,33 @@ th {
   3. **生日**：一个日期选择控件，提交的名字叫 `birthday`
   （练习文件 `test_10_登记表单项.html` 里有写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：单选用一种输入类型、复选用另一种；"只能选一个"这件事是由**同一个 name** 保证的，不是靠属性开关
-  > **二级 · 方法**：`type="radio"`（一组共用同一个 `name="gender"`，每项用 `value` 区分）；`type="checkbox"`（多项共用 `name="hobby"`）；日期用 `type="date"`
-  > **三级 · 骨架**：`<input type="____" name="gender" value="1"> 男` / `<input type="____" name="hobby" value="java"> java` / `<input type="____" name="birthday">`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <form action="/save" method="post">
-  >   性别: <input type="radio" name="gender" value="1"> 男
-  >         <label><input type="radio" name="gender" value="2"> 女 </label> <br><br>
-  >
-  >   爱好: <label><input type="checkbox" name="hobby" value="java"> java </label>
-  >         <label><input type="checkbox" name="hobby" value="game"> game </label>
-  >         <label><input type="checkbox" name="hobby" value="sing"> sing </label> <br><br>
-  >
-  >   生日: <input type="date" name="birthday">
-  > </form>
-  > ```
-  > 对照课程 `13. 表单项标签.html`。要点：单选框**两个 name 必须一样**（`gender`）才会互斥，靠 `value` 区分提交值（1 / 2）；复选框**三项 name 也一样**（`hobby`），可以同时勾多个，提交出去是 `hobby=java&hobby=game` 这种多值形式；每个 `<label>` 把输入框和文字包起来，点文字也能选中。
+  **一级 · 思路**：单选用一种输入类型、复选用另一种；"只能选一个"这件事是由**同一个 name** 保证的，不是靠属性开关
+  **二级 · 方法**：`type="radio"`（一组共用同一个 `name="gender"`，每项用 `value` 区分）；`type="checkbox"`（多项共用 `name="hobby"`）；日期用 `type="date"`
+  **三级 · 骨架**：`<input type="____" name="gender" value="1"> 男` / `<input type="____" name="hobby" value="java"> java` / `<input type="____" name="birthday">`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <form action="/save" method="post">
+    性别: <input type="radio" name="gender" value="1"> 男
+          <label><input type="radio" name="gender" value="2"> 女 </label> <br><br>
+  
+    爱好: <label><input type="checkbox" name="hobby" value="java"> java </label>
+          <label><input type="checkbox" name="hobby" value="game"> game </label>
+          <label><input type="checkbox" name="hobby" value="sing"> sing </label> <br><br>
+  
+    生日: <input type="date" name="birthday">
+  </form>
+  ```
+  对照课程 `13. 表单项标签.html`。要点：单选框**两个 name 必须一样**（`gender`）才会互斥，靠 `value` 区分提交值（1 / 2）；复选框**三项 name 也一样**（`hobby`），可以同时勾多个，提交出去是 `hobby=java&hobby=game` 这种多值形式；每个 `<label>` 把输入框和文字包起来，点文字也能选中。
+
+  :::
+
 
 - [ ] **2-3 做一个"职位 + 学历"的下拉列表**
   要求：
@@ -396,25 +412,33 @@ th {
   2. 一个**描述**文本域，提交名字叫 `description`，宽 30 列、高 10 行
   （练习文件 `test_10_下拉与文本域.html` 里有写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：下拉用一个外层标签把若干"选项"装起来；多行输入用另外那个标签，尺寸靠两个属性控制
-  > **二级 · 方法**：`<select name="position">` 里放多个 `<option value="1">班主任</option>`；文本域 `<textarea name="description" cols="30" rows="10"></textarea>`
-  > **三级 · 骨架**：`<select name="____"><option value="">----------- 请选择 -----------</option>…</select>` / `<textarea name="____" cols="____" rows="____"></textarea>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > 职位: <select name="position">
-  >         <option value="">----------- 请选择 -----------</option>
-  >         <option value="1">班主任</option>
-  >         <option value="2">讲师</option>
-  >         <option value="3">学工主管</option>
-  >         <option value="4">教研主管</option>
-  >         <option value="5">咨询师</option>
-  >       </select> <br><br>
-  >
-  > 描述: <textarea name="description" cols="30" rows="10"></textarea>
-  > ```
-  > 对照课程 `13. 表单项标签.html`（学历下拉）和 `14. Tlias案例-搜索表单区域.html`（职位下拉）。`<option>` 的 `value` 才是提交的值；不写 `value` 时会默认提交标签里的文字，但实际项目里都是显式写 `value`（一般是数据库里的编号）。
+  **一级 · 思路**：下拉用一个外层标签把若干"选项"装起来；多行输入用另外那个标签，尺寸靠两个属性控制
+  **二级 · 方法**：`<select name="position">` 里放多个 `<option value="1">班主任</option>`；文本域 `<textarea name="description" cols="30" rows="10"></textarea>`
+  **三级 · 骨架**：`<select name="____"><option value="">----------- 请选择 -----------</option>…</select>` / `<textarea name="____" cols="____" rows="____"></textarea>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  职位: <select name="position">
+          <option value="">----------- 请选择 -----------</option>
+          <option value="1">班主任</option>
+          <option value="2">讲师</option>
+          <option value="3">学工主管</option>
+          <option value="4">教研主管</option>
+          <option value="5">咨询师</option>
+        </select> <br><br>
+  
+  描述: <textarea name="description" cols="30" rows="10"></textarea>
+  ```
+  对照课程 `13. 表单项标签.html`（学历下拉）和 `14. Tlias案例-搜索表单区域.html`（职位下拉）。`<option>` 的 `value` 才是提交的值；不写 `value` 时会默认提交标签里的文字，但实际项目里都是显式写 `value`（一般是数据库里的编号）。
+
+  :::
+
 
 - [ ] **2-4 提交时"悄悄带上"数据，再给一个"重置"按钮**
   要求：
@@ -423,24 +447,32 @@ th {
   3. 有一个**重置**按钮，点了能把表单内容恢复到初始状态
   （练习文件 `test_10_文件与隐藏域.html` 里有写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：文件上传、看不见的项、重置按钮——都是同一个标签换一种 `type`
-  > **二级 · 方法**：`<input type="file" name="image">`；隐藏域 `<input type="hidden" name="id" value="1">`；重置按钮 `<input type="reset" value="重置">`
-  > **三级 · 骨架**：`<input type="____" name="image">` / `<input type="____" name="id" value="____">` / `<input type="____" value="重置">`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <form action="/save" method="post">
-  >   图像: <input type="file" name="image">  <br><br>
-  >
-  >   <!-- 隐藏域：页面看不见，但值会跟着表单提交 -->
-  >   <input type="hidden" name="id" value="1">
-  >
-  >   <input type="reset" value="重置">
-  >   <input type="submit" value="提交">
-  > </form>
-  > ```
-  > 对照课程 `13. 表单项标签.html`。隐藏域虽然看不见，但**照样要有 `name` 和 `value`**（`name` 是它的名字、`value` 是它提交的值）；`type="reset"` 只清空**这个表单内部**的内容，不会刷新页面。
+  **一级 · 思路**：文件上传、看不见的项、重置按钮——都是同一个标签换一种 `type`
+  **二级 · 方法**：`<input type="file" name="image">`；隐藏域 `<input type="hidden" name="id" value="1">`；重置按钮 `<input type="reset" value="重置">`
+  **三级 · 骨架**：`<input type="____" name="image">` / `<input type="____" name="id" value="____">` / `<input type="____" value="重置">`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <form action="/save" method="post">
+    图像: <input type="file" name="image">  <br><br>
+  
+    <!-- 隐藏域：页面看不见，但值会跟着表单提交 -->
+    <input type="hidden" name="id" value="1">
+  
+    <input type="reset" value="重置">
+    <input type="submit" value="提交">
+  </form>
+  ```
+  对照课程 `13. 表单项标签.html`。隐藏域虽然看不见，但**照样要有 `name` 和 `value`**（`name` 是它的名字、`value` 是它提交的值）；`type="reset"` 只清空**这个表单内部**的内容，不会刷新页面。
+
+  :::
+
 
 ### 三、综合题
 
@@ -455,66 +487,74 @@ th {
   6. **表格数据**：主体部分加**两行**数据（令狐冲/男/讲师/2021-06-15、任盈盈/女/咨询师/2021-07-20）
   7. **自查**：数一数表单里一共有几个 `name`？表格里表头用了 `<th>`、数据用了 `<td>` 吗？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：第 1~4 步是"表单 + 几个表单项"；第 5~6 步是"表格整体 → 头部 → 主体"，一层套一层
-  > **二级 · 方法**：`<form action="/search" method="post">`；`<input type="text" name="name">`；两个 `<select>` 里放 `<option>`；`<button type="submit">查询</button>` / `<button type="reset">清空</button>`；表格 `<table><thead><tr><th>…` + `<tbody><tr><td>…`
-  > **三级 · 骨架**：`<form action="____" method="____">` … `<table><thead><tr><th>____</th></tr></thead><tbody><tr><td>____</td></tr></tbody></table>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <!-- 搜索表单区域 -->
-  > <form action="/search" method="post">
-  >   <label for="name">姓名：</label>
-  >   <input type="text" id="name" name="name" placeholder="请输入姓名">
-  >
-  >   <label for="gender">性别：</label>
-  >   <select id="gender" name="gender">
-  >     <option value=""></option>
-  >     <option value="1">男</option>
-  >     <option value="2">女</option>
-  >   </select>
-  >
-  >   <label for="position">职位：</label>
-  >   <select id="position" name="position">
-  >     <option value=""></option>
-  >     <option value="1">班主任</option>
-  >     <option value="2">讲师</option>
-  >     <option value="3">学工主管</option>
-  >     <option value="4">教研主管</option>
-  >     <option value="5">咨询师</option>
-  >   </select>
-  >
-  >   <button type="submit">查询</button>
-  >   <button type="reset">清空</button>
-  > </form>
-  >
-  > <!-- 表格展示区 -->
-  > <table>
-  >   <!-- 表头 -->
-  >   <thead>
-  >     <tr>
-  >       <th>姓名</th>
-  >       <th>性别</th>
-  >       <th>职位</th>
-  >       <th>入职日期</th>
-  >     </tr>
-  >   </thead>
-  >
-  >   <!-- 表格主体内容 -->
-  >   <tbody>
-  >     <tr>
-  >       <td>令狐冲</td>
-  >       <td>男</td>
-  >       <td>讲师</td>
-  >       <td>2021-06-15</td>
-  >     </tr>
-  >     <tr>
-  >       <td>任盈盈</td>
-  >       <td>女</td>
-  >       <td>咨询师</td>
-  >       <td>2021-07-20</td>
-  >     </tr>
-  >   </tbody>
-  > </table>
-  > ```
-  > 第 7 步的答案：表单里有 **3 个 `name`**（`name`、`gender`、`position`）——按钮不需要 `name`（它们不是"数据"，是操作）；表格里表头四个单元格用的是 `<th>`、数据行用的是 `<td>`。对照课程 `14. Tlias案例-搜索表单区域.html` 与 `15. Tlias案例-表格数据展示区域.html`，课程版本还多加了头像列、操作列和表格样式，结构是一样的。
+  **一级 · 思路**：第 1~4 步是"表单 + 几个表单项"；第 5~6 步是"表格整体 → 头部 → 主体"，一层套一层
+  **二级 · 方法**：`<form action="/search" method="post">`；`<input type="text" name="name">`；两个 `<select>` 里放 `<option>`；`<button type="submit">查询</button>` / `<button type="reset">清空</button>`；表格 `<table><thead><tr><th>…` + `<tbody><tr><td>…`
+  **三级 · 骨架**：`<form action="____" method="____">` … `<table><thead><tr><th>____</th></tr></thead><tbody><tr><td>____</td></tr></tbody></table>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <!-- 搜索表单区域 -->
+  <form action="/search" method="post">
+    <label for="name">姓名：</label>
+    <input type="text" id="name" name="name" placeholder="请输入姓名">
+  
+    <label for="gender">性别：</label>
+    <select id="gender" name="gender">
+      <option value=""></option>
+      <option value="1">男</option>
+      <option value="2">女</option>
+    </select>
+  
+    <label for="position">职位：</label>
+    <select id="position" name="position">
+      <option value=""></option>
+      <option value="1">班主任</option>
+      <option value="2">讲师</option>
+      <option value="3">学工主管</option>
+      <option value="4">教研主管</option>
+      <option value="5">咨询师</option>
+    </select>
+  
+    <button type="submit">查询</button>
+    <button type="reset">清空</button>
+  </form>
+  
+  <!-- 表格展示区 -->
+  <table>
+    <!-- 表头 -->
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th>性别</th>
+        <th>职位</th>
+        <th>入职日期</th>
+      </tr>
+    </thead>
+  
+    <!-- 表格主体内容 -->
+    <tbody>
+      <tr>
+        <td>令狐冲</td>
+        <td>男</td>
+        <td>讲师</td>
+        <td>2021-06-15</td>
+      </tr>
+      <tr>
+        <td>任盈盈</td>
+        <td>女</td>
+        <td>咨询师</td>
+        <td>2021-07-20</td>
+      </tr>
+    </tbody>
+  </table>
+  ```
+  第 7 步的答案：表单里有 **3 个 `name`**（`name`、`gender`、`position`）——按钮不需要 `name`（它们不是"数据"，是操作）；表格里表头四个单元格用的是 `<th>`、数据行用的是 `<td>`。对照课程 `14. Tlias案例-搜索表单区域.html` 与 `15. Tlias案例-表格数据展示区域.html`，课程版本还多加了头像列、操作列和表格样式，结构是一样的。
+
+  :::
+

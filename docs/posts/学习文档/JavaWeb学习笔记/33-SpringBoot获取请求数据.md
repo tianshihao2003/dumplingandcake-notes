@@ -31,7 +31,7 @@ PPT 第 29 页把"获取"的原理说得非常直白：
 ![原始HTTP请求报文](https://img.tsh520.cn/file/blog/article/29-原始HTTP请求报文.jpg)
 *图：PPT 第 29 页配的原始请求报文——第一行是请求行（`GET /brand/findAll?name=OPPO&status=1 HTTP/1.1`），第二行起是请求头（`Accept`、`Accept-Encoding`、`Accept-Language`、`Host: localhost:8080`、`User-Agent: Mozilla/5.0 … Chrome/…`）。这一整段就是 Tomcat 要解析的对象，本篇六个方法不过是各取其中一段：`getRequestURI()` 取 `/brand/findAll`、`getQueryString()` 取 `name=OPPO&status=1`、`getHeader("Host")` 取 `localhost:8080`、`getHeader("User-Agent")` 取最后那一长串。注意这段报文里没有 `Content-Type`、`Content-Length`、`Cookie`——因为它是 GET 请求，压根没有请求体*
 
-> [!TIP]
+> [!TIP] 提示
 > "程序员不必直接对协议进行操作"这句话的实际含义是：**你永远不需要自己写字符串去切分那段报文**。像 `getParameter("name")` 这种调用，背后就是 Tomcat 在解析请求行/请求体时顺手存进对象里的结果。
 
 ## 请求对象怎么用：PPT 第 30 页的代码
@@ -84,14 +84,14 @@ PPT 第 30 页的注释里给了每个方法的预期结果，把它和报文对
 
 一句话总结每个方法的口径：**要值用 `getParameter`，要路径用 `getRequestURI`/`getRequestURL`，要请求头用 `getHeader`，要方式用 `getMethod`，要原始查询串用 `getQueryString`。**
 
-> [!TIP]
+> [!TIP] 提示
 > 取请求参数其实还有更省事的写法：课程[30 篇](/posts/编程学习/javaweb学习笔记/30-springboot快速入门/)里的 `public String hello(String name)` 就是把参数名直接写成方法参数，SpringMVC 会自动按名字去请求参数里找同名值塞进来。差别在于：**直接写参数只能拿到你要的那一两个值，而拿到 `HttpServletRequest` 对象等于拿到了整个请求**（路径、请求头、请求方式都能顺手取）。
 
 ## 实测：六个方法在本机跑出来的真实返回值
 
 光看注释还不够，六个方法到底返回什么，本机在 Spring Boot 3.2.8（内嵌 Tomcat 10.1.26 / JDK 17）里跑了一遍。请求用的是带两个参数的地址：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**——请求 `curl -s "http://localhost:8080/request?name=Tomcat&age=10"`，服务端把这六个方法的结果各打印/返回一行：
 >
 > ```text
@@ -167,103 +167,127 @@ PPT 第 30 页的注释里给了每个方法的预期结果，把它和报文对
   需求：浏览器访问 `/hello2?name=Tomcat` 时，服务器在**控制台**打印出这次来访者的名字，并给浏览器返回一句简单的问候语（比如"Hello Tomcat"）。要求名字是从请求里取出来的、不能写死。
   （练习文件 `test_33_获取请求数据.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：地址上 `?name=Tomcat` 就是一个请求参数，取参数得先有"请求对象"；这个对象不用自己造，**声明成方法的参数**服务器就会送进来
-  > **二级 · 方法**：`HttpServletRequest`（`jakarta.servlet.http` 包）+ 它的 `getParameter("name")`；方法返回值由 `@RestController` + `@RequestMapping` 直接写进响应体
-  > **三级 · 骨架**：`@RequestMapping("____") public String hello2(____ request){ String name = request.____("____"); System.out.println(____); return ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import jakarta.servlet.http.HttpServletRequest;
-  > import org.springframework.web.bind.annotation.RequestMapping;
-  > import org.springframework.web.bind.annotation.RestController;
-  >
-  > @RestController
-  > public class HelloController {
-  >
-  >     @RequestMapping("/hello2")
-  >     public String hello2(HttpServletRequest request) {
-  >         // 从请求参数里按名字取出 name（地址 ?name=Tomcat）
-  >         String name = request.getParameter("name");
-  >         // 控制台打印来访者名字
-  >         System.out.println("HelloController ... hello2 ： " + name);
-  >         // 把问候写回浏览器
-  >         return "Hello " + name;
-  >     }
-  > }
-  > ```
-  > 访问 `http://localhost:8080/hello2?name=Tomcat`，浏览器显示 `Hello Tomcat`，IDEA 控制台打印 `HelloController ... hello2 ： Tomcat`。
-  > 想省掉请求对象也行——把 `String name` 直接写成方法参数（课程[30 篇](/posts/编程学习/javaweb学习笔记/30-springboot快速入门/)的写法），SpringMVC 会自动把同名的请求参数绑定进来。
+  **一级 · 思路**：地址上 `?name=Tomcat` 就是一个请求参数，取参数得先有"请求对象"；这个对象不用自己造，**声明成方法的参数**服务器就会送进来
+  **二级 · 方法**：`HttpServletRequest`（`jakarta.servlet.http` 包）+ 它的 `getParameter("name")`；方法返回值由 `@RestController` + `@RequestMapping` 直接写进响应体
+  **三级 · 骨架**：`@RequestMapping("____") public String hello2(____ request){ String name = request.____("____"); System.out.println(____); return ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import jakarta.servlet.http.HttpServletRequest;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  @RestController
+  public class HelloController {
+  
+      @RequestMapping("/hello2")
+      public String hello2(HttpServletRequest request) {
+          // 从请求参数里按名字取出 name（地址 ?name=Tomcat）
+          String name = request.getParameter("name");
+          // 控制台打印来访者名字
+          System.out.println("HelloController ... hello2 ： " + name);
+          // 把问候写回浏览器
+          return "Hello " + name;
+      }
+  }
+  ```
+  访问 `http://localhost:8080/hello2?name=Tomcat`，浏览器显示 `Hello Tomcat`，IDEA 控制台打印 `HelloController ... hello2 ： Tomcat`。
+  想省掉请求对象也行——把 `String name` 直接写成方法参数（课程[30 篇](/posts/编程学习/javaweb学习笔记/30-springboot快速入门/)的写法），SpringMVC 会自动把同名的请求参数绑定进来。
+
+  :::
+
 
 - [ ] **2-2 做一个"请求信息回显"接口**
   需求：访问 `/requestInfo` 时，把这次请求的**三个信息**拼成三行文字返回给浏览器——① 请求的是哪个资源路径；② 这个请求的完整地址；③ 用的是哪种请求方式。要求三行各占一行，且值都从请求里取。
   （练习文件 `test_33_请求信息回显.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三个信息都在请求行里，分别对应"只要路径""要完整地址""要方法名"三个取值方法；拼字符串时每写完一段补一个换行
-  > **二级 · 方法**：`getRequestURI()` / `getRequestURL().toString()` / `getMethod()`，用 `StringBuilder` 拼接，换行用 `"\n"`
-  > **三级 · 骨架**：`StringBuilder sb = new StringBuilder(); sb.append("请求路径 = ").append(request.____()); sb.append("\n"); …… return sb.toString();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import jakarta.servlet.http.HttpServletRequest;
-  > import org.springframework.web.bind.annotation.RequestMapping;
-  > import org.springframework.web.bind.annotation.RestController;
-  >
-  > @RestController
-  > public class RequestInfoController {
-  >
-  >     @RequestMapping("/requestInfo")
-  >     public String requestInfo(HttpServletRequest request) {
-  >         StringBuilder sb = new StringBuilder();
-  >         sb.append("请求路径 = ").append(request.getRequestURI()).append("\n");
-  >         // getRequestURL() 返回的是 StringBuffer，要 toString()
-  >         sb.append("完整地址 = ").append(request.getRequestURL().toString()).append("\n");
-  >         sb.append("请求方式 = ").append(request.getMethod());
-  >         return sb.toString();
-  >     }
-  > }
-  > ```
-  > 访问 `http://localhost:8080/requestInfo`，浏览器（返回的是 `text/plain`，浏览器按原文显示、保留换行）里是三行，本机实测同样的取法结果是 `请求路径 = /request`、`完整地址 = http://localhost:8080/request`、`请求方式 = GET`。
+  **一级 · 思路**：三个信息都在请求行里，分别对应"只要路径""要完整地址""要方法名"三个取值方法；拼字符串时每写完一段补一个换行
+  **二级 · 方法**：`getRequestURI()` / `getRequestURL().toString()` / `getMethod()`，用 `StringBuilder` 拼接，换行用 `"\n"`
+  **三级 · 骨架**：`StringBuilder sb = new StringBuilder(); sb.append("请求路径 = ").append(request.____()); sb.append("\n"); …… return sb.toString();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import jakarta.servlet.http.HttpServletRequest;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  @RestController
+  public class RequestInfoController {
+  
+      @RequestMapping("/requestInfo")
+      public String requestInfo(HttpServletRequest request) {
+          StringBuilder sb = new StringBuilder();
+          sb.append("请求路径 = ").append(request.getRequestURI()).append("\n");
+          // getRequestURL() 返回的是 StringBuffer，要 toString()
+          sb.append("完整地址 = ").append(request.getRequestURL().toString()).append("\n");
+          sb.append("请求方式 = ").append(request.getMethod());
+          return sb.toString();
+      }
+  }
+  ```
+  访问 `http://localhost:8080/requestInfo`，浏览器（返回的是 `text/plain`，浏览器按原文显示、保留换行）里是三行，本机实测同样的取法结果是 `请求路径 = /request`、`完整地址 = http://localhost:8080/request`、`请求方式 = GET`。
+
+  :::
+
 
 - [ ] **2-3 把来访者的身份记到控制台**
   需求：随意写一个能访问到的接口，在里面把**来访客户端的身份信息**和**它访问的主机名**取出来打印到控制台，并观察同一个地址分别用浏览器和用 curl 访问时，这两行输出有什么不同。
   做完在文件末尾的注释里回答：这两行分别取的是报文里的哪一部分？为什么同一个接口两次访问拿到的值不一样？
   （练习文件 `test_33_读取请求头.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：客户端身份和主机名都不是地址上的参数，而是**报文第二行开始的那些"键：值"**——要用"按头名取请求头"的方法
-  > **二级 · 方法**：`request.getHeader("User-Agent")`（客户端身份）、`request.getHeader("Host")`（主机名，浏览器访问时是 `localhost:8080`）
-  > **三级 · 骨架**：`String ua = request.getHeader("____"); String host = request.getHeader("____"); System.out.println("User-Agent = " + ua); System.out.println("Host = " + host);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import jakarta.servlet.http.HttpServletRequest;
-  > import org.springframework.web.bind.annotation.RequestMapping;
-  > import org.springframework.web.bind.annotation.RestController;
-  >
-  > @RestController
-  > public class HeaderController {
-  >
-  >     @RequestMapping("/header")
-  >     public String header(HttpServletRequest request) {
-  >         String userAgent = request.getHeader("User-Agent");
-  >         String host = request.getHeader("Host");
-  >         System.out.println("User-Agent = " + userAgent);
-  >         System.out.println("Host = " + host);
-  >         return "ok";
-  >     }
-  > }
-  > ```
-  > 两个问题：
-  > ① 两行取的都是**请求头（request header）**，不是请求行里的参数——所以要用 `getHeader("头名")`，而不是 `getParameter`；
-  > ② 因为**请求头是客户端自己填的**：请求头里的 `User-Agent` 就是"我是谁"的自述，本机实测用 curl 访问拿到的是 `curl/8.15.0`，用浏览器访问拿到的是 `Mozilla/5.0 (Windows NT 10.0; Win64; x64) … Chrome/…`；两台不同的客户端访问同一个地址，值自然不一样（`Host` 也会因为访问用的地址不同而变，如 `localhost:8080` 与 `127.0.0.1:8080`）。
+  **一级 · 思路**：客户端身份和主机名都不是地址上的参数，而是**报文第二行开始的那些"键：值"**——要用"按头名取请求头"的方法
+  **二级 · 方法**：`request.getHeader("User-Agent")`（客户端身份）、`request.getHeader("Host")`（主机名，浏览器访问时是 `localhost:8080`）
+  **三级 · 骨架**：`String ua = request.getHeader("____"); String host = request.getHeader("____"); System.out.println("User-Agent = " + ua); System.out.println("Host = " + host);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import jakarta.servlet.http.HttpServletRequest;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  @RestController
+  public class HeaderController {
+  
+      @RequestMapping("/header")
+      public String header(HttpServletRequest request) {
+          String userAgent = request.getHeader("User-Agent");
+          String host = request.getHeader("Host");
+          System.out.println("User-Agent = " + userAgent);
+          System.out.println("Host = " + host);
+          return "ok";
+      }
+  }
+  ```
+  两个问题：
+  ① 两行取的都是**请求头（request header）**，不是请求行里的参数——所以要用 `getHeader("头名")`，而不是 `getParameter`；
+  ② 因为**请求头是客户端自己填的**：请求头里的 `User-Agent` 就是"我是谁"的自述，本机实测用 curl 访问拿到的是 `curl/8.15.0`，用浏览器访问拿到的是 `Mozilla/5.0 (Windows NT 10.0; Win64; x64) … Chrome/…`；两台不同的客户端访问同一个地址，值自然不一样（`Host` 也会因为访问用的地址不同而变，如 `localhost:8080` 与 `127.0.0.1:8080`）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -290,62 +314,70 @@ PPT 第 30 页的注释里给了每个方法的预期结果，把它和报文对
   | URI 与 URL 的区别 | 一个只有路径、一个是完整地址（含协议/主机/端口） |
   | 请求头 | `User-Agent` 随客户端变化（curl 与浏览器不同） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先"拿到请求对象"，再"从它身上一个个取"——取参数、取路径、取头、取方式，最后把七行拼成一段字符串返回；第 9 步的两个问题回去看本篇开头 PPT 第 29 页那句原话
-  > **二级 · 方法**：`@RestController` + `@RequestMapping("/request")`；参数写 `HttpServletRequest request`；拼串用 `StringBuilder`（`append` 一串 `.append("\n")`），注意 `getRequestURL()` 要 `.toString()`
-  > **三级 · 骨架**：`String name = request.____("name"); String uri = request.____(); String url = request.____().toString(); String ua = request.____("User-Agent"); String method = request.____(); String qs = request.____();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > 1~7. 代码（本机实验室里用的就是这个结构，`HttpLabController`）：
-  >    ```java
-  >    package com.itheima;
-  >
-  >    import jakarta.servlet.http.HttpServletRequest;
-  >    import org.springframework.web.bind.annotation.RequestMapping;
-  >    import org.springframework.web.bind.annotation.RestController;
-  >
-  >    @RestController
-  >    public class RequestLabController {
-  >
-  >        @RequestMapping("/request")
-  >        public String request(HttpServletRequest request) {
-  >            // 1.请求参数
-  >            String name = request.getParameter("name");
-  >            String age = request.getParameter("age");
-  >            // 2.路径 uri 与完整地址 url
-  >            String uri = request.getRequestURI();
-  >            String url = request.getRequestURL().toString();
-  >            // 3.请求头
-  >            String userAgent = request.getHeader("User-Agent");
-  >            // 4.请求方式
-  >            String method = request.getMethod();
-  >            // 5.查询字符串
-  >            String queryString = request.getQueryString();
-  >
-  >            StringBuilder sb = new StringBuilder();
-  >            sb.append("getParameter(name)    = ").append(name).append("\n");
-  >            sb.append("getParameter(age)     = ").append(age).append("\n");
-  >            sb.append("getRequestURI()       = ").append(uri).append("\n");
-  >            sb.append("getRequestURL()       = ").append(url).append("\n");
-  >            sb.append("getHeader(User-Agent) = ").append(userAgent).append("\n");
-  >            sb.append("getMethod()           = ").append(method).append("\n");
-  >            sb.append("getQueryString()      = ").append(queryString);
-  >            return sb.toString();
-  >        }
-  >    }
-  >    ```
-  > 8. 访问 `http://localhost:8080/request?name=Tomcat&age=10` 的**本机实测**输出：
-  >    ```text
-  >    getParameter(name)    = Tomcat
-  >    getParameter(age)     = 10
-  >    getRequestURI()       = /request
-  >    getRequestURL()       = http://localhost:8080/request
-  >    getHeader(User-Agent) = curl/8.15.0
-  >    getMethod()           = GET
-  >    getQueryString()      = name=Tomcat&age=10
-  >    ```
-  >    （`User-Agent` 那一行取决于用什么访问：curl 是 `curl/8.15.0`，浏览器是一长串 `Mozilla/5.0 … Chrome/…`。）
-  > 9. 两个问题：
-  >    ① `uri` = `/request`（只有资源路径，来自请求行的 `GET /request HTTP/1.1` 那一段）；`url` = `http://localhost:8080/request`（完整地址，多了协议、主机、端口）。名字只差一个字母，**URL 才是能在浏览器里直接打开的地址**；另外 `getRequestURL()` 返回 `StringBuffer`，所以代码里多写了 `.toString()`；
-  >    ② 请求数据由 **Web 服务器（Tomcat）**解析并**封装成 `HttpServletRequest` 请求对象**，在调用 Controller 方法时**作为方法参数**传给该方法——所以方法里一行解析代码都不用写（PPT 第 29 页原话，也是 PPT 第 31 页问答的答案）。
+  **一级 · 思路**：先"拿到请求对象"，再"从它身上一个个取"——取参数、取路径、取头、取方式，最后把七行拼成一段字符串返回；第 9 步的两个问题回去看本篇开头 PPT 第 29 页那句原话
+  **二级 · 方法**：`@RestController` + `@RequestMapping("/request")`；参数写 `HttpServletRequest request`；拼串用 `StringBuilder`（`append` 一串 `.append("\n")`），注意 `getRequestURL()` 要 `.toString()`
+  **三级 · 骨架**：`String name = request.____("name"); String uri = request.____(); String url = request.____().toString(); String ua = request.____("User-Agent"); String method = request.____(); String qs = request.____();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  1~7. 代码（本机实验室里用的就是这个结构，`HttpLabController`）：
+     ```java
+     package com.itheima;
+  
+     import jakarta.servlet.http.HttpServletRequest;
+     import org.springframework.web.bind.annotation.RequestMapping;
+     import org.springframework.web.bind.annotation.RestController;
+  
+     @RestController
+     public class RequestLabController {
+  
+         @RequestMapping("/request")
+         public String request(HttpServletRequest request) {
+             // 1.请求参数
+             String name = request.getParameter("name");
+             String age = request.getParameter("age");
+             // 2.路径 uri 与完整地址 url
+             String uri = request.getRequestURI();
+             String url = request.getRequestURL().toString();
+             // 3.请求头
+             String userAgent = request.getHeader("User-Agent");
+             // 4.请求方式
+             String method = request.getMethod();
+             // 5.查询字符串
+             String queryString = request.getQueryString();
+  
+             StringBuilder sb = new StringBuilder();
+             sb.append("getParameter(name)    = ").append(name).append("\n");
+             sb.append("getParameter(age)     = ").append(age).append("\n");
+             sb.append("getRequestURI()       = ").append(uri).append("\n");
+             sb.append("getRequestURL()       = ").append(url).append("\n");
+             sb.append("getHeader(User-Agent) = ").append(userAgent).append("\n");
+             sb.append("getMethod()           = ").append(method).append("\n");
+             sb.append("getQueryString()      = ").append(queryString);
+             return sb.toString();
+         }
+     }
+     ```
+  8. 访问 `http://localhost:8080/request?name=Tomcat&age=10` 的**本机实测**输出：
+     ```text
+     getParameter(name)    = Tomcat
+     getParameter(age)     = 10
+     getRequestURI()       = /request
+     getRequestURL()       = http://localhost:8080/request
+     getHeader(User-Agent) = curl/8.15.0
+     getMethod()           = GET
+     getQueryString()      = name=Tomcat&age=10
+     ```
+     （`User-Agent` 那一行取决于用什么访问：curl 是 `curl/8.15.0`，浏览器是一长串 `Mozilla/5.0 … Chrome/…`。）
+  9. 两个问题：
+     ① `uri` = `/request`（只有资源路径，来自请求行的 `GET /request HTTP/1.1` 那一段）；`url` = `http://localhost:8080/request`（完整地址，多了协议、主机、端口）。名字只差一个字母，**URL 才是能在浏览器里直接打开的地址**；另外 `getRequestURL()` 返回 `StringBuffer`，所以代码里多写了 `.toString()`；
+     ② 请求数据由 **Web 服务器（Tomcat）**解析并**封装成 `HttpServletRequest` 请求对象**，在调用 Controller 方法时**作为方法参数**传给该方法——所以方法里一行解析代码都不用写（PPT 第 29 页原话，也是 PPT 第 31 页问答的答案）。
+
+  :::
+

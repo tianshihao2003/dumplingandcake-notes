@@ -33,7 +33,7 @@ plt.plot(x, y)     # 折线图
 plt.show()         # 显示图表
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **X 轴的数据数量与 Y 轴的数据数量必须一致**，否则画不出来（10 个点就必须都是 10 个）。
 
 ## 一份完整的折线图
@@ -78,7 +78,7 @@ plt.show()
 | 图例（Legend） | `plt.legend(loc='upper right')` |
 | 显示图表 | `plt.show()` |
 
-> [!TIP]
+> [!TIP] 提示
 > `label` 与 `legend` 是配套的：**每条折线都要写 `label`，`plt.legend()` 才会显示出图例**；只调 `legend()` 不写 `label`，图例是空的。
 
 ## 相关
@@ -101,62 +101,86 @@ plt.show()
 - [ ] **2-1 画一条最简单的折线**
   x 取 1~10，y 取这 10 个数的平方，画出折线图（不用设置中文）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：准备两组等长的列表 → 画 → 显示
-  > **二级 · 方法**：`plt.plot(x, y)` / `plt.show()`
-  > **三级 · 骨架**：`y = [i ** 2 for i in x]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import matplotlib.pyplot as plt
-  >
-  > # 2-1
-  > x = [i for i in range(1, 11)]
-  > y = [i ** 2 for i in x]
-  > plt.plot(x, y)
-  > plt.show()
-  > ```
+  **一级 · 思路**：准备两组等长的列表 → 画 → 显示
+  **二级 · 方法**：`plt.plot(x, y)` / `plt.show()`
+  **三级 · 骨架**：`y = [i ** 2 for i in x]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import matplotlib.pyplot as plt
+  
+  # 2-1
+  x = [i for i in range(1, 11)]
+  y = [i ** 2 for i in x]
+  plt.plot(x, y)
+  plt.show()
+  ```
+
+  :::
+
 
 - [ ] **2-2 加满细节的折线图**
   画两条折线（北京/西安的气温，数据自拟），要求有：中文标题、XY 轴标签、X 轴刻度、网格线、图例。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先设中文字体，再画线（带 label），最后统一设置文字与网格
-  > **二级 · 方法**：`rcParams` / `plot(..., label=)` / `title` / `xlabel` / `ylabel` / `xticks` / `grid` / `legend`
-  > **三级 · 骨架**：`plt.legend(loc='upper right')` 显示图例
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > plt.rcParams['font.sans-serif'] = ['SimHei']
-  >
-  > x = [i for i in range(1, 13)]
-  > y_bj = [10, 12, 15, 18, 22, 26, 28, 27, 23, 18, 13, 11]
-  > y_xa = [12, 14, 17, 21, 25, 29, 31, 30, 26, 21, 16, 13]
-  >
-  > plt.figure(figsize=(10, 5))
-  > plt.plot(x, y_bj, label='北京')
-  > plt.plot(x, y_xa, label='西安')
-  > plt.title('气温变化折线图', fontsize=15)
-  > plt.xlabel('月份')
-  > plt.ylabel('温度(℃)')
-  > plt.xticks(x)
-  > plt.grid(linestyle='--', alpha=0.3)
-  > plt.legend(loc='upper right')
-  > ```
+  **一级 · 思路**：先设中文字体，再画线（带 label），最后统一设置文字与网格
+  **二级 · 方法**：`rcParams` / `plot(..., label=)` / `title` / `xlabel` / `ylabel` / `xticks` / `grid` / `legend`
+  **三级 · 骨架**：`plt.legend(loc='upper right')` 显示图例
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  plt.rcParams['font.sans-serif'] = ['SimHei']
+  
+  x = [i for i in range(1, 13)]
+  y_bj = [10, 12, 15, 18, 22, 26, 28, 27, 23, 18, 13, 11]
+  y_xa = [12, 14, 17, 21, 25, 29, 31, 30, 26, 21, 16, 13]
+  
+  plt.figure(figsize=(10, 5))
+  plt.plot(x, y_bj, label='北京')
+  plt.plot(x, y_xa, label='西安')
+  plt.title('气温变化折线图', fontsize=15)
+  plt.xlabel('月份')
+  plt.ylabel('温度(℃)')
+  plt.xticks(x)
+  plt.grid(linestyle='--', alpha=0.3)
+  plt.legend(loc='upper right')
+  ```
+
+  :::
+
 
 - [ ] **2-3 把图保存成图片**
   在 2-2 的基础上，把图表保存成 `chart.png` 再显示。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：保存要在 `show()` 之前（show 之后画布会被清掉）
-  > **二级 · 方法**：`plt.savefig('chart.png')`
-  > **三级 · 骨架**：`savefig` 也可以指定 `dpi=100`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3：接在 2-2 代码的最后
-  > plt.savefig('chart.png')   # 先保存
-  > plt.show()                 # 再显示
-  > ```
+  **一级 · 思路**：保存要在 `show()` 之前（show 之后画布会被清掉）
+  **二级 · 方法**：`plt.savefig('chart.png')`
+  **三级 · 骨架**：`savefig` 也可以指定 `dpi=100`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3：接在 2-2 代码的最后
+  plt.savefig('chart.png')   # 先保存
+  plt.show()                 # 再显示
+  ```
+
+  :::
+
 

@@ -111,7 +111,7 @@ spring-boot-starter-parent（SpringBoot 官方的父工程，管 SpringBoot 全�
 ![父工程 pom 片段](https://img.tsh520.cn/file/blog/article/15-父工程pom片段.jpg)
 *图：PPT 第 15 页——父工程 pom 的写法：上半段是 `<parent>`（继承 `spring-boot-starter-parent`、`<relativePath/>` 写空），下半段是父工程自己的坐标与 `<packaging>pom</packaging>`*
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 15 页这张图里 `spring-boot-starter-parent` 的版本写的是 **3.1.3**，而课程代码 `tlias-parent/pom.xml` 里是 **3.2.10** —— 同一份讲义里前后不一致。**以课程代码的 3.2.10 为准**（本机实验工程里也是 3.2.10），不要照着 PPT 的图手抄版本号。
 
 ### 3.2 ② 在子工程中配置继承关系
@@ -210,10 +210,10 @@ PPT 第 17 页给的解法是**版本锁定**：
 
 版本从哪来？就从父工程那份清单里"对号入座"。这样版本仍然只有**一处**（父工程），但依赖不会强塞给不用的模块。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 版本锁定是两件事配合：**父工程给"版本清单"（`<dependencyManagement>`）+ 子工程自己写依赖（不写版本）**。子工程如果既没写 `<version>`、父工程的清单里也没有它，Maven 会直接报错，提示依赖的 `version` 缺失。
 
-> [!TIP]
+> [!TIP] 提示
 > PPT 第 17 页的示意图右上角还标了一个 **0.9.2** 的版本号，讲的就是"版本被别人改掉/写岔了"这种情况 —— 对应的是第 15 页那条规则：**父子工程都配了同一个依赖的不同版本时，以子工程的为准**。所以在用了 `<dependencyManagement>` 统一版本之后，子工程里就不要再手写版本号，免得又出现"清单里是 0.9.1、实际用的是别的版本"。
 
 ## 五、`<dependencyManagement>` 与 `<dependencies>` 的区别（PPT 第 19 页）
@@ -274,7 +274,7 @@ PPT 第 17 页给的解法是**版本锁定**：
 
 好处很直白：**版本号只有一处**，升级时改 `<properties>` 里那一行就行；而且打开父工程 pom，一眼就能看到"这个项目都用了哪些版本"。属性名（`lombok.version`、`jjwt.version`）是自己起的，课程惯例是 `<artifactId>.version`。
 
-> [!TIP]
+> [!TIP] 提示
 > PPT 第 18 页这个例子里的 lombok 版本写的是 **1.18.30**，而课程代码 `tlias-parent/pom.xml` 里是 **1.18.34**（PPT 第 12 页那三个重复的 lombok 依赖也是 1.18.34）—— 还是那句话，**版本以课程代码为准**，PPT 这页只是演示"属性怎么声明、怎么引用"。
 
 课程代码里父工程一共声明了 7 个自定义属性：
@@ -319,7 +319,7 @@ PPT 第 17 页给的解法是**版本锁定**：
 
 `<module>` 里写的是**模块的相对路径**（`../tlias-pojo` 表示"上一级目录里的 tlias-pojo 模块"），Maven 顺着这个路径找到那个模块的 pom，就把它纳入本次构建。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **注意**：聚合工程中所包含的模块，在构建时，会**自动根据模块间的依赖关系设置构建顺序**，与聚合工程中模块的配置书写位置**无关**。（PPT 第 21 页）
 >
 > 也就是说：`<modules>` 里写的顺序不重要，Maven 会自己算出"谁先谁后"——先构建被依赖的模块（pojo、utils），最后构建依赖别人的模块（web-management）。想改变构建顺序，只能改变**依赖关系**，改书写顺序没用。
@@ -334,7 +334,7 @@ PPT 第 17 页给的解法是**版本锁定**：
 mvn clean install -DskipTests
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）—— 完整输出（含模块耗时）：
 >
 > ```text
@@ -432,27 +432,35 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   3. 写出它自己的坐标（`com.itheima:tlias-parent:1.0-SNAPSHOT`）。
   （练习文件 `test_92_继承与聚合.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：父工程的第一个标志就是"打包方式"——不写代码的工程该打成什么；第二个标志是"它自己也是别人的子工程"
-  > **二级 · 方法**：用 `<packaging>` 声明打包方式（值取三种类型里"不写代码"的那一个）；用 `<parent>` 继承 `spring-boot-starter-parent`，并且把 `<relativePath>` 写空（表示去仓库找，不是在上级目录找）
-  > **三级 · 骨架**：`<packaging>____</packaging>`；`<parent> … <relativePath/> </parent>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <parent>
-  >     <groupId>org.springframework.boot</groupId>
-  >     <artifactId>spring-boot-starter-parent</artifactId>
-  >     <version>3.2.10</version>
-  >     <!--父工程的pom.xml的相对路径-->
-  >     <relativePath/> <!-- lookup parent from repository -->
-  > </parent>
-  >
-  > <groupId>com.itheima</groupId>
-  > <artifactId>tlias-parent</artifactId>
-  > <version>1.0-SNAPSHOT</version>
-  > <packaging>pom</packaging>
-  > ```
-  > 说明：`<packaging>pom</packaging>` 说明"父工程/聚合工程，不写代码、仅做依赖管理"；`<relativePath/>` 写空是因为 `spring-boot-starter-parent` 是从仓库下载的第三方构件，上级目录里并没有它。这份片段就是课程代码 `tlias-parent/pom.xml` 的开头部分（PPT 第 15 页那张图上的版本号写的是 3.1.3，**以课程代码的 3.2.10 为准**）。
+  **一级 · 思路**：父工程的第一个标志就是"打包方式"——不写代码的工程该打成什么；第二个标志是"它自己也是别人的子工程"
+  **二级 · 方法**：用 `<packaging>` 声明打包方式（值取三种类型里"不写代码"的那一个）；用 `<parent>` 继承 `spring-boot-starter-parent`，并且把 `<relativePath>` 写空（表示去仓库找，不是在上级目录找）
+  **三级 · 骨架**：`<packaging>____</packaging>`；`<parent> … <relativePath/> </parent>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.2.10</version>
+      <!--父工程的pom.xml的相对路径-->
+      <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  
+  <groupId>com.itheima</groupId>
+  <artifactId>tlias-parent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  ```
+  说明：`<packaging>pom</packaging>` 说明"父工程/聚合工程，不写代码、仅做依赖管理"；`<relativePath/>` 写空是因为 `spring-boot-starter-parent` 是从仓库下载的第三方构件，上级目录里并没有它。这份片段就是课程代码 `tlias-parent/pom.xml` 的开头部分（PPT 第 15 页那张图上的版本号写的是 3.1.3，**以课程代码的 3.2.10 为准**）。
+
+  :::
+
 
 - [ ] **2-2 让子工程"认父"**
   已经有一个父工程 `com.itheima:tlias-parent:1.0-SNAPSHOT`，它就放在**上一级目录**的 `tlias-parent` 文件夹里。请给子工程 `tlias-pojo` 写出 pom 片段：
@@ -460,25 +468,33 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   2. 写完以后回答：这个子工程的 `groupId` 还需要写吗？为什么？
   （练习文件 `test_92_继承与聚合.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：子工程"认父"是写在子工程 pom 里的；"父工程的位置"有专门的标签来指
-  > **二级 · 方法**：`<parent>` 里写三个坐标，再加 `<relativePath>` 指向父工程的 pom.xml；坐标三项里 groupId 可以省，因为会自动继承父工程的
-  > **三级 · 骨架**：`<parent> … <relativePath>../____/pom.xml</relativePath> </parent>`，然后子工程自己只写 `<artifactId>` 和 `<version>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <!--父工程-->
-  > <parent>
-  >     <groupId>com.itheima</groupId>
-  >     <artifactId>tlias-parent</artifactId>
-  >     <version>1.0-SNAPSHOT</version>
-  >     <relativePath>../tlias-parent/pom.xml</relativePath>
-  > </parent>
-  >
-  > <artifactId>tlias-pojo</artifactId>
-  > <version>1.0-SNAPSHOT</version>
-  > ```
-  > 2. **不需要再写 `groupId`**：子工程配置了继承关系之后，坐标中的 groupId 会自动继承父工程的（这里就是 `com.itheima`）。另外 `<relativePath>` 的作用是"指定父工程 pom 文件的相对位置"，不写的话 Maven 会去本地仓库/远程仓库找父工程 —— 父工程还没 `install` 过就会报错。
+  **一级 · 思路**：子工程"认父"是写在子工程 pom 里的；"父工程的位置"有专门的标签来指
+  **二级 · 方法**：`<parent>` 里写三个坐标，再加 `<relativePath>` 指向父工程的 pom.xml；坐标三项里 groupId 可以省，因为会自动继承父工程的
+  **三级 · 骨架**：`<parent> … <relativePath>../____/pom.xml</relativePath> </parent>`，然后子工程自己只写 `<artifactId>` 和 `<version>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <!--父工程-->
+  <parent>
+      <groupId>com.itheima</groupId>
+      <artifactId>tlias-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <relativePath>../tlias-parent/pom.xml</relativePath>
+  </parent>
+  
+  <artifactId>tlias-pojo</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  ```
+  2. **不需要再写 `groupId`**：子工程配置了继承关系之后，坐标中的 groupId 会自动继承父工程的（这里就是 `com.itheima`）。另外 `<relativePath>` 的作用是"指定父工程 pom 文件的相对位置"，不写的话 Maven 会去本地仓库/远程仓库找父工程 —— 父工程还没 `install` 过就会报错。
+
+  :::
+
 
 - [ ] **2-3 让三个子模块共用同一份依赖版本管理**
   场景：OSS 的 SDK（`com.aliyun.oss:aliyun-sdk-oss:3.17.4`）和 JJWT（`io.jsonwebtoken:jjwt:0.9.1`）**只有工具类模块用得到**，实体类模块、业务模块都不需要；但版本必须三处一致、只在一处改。请：
@@ -487,55 +503,63 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   3. 把两个版本号提到**自定义属性**里，并在 1、2 两步用 `${}` 引用。
   （练习文件 `test_92_继承与聚合.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：父工程要写的是"**版本清单**"而不是"依赖"——这两者在 Maven 里是两个不同的标签；子工程再自己写依赖、只写前两项坐标
-  > **二级 · 方法**：父工程用 `<dependencyManagement>` 包一层 `<dependencies>`（注意是"管理"不是"引入"）；版本号抽到 `<properties>` 里用 `<名字.version>` 风格命名，然后用 `${名字.version}` 引用
-  > **三级 · 骨架**：`<properties><aliyun.sdk.version>____</aliyun.sdk.version></properties>`；父工程 `<dependencyManagement><dependencies><dependency>…<version>${____}</version></dependency></dependencies></dependencyManagement>`；子工程 `<dependencies><dependency>…（不写 version）</dependency></dependencies>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 父工程（`tlias-parent/pom.xml`，节选，和课程代码一致）：
-  >    ```xml
-  >    <properties>
-  >        <!--自定义属性-->
-  >        <aliyun.sdk.version>3.17.4</aliyun.sdk.version>
-  >        <jjwt.version>0.9.1</jjwt.version>
-  >    </properties>
-  >
-  >    <!--统一管理依赖的版本-->
-  >    <dependencyManagement>
-  >        <dependencies>
-  >            <dependency>
-  >                <groupId>com.aliyun.oss</groupId>
-  >                <artifactId>aliyun-sdk-oss</artifactId>
-  >                <version>${aliyun.sdk.version}</version>
-  >            </dependency>
-  >
-  >            <!--JWT-->
-  >            <dependency>
-  >                <groupId>io.jsonwebtoken</groupId>
-  >                <artifactId>jjwt</artifactId>
-  >                <version>${jjwt.version}</version>
-  >            </dependency>
-  >        </dependencies>
-  >    </dependencyManagement>
-  >    ```
-  > 2. 子工程（`tlias-utils/pom.xml`，节选）——**只写 groupId + artifactId，不写 version**：
-  >    ```xml
-  >    <dependencies>
-  >        <!--阿里云OSS依赖-->
-  >        <dependency>
-  >            <groupId>com.aliyun.oss</groupId>
-  >            <artifactId>aliyun-sdk-oss</artifactId>
-  >        </dependency>
-  >
-  >        <!--JWT-->
-  >        <dependency>
-  >            <groupId>io.jsonwebtoken</groupId>
-  >            <artifactId>jjwt</artifactId>
-  >        </dependency>
-  >    </dependencies>
-  >    ```
-  >    为什么不能用 `<dependencies>` 直接放父工程？那样会把 OSS、JJWT 强行塞给 `tlias-pojo`、`tlias-web-management`，它们根本用不到；`<dependencyManagement>` 只给"版本清单"，用不用由子工程自己决定 —— 这就是 PPT 第 19 页那两句的区别。
+  **一级 · 思路**：父工程要写的是"**版本清单**"而不是"依赖"——这两者在 Maven 里是两个不同的标签；子工程再自己写依赖、只写前两项坐标
+  **二级 · 方法**：父工程用 `<dependencyManagement>` 包一层 `<dependencies>`（注意是"管理"不是"引入"）；版本号抽到 `<properties>` 里用 `<名字.version>` 风格命名，然后用 `${名字.version}` 引用
+  **三级 · 骨架**：`<properties><aliyun.sdk.version>____</aliyun.sdk.version></properties>`；父工程 `<dependencyManagement><dependencies><dependency>…<version>${____}</version></dependency></dependencies></dependencyManagement>`；子工程 `<dependencies><dependency>…（不写 version）</dependency></dependencies>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 父工程（`tlias-parent/pom.xml`，节选，和课程代码一致）：
+     ```xml
+     <properties>
+         <!--自定义属性-->
+         <aliyun.sdk.version>3.17.4</aliyun.sdk.version>
+         <jjwt.version>0.9.1</jjwt.version>
+     </properties>
+  
+     <!--统一管理依赖的版本-->
+     <dependencyManagement>
+         <dependencies>
+             <dependency>
+                 <groupId>com.aliyun.oss</groupId>
+                 <artifactId>aliyun-sdk-oss</artifactId>
+                 <version>${aliyun.sdk.version}</version>
+             </dependency>
+  
+             <!--JWT-->
+             <dependency>
+                 <groupId>io.jsonwebtoken</groupId>
+                 <artifactId>jjwt</artifactId>
+                 <version>${jjwt.version}</version>
+             </dependency>
+         </dependencies>
+     </dependencyManagement>
+     ```
+  2. 子工程（`tlias-utils/pom.xml`，节选）——**只写 groupId + artifactId，不写 version**：
+     ```xml
+     <dependencies>
+         <!--阿里云OSS依赖-->
+         <dependency>
+             <groupId>com.aliyun.oss</groupId>
+             <artifactId>aliyun-sdk-oss</artifactId>
+         </dependency>
+  
+         <!--JWT-->
+         <dependency>
+             <groupId>io.jsonwebtoken</groupId>
+             <artifactId>jjwt</artifactId>
+         </dependency>
+     </dependencies>
+     ```
+     为什么不能用 `<dependencies>` 直接放父工程？那样会把 OSS、JJWT 强行塞给 `tlias-pojo`、`tlias-web-management`，它们根本用不到；`<dependencyManagement>` 只给"版本清单"，用不用由子工程自己决定 —— 这就是 PPT 第 19 页那两句的区别。
+
+  :::
+
 
 - [ ] **2-4 一条命令构建全部模块**
   三个子模块和一个父工程（分别在 `../tlias-pojo`、`../tlias-utils`、`../tlias-web-management`）现在要"一起构建"。请：
@@ -544,23 +568,31 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   3. 回答：如果我把这三个模块的**书写顺序**倒过来写，构建顺序会变吗？为什么？
   （练习文件 `test_92_继承与聚合.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把多个模块"组织成一个整体、同时构建"这件事叫聚合，配置写在**父工程**里；至于谁先谁后，先看模块之间"谁依赖谁"
-  > **二级 · 方法**：父工程用 `<modules>` 列子模块，每项写模块的相对路径；构建顺序由**依赖关系**决定，不由书写位置决定
-  > **三级 · 骨架**：`<modules><module>../____</module>…</modules>`；顺序：被依赖的在前
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 父工程（聚合工程）里：
-  >    ```xml
-  >    <!--聚合-->
-  >    <modules>
-  >        <module>../tlias-pojo</module>
-  >        <module>../tlias-utils</module>
-  >        <module>../tlias-web-management</module>
-  >    </modules>
-  >    ```
-  > 2. 构建顺序：**`tlias-parent`（父工程自己）→ `tlias-pojo` → `tlias-utils` → `tlias-web-management`**。本机实测（Maven 3.9.14 / JDK 17）在父工程上执行一次 `mvn clean install -DskipTests`，输出正是 `[1/4] tlias-parent → [2/4] tlias-pojo → [3/4] tlias-utils → [4/4] tlias-web-management`，四个模块全部 `SUCCESS`，`Total time: 11.982 s`。
-  > 3. **不会变**。PPT 第 21 页的"注意"说得明白：聚合工程中所包含的模块在构建时，会**自动根据模块间的依赖关系**设置构建顺序，**与聚合工程中模块的配置书写位置无关**。因为 `tlias-web-management` 依赖 pojo 和 utils，所以它必须排在最后 —— 想改顺序只能改依赖关系。
+  **一级 · 思路**：把多个模块"组织成一个整体、同时构建"这件事叫聚合，配置写在**父工程**里；至于谁先谁后，先看模块之间"谁依赖谁"
+  **二级 · 方法**：父工程用 `<modules>` 列子模块，每项写模块的相对路径；构建顺序由**依赖关系**决定，不由书写位置决定
+  **三级 · 骨架**：`<modules><module>../____</module>…</modules>`；顺序：被依赖的在前
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 父工程（聚合工程）里：
+     ```xml
+     <!--聚合-->
+     <modules>
+         <module>../tlias-pojo</module>
+         <module>../tlias-utils</module>
+         <module>../tlias-web-management</module>
+     </modules>
+     ```
+  2. 构建顺序：**`tlias-parent`（父工程自己）→ `tlias-pojo` → `tlias-utils` → `tlias-web-management`**。本机实测（Maven 3.9.14 / JDK 17）在父工程上执行一次 `mvn clean install -DskipTests`，输出正是 `[1/4] tlias-parent → [2/4] tlias-pojo → [3/4] tlias-utils → [4/4] tlias-web-management`，四个模块全部 `SUCCESS`，`Total time: 11.982 s`。
+  3. **不会变**。PPT 第 21 页的"注意"说得明白：聚合工程中所包含的模块在构建时，会**自动根据模块间的依赖关系**设置构建顺序，**与聚合工程中模块的配置书写位置无关**。因为 `tlias-web-management` 依赖 pojo 和 utils，所以它必须排在最后 —— 想改顺序只能改依赖关系。
+
+  :::
+
 
 - [ ] **2-5 说清"直接引入"和"版本管理"的区别**
   用一句话各自概括下面两种写法的**效果**，并说明它们分别适合放什么依赖：
@@ -568,15 +600,23 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   2. 父工程里只写了依赖的版本清单（子工程还是要自己写依赖）。
   再回答：为什么课程把 lombok 放在第 1 种写法里、把 OSS/JJWT 放在第 2 种写法里？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一句话概括时抓住"送上门 / 给清单"这个区别：前者子工程自动拿，后者子工程自己点名
-  > **二级 · 方法**：判断标准是"**所有**模块都要用"还是"**部分**模块才用"
-  > **三级 · 骨架**：第 1 种 = `<dependencies>`（直接依赖、子工程直接继承）；第 2 种 = `<dependencyManagement>`（统一管理版本、子工程引入时不写版本）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 这是 **`<dependencies>`**（直接依赖）：父工程配好之后，**子工程会直接继承下来**，什么额外配置都不用写。
-  > 2. 这是 **`<dependencyManagement>`**（统一管理依赖版本）：它**不会直接依赖**，只是"版本清单"；子工程还要在自己的 `<dependencies>` 里引入所需依赖，只是**无需指定版本**（版本从清单里拿）。
-  > 3. **判断标准是"是不是每个模块都要用"**：lombok 是 pojo、utils、web-management 三个模块都需要的（都用 `@Data`、`@Slf4j`），所以放 `<dependencies>` 一次配好、人人有份，省事；OSS SDK 和 JJWT 只有 `tlias-utils` 用得到，放 `<dependencies>` 会把它们强行塞给所有模块（下载更多 jar、传递依赖也更多），所以放 `<dependencyManagement>` 只给版本清单，用不用由子工程自己说。
+  **一级 · 思路**：一句话概括时抓住"送上门 / 给清单"这个区别：前者子工程自动拿，后者子工程自己点名
+  **二级 · 方法**：判断标准是"**所有**模块都要用"还是"**部分**模块才用"
+  **三级 · 骨架**：第 1 种 = `<dependencies>`（直接依赖、子工程直接继承）；第 2 种 = `<dependencyManagement>`（统一管理版本、子工程引入时不写版本）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 这是 **`<dependencies>`**（直接依赖）：父工程配好之后，**子工程会直接继承下来**，什么额外配置都不用写。
+  2. 这是 **`<dependencyManagement>`**（统一管理依赖版本）：它**不会直接依赖**，只是"版本清单"；子工程还要在自己的 `<dependencies>` 里引入所需依赖，只是**无需指定版本**（版本从清单里拿）。
+  3. **判断标准是"是不是每个模块都要用"**：lombok 是 pojo、utils、web-management 三个模块都需要的（都用 `@Data`、`@Slf4j`），所以放 `<dependencies>` 一次配好、人人有份，省事；OSS SDK 和 JJWT 只有 `tlias-utils` 用得到，放 `<dependencies>` 会把它们强行塞给所有模块（下载更多 jar、传递依赖也更多），所以放 `<dependencyManagement>` 只给版本清单，用不用由子工程自己说。
+
+  :::
+
 
 ### 三、综合题
 
@@ -601,116 +641,124 @@ PPT 第 22 页用一问一答把两者放在一起对比：
   | 自定义属性 | `<properties>` 里的 `${xxx.version}` |
   | 聚合 | 父工程 `<modules>`、构建顺序由依赖关系决定 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：父工程的三块内容是"往上继承（`<parent>`）、往下管理（`<dependencies>` + `<dependencyManagement>`）、往下聚合（`<modules>`）"，各写各的、别混在一起
-  > **二级 · 方法**：版本全部走 `<properties>`；"所有模块都用"的依赖放 `<dependencies>`，"只有部分模块用"的放 `<dependencyManagement>`；构建顺序按"被依赖的先构建"
-  > **三级 · 骨架**：`<packaging>____</packaging>` / `<properties>…</properties>` / `<dependencies>…</dependencies>` / `<dependencyManagement><dependencies>…</dependencies></dependencyManagement>` / `<modules>…</modules>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1~3. 父工程 `tlias-parent/pom.xml`（与课程代码一致，省略 XML 声明与命名空间）：
-  >    ```xml
-  >    <parent>
-  >        <groupId>org.springframework.boot</groupId>
-  >        <artifactId>spring-boot-starter-parent</artifactId>
-  >        <version>3.2.10</version>
-  >        <relativePath/> <!-- 去仓库里拿 SpringBoot 官方父工程 -->
-  >    </parent>
-  >
-  >    <groupId>com.itheima</groupId>
-  >    <artifactId>tlias-parent</artifactId>
-  >    <version>1.0-SNAPSHOT</version>
-  >    <packaging>pom</packaging>   <!-- 父工程/聚合工程：不写代码，仅做依赖管理 -->
-  >
-  >    <properties>
-  >        <maven.compiler.source>17</maven.compiler.source>
-  >        <maven.compiler.target>17</maven.compiler.target>
-  >        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  >
-  >        <!--自定义属性-->
-  >        <lombok.version>1.18.34</lombok.version>
-  >        <spring.boot.starter.version>3.2.10</spring.boot.starter.version>
-  >        <aliyun.sdk.version>3.17.4</aliyun.sdk.version>
-  >        <jaxb.api.version>2.3.1</jaxb.api.version>
-  >        <activation.version>1.1.1</activation.version>
-  >        <jaxb.runtime>2.3.3</jaxb.runtime>
-  >        <jjwt.version>0.9.1</jjwt.version>
-  >    </properties>
-  >
-  >    <!--直接引入依赖：所有子工程都继承（人人有份）-->
-  >    <dependencies>
-  >        <dependency>
-  >            <groupId>org.projectlombok</groupId>
-  >            <artifactId>lombok</artifactId>
-  >            <version>${lombok.version}</version>
-  >            <optional>true</optional>
-  >        </dependency>
-  >
-  >        <dependency>
-  >            <groupId>org.springframework.boot</groupId>
-  >            <artifactId>spring-boot-starter</artifactId>
-  >            <version>${spring.boot.starter.version}</version>
-  >        </dependency>
-  >    </dependencies>
-  >
-  >    <!--统一管理依赖的版本：只给清单，用不用子工程自己说-->
-  >    <dependencyManagement>
-  >        <dependencies>
-  >            <dependency>
-  >                <groupId>com.aliyun.oss</groupId>
-  >                <artifactId>aliyun-sdk-oss</artifactId>
-  >                <version>${aliyun.sdk.version}</version>
-  >            </dependency>
-  >
-  >            <dependency>
-  >                <groupId>javax.xml.bind</groupId>
-  >                <artifactId>jaxb-api</artifactId>
-  >                <version>${jaxb.api.version}</version>
-  >            </dependency>
-  >            <dependency>
-  >                <groupId>javax.activation</groupId>
-  >                <artifactId>activation</artifactId>
-  >                <version>${activation.version}</version>
-  >            </dependency>
-  >            <!-- no more than 2.3.3-->
-  >            <dependency>
-  >                <groupId>org.glassfish.jaxb</groupId>
-  >                <artifactId>jaxb-runtime</artifactId>
-  >                <version>${jaxb.runtime}</version>
-  >            </dependency>
-  >
-  >            <!--JWT-->
-  >            <dependency>
-  >                <groupId>io.jsonwebtoken</groupId>
-  >                <artifactId>jjwt</artifactId>
-  >                <version>${jjwt.version}</version>
-  >            </dependency>
-  >        </dependencies>
-  >    </dependencyManagement>
-  >    ```
-  > 4. 子工程 `tlias-pojo/pom.xml`：
-  >    ```xml
-  >    <!--父工程-->
-  >    <parent>
-  >        <groupId>com.itheima</groupId>
-  >        <artifactId>tlias-parent</artifactId>
-  >        <version>1.0-SNAPSHOT</version>
-  >        <relativePath>../tlias-parent/pom.xml</relativePath>
-  >    </parent>
-  >
-  >    <artifactId>tlias-pojo</artifactId>
-  >    <version>1.0-SNAPSHOT</version>
-  >    ```
-  >    `groupId` 可以不写：**子工程配置了继承关系之后，坐标中的 groupId 会自动继承父工程的**（`com.itheima`）；同样地，lombok、`spring-boot-starter` 也不用再写，它们从父工程的 `<dependencies>` 里继承下来了。
-  > 5. 聚合（写在父工程里）：
-  >    ```xml
-  >    <!--聚合-->
-  >    <modules>
-  >        <module>../tlias-pojo</module>
-  >        <module>../tlias-utils</module>
-  >        <module>../tlias-web-management</module>
-  >    </modules>
-  >    ```
-  >    预测顺序：`tlias-parent → tlias-pojo → tlias-utils → tlias-web-management`（本机实测在父工程上执行 `mvn clean install -DskipTests`，输出为 `[1/4]`~`[4/4]` 四个模块全 `SUCCESS`，`Total time: 11.982 s`；顺序不是书写顺序，而是**模块间依赖关系**决定的）。
-  > 6. 两个对比：
-  >    ① **`<dependencies>` 是直接依赖**，父工程配了依赖，子工程会**直接继承下来**；**`<dependencyManagement>` 是统一管理依赖版本**，**不会直接依赖**，还需要在子工程中引入所需依赖（**无需指定版本**）。
-  >    ② **联系**：继承与聚合**都属于设计型模块**、**打包方式都为 pom**、**常将两种关系制作到同一个 pom 文件中**（`tlias-parent` 就是这样）。**区别**：**继承用于简化依赖配置、统一管理依赖版本，是在子工程中配置继承关系**；**聚合用于快速构建项目，是在父工程（聚合工程）中配置聚合的模块**。
+  **一级 · 思路**：父工程的三块内容是"往上继承（`<parent>`）、往下管理（`<dependencies>` + `<dependencyManagement>`）、往下聚合（`<modules>`）"，各写各的、别混在一起
+  **二级 · 方法**：版本全部走 `<properties>`；"所有模块都用"的依赖放 `<dependencies>`，"只有部分模块用"的放 `<dependencyManagement>`；构建顺序按"被依赖的先构建"
+  **三级 · 骨架**：`<packaging>____</packaging>` / `<properties>…</properties>` / `<dependencies>…</dependencies>` / `<dependencyManagement><dependencies>…</dependencies></dependencyManagement>` / `<modules>…</modules>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1~3. 父工程 `tlias-parent/pom.xml`（与课程代码一致，省略 XML 声明与命名空间）：
+     ```xml
+     <parent>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-parent</artifactId>
+         <version>3.2.10</version>
+         <relativePath/> <!-- 去仓库里拿 SpringBoot 官方父工程 -->
+     </parent>
+  
+     <groupId>com.itheima</groupId>
+     <artifactId>tlias-parent</artifactId>
+     <version>1.0-SNAPSHOT</version>
+     <packaging>pom</packaging>   <!-- 父工程/聚合工程：不写代码，仅做依赖管理 -->
+  
+     <properties>
+         <maven.compiler.source>17</maven.compiler.source>
+         <maven.compiler.target>17</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  
+         <!--自定义属性-->
+         <lombok.version>1.18.34</lombok.version>
+         <spring.boot.starter.version>3.2.10</spring.boot.starter.version>
+         <aliyun.sdk.version>3.17.4</aliyun.sdk.version>
+         <jaxb.api.version>2.3.1</jaxb.api.version>
+         <activation.version>1.1.1</activation.version>
+         <jaxb.runtime>2.3.3</jaxb.runtime>
+         <jjwt.version>0.9.1</jjwt.version>
+     </properties>
+  
+     <!--直接引入依赖：所有子工程都继承（人人有份）-->
+     <dependencies>
+         <dependency>
+             <groupId>org.projectlombok</groupId>
+             <artifactId>lombok</artifactId>
+             <version>${lombok.version}</version>
+             <optional>true</optional>
+         </dependency>
+  
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter</artifactId>
+             <version>${spring.boot.starter.version}</version>
+         </dependency>
+     </dependencies>
+  
+     <!--统一管理依赖的版本：只给清单，用不用子工程自己说-->
+     <dependencyManagement>
+         <dependencies>
+             <dependency>
+                 <groupId>com.aliyun.oss</groupId>
+                 <artifactId>aliyun-sdk-oss</artifactId>
+                 <version>${aliyun.sdk.version}</version>
+             </dependency>
+  
+             <dependency>
+                 <groupId>javax.xml.bind</groupId>
+                 <artifactId>jaxb-api</artifactId>
+                 <version>${jaxb.api.version}</version>
+             </dependency>
+             <dependency>
+                 <groupId>javax.activation</groupId>
+                 <artifactId>activation</artifactId>
+                 <version>${activation.version}</version>
+             </dependency>
+             <!-- no more than 2.3.3-->
+             <dependency>
+                 <groupId>org.glassfish.jaxb</groupId>
+                 <artifactId>jaxb-runtime</artifactId>
+                 <version>${jaxb.runtime}</version>
+             </dependency>
+  
+             <!--JWT-->
+             <dependency>
+                 <groupId>io.jsonwebtoken</groupId>
+                 <artifactId>jjwt</artifactId>
+                 <version>${jjwt.version}</version>
+             </dependency>
+         </dependencies>
+     </dependencyManagement>
+     ```
+  4. 子工程 `tlias-pojo/pom.xml`：
+     ```xml
+     <!--父工程-->
+     <parent>
+         <groupId>com.itheima</groupId>
+         <artifactId>tlias-parent</artifactId>
+         <version>1.0-SNAPSHOT</version>
+         <relativePath>../tlias-parent/pom.xml</relativePath>
+     </parent>
+  
+     <artifactId>tlias-pojo</artifactId>
+     <version>1.0-SNAPSHOT</version>
+     ```
+     `groupId` 可以不写：**子工程配置了继承关系之后，坐标中的 groupId 会自动继承父工程的**（`com.itheima`）；同样地，lombok、`spring-boot-starter` 也不用再写，它们从父工程的 `<dependencies>` 里继承下来了。
+  5. 聚合（写在父工程里）：
+     ```xml
+     <!--聚合-->
+     <modules>
+         <module>../tlias-pojo</module>
+         <module>../tlias-utils</module>
+         <module>../tlias-web-management</module>
+     </modules>
+     ```
+     预测顺序：`tlias-parent → tlias-pojo → tlias-utils → tlias-web-management`（本机实测在父工程上执行 `mvn clean install -DskipTests`，输出为 `[1/4]`~`[4/4]` 四个模块全 `SUCCESS`，`Total time: 11.982 s`；顺序不是书写顺序，而是**模块间依赖关系**决定的）。
+  6. 两个对比：
+     ① **`<dependencies>` 是直接依赖**，父工程配了依赖，子工程会**直接继承下来**；**`<dependencyManagement>` 是统一管理依赖版本**，**不会直接依赖**，还需要在子工程中引入所需依赖（**无需指定版本**）。
+     ② **联系**：继承与聚合**都属于设计型模块**、**打包方式都为 pom**、**常将两种关系制作到同一个 pom 文件中**（`tlias-parent` 就是这样）。**区别**：**继承用于简化依赖配置、统一管理依赖版本，是在子工程中配置继承关系**；**聚合用于快速构建项目，是在父工程（聚合工程）中配置聚合的模块**。
+
+  :::
+

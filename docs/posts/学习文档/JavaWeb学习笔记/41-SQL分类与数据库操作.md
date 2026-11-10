@@ -51,7 +51,7 @@ PPT 第 21 页还配了一张架构图，把这些分类"贴"到了[上一篇](/
              └── 数据库2
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 一句话区分 DDL 与 DML/DQL：**DDL 动的是"结构"（有什么库、有什么表、表里有哪些字段），DML/DQL 动的是"内容"（表里存了什么数据）**。所以后面建表、改字段用 DDL；插数据、改数据用 DML；查数据用 DQL。
 
 ## DDL-数据库：五条语法（PPT 第 24 页）
@@ -81,7 +81,7 @@ PPT 把这一页的顺序总结成"**查询 – 使用 – 创建 – 删除**"�
 | `create database [if not exists] 数据库名 [default charset utf8mb4];` | **创建**数据库 | `if not exists` 让"库已存在"时不报错；`default charset` 指定字符集 |
 | `drop database [if exists] 数据库名;` | **删除**数据库 | ⚠️ 库里的**所有表和数据都会一起删掉**；`if exists` 让"库不存在"时不报错 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 删除数据库是**不可逆**操作：库删了，里面的表、表里的数据全没了。练习时删的是自己建的练习库没问题，**生产环境删库之前一定要确认备份**。
 
 ### 实测：报错长什么样（1007 / 1008）
@@ -207,74 +207,90 @@ PPT 第 28 页演示的是"**用 DataGrip 连上 MySQL**"这两步。
   连上 MySQL 之后，依次完成三件事：① 列出这台服务器上现有的**所有数据库**；② 显示**当前正在使用**的是哪个数据库；③ 切换到 `db01` 库，并再确认一次当前库。
   （练习文件 `test_41_数据库操作.sql` 的题目 2-1 处，做完把实际结果抄在注释里。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这三件事都是"**库层面**"的操作（还没碰到表），各有一条固定命令；第 ③ 步切完要**再查一次**才能证明切成功了
-  > **二级 · 方法**：列所有库用 `show databases`；查当前库用 `select database()`（注意带括号）；切换用 `use 库名`
-  > **三级 · 骨架**：`＿＿ databases;` → `select ＿＿();` → `＿＿ db01;` → `select ＿＿();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- ① 列出所有数据库
-  > show databases;
-  > -- ② 显示当前数据库
-  > select database();
-  > -- ③ 切换到 db01 并确认
-  > use db01;
-  > select database();
-  > ```
-  > 本机实测（MySQL 9.0.1）的对应输出：
-  > ```text
-  > mysql> show databases;
-  > +--------------------+
-  > | Database           |
-  > +--------------------+
-  > | db01               |
-  > | information_schema |
-  > | mysql              |
-  > | performance_schema |
-  > | sys                |
-  > +--------------------+
-  > mysql> select database();
-  > +------------+
-  > | database() |
-  > +------------+
-  > | NULL       |
-  > +------------+
-  > mysql> use db01;
-  > Database changed
-  > mysql> select database();
-  > +------------+
-  > | database() |
-  > +------------+
-  > | db01       |
-  > +------------+
-  > ```
-  > 两个细节：① `select database()` 在前两行返回 **NULL**，说明"连上服务器"不等于"选中了某个库"（连接命令末尾跟一个库名，就等于连上后自动 `use` 它）；② 后四个 `information_schema`、`mysql`、`performance_schema`、`sys` 是**系统库**，MySQL 自带，别去动。
+  **一级 · 思路**：这三件事都是"**库层面**"的操作（还没碰到表），各有一条固定命令；第 ③ 步切完要**再查一次**才能证明切成功了
+  **二级 · 方法**：列所有库用 `show databases`；查当前库用 `select database()`（注意带括号）；切换用 `use 库名`
+  **三级 · 骨架**：`＿＿ databases;` → `select ＿＿();` → `＿＿ db01;` → `select ＿＿();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- ① 列出所有数据库
+  show databases;
+  -- ② 显示当前数据库
+  select database();
+  -- ③ 切换到 db01 并确认
+  use db01;
+  select database();
+  ```
+  本机实测（MySQL 9.0.1）的对应输出：
+  ```text
+  mysql> show databases;
+  +--------------------+
+  | Database           |
+  +--------------------+
+  | db01               |
+  | information_schema |
+  | mysql              |
+  | performance_schema |
+  | sys                |
+  +--------------------+
+  mysql> select database();
+  +------------+
+  | database() |
+  +------------+
+  | NULL       |
+  +------------+
+  mysql> use db01;
+  Database changed
+  mysql> select database();
+  +------------+
+  | database() |
+  +------------+
+  | db01       |
+  +------------+
+  ```
+  两个细节：① `select database()` 在前两行返回 **NULL**，说明"连上服务器"不等于"选中了某个库"（连接命令末尾跟一个库名，就等于连上后自动 `use` 它）；② 后四个 `information_schema`、`mysql`、`performance_schema`、`sys` 是**系统库**，MySQL 自带，别去动。
+
+  :::
+
 
 - [ ] **2-2 建一个库，再把它删掉（要求都不报错）**
   写一组语句：① 创建一个名为 `db_test` 的数据库，**字符集显式指定为 utf8mb4**，并且**它已经存在时不要报错**；② 列出所有数据库确认它在里面；③ 切过去确认当前库；④ 删除 `db_test`，**它不存在时不要报错**；⑤ 再列一次确认它没了。
   （对应练习文件题目 2-2。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：①④ 的关键在"**容错参数**"——让语句在对象已存在（或不存在）时安静地跳过而不是报错；②③⑤ 就是 2-1 用过的那几条
-  > **二级 · 方法**：建库 `create database [if not exists] 库名 [default charset 字符集];`；删库 `drop database [if exists] 库名;`
-  > **三级 · 骨架**：`create database ＿＿ db_test ＿＿ utf8mb4;` … `＿＿ database ＿＿ db_test;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- ① 创建库（存在则跳过，显式指定字符集）
-  > create database if not exists db_test default charset utf8mb4;
-  > -- ② 确认它在列表里
-  > show databases;
-  > -- ③ 切过去并确认
-  > use db_test;
-  > select database();
-  > -- ④ 删除库（不存在则跳过）
-  > drop database if exists db_test;
-  > -- ⑤ 确认它没了
-  > show databases;
-  > ```
-  > 要点：`create database` 完整语法是 `create database [if not exists] 数据库名 [default charset utf8mb4];`——后面的括号里都是**可选部分**，`[]` 不出现在真正执行的语句里。`if not exists` / `if exists` 让"重复建""删不存在的"都只给 `1 warning`（见本篇实测表），非常适合写在脚本里反复执行。
+  **一级 · 思路**：①④ 的关键在"**容错参数**"——让语句在对象已存在（或不存在）时安静地跳过而不是报错；②③⑤ 就是 2-1 用过的那几条
+  **二级 · 方法**：建库 `create database [if not exists] 库名 [default charset 字符集];`；删库 `drop database [if exists] 库名;`
+  **三级 · 骨架**：`create database ＿＿ db_test ＿＿ utf8mb4;` … `＿＿ database ＿＿ db_test;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- ① 创建库（存在则跳过，显式指定字符集）
+  create database if not exists db_test default charset utf8mb4;
+  -- ② 确认它在列表里
+  show databases;
+  -- ③ 切过去并确认
+  use db_test;
+  select database();
+  -- ④ 删除库（不存在则跳过）
+  drop database if exists db_test;
+  -- ⑤ 确认它没了
+  show databases;
+  ```
+  要点：`create database` 完整语法是 `create database [if not exists] 数据库名 [default charset utf8mb4];`——后面的括号里都是**可选部分**，`[]` 不出现在真正执行的语句里。`if not exists` / `if exists` 让"重复建""删不存在的"都只给 `1 warning`（见本篇实测表），非常适合写在脚本里反复执行。
+
+  :::
+
 
 - [ ] **2-3 读懂这两条报错，并改到不报错**
   同一台服务器上操作时，出现了两条报错：
@@ -285,21 +301,29 @@ PPT 第 28 页演示的是"**用 DataGrip 连上 MySQL**"这两步。
   请分别写出：原因是什么、加上哪个关键字后就不报了、改好后的完整语句是什么。
   （对应练习文件题目 2-3。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：两条报错都在说"你这个对象的状态和你要求的动作冲突了"——一条是"已经有了还让我建"，一条是"根本没有还让我删"
-  > **二级 · 方法**：建库语句可以带 `if not exists`；删库语句可以带 `if exists`
-  > **三级 · 骨架**：`create database ＿＿ 库名 [default charset utf8mb4];` / `drop database ＿＿ 库名;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **原因**：这个库里已经存在一个叫 `db_test` 的数据库，`create database` 不做覆盖（这也印证了"同一个服务器上库名不能重复"）；**不报错的写法**：加上 `if not exists`——
-  > ```sql
-  > create database if not exists db_test default charset utf8mb4;
-  > ```
-  > ② **原因**：服务器上根本没有叫 `db_xxx` 的库，`drop database` 找不到对象（注意它**不会**当成"已经删掉了"而放过）；**不报错的写法**：加上 `if exists`——
-  > ```sql
-  > drop database if exists db_xxx;
-  > ```
-  > 加上之后，重复建库、删不存在的库都只返回 `Query OK, 0 rows affected, 1 warning (0.00 sec)`。**本机实测（MySQL 9.0.1）**的原始报错就是题面这两条，`SQL脚本.sql` 里最朴素的 `create database db03;` / `drop database db03;` 就是会报错的那种写法。
+  **一级 · 思路**：两条报错都在说"你这个对象的状态和你要求的动作冲突了"——一条是"已经有了还让我建"，一条是"根本没有还让我删"
+  **二级 · 方法**：建库语句可以带 `if not exists`；删库语句可以带 `if exists`
+  **三级 · 骨架**：`create database ＿＿ 库名 [default charset utf8mb4];` / `drop database ＿＿ 库名;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **原因**：这个库里已经存在一个叫 `db_test` 的数据库，`create database` 不做覆盖（这也印证了"同一个服务器上库名不能重复"）；**不报错的写法**：加上 `if not exists`——
+  ```sql
+  create database if not exists db_test default charset utf8mb4;
+  ```
+  ② **原因**：服务器上根本没有叫 `db_xxx` 的库，`drop database` 找不到对象（注意它**不会**当成"已经删掉了"而放过）；**不报错的写法**：加上 `if exists`——
+  ```sql
+  drop database if exists db_xxx;
+  ```
+  加上之后，重复建库、删不存在的库都只返回 `Query OK, 0 rows affected, 1 warning (0.00 sec)`。**本机实测（MySQL 9.0.1）**的原始报错就是题面这两条，`SQL脚本.sql` 里最朴素的 `create database db03;` / `drop database db03;` 就是会报错的那种写法。
+
+  :::
+
 
 ### 三、综合题
 
@@ -325,47 +349,55 @@ PPT 第 28 页演示的是"**用 DataGrip 连上 MySQL**"这两步。
   | 客户端工具的痛点 | 命令行无提示、繁琐、无历史 → DataGrip 补齐 |
   | DataGrip 连接 | Host / Port / User / Password + 下载驱动 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整体是"**连上 → 看现状 → 建库 → 用库 → 换图形化工具再连一遍 → 删库收尾**"；第 5、8 步考的是"命令行参数与图形界面四件套的对应关系"
-  > **二级 · 方法**：列库 `show databases`；建库 `create database if not exists 库名 default charset utf8mb4`；切库 `use 库名`；查当前库 `select database()`；删库 `drop database if exists 库名`；DataGrip 里点是 `+` → `Data Source` → `MySQL`
-  > **三级 · 骨架**：`create database ＿＿ db_practice ＿＿ utf8mb4;` → `use ＿＿; select ＿＿();` → DataGrip：Host=IP、Port=＿＿、User=＿＿、Password=＿＿
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 命令行连接（带字符集参数，避免中文报 1366）：
-  >    ```bash
-  >    $ mysql --default-character-set=utf8mb4 -uroot -p
-  >    ```
-  > 2. 列库（本机实测（MySQL 9.0.1）输出）：
-  >    ```text
-  >    mysql> show databases;
-  >    +--------------------+
-  >    | Database           |
-  >    +--------------------+
-  >    | db01               |
-  >    | information_schema |
-  >    | mysql              |
-  >    | performance_schema |
-  >    | sys                |
-  >    +--------------------+
-  >    ```
-  >    业务库：`db01`；系统库：`information_schema`、`mysql`、`performance_schema`、`sys`。
-  > 3. 建库 + 确认：
-  >    ```sql
-  >    create database if not exists db_practice default charset utf8mb4;
-  >    show databases;
-  >    ```
-  > 4. 切库 + 确认：
-  >    ```sql
-  >    use db_practice;
-  >    select database();   -- 返回 db_practice
-  >    ```
-  > 5. DataGrip 的四个框：**Host** 填数据库服务器 IP（本机就是 `localhost`）↔ 命令行的 `-h`；**Port** 填 `3306` ↔ 命令行的 `-P`；**User** 填 `root` ↔ 命令行的 `-u`；**Password** 填密码 ↔ 命令行的 `-p`。URL 会自动拼成 `jdbc:mysql://localhost:3306`；**要点一下 Download 把驱动下下来**，否则连不上。
-  > 6. DataGrip 查询控制台里执行 `show databases;`，结果里能看到 `db_practice`（DataGrip 是把同一条 SQL 发给同一个 DBMS，界面不同而已）。
-  > 7. 删库 + 确认：
-  >    ```sql
-  >    drop database if exists db_practice;
-  >    show databases;
-  >    ```
-  > 8. 两问：
-  >    ① 一一对应关系：`-h`→Host、`-P`→Port、`-u`→User、`-p`→Password（命令行还有 `--default-character-set=utf8mb4`，DataGrip 一般在驱动配置里带字符集，Windows 下不容易出 1366）；
-  >    ② 因为 `if not exists` / `if exists` 让语句变成**幂等**的——重复执行同一份脚本不会中断（只给一条 warning）。在做练习、写初始化脚本、反复部署时非常实用；不加的话第二次执行就会报 1007 / 1008 把脚本打断。
+  **一级 · 思路**：整体是"**连上 → 看现状 → 建库 → 用库 → 换图形化工具再连一遍 → 删库收尾**"；第 5、8 步考的是"命令行参数与图形界面四件套的对应关系"
+  **二级 · 方法**：列库 `show databases`；建库 `create database if not exists 库名 default charset utf8mb4`；切库 `use 库名`；查当前库 `select database()`；删库 `drop database if exists 库名`；DataGrip 里点是 `+` → `Data Source` → `MySQL`
+  **三级 · 骨架**：`create database ＿＿ db_practice ＿＿ utf8mb4;` → `use ＿＿; select ＿＿();` → DataGrip：Host=IP、Port=＿＿、User=＿＿、Password=＿＿
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 命令行连接（带字符集参数，避免中文报 1366）：
+     ```bash
+     $ mysql --default-character-set=utf8mb4 -uroot -p
+     ```
+  2. 列库（本机实测（MySQL 9.0.1）输出）：
+     ```text
+     mysql> show databases;
+     +--------------------+
+     | Database           |
+     +--------------------+
+     | db01               |
+     | information_schema |
+     | mysql              |
+     | performance_schema |
+     | sys                |
+     +--------------------+
+     ```
+     业务库：`db01`；系统库：`information_schema`、`mysql`、`performance_schema`、`sys`。
+  3. 建库 + 确认：
+     ```sql
+     create database if not exists db_practice default charset utf8mb4;
+     show databases;
+     ```
+  4. 切库 + 确认：
+     ```sql
+     use db_practice;
+     select database();   -- 返回 db_practice
+     ```
+  5. DataGrip 的四个框：**Host** 填数据库服务器 IP（本机就是 `localhost`）↔ 命令行的 `-h`；**Port** 填 `3306` ↔ 命令行的 `-P`；**User** 填 `root` ↔ 命令行的 `-u`；**Password** 填密码 ↔ 命令行的 `-p`。URL 会自动拼成 `jdbc:mysql://localhost:3306`；**要点一下 Download 把驱动下下来**，否则连不上。
+  6. DataGrip 查询控制台里执行 `show databases;`，结果里能看到 `db_practice`（DataGrip 是把同一条 SQL 发给同一个 DBMS，界面不同而已）。
+  7. 删库 + 确认：
+     ```sql
+     drop database if exists db_practice;
+     show databases;
+     ```
+  8. 两问：
+     ① 一一对应关系：`-h`→Host、`-P`→Port、`-u`→User、`-p`→Password（命令行还有 `--default-character-set=utf8mb4`，DataGrip 一般在驱动配置里带字符集，Windows 下不容易出 1366）；
+     ② 因为 `if not exists` / `if exists` 让语句变成**幂等**的——重复执行同一份脚本不会中断（只给一条 warning）。在做练习、写初始化脚本、反复部署时非常实用；不加的话第二次执行就会报 1007 / 1008 把脚本打断。
+
+  :::
+

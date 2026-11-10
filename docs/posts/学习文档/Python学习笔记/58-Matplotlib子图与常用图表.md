@@ -34,7 +34,7 @@ axes[1].pie(...)   # 右边的子图：饼状图
 | `nrows=1, ncols=2`（一行两列） | `axes[0]`、`axes[1]` |
 | `nrows=2, ncols=2`（两行两列） | `axes[0][0]`、`axes[0][1]`、`axes[1][0]`、`axes[1][1]`（`axes[行][列]`） |
 
-> [!TIP]
+> [!TIP] 提示
 > 记住 `axes[行][列]` 就能定位任意子图；写成 `axes1 = axes[0][0]` 这样起个短名字，后面设置标题就不用重复写下标了。
 
 ## 三种常用图表
@@ -122,66 +122,90 @@ plt.show()                   # 展示图表
 - [ ] **2-1 一行两列的子图**
   创建 1 行 2 列的子图，左边画柱状图（自拟 5 个城市的人口），右边画饼图（同样数据看占比），两边都要有标题。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先建子图拿到 axes，再往 axes[0]、axes[1] 上分别画
-  > **二级 · 方法**：`plt.subplots(nrows=1, ncols=2, figsize=(20, 6))` / `axes[0].bar(...)` / `axes[1].pie(...)`
-  > **三级 · 骨架**：`axes[0].set_title('...', fontsize=18)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import matplotlib.pyplot as plt
-  >
-  > plt.rcParams['font.sans-serif'] = ['SimHei']
-  >
-  > cities = ['北京', '上海', '广州', '深圳', '成都']
-  > pops = [2184, 2487, 1868, 1756, 2126]
-  >
-  > # 2-1
-  > fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 6), dpi=100)
-  > axes[0].bar(cities, pops, width=0.6, color='g')
-  > axes[0].set_title('城市人口对比', fontsize=18)
-  > axes[0].set_xlabel('城市')
-  > axes[0].set_ylabel('人口(万)')
-  >
-  > axes[1].pie(pops, labels=cities, autopct='%1.1f%%')
-  > axes[1].set_title('城市人口占比', fontsize=18)
-  > plt.show()
-  > ```
+  **一级 · 思路**：先建子图拿到 axes，再往 axes[0]、axes[1] 上分别画
+  **二级 · 方法**：`plt.subplots(nrows=1, ncols=2, figsize=(20, 6))` / `axes[0].bar(...)` / `axes[1].pie(...)`
+  **三级 · 骨架**：`axes[0].set_title('...', fontsize=18)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import matplotlib.pyplot as plt
+  
+  plt.rcParams['font.sans-serif'] = ['SimHei']
+  
+  cities = ['北京', '上海', '广州', '深圳', '成都']
+  pops = [2184, 2487, 1868, 1756, 2126]
+  
+  # 2-1
+  fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 6), dpi=100)
+  axes[0].bar(cities, pops, width=0.6, color='g')
+  axes[0].set_title('城市人口对比', fontsize=18)
+  axes[0].set_xlabel('城市')
+  axes[0].set_ylabel('人口(万)')
+  
+  axes[1].pie(pops, labels=cities, autopct='%1.1f%%')
+  axes[1].set_title('城市人口占比', fontsize=18)
+  plt.show()
+  ```
+
+  :::
+
 
 - [ ] **2-2 两行两列的布局**
   改成 2 行 2 列的布局，把两个图分别放在**左上角**和**右下角**子图上，并给整个画布加标题。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：画布标题是 fig 级别的，不是某个子图的
-  > **二级 · 方法**：`fig.suptitle('总标题', x=0.5, y=0.95)` / `fig.subplots_adjust(hspace=0.4, wspace=0.2)`
-  > **三级 · 骨架**：`fig, axes = plt.subplots(nrows=2, ncols=2)`；左上角是 `axes[____][____]`，右下角是 `axes[____][____]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2 两行两列 + 画布标题
-  > fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20, 12), dpi=100)
-  > fig.suptitle('城市人口分析', fontsize=23, x=0.5, y=0.95)
-  > fig.subplots_adjust(hspace=0.4, wspace=0.2)
-  >
-  > axes[0][0].bar(cities, pops, color='g')
-  > axes[0][0].set_title('人口对比', fontsize=15)
-  >
-  > axes[1][1].pie(pops, labels=cities, autopct='%1.1f%%')
-  > axes[1][1].set_title('人口占比', fontsize=15)
-  > plt.show()
-  > ```
+  **一级 · 思路**：画布标题是 fig 级别的，不是某个子图的
+  **二级 · 方法**：`fig.suptitle('总标题', x=0.5, y=0.95)` / `fig.subplots_adjust(hspace=0.4, wspace=0.2)`
+  **三级 · 骨架**：`fig, axes = plt.subplots(nrows=2, ncols=2)`；左上角是 `axes[____][____]`，右下角是 `axes[____][____]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2 两行两列 + 画布标题
+  fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20, 12), dpi=100)
+  fig.suptitle('城市人口分析', fontsize=23, x=0.5, y=0.95)
+  fig.subplots_adjust(hspace=0.4, wspace=0.2)
+  
+  axes[0][0].bar(cities, pops, color='g')
+  axes[0][0].set_title('人口对比', fontsize=15)
+  
+  axes[1][1].pie(pops, labels=cities, autopct='%1.1f%%')
+  axes[1][1].set_title('人口占比', fontsize=15)
+  plt.show()
+  ```
+
+  :::
+
 
 - [ ] **2-3 标签太长怎么办**
   柱状图的 X 轴是较长的中文名称，画出后标签挤在一起——想办法让它竖着显示。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：旋转刻度标签
-  > **二级 · 方法**：`axes.tick_params(axis='x', rotation=90)`
-  > **三级 · 骨架**：`axis='____'` 指定是哪根轴
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3：接在 2-2 的柱状图后面，让 X 轴标签竖排
-  > axes[0][0].tick_params(axis='x', rotation=90)
-  > ```
+  **一级 · 思路**：旋转刻度标签
+  **二级 · 方法**：`axes.tick_params(axis='x', rotation=90)`
+  **三级 · 骨架**：`axis='____'` 指定是哪根轴
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3：接在 2-2 的柱状图后面，让 X 轴标签竖排
+  axes[0][0].tick_params(axis='x', rotation=90)
+  ```
+
+  :::
+
 

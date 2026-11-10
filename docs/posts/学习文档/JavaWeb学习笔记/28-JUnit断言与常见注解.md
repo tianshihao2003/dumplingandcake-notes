@@ -45,7 +45,7 @@ PPT 第 59 页的"提示"专门解释了最后一个参数：
 
 也就是说 `Assertions.assertEquals("男", gender)` 和 `Assertions.assertEquals("男", gender, "性别获取错误有问题")` 都能用——**加了 `msg`，测试失败时这句提示会一起打印出来**，方便一眼看出是哪个检查点挂了。
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）：把上面七个断言方法各写一个测试方法跑一遍（`assertEquals`、`assertNotEquals`、`assertNull` + `assertNotNull`、`assertTrue` + `assertFalse`、`assertThrows`），结果全部通过：
 >
 > ```text
@@ -86,7 +86,7 @@ public void testGenderWithAssert(){
 
 本机把"预期值故意写错"（预期 100，实际 25）跑了一遍，真实输出如下：
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机实测（Maven 3.9.14 / JDK 17）——故意写错的断言，`assertEquals(100, age)`（真实年龄是 25）：
 >
 > ```java
@@ -206,7 +206,7 @@ public void afterEach(){
 
 PPT 上只有"执行一次 / 执行一次每一次"这样的文字说明，执行顺序到底是什么样？**跑一遍最直观**——本机用四个注解加上两个 `@Test` 方法、一个参数化测试实跑了一次，打印顺序如下（就是证据）：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）——四个生命周期注解各打印一行，注意各个缩进只是为了让层次好读，实际输出没有缩进：
 >
 > ```text
@@ -267,7 +267,7 @@ public void testGetGender2(String idCard){                                  // �
 
 上一节那份实测输出里，"Running **注解执行顺序演示类**"用的就是类上的 `@DisplayName`——**没有写 `@DisplayName` 时，控制台显示的是全类名**（比如 `Running com.itheima.UserServiceTest`）。这也是为什么上一篇里跑课程代码显示的是中文的"用户信息测试类"。
 
-> [!NOTE]
+> [!NOTE] 注意
 > `@ValueSource` 只是参数来源的一种，PPT 这张表里只列了它，用法是 `@ValueSource(strings = {...})`、`ints = {...}` 这样按类型给一组值；它的职责就是"**赋予测试方法参数**"，而参数化测试让方法**可以声明形参**——这正好是 PPT 第 63 页第一个问答的答案。
 
 ## 必答问答（PPT 第 63 页）
@@ -357,7 +357,7 @@ public class UserServiceAiTest {
 | 断言一律带 `msg` | 失败时能一眼看出是哪一类预期没满足 |
 | 用 `@ParameterizedTest` 批量测多个身份证号 | 一个方法覆盖多组数据，不用复制粘贴 |
 
-> [!TIP]
+> [!TIP] 提示
 > **`import static org.junit.jupiter.api.Assertions.*;` 是"静态导入"**——有了它就能直接写 `assertEquals(...)`、`assertThrows(...)`，而不用每次写全 `Assertions.assertEquals(...)`。两种写法等价（课程手写版用 `Assertions.` 前缀、AI 版用静态导入），看团队习惯选一种，**别在同一个类里混着用**。本机实测（Maven 3.9.14 / JDK 17）：把这个测试类放进 `src/test/java` 跑 `mvn test`，6 个测试方法（其中 2 个参数化，各 3 组参数）一共 **`Tests run: 10, Failures: 0, Errors: 0`**，全部通过。
 
 ## 小结
@@ -405,32 +405,40 @@ public class UserServiceAiTest {
   3. 再补一个断言，用**同一个身份证号**检查 `getGender` 的返回值和"女"**不相等**。
   （练习文件 `test_28_断言改造.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：断言就是"我把预期写出来，你来比对"；比"相等"和比"不相等"是两个不同的方法
-  > **二级 · 方法**：断言的类名是 `Assertions`；判断相等用 `assertEquals(预期, 实际, 提示信息)`；判断不相等用 `assertNotEquals(不想要的, 实际, 提示信息)`
-  > **三级 · 骨架**：`Assertions.____("男", gender, "性别获取错误");` / `Assertions.____("女", gender);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Assertions;
-  > import org.junit.jupiter.api.Test;
-  >
-  > public class UserServiceTest {
-  >
-  >     @Test
-  >     public void testGetGenderWithAssert(){
-  >         UserService userService = new UserService();
-  >         String gender = userService.getGender("100000200010011011");
-  >         // 断言①：预期结果是"男"
-  >         Assertions.assertEquals("男", gender, "性别获取错误");
-  >         // 断言②：结果不会是"女"
-  >         Assertions.assertNotEquals("女", gender);
-  >     }
-  > }
-  > ```
-  > 检查点：① `Assertions` 要 import（`org.junit.jupiter.api.Assertions`）；② 参数顺序是"**预期在前、实际在后**"——写反了报错信息会变成 `expected: <男> but was: <女>` 反着读，容易误判；③ 本机实测（Maven 3.9.14 / JDK 17）这样写的结果是 `Tests run: 1, Failures: 0, Errors: 0` + `BUILD SUCCESS`；把预期故意改成"女"就会立刻 `Failures: 1`，报 `性别获取错误 ==> expected: <女> but was: <男>`。
+  **一级 · 思路**：断言就是"我把预期写出来，你来比对"；比"相等"和比"不相等"是两个不同的方法
+  **二级 · 方法**：断言的类名是 `Assertions`；判断相等用 `assertEquals(预期, 实际, 提示信息)`；判断不相等用 `assertNotEquals(不想要的, 实际, 提示信息)`
+  **三级 · 骨架**：`Assertions.____("男", gender, "性别获取错误");` / `Assertions.____("女", gender);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Assertions;
+  import org.junit.jupiter.api.Test;
+  
+  public class UserServiceTest {
+  
+      @Test
+      public void testGetGenderWithAssert(){
+          UserService userService = new UserService();
+          String gender = userService.getGender("100000200010011011");
+          // 断言①：预期结果是"男"
+          Assertions.assertEquals("男", gender, "性别获取错误");
+          // 断言②：结果不会是"女"
+          Assertions.assertNotEquals("女", gender);
+      }
+  }
+  ```
+  检查点：① `Assertions` 要 import（`org.junit.jupiter.api.Assertions`）；② 参数顺序是"**预期在前、实际在后**"——写反了报错信息会变成 `expected: <男> but was: <女>` 反着读，容易误判；③ 本机实测（Maven 3.9.14 / JDK 17）这样写的结果是 `Tests run: 1, Failures: 0, Errors: 0` + `BUILD SUCCESS`；把预期故意改成"女"就会立刻 `Failures: 1`，报 `性别获取错误 ==> expected: <女> but was: <男>`。
+
+  :::
+
 
 - [ ] **2-2 用参数化测试一次测多个身份证号**
   被测方法还是 `getGender(String idCard)`。要求：
@@ -440,32 +448,40 @@ public class UserServiceAiTest {
   4. 给这个测试方法起一个中文的**显示名称**（运行报告里显示的中文名）。
   （练习文件 `test_28_参数化测试.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：让一个方法跑多次，靠的是"参数化测试"；参数从哪儿来，靠的是"参数来源"；想让报告里显示中文名，靠的是"显示名称"
-  > **二级 · 方法**：`@ParameterizedTest`（不再需要 `@Test`）+ `@ValueSource(strings = {...})` + `@DisplayName("...")`；方法签名形如 `public void testXxx(String idCard)`
-  > **三级 · 骨架**：`@____ @____(strings = {"...","...","..."}) public void ____(String idCard){ Assertions.assertEquals("男", new UserService().getGender(idCard)); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Assertions;
-  > import org.junit.jupiter.api.DisplayName;
-  > import org.junit.jupiter.params.ParameterizedTest;
-  > import org.junit.jupiter.params.provider.ValueSource;
-  >
-  > public class UserServiceTest {
-  >
-  >     @DisplayName("测试多个男性身份证号")
-  >     @ParameterizedTest
-  >     @ValueSource(strings = {"100000200010011011", "100000200010011031", "100000200010011051"})
-  >     public void testGetGender2(String idCard){
-  >         String gender = new UserService().getGender(idCard);
-  >         Assertions.assertEquals("男", gender);
-  >     }
-  > }
-  > ```
-  > 检查点：① **不要**再写 `@Test`（课程 PPT 备注："用了该注解，就不需要 `@Test` 注解了"），两个都写不会报错但属于多余；② 参数化测试的 import 是 `org.junit.jupiter.params.*` 那一套（和 `org.junit.jupiter.api.*` 不是一个包，IDEA 里容易选错）；③ 本机实测（Maven 3.9.14 / JDK 17）：同一个方法传 3 组参数算 **3 次执行**——运行报告里 `Tests run` 会把这 3 次分开计数（配套的 `@BeforeEach`/`@AfterEach` 也跟着跑 3 遍）。
+  **一级 · 思路**：让一个方法跑多次，靠的是"参数化测试"；参数从哪儿来，靠的是"参数来源"；想让报告里显示中文名，靠的是"显示名称"
+  **二级 · 方法**：`@ParameterizedTest`（不再需要 `@Test`）+ `@ValueSource(strings = {...})` + `@DisplayName("...")`；方法签名形如 `public void testXxx(String idCard)`
+  **三级 · 骨架**：`@____ @____(strings = {"...","...","..."}) public void ____(String idCard){ Assertions.assertEquals("男", new UserService().getGender(idCard)); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Assertions;
+  import org.junit.jupiter.api.DisplayName;
+  import org.junit.jupiter.params.ParameterizedTest;
+  import org.junit.jupiter.params.provider.ValueSource;
+  
+  public class UserServiceTest {
+  
+      @DisplayName("测试多个男性身份证号")
+      @ParameterizedTest
+      @ValueSource(strings = {"100000200010011011", "100000200010011031", "100000200010011051"})
+      public void testGetGender2(String idCard){
+          String gender = new UserService().getGender(idCard);
+          Assertions.assertEquals("男", gender);
+      }
+  }
+  ```
+  检查点：① **不要**再写 `@Test`（课程 PPT 备注："用了该注解，就不需要 `@Test` 注解了"），两个都写不会报错但属于多余；② 参数化测试的 import 是 `org.junit.jupiter.params.*` 那一套（和 `org.junit.jupiter.api.*` 不是一个包，IDEA 里容易选错）；③ 本机实测（Maven 3.9.14 / JDK 17）：同一个方法传 3 组参数算 **3 次执行**——运行报告里 `Tests run` 会把这 3 次分开计数（配套的 `@BeforeEach`/`@AfterEach` 也跟着跑 3 遍）。
+
+  :::
+
 
 - [ ] **2-3 观察四个生命周期注解的执行顺序**
   写一个测试类，验证"谁在什么时候执行"：
@@ -475,58 +491,66 @@ public class UserServiceAiTest {
   4. 在注释里回答：`BeforeAll` 和 `BeforeEach` 各执行了几次？为什么其中一个必须是**静态方法**？如果把参数化测试加进来，`BeforeEach` 的次数会怎么变？
   （练习文件 `test_28_注解执行时机.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分两档——"整个类一共一次"和"每个测试方法各一次"；分两个时间点——"之前"和"之后"
-  > **二级 · 方法**：整个类一次的是 `@BeforeAll` / `@AfterAll`（修饰 `public static void`），每个方法一次的是 `@BeforeEach` / `@AfterEach`（修饰 `public void`）
-  > **三级 · 骨架**：先打 `@BeforeAll` 那句 → 每个测试方法前后各夹一组 `@BeforeEach`/`@AfterEach` → 最后打 `@AfterAll` 那句
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.*;
-  >
-  > public class LifecycleDemoTest {
-  >
-  >     @BeforeAll                                  // 所有测试方法之前，只执行一次（必须是静态方法）
-  >     public static void beforeAll(){
-  >         System.out.println("[BeforeAll]  所有测试方法之前，只执行一次（静态方法）");
-  >     }
-  >
-  >     @AfterAll                                   // 所有测试方法之后，只执行一次（必须是静态方法）
-  >     public static void afterAll(){
-  >         System.out.println("[AfterAll]   所有测试方法之后，只执行一次（静态方法）");
-  >     }
-  >
-  >     @BeforeEach                                 // 每个测试方法之前各执行一次
-  >     public void beforeEach(){
-  >         System.out.println("  [BeforeEach] 某个测试方法执行之前（初始化资源）");
-  >     }
-  >
-  >     @AfterEach                                  // 每个测试方法之后各执行一次
-  >     public void afterEach(){
-  >         System.out.println("  [AfterEach]  某个测试方法执行之后（释放资源）");
-  >     }
-  >
-  >     @Test
-  >     public void testOne(){ System.out.println("    >>> 正在执行：第一个测试方法 testOne"); }
-  >
-  >     @Test
-  >     public void testTwo(){ System.out.println("    >>> 正在执行：第二个测试方法 testTwo"); }
-  > }
-  > ```
-  > 3. 本机实测（Maven 3.9.14 / JDK 17）的打印顺序：
-  >    ```text
-  >    [BeforeAll]  所有测试方法之前，只执行一次（静态方法）
-  >      [BeforeEach] 某个测试方法执行之前（初始化资源）
-  >        >>> 正在执行：第一个测试方法 testOne
-  >      [AfterEach]  某个测试方法执行之后（释放资源）
-  >      [BeforeEach] 某个测试方法执行之前（初始化资源）
-  >        >>> 正在执行：第二个测试方法 testTwo
-  >      [AfterEach]  某个测试方法执行之后（释放资源）
-  >    [AfterAll]   所有测试方法之后，只执行一次（静态方法）
-  >    ```
-  > 4. 三个问题的答案：① **`@BeforeAll`/`@AfterAll` 各 1 次**（整个类一次），**`@BeforeEach`/`@AfterEach` 各 2 次**（每个测试方法一次，本机输出里就是两组）；② `@BeforeAll` 必须是**静态方法**，因为它要在**任何测试类实例被创建之前**就执行，没有实例可用，只能靠类直接调用；③ 加上参数化测试后，**参数化的每一组参数都算一次测试方法执行**，所以 `@BeforeEach`/`@AfterEach` 的次数会跟着增加——本机另一份实测（2 个普通测试 + 1 个 3 组参数的参数化测试）里，`Tests run: 5`，`@BeforeEach`/`@AfterEach` 就各执行了 **5 次**。
+  **一级 · 思路**：分两档——"整个类一共一次"和"每个测试方法各一次"；分两个时间点——"之前"和"之后"
+  **二级 · 方法**：整个类一次的是 `@BeforeAll` / `@AfterAll`（修饰 `public static void`），每个方法一次的是 `@BeforeEach` / `@AfterEach`（修饰 `public void`）
+  **三级 · 骨架**：先打 `@BeforeAll` 那句 → 每个测试方法前后各夹一组 `@BeforeEach`/`@AfterEach` → 最后打 `@AfterAll` 那句
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.*;
+  
+  public class LifecycleDemoTest {
+  
+      @BeforeAll                                  // 所有测试方法之前，只执行一次（必须是静态方法）
+      public static void beforeAll(){
+          System.out.println("[BeforeAll]  所有测试方法之前，只执行一次（静态方法）");
+      }
+  
+      @AfterAll                                   // 所有测试方法之后，只执行一次（必须是静态方法）
+      public static void afterAll(){
+          System.out.println("[AfterAll]   所有测试方法之后，只执行一次（静态方法）");
+      }
+  
+      @BeforeEach                                 // 每个测试方法之前各执行一次
+      public void beforeEach(){
+          System.out.println("  [BeforeEach] 某个测试方法执行之前（初始化资源）");
+      }
+  
+      @AfterEach                                  // 每个测试方法之后各执行一次
+      public void afterEach(){
+          System.out.println("  [AfterEach]  某个测试方法执行之后（释放资源）");
+      }
+  
+      @Test
+      public void testOne(){ System.out.println("    >>> 正在执行：第一个测试方法 testOne"); }
+  
+      @Test
+      public void testTwo(){ System.out.println("    >>> 正在执行：第二个测试方法 testTwo"); }
+  }
+  ```
+  3. 本机实测（Maven 3.9.14 / JDK 17）的打印顺序：
+     ```text
+     [BeforeAll]  所有测试方法之前，只执行一次（静态方法）
+       [BeforeEach] 某个测试方法执行之前（初始化资源）
+         >>> 正在执行：第一个测试方法 testOne
+       [AfterEach]  某个测试方法执行之后（释放资源）
+       [BeforeEach] 某个测试方法执行之前（初始化资源）
+         >>> 正在执行：第二个测试方法 testTwo
+       [AfterEach]  某个测试方法执行之后（释放资源）
+     [AfterAll]   所有测试方法之后，只执行一次（静态方法）
+     ```
+  4. 三个问题的答案：① **`@BeforeAll`/`@AfterAll` 各 1 次**（整个类一次），**`@BeforeEach`/`@AfterEach` 各 2 次**（每个测试方法一次，本机输出里就是两组）；② `@BeforeAll` 必须是**静态方法**，因为它要在**任何测试类实例被创建之前**就执行，没有实例可用，只能靠类直接调用；③ 加上参数化测试后，**参数化的每一组参数都算一次测试方法执行**，所以 `@BeforeEach`/`@AfterEach` 的次数会跟着增加——本机另一份实测（2 个普通测试 + 1 个 3 组参数的参数化测试）里，`Tests run: 5`，`@BeforeEach`/`@AfterEach` 就各执行了 **5 次**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -551,70 +575,78 @@ public class UserServiceAiTest {
   | `@ParameterizedTest` + `@ValueSource` | 一个方法覆盖多个身份证号 |
   | 断言失败输出 | `expected: <x> but was: <y>` + 自己代码的行号 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"准备工作（@BeforeEach）→ 调业务方法 → 断言结果"这条线在每个测试方法里重复一遍；异常场景不用 try-catch，用专门的断言方法
-  > **二级 · 方法**：相等用 `assertEquals(预期, 实际, msg)`；异常用 `assertThrows(异常类型.class, () -> { 调用业务方法 })`；参数化用 `@ParameterizedTest` + `@ValueSource(strings = {...})`（不再写 `@Test`）
-  > **三级 · 骨架**：`private UserService ____;` → `@BeforeEach public void setUp(){ ____ = new UserService(); }` → `@Test public void testGetAge(){ Assertions.assertEquals(____, userService.getAge("100000200010011011"), "年龄校验失败"); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.*;
-  > import org.junit.jupiter.params.ParameterizedTest;
-  > import org.junit.jupiter.params.provider.ValueSource;
-  >
-  > @DisplayName("用户业务测试类")
-  > public class UserServiceFullTest {
-  >
-  >     private UserService userService;
-  >
-  >     @BeforeEach   // 每个测试方法执行之前都跑一次：准备好被测对象
-  >     public void setUp(){
-  >         userService = new UserService();
-  >     }
-  >
-  >     @Test
-  >     @DisplayName("测试年龄：2000-10-01 出生，2026-09-29 时是 25 岁")
-  >     public void testGetAge(){
-  >         Integer age = userService.getAge("100000200010011011");
-  >         Assertions.assertEquals(25, age, "年龄校验失败");
-  >     }
-  >
-  >     @Test
-  >     @DisplayName("测试性别：第 17 位是奇数返回男")
-  >     public void testGetGender(){
-  >         String gender = userService.getGender("100000200010011011");
-  >         Assertions.assertEquals("男", gender, "性别校验失败");
-  >     }
-  >
-  >     @Test
-  >     @DisplayName("测试异常：身份证号不合法要抛 IllegalArgumentException")
-  >     public void testGetGenderInvalidIdCard(){
-  >         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-  >             userService.getGender("123");   // 长度不是 18 位
-  >         }, "无效的身份证号码");
-  >     }
-  >
-  >     @DisplayName("参数化测试：多个男性身份证号")
-  >     @ParameterizedTest
-  >     @ValueSource(strings = {"100000200010011011", "100000200010011031", "100000200010011051"})
-  >     public void testGetGenderParameterized(String idCard){
-  >         String gender = userService.getGender(idCard);
-  >         Assertions.assertEquals("男", gender, "性别校验失败");
-  >     }
-  > }
-  > ```
-  > 6. **运行结果**（本机实测，Maven 3.9.14 / JDK 17）：3 个普通 `@Test` 方法（年龄、性别、异常）+ 1 个参数化方法（3 组参数）＝ **6 次执行**，输出为 `Tests run: 6, Failures: 0, Errors: 0, Skipped: 0` + `BUILD SUCCESS`（运行报告里 `Running 用户业务测试类` 用的就是类上的 `@DisplayName`）。
-  >    把年龄的预期值改成 100 后再次实测，失败信息是：
-  >    ```text
-  >    org.opentest4j.AssertionFailedError: expected: <100> but was: <25>
-  >    	at com.itheima.UserServiceAssertFailTest.testGetAgeWithWrongExpect(UserServiceAssertFailTest.java:19)
-  >    [ERROR]   UserServiceAssertFailTest.testGetAgeWithWrongExpect:19 expected: <100> but was: <25>
-  >    [INFO] BUILD FAILURE
-  >    ```
-  >    **行号（`:19`）指向的就是那行 `assertEquals`**——所以排查测试失败的第一步永远是：看 `expected/but was`，再看它指到哪一行。
+  **一级 · 思路**：把"准备工作（@BeforeEach）→ 调业务方法 → 断言结果"这条线在每个测试方法里重复一遍；异常场景不用 try-catch，用专门的断言方法
+  **二级 · 方法**：相等用 `assertEquals(预期, 实际, msg)`；异常用 `assertThrows(异常类型.class, () -> { 调用业务方法 })`；参数化用 `@ParameterizedTest` + `@ValueSource(strings = {...})`（不再写 `@Test`）
+  **三级 · 骨架**：`private UserService ____;` → `@BeforeEach public void setUp(){ ____ = new UserService(); }` → `@Test public void testGetAge(){ Assertions.assertEquals(____, userService.getAge("100000200010011011"), "年龄校验失败"); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.*;
+  import org.junit.jupiter.params.ParameterizedTest;
+  import org.junit.jupiter.params.provider.ValueSource;
+  
+  @DisplayName("用户业务测试类")
+  public class UserServiceFullTest {
+  
+      private UserService userService;
+  
+      @BeforeEach   // 每个测试方法执行之前都跑一次：准备好被测对象
+      public void setUp(){
+          userService = new UserService();
+      }
+  
+      @Test
+      @DisplayName("测试年龄：2000-10-01 出生，2026-09-29 时是 25 岁")
+      public void testGetAge(){
+          Integer age = userService.getAge("100000200010011011");
+          Assertions.assertEquals(25, age, "年龄校验失败");
+      }
+  
+      @Test
+      @DisplayName("测试性别：第 17 位是奇数返回男")
+      public void testGetGender(){
+          String gender = userService.getGender("100000200010011011");
+          Assertions.assertEquals("男", gender, "性别校验失败");
+      }
+  
+      @Test
+      @DisplayName("测试异常：身份证号不合法要抛 IllegalArgumentException")
+      public void testGetGenderInvalidIdCard(){
+          Assertions.assertThrows(IllegalArgumentException.class, () -> {
+              userService.getGender("123");   // 长度不是 18 位
+          }, "无效的身份证号码");
+      }
+  
+      @DisplayName("参数化测试：多个男性身份证号")
+      @ParameterizedTest
+      @ValueSource(strings = {"100000200010011011", "100000200010011031", "100000200010011051"})
+      public void testGetGenderParameterized(String idCard){
+          String gender = userService.getGender(idCard);
+          Assertions.assertEquals("男", gender, "性别校验失败");
+      }
+  }
+  ```
+  6. **运行结果**（本机实测，Maven 3.9.14 / JDK 17）：3 个普通 `@Test` 方法（年龄、性别、异常）+ 1 个参数化方法（3 组参数）＝ **6 次执行**，输出为 `Tests run: 6, Failures: 0, Errors: 0, Skipped: 0` + `BUILD SUCCESS`（运行报告里 `Running 用户业务测试类` 用的就是类上的 `@DisplayName`）。
+     把年龄的预期值改成 100 后再次实测，失败信息是：
+     ```text
+     org.opentest4j.AssertionFailedError: expected: <100> but was: <25>
+     	at com.itheima.UserServiceAssertFailTest.testGetAgeWithWrongExpect(UserServiceAssertFailTest.java:19)
+     [ERROR]   UserServiceAssertFailTest.testGetAgeWithWrongExpect:19 expected: <100> but was: <25>
+     [INFO] BUILD FAILURE
+     ```
+     **行号（`:19`）指向的就是那行 `assertEquals`**——所以排查测试失败的第一步永远是：看 `expected/but was`，再看它指到哪一行。
+
+  :::
+
 
 ---
 

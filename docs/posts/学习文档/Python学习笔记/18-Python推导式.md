@@ -180,23 +180,31 @@ listdemo = ['Google', 'Runoob', 'Taobao']
 
   > **批改（2026-09-28）**：✅ 正确（1-20 的偶数列表与字符串全转大写，输出与预期一致）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：列表推导式就是"表达式 + for + 可选 if"，把结果用中括号括起来；转换和过滤分别用"加工表达式"和"if 条件"实现
-  > **二级 · 方法**：`[表达式 for 变量 in 序列 if 条件]`——`[x for x in range(1, 21) if x % 2 == 0]`、`[word.upper() for word in words]`
-  > **三级 · 骨架**：`even = [x for x in range(1, ____) if x % 2 == 0]` / `upper_words = [word.____() for word in words]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > # 1-20 中所有偶数
-  > even = [x for x in range(1, 21) if x % 2 == 0]
-  > print(f"偶数列表: {even}")
-  >
-  > # 字符串转大写
-  > words = ["hello", "world", "python"]
-  > upper_words = [word.upper() for word in words]
-  > print(f"大写列表: {upper_words}")
-  > ```
+  **一级 · 思路**：列表推导式就是"表达式 + for + 可选 if"，把结果用中括号括起来；转换和过滤分别用"加工表达式"和"if 条件"实现
+  **二级 · 方法**：`[表达式 for 变量 in 序列 if 条件]`——`[x for x in range(1, 21) if x % 2 == 0]`、`[word.upper() for word in words]`
+  **三级 · 骨架**：`even = [x for x in range(1, ____) if x % 2 == 0]` / `upper_words = [word.____() for word in words]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  # 1-20 中所有偶数
+  even = [x for x in range(1, 21) if x % 2 == 0]
+  print(f"偶数列表: {even}")
+  
+  # 字符串转大写
+  words = ["hello", "world", "python"]
+  upper_words = [word.upper() for word in words]
+  print(f"大写列表: {upper_words}")
+  ```
+
+  :::
+
 
 - [x] **2-2 字典推导式**
   创建文件 `test_dict.py`，完成以下操作：
@@ -205,24 +213,32 @@ listdemo = ['Google', 'Runoob', 'Taobao']
 
   > **批改（2026-09-28）**：⚠️ 平方数字典用 `range(1, 4)` 只生成了 `{1: 1, 2: 4, 3: 9}`，缺 `4: 16`、`5: 25`，应为 `range(1, 6)`；两个列表合并为字典正确。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：字典推导式是"键表达式: 值表达式 + for"；两个列表合并时，要用能同时取出"同位置一对值"的配对函数，再拆给键和值
-  > **二级 · 方法**：`{键表达式: 值表达式 for 变量 in 序列}`——`{x: x**2 for x in range(1, 6)}`；配对用 `zip(keys, values)`，写成 `{k: v for k, v in zip(keys, values)}`
-  > **三级 · 骨架**：`squares = {x: ____ for x in range(1, 6)}` / `d = {k: v for k, v in ____(keys, values)}`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > # 平方数字典
-  > squares = {x: x**2 for x in range(1, 6)}
-  > print(f"平方数字典: {squares}")
-  >
-  > # 两个列表合并为字典
-  > keys = ["name", "age", "city"]
-  > values = ["张三", 25, "北京"]
-  > d = {k: v for k, v in zip(keys, values)}
-  > print(f"合并字典: {d}")
-  > ```
+  **一级 · 思路**：字典推导式是"键表达式: 值表达式 + for"；两个列表合并时，要用能同时取出"同位置一对值"的配对函数，再拆给键和值
+  **二级 · 方法**：`{键表达式: 值表达式 for 变量 in 序列}`——`{x: x**2 for x in range(1, 6)}`；配对用 `zip(keys, values)`，写成 `{k: v for k, v in zip(keys, values)}`
+  **三级 · 骨架**：`squares = {x: ____ for x in range(1, 6)}` / `d = {k: v for k, v in ____(keys, values)}`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  # 平方数字典
+  squares = {x: x**2 for x in range(1, 6)}
+  print(f"平方数字典: {squares}")
+  
+  # 两个列表合并为字典
+  keys = ["name", "age", "city"]
+  values = ["张三", 25, "北京"]
+  d = {k: v for k, v in zip(keys, values)}
+  print(f"合并字典: {d}")
+  ```
+
+  :::
+
 
 - [x] **2-3 集合推导式**
   创建文件 `test_set.py`，完成以下操作：
@@ -231,24 +247,32 @@ listdemo = ['Google', 'Runoob', 'Taobao']
 
   > **批改（2026-09-28）**：✅ 正确（列表去重得 `{1, 2, 3, 4}`，字符串去重得 5 个不重复字符，均与预期一致）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：和列表推导式同一套路，只是最外层换成花括号——结果自动去重
-  > **二级 · 方法**：`{表达式 for 变量 in 序列}`——`{x for x in lst}`、`{x for x in s}`
-  > **三级 · 骨架**：`unique = {x for x in ____}` / `chars = {x for x in ____}`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > # 去除重复元素
-  > lst = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
-  > unique = {x for x in lst}
-  > print(f"去重后: {unique}")
-  >
-  > # 提取不重复字符
-  > s = "abracadabra"
-  > chars = {x for x in s}
-  > print(f"不重复字符: {chars}")
-  > ```
+  **一级 · 思路**：和列表推导式同一套路，只是最外层换成花括号——结果自动去重
+  **二级 · 方法**：`{表达式 for 变量 in 序列}`——`{x for x in lst}`、`{x for x in s}`
+  **三级 · 骨架**：`unique = {x for x in ____}` / `chars = {x for x in ____}`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  # 去除重复元素
+  lst = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
+  unique = {x for x in lst}
+  print(f"去重后: {unique}")
+  
+  # 提取不重复字符
+  s = "abracadabra"
+  chars = {x for x in s}
+  print(f"不重复字符: {chars}")
+  ```
+
+  :::
+
 
 - [x] **2-4 元组推导式**
   创建文件 `test_tuple.py`，完成以下操作：
@@ -257,19 +281,27 @@ listdemo = ['Google', 'Runoob', 'Taobao']
 
   > **批改（2026-09-28）**：✅ 正确（生成器对象正常，`tuple(gen)` 得到 1-10 的平方数元组）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：圆括号写法拿到的是"生成器"，它只按需产出值；要拿到元组得再转换一次
-  > **二级 · 方法**：`(表达式 for 变量 in 序列)` 得到生成器；`tuple(生成器对象)` 转成元组
-  > **三级 · 骨架**：`gen = (x**2 for x in range(1, ____))` / `t = ____(gen)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-4
-  > # 生成器
-  > gen = (x**2 for x in range(1, 11))
-  > print(f"生成器对象: {gen}")
-  >
-  > # 转换为元组
-  > t = tuple(gen)
-  > print(f"元组: {t}")
-  > ```
+  **一级 · 思路**：圆括号写法拿到的是"生成器"，它只按需产出值；要拿到元组得再转换一次
+  **二级 · 方法**：`(表达式 for 变量 in 序列)` 得到生成器；`tuple(生成器对象)` 转成元组
+  **三级 · 骨架**：`gen = (x**2 for x in range(1, ____))` / `t = ____(gen)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-4
+  # 生成器
+  gen = (x**2 for x in range(1, 11))
+  print(f"生成器对象: {gen}")
+  
+  # 转换为元组
+  t = tuple(gen)
+  print(f"元组: {t}")
+  ```
+
+  :::
+

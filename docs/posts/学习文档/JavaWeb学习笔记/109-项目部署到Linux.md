@@ -14,7 +14,7 @@ cover: false
 
 [108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)把 JDK、MySQL、Nginx 三样装进了服务器，环境齐了。这一篇（PPT 第 63～70 页）是**第 19 章的收官**：把 Tlias 这个项目真正**搬到服务器上跑起来**——前端那段静态页面交给 nginx，后端那个 jar 在服务器上跑起来，再让 nginx 把两者合成"一个入口"。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **这一篇没有在本机实测**——跑通它需要一台真实的 Linux 服务器（还要先按 [108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)把 JDK / MySQL / Nginx 装好、把 tlias 库导进去），本轮没有这样的环境。好在**里面的关键一步是"见过"的**：nginx 的静态托管 + `/api` 反向代理这一整套，[第 7 章](/posts/编程学习/javaweb学习笔记/59-部门管理-前后端联调与反向代理/)在 **Windows** 上做过并且实测过（那份配置监听 90 端口、把 `/api/depts` 转给 8080 的 Tomcat）——**Linux 上这一套和它是一个道理**，只是换成 nginx 装在服务器上、监听 80、后端也换成服务器上的 jar。下面按 **PPT 第 63～70 页**写。
 
 | PPT 页 | 内容 | 本篇对应小节 |
@@ -112,7 +112,7 @@ server {
 
 **浏览器敲 `http://192.168.100.128` → 落到 80 的 nginx → 匹配 `location /`，从 `/usr/local/nginx/html` 取出 `index.html`（页面回来了）→ 页面脚本发 `/api/depts` 给同一个 80 → 匹配 `location ^~ /api/` → `rewrite` 成 `/depts` → `proxy_pass` 转给 `localhost:8080` → 后端 jar 处理 → JSON 原路返回 → 页面渲染出表格。**
 
-> [!TIP]
+> [!TIP] 提示
 > 和 [第 7 章 Windows 上那套](/posts/编程学习/javaweb学习笔记/59-部门管理-前后端联调与反向代理/)对比着看——**配置本身一字未改，变的只是"东西放在哪台机器上"**：
 > | 对比项 | 第 7 章（Windows 联调） | 本篇（Linux 服务器） |
 > | --- | --- | --- |
@@ -368,33 +368,41 @@ ps -ef | grep java
   需求：服务器上已经装好了 nginx（装的时候指定了安装位置 `/usr/local/nginx`）。现在你手上有前端打包好的产物（`index.html`、`assets/`、`favicon.ico`）。请写出：① 这些东西该放到哪个目录（写全路径）；② 为什么是那个目录（从 nginx 的安装方式解释）；③ 放的时候要注意什么"层次问题"；④ 放完之后浏览器该访问什么地址、看到什么算成功。
   素材：`conf/nginx.conf` 的 `server` 块里有 `location / { root html; index index.html index.htm; }`；服务器 IP 是 `192.168.100.128`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：nginx 是"静态服务器"，它发页面时是**拿某个目录当根**去找文件的——那个目录写在配置里（`root html`），而 `html` 是相对 nginx **安装目录**的路径
-  > **二级 · 方法**：安装位置是 `/usr/local/nginx`（`./configure --prefix` 定的），所以 html 目录就是 `/usr/local/nginx/html`；`root html` 找的就是它；传的是 **dist/页面资源里面的文件**，不能多套一层文件夹；访问 `http://192.168.100.128`（80 可省），看到 Tlias 页面算成功
-  > **三级 · 骨架**：① 目录：`____/html`；② 因为配置里写的是 `root ____`，它是相对 nginx 的 `____` 目录；③ 放的是产物**里面的文件**（不带产物文件夹这一层）；④ 访问 `http://____`，看到 `____` 页面
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > ① 放的目录：/usr/local/nginx/html
-  >
-  > ② 为什么是这个目录：
-  >    nginx 装的时候用了 ./configure --prefix=/usr/local/nginx，
-  >    所以 nginx 的"家"是 /usr/local/nginx；
-  >    配置里 location / 那段的 root 写的是 html（相对路径），
-  >    相对的正是 nginx 的安装目录 → 实际找的是 /usr/local/nginx/html。
-  >
-  > ③ 层次问题：
-  >    传进去的必须是页面资源"里面的文件"——index.html、assets/、favicon.ico；
-  >    不能把整个文件夹塞进 html（那会变成 html/页面资源/index.html，
-  >    访问地址就得跟着带一层目录，和 http://192.168.100.128 对不上）。
-  >    另外它会替换掉 nginx 自带的欢迎页 index.html。
-  >
-  > ④ 访问与判定：
-  >    http://192.168.100.128     （80 是浏览器默认端口，可以不写）
-  >    看到 Tlias 的页面（不再是「Welcome to nginx!」）就成功。
-  >    打不开先查：nginx 起了没有（ps -ef | grep nginx）、80 放行了没有。
-  > ```
-  > 检查点：① 路径写的是 `/usr/local/nginx/html`；② 能说清 `root html` 相对的是 nginx 安装目录；③ 知道是"产物里的文件"而不是整个文件夹；④ 访问地址是服务器 IP（80 可省）。
+  **一级 · 思路**：nginx 是"静态服务器"，它发页面时是**拿某个目录当根**去找文件的——那个目录写在配置里（`root html`），而 `html` 是相对 nginx **安装目录**的路径
+  **二级 · 方法**：安装位置是 `/usr/local/nginx`（`./configure --prefix` 定的），所以 html 目录就是 `/usr/local/nginx/html`；`root html` 找的就是它；传的是 **dist/页面资源里面的文件**，不能多套一层文件夹；访问 `http://192.168.100.128`（80 可省），看到 Tlias 页面算成功
+  **三级 · 骨架**：① 目录：`____/html`；② 因为配置里写的是 `root ____`，它是相对 nginx 的 `____` 目录；③ 放的是产物**里面的文件**（不带产物文件夹这一层）；④ 访问 `http://____`，看到 `____` 页面
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  ① 放的目录：/usr/local/nginx/html
+  
+  ② 为什么是这个目录：
+     nginx 装的时候用了 ./configure --prefix=/usr/local/nginx，
+     所以 nginx 的"家"是 /usr/local/nginx；
+     配置里 location / 那段的 root 写的是 html（相对路径），
+     相对的正是 nginx 的安装目录 → 实际找的是 /usr/local/nginx/html。
+  
+  ③ 层次问题：
+     传进去的必须是页面资源"里面的文件"——index.html、assets/、favicon.ico；
+     不能把整个文件夹塞进 html（那会变成 html/页面资源/index.html，
+     访问地址就得跟着带一层目录，和 http://192.168.100.128 对不上）。
+     另外它会替换掉 nginx 自带的欢迎页 index.html。
+  
+  ④ 访问与判定：
+     http://192.168.100.128     （80 是浏览器默认端口，可以不写）
+     看到 Tlias 的页面（不再是「Welcome to nginx!」）就成功。
+     打不开先查：nginx 起了没有（ps -ef | grep nginx）、80 放行了没有。
+  ```
+  检查点：① 路径写的是 `/usr/local/nginx/html`；② 能说清 `root html` 相对的是 nginx 安装目录；③ 知道是"产物里的文件"而不是整个文件夹；④ 访问地址是服务器 IP（80 可省）。
+
+  :::
+
 
 - [ ] **2-2 补全 `conf/nginx.conf` 里这个 `server` 块**
   需求：下面是一个 `server` 块的骨架。要求你补全它，让**同一个入口**既能发前端页面、又能把接口请求转给后端：
@@ -412,33 +420,41 @@ ps -ef | grep java
   }
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个 `server` 块里写**两条 location**——一条管"其余所有请求"（发静态页面），一条管"`/api/` 开头的请求"（改路径 + 转发）
-  > **二级 · 方法**：端口是 `listen 80;`、请求体上限 `client_max_body_size 10m;`；静态那条是 `location / { root html; index index.html index.htm; try_files $uri $uri/ /index.html; }`；接口那条是 `location ^~ /api/ { rewrite ^/api/(.*)$ /$1 break; proxy_pass http://localhost:8080; }`
-  > **三级 · 骨架**：`listen ____;` ↳ `server_name localhost;` ↳ `client_max_body_size ____;` ↳ `location ____ { root ____; index index.html index.htm; try_files $uri $uri/ /____; }` ↳ `location ^~ ____ { rewrite ^/api/(.*)$ ____$1 break; proxy_pass http://____:____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```nginx
-  > server {
-  >     listen       80;                    # 浏览器默认端口，用户的访问入口
-  >     server_name  localhost;             # 域名匹配（单 server 块时按默认服务处理）
-  >     client_max_body_size 10m;           # 允许的请求体最大 10MB（上传文件用）
-  >
-  >     # 其余所有请求：从 html 目录取静态页面返回（前端页面）
-  >     location / {
-  >         root   html;                    # 静态根目录（相对 nginx 安装目录）
-  >         index  index.html index.htm;    # 访问目录时默认返回的文件
-  >         try_files $uri $uri/ /index.html;   # 找不到就回 index.html（前端路由兜底）
-  >     }
-  >
-  >     # /api/ 开头的请求：摘掉前缀后转发给本机 8080 的后端
-  >     location ^~ /api/ {
-  >         rewrite ^/api/(.*)$ /$1 break;      # /api/depts → /depts
-  >         proxy_pass http://localhost:8080;   # 转给同机 8080 上的后端服务
-  >     }
-  > }
-  > ```
-  > 自查四点：① 是**两条** location（`/` 与 `^~ /api/`），别写成一条；② `rewrite` 的替换目标是 `/$1`（以 `/` 开头），这样 `/api/depts` 才会变成 `/depts`；③ `proxy_pass` 只写到主机端口、不追加路径；④ 改完这个文件**必须 `sbin/nginx -s reload`** 才生效。
+  **一级 · 思路**：一个 `server` 块里写**两条 location**——一条管"其余所有请求"（发静态页面），一条管"`/api/` 开头的请求"（改路径 + 转发）
+  **二级 · 方法**：端口是 `listen 80;`、请求体上限 `client_max_body_size 10m;`；静态那条是 `location / { root html; index index.html index.htm; try_files $uri $uri/ /index.html; }`；接口那条是 `location ^~ /api/ { rewrite ^/api/(.*)$ /$1 break; proxy_pass http://localhost:8080; }`
+  **三级 · 骨架**：`listen ____;` ↳ `server_name localhost;` ↳ `client_max_body_size ____;` ↳ `location ____ { root ____; index index.html index.htm; try_files $uri $uri/ /____; }` ↳ `location ^~ ____ { rewrite ^/api/(.*)$ ____$1 break; proxy_pass http://____:____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```nginx
+  server {
+      listen       80;                    # 浏览器默认端口，用户的访问入口
+      server_name  localhost;             # 域名匹配（单 server 块时按默认服务处理）
+      client_max_body_size 10m;           # 允许的请求体最大 10MB（上传文件用）
+  
+      # 其余所有请求：从 html 目录取静态页面返回（前端页面）
+      location / {
+          root   html;                    # 静态根目录（相对 nginx 安装目录）
+          index  index.html index.htm;    # 访问目录时默认返回的文件
+          try_files $uri $uri/ /index.html;   # 找不到就回 index.html（前端路由兜底）
+      }
+  
+      # /api/ 开头的请求：摘掉前缀后转发给本机 8080 的后端
+      location ^~ /api/ {
+          rewrite ^/api/(.*)$ /$1 break;      # /api/depts → /depts
+          proxy_pass http://localhost:8080;   # 转给同机 8080 上的后端服务
+      }
+  }
+  ```
+  自查四点：① 是**两条** location（`/` 与 `^~ /api/`），别写成一条；② `rewrite` 的替换目标是 `/$1`（以 `/` 开头），这样 `/api/depts` 才会变成 `/depts`；③ `proxy_pass` 只写到主机端口、不追加路径；④ 改完这个文件**必须 `sbin/nginx -s reload`** 才生效。
+
+  :::
+
 
 - [ ] **2-3 逐行解释这个 `server` 块（并说清少一行会怎样）**
   需求：请逐行说明下面这段配置每一行在干什么，并回答：① 用户访问 `http://192.168.100.128` 时走到哪一条 location、页面从哪个目录取；② 页面里的 `/api/depts` 最终变成什么请求、发给谁；③ 把 `rewrite` 那一行注释掉会怎样；④ 后端没启动会怎样。
@@ -457,72 +473,88 @@ ps -ef | grep java
   }
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分三层读——"服务听在哪个端口""哪些请求归哪条 location 管""对请求做了什么"（做的一般是两步：改路径、换目的地）
-  > **二级 · 方法**：`listen` 是端口；`location /` + `root html` 决定页面从 `/usr/local/nginx/html` 取、`try_files` 是前端路由兜底；`location ^~ /api/` 是前缀匹配；`rewrite` 用正则把 `/api` 摘掉（`(.*)` 捕获、`$1` 引用）；`proxy_pass` 把请求交给 `localhost:8080`
-  > **三级 · 骨架**：① 访问 IP → 匹配 `location ____` → 从 `____` 目录取 `____`；② `/api/depts` → `rewrite` 成 `____` → 转给 `http://____:____`；③ 没有 rewrite → 后端收到 `____`，返回 `____`；④ 后端没起 → 转发没人接，nginx 返回 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **逐行**：
-  > - `listen 80;`——这个服务监听 **80 端口**（浏览器默认 HTTP 端口），也就是用户访问的入口；
-  > - `location / { … }`——**其余所有请求**（不是 `/api/` 开头的）走这条；
-  >   - `root html;`——静态根目录，`html` 相对 nginx 安装目录，实际是 `/usr/local/nginx/html`；
-  >   - `index index.html index.htm;`——访问目录时默认返回 `index.html`；
-  >   - `try_files $uri $uri/ /index.html;`——先按路径找文件，找不到就回 `index.html`（**前端路由兜底**，刷新页面不 404）；
-  > - `location ^~ /api/ { … }`——**`/api/` 开头的请求**走这条（`^~` 前缀匹配，命中后不再试正则）；
-  >   - `rewrite ^/api/(.*)$ /$1 break;`——把 `/api` 前缀**重写掉**：`/api/depts` → `/depts`；
-  >   - `proxy_pass http://localhost:8080;`——把（重写后的）请求**转发**给本机 8080 的后端服务。
-  > **四个回答**：
-  > ① 访问 `http://192.168.100.128` → 匹配 `location /` → nginx 从 **`/usr/local/nginx/html`** 取出 `index.html` 返回；
-  > ② `/api/depts` → 匹配 `location ^~ /api/` → `rewrite` 成 **`/depts`** → `proxy_pass` 转给 **`http://localhost:8080/depts`**（同机 8080 上的后端 jar）；
-  > ③ 没有 `rewrite` → 转发出去还是 `/api/depts`，而后端接口是 `/depts`（没有 `/api` 前缀）→ **404**，页面数据空；
-  > ④ 后端没启动 → 8080 上没人监听，代理转发失败 → nginx 返回 **502 Bad Gateway**。
-  > 一句话：**页面归 nginx 自己发，`/api` 归后端——nginx 在中间当了"换门牌号 + 跑腿"的角色**。
+  **一级 · 思路**：分三层读——"服务听在哪个端口""哪些请求归哪条 location 管""对请求做了什么"（做的一般是两步：改路径、换目的地）
+  **二级 · 方法**：`listen` 是端口；`location /` + `root html` 决定页面从 `/usr/local/nginx/html` 取、`try_files` 是前端路由兜底；`location ^~ /api/` 是前缀匹配；`rewrite` 用正则把 `/api` 摘掉（`(.*)` 捕获、`$1` 引用）；`proxy_pass` 把请求交给 `localhost:8080`
+  **三级 · 骨架**：① 访问 IP → 匹配 `location ____` → 从 `____` 目录取 `____`；② `/api/depts` → `rewrite` 成 `____` → 转给 `http://____:____`；③ 没有 rewrite → 后端收到 `____`，返回 `____`；④ 后端没起 → 转发没人接，nginx 返回 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **逐行**：
+  - `listen 80;`——这个服务监听 **80 端口**（浏览器默认 HTTP 端口），也就是用户访问的入口；
+  - `location / { … }`——**其余所有请求**（不是 `/api/` 开头的）走这条；
+    - `root html;`——静态根目录，`html` 相对 nginx 安装目录，实际是 `/usr/local/nginx/html`；
+    - `index index.html index.htm;`——访问目录时默认返回 `index.html`；
+    - `try_files $uri $uri/ /index.html;`——先按路径找文件，找不到就回 `index.html`（**前端路由兜底**，刷新页面不 404）；
+  - `location ^~ /api/ { … }`——**`/api/` 开头的请求**走这条（`^~` 前缀匹配，命中后不再试正则）；
+    - `rewrite ^/api/(.*)$ /$1 break;`——把 `/api` 前缀**重写掉**：`/api/depts` → `/depts`；
+    - `proxy_pass http://localhost:8080;`——把（重写后的）请求**转发**给本机 8080 的后端服务。
+  **四个回答**：
+  ① 访问 `http://192.168.100.128` → 匹配 `location /` → nginx 从 **`/usr/local/nginx/html`** 取出 `index.html` 返回；
+  ② `/api/depts` → 匹配 `location ^~ /api/` → `rewrite` 成 **`/depts`** → `proxy_pass` 转给 **`http://localhost:8080/depts`**（同机 8080 上的后端 jar）；
+  ③ 没有 `rewrite` → 转发出去还是 `/api/depts`，而后端接口是 `/depts`（没有 `/api` 前缀）→ **404**，页面数据空；
+  ④ 后端没启动 → 8080 上没人监听，代理转发失败 → nginx 返回 **502 Bad Gateway**。
+  一句话：**页面归 nginx 自己发，`/api` 归后端——nginx 在中间当了"换门牌号 + 跑腿"的角色**。
+
+  :::
+
 
 - [ ] **2-4 把这个后端 jar 在服务器上跑起来（并让它后台运行）**
   需求：后端工程要部署到 `192.168.100.128` 这台服务器上（服务器已经装好 JDK 和 MySQL）。请写出完整过程：① 打包前必须先做什么、为什么；② 用什么命令打包、产物是什么；③ jar 传到服务器的哪个目录（怎么建目录）；④ 先怎么"前台跑一次"、会有什么现象；⑤ 怎么写才能**后台运行**（把这一行拆开解释每个部分）；⑥ 怎么确认它在跑、怎么停掉它、怎么重启它。
   素材：后端是个 SpringBoot 工程（多模块，父工程管理）；服务器上的 MySQL 是 [108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)装的那套（root/1234）；课程资料里那份 jar 叫 `tlias-web-management.jar`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五站——**改配置并测通 → 打包 → 传上去 → 先前台跑一次确认能起 → 再改成后台跑**；"后台"那一行要解决三个问题：不被挂断、输出去哪、怎么立刻返回
-  > **二级 · 方法**：打包用 maven 父工程的 **package**；jar 放 `/usr/local/tlias-app`（先 `mkdir`）；前台是 `java -jar xxxxxx.jar`（关窗口就停）；后台是 `nohup java -jar xxxxxx.jar &> tlias.log &`；查进程 `ps -ef | grep java`，杀进程 `kill -9 PID`
-  > **三级 · 骨架**：① 先把 `application.yml` 的数据源改成 `____` 并测通；② 父工程执行 `____`；③ `mkdir /usr/local/____` → 上传 jar；④ `java -____ xxxxxx.jar`；⑤ `____ java -jar xxxxxx.jar &> ____ &`；⑥ `ps -ef | grep ____`、`kill -____ PID`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > ① 打包前必须做的事：
-  >    把工程的数据源配置改成服务器上的 MySQL（192.168.100.128:3306、root/1234），
-  >    并在服务器上执行 tlias.sql 建好库表，先在本地连服务器数据库跑通、测过。
-  >    原因：jar 里打进去的是"打包那一刻"的配置——先打包再改，
-  >    等于抱着一个连不上数据库的 jar 上服务器（启动就报错）。
-  >
-  > ② 打包：
-  >    在 maven 父工程上执行 package 生命周期（IDEA 的 Maven 面板双击 package）。
-  >    产物：可执行的 jar 包（课程资料里那份叫 tlias-web-management.jar）。
-  >
-  > ③ 放到哪：
-  >    mkdir /usr/local/tlias-app
-  >    把 jar 上传到 /usr/local/tlias-app（FinalShell 上传）
-  >
-  > ④ 前台跑一次：
-  >    cd /usr/local/tlias-app
-  >    java -jar tlias-web-management.jar
-  >    现象：日志刷在屏幕上（能看到 Tomcat started on port 8080 / Started ...Application），
-  >          窗口被占着、不能关——"窗口关闭服务也就停了"。确认没问题后 Ctrl+C 停掉。
-  >
-  > ⑤ 后台运行（推荐）：
-  >    nohup java -jar tlias-web-management.jar &> tlias.log &
-  >    · nohup        —— 不受终端挂断影响（关掉 FinalShell 窗口服务照跑）
-  >    · &> tlias.log —— 标准输出和标准错误都重定向进 tlias.log（日志留痕）
-  >    · 末尾 &       —— 放到后台执行，命令立刻返回
-  >
-  > ⑥ 查看 / 停止 / 重启：
-  >    ps -ef | grep java                  # 找到 java 进程的 PID（第二列）
-  >    kill -9 PID                         # 强制杀掉旧进程
-  >    nohup java -jar tlias-web-management.jar &> tlias.log &   # 重新后台起
-  >    （改了代码就是"重新打包 → 重新上传 → 杀掉旧进程 → 重新 nohup 起"）
-  > ```
-  > 检查点：① 说清"先改数据库配置、测通、再打包"以及为什么；② 打包命令是父工程的 package；③ 目录是 `/usr/local/tlias-app`；④ 后台那一行三个部分都能解释；⑤ 知道 `ps -ef | grep` 和 `kill -9` 的用法。
+  **一级 · 思路**：五站——**改配置并测通 → 打包 → 传上去 → 先前台跑一次确认能起 → 再改成后台跑**；"后台"那一行要解决三个问题：不被挂断、输出去哪、怎么立刻返回
+  **二级 · 方法**：打包用 maven 父工程的 **package**；jar 放 `/usr/local/tlias-app`（先 `mkdir`）；前台是 `java -jar xxxxxx.jar`（关窗口就停）；后台是 `nohup java -jar xxxxxx.jar &> tlias.log &`；查进程 `ps -ef | grep java`，杀进程 `kill -9 PID`
+  **三级 · 骨架**：① 先把 `application.yml` 的数据源改成 `____` 并测通；② 父工程执行 `____`；③ `mkdir /usr/local/____` → 上传 jar；④ `java -____ xxxxxx.jar`；⑤ `____ java -jar xxxxxx.jar &> ____ &`；⑥ `ps -ef | grep ____`、`kill -____ PID`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  ① 打包前必须做的事：
+     把工程的数据源配置改成服务器上的 MySQL（192.168.100.128:3306、root/1234），
+     并在服务器上执行 tlias.sql 建好库表，先在本地连服务器数据库跑通、测过。
+     原因：jar 里打进去的是"打包那一刻"的配置——先打包再改，
+     等于抱着一个连不上数据库的 jar 上服务器（启动就报错）。
+  
+  ② 打包：
+     在 maven 父工程上执行 package 生命周期（IDEA 的 Maven 面板双击 package）。
+     产物：可执行的 jar 包（课程资料里那份叫 tlias-web-management.jar）。
+  
+  ③ 放到哪：
+     mkdir /usr/local/tlias-app
+     把 jar 上传到 /usr/local/tlias-app（FinalShell 上传）
+  
+  ④ 前台跑一次：
+     cd /usr/local/tlias-app
+     java -jar tlias-web-management.jar
+     现象：日志刷在屏幕上（能看到 Tomcat started on port 8080 / Started ...Application），
+           窗口被占着、不能关——"窗口关闭服务也就停了"。确认没问题后 Ctrl+C 停掉。
+  
+  ⑤ 后台运行（推荐）：
+     nohup java -jar tlias-web-management.jar &> tlias.log &
+     · nohup        —— 不受终端挂断影响（关掉 FinalShell 窗口服务照跑）
+     · &> tlias.log —— 标准输出和标准错误都重定向进 tlias.log（日志留痕）
+     · 末尾 &       —— 放到后台执行，命令立刻返回
+  
+  ⑥ 查看 / 停止 / 重启：
+     ps -ef | grep java                  # 找到 java 进程的 PID（第二列）
+     kill -9 PID                         # 强制杀掉旧进程
+     nohup java -jar tlias-web-management.jar &> tlias.log &   # 重新后台起
+     （改了代码就是"重新打包 → 重新上传 → 杀掉旧进程 → 重新 nohup 起"）
+  ```
+  检查点：① 说清"先改数据库配置、测通、再打包"以及为什么；② 打包命令是父工程的 package；③ 目录是 `/usr/local/tlias-app`；④ 后台那一行三个部分都能解释；⑤ 知道 `ps -ef | grep` 和 `kill -9` 的用法。
+
+  :::
+
 
 - [ ] **2-5 部署完的表现对不上——照现象排查**
   需求：部署完成后出现了下面四种现象，请分别说出**最可能的原因**和**先动手查什么**：
@@ -532,17 +564,25 @@ ps -ef | grep java
   ④ 请求确实转发出去了，但后端返回 `404`。
   （练习文件 `test_109_项目部署.md` 的题目2-5 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"请求走到哪一站失败"来定位——浏览器到 nginx、nginx 到静态文件、nginx 到后端、后端到接口路径，四站四问
-  > **二级 · 方法**：打不开先看 80 端口放行与 nginx 进程；数据空看 `/api` 那段配置有没有、有没有 `-s reload`；502 看后端进程与 `proxy_pass` 的端口；404 看 `rewrite` 有没有把 `/api` 前缀摘掉
-  > **三级 · 骨架**：① 查 `____` 放行 + `ps -ef | grep ____`；② 查 `location ^~ ____` 是否配置/是否 `sbin/nginx -s ____`；③ 查 `ps -ef | grep ____` 与 `proxy_pass` 的 `____`；④ 查 `____` 那一行写没写对
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **完全打不开**（连页面都没有）：最可能是 **80 端口没在防火墙放行**，或 **nginx 没起来**。先查：`firewall-cmd --zone=public --list-ports` 看 80 在不在、`ps -ef | grep nginx` 看进程（必要时 `systemctl status firewalld`）。
-  > ② **页面能开、数据空**：最可能是 **`location ^~ /api/` 那段没配**（于是 `/api/depts` 被当成静态文件去找 → 404），或者配了但**没有 `sbin/nginx -s reload`**（配置没生效）。先查：`conf/nginx.conf` 里有没有那段、改完有没有 reload。
-  > ③ **502 Bad Gateway**：说明 nginx **转发出去了但没人接**——后端 jar 没跑起来，或 `proxy_pass` 的端口和 jar 实际监听的端口（8080）不一致。先查：`ps -ef | grep java`、`tail -f tlias.log` 看后端启动日志。
-  > ④ **转发出去之后 404**：路径对不上——**`rewrite` 那一行没写或写错**，后端收到的是带 `/api` 的路径，而它的接口是 `/depts`（没有 `/api` 前缀）。先查：配置里 `rewrite ^/api/(.*)$ /$1 break;` 在不在、`$1` 前有没有 `/`。
-  > 顺带记一条顺序：**排查从外往里**（防火墙 → nginx → 静态文件 → 代理 → 后端 → 数据库），哪一站断了一目了然。
+  **一级 · 思路**：按"请求走到哪一站失败"来定位——浏览器到 nginx、nginx 到静态文件、nginx 到后端、后端到接口路径，四站四问
+  **二级 · 方法**：打不开先看 80 端口放行与 nginx 进程；数据空看 `/api` 那段配置有没有、有没有 `-s reload`；502 看后端进程与 `proxy_pass` 的端口；404 看 `rewrite` 有没有把 `/api` 前缀摘掉
+  **三级 · 骨架**：① 查 `____` 放行 + `ps -ef | grep ____`；② 查 `location ^~ ____` 是否配置/是否 `sbin/nginx -s ____`；③ 查 `ps -ef | grep ____` 与 `proxy_pass` 的 `____`；④ 查 `____` 那一行写没写对
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **完全打不开**（连页面都没有）：最可能是 **80 端口没在防火墙放行**，或 **nginx 没起来**。先查：`firewall-cmd --zone=public --list-ports` 看 80 在不在、`ps -ef | grep nginx` 看进程（必要时 `systemctl status firewalld`）。
+  ② **页面能开、数据空**：最可能是 **`location ^~ /api/` 那段没配**（于是 `/api/depts` 被当成静态文件去找 → 404），或者配了但**没有 `sbin/nginx -s reload`**（配置没生效）。先查：`conf/nginx.conf` 里有没有那段、改完有没有 reload。
+  ③ **502 Bad Gateway**：说明 nginx **转发出去了但没人接**——后端 jar 没跑起来，或 `proxy_pass` 的端口和 jar 实际监听的端口（8080）不一致。先查：`ps -ef | grep java`、`tail -f tlias.log` 看后端启动日志。
+  ④ **转发出去之后 404**：路径对不上——**`rewrite` 那一行没写或写错**，后端收到的是带 `/api` 的路径，而它的接口是 `/depts`（没有 `/api` 前缀）。先查：配置里 `rewrite ^/api/(.*)$ /$1 break;` 在不在、`$1` 前有没有 `/`。
+  顺带记一条顺序：**排查从外往里**（防火墙 → nginx → 静态文件 → 代理 → 后端 → 数据库），哪一站断了一目了然。
+
+  :::
+
 
 ### 三、综合题
 
@@ -557,79 +597,87 @@ ps -ef | grep java
   7. **验证整条链路**：浏览器访问 `http://192.168.100.128` → 页面出来 → 点开有数据的页面（如员工管理）→ 表格渲染出数据（说明 `/api` 那一路也通了）；
   8. **收尾**：把"页面能开""数据能出"分别对应到哪一段配置说一遍，并想一遍四种故障（打不开 / 数据空 / 502 / 转发后 404）各自查哪里。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链路是"**一个入口、两个服务**"——入口是 80 的 nginx；两个服务是 nginx 自己和 8080 的 jar。清单按"**先后端、再前端、最后入口**"的顺序做最顺（后端先起来，代理转过去才有人接）
-  > **二级 · 方法**：后端 = 改数据源 + `package` + `/usr/local/tlias-app` + `nohup java -jar … &> tlias.log &`；前端 = 页面资源 → `/usr/local/nginx/html`；入口 = `conf/nginx.conf` 的 `server` 块两段 location + 防火墙放行 80 + `sbin/nginx`/`-s reload`
-  > **三级 · 骨架**：① 后端打 jar（`____` 生命周期，先改 `____` 并测通）；② 后端跑起来（`nohup java -jar ____ &> ____ &`）；③ 前端传 `____/html`；④ 配 nginx（`listen ____` / `location ^~ ____` / `proxy_pass http://____:____`）；⑤ 放行 80（`--____=80/tcp --permanent` + `--reload`）；⑥ 访问 `http://____`，页面 + 数据都出来了才算成功
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 清单：Tlias 部署到 Linux 服务器（PPT 第 63～70 页）
-  >
-  > 【0】先画清楚分工
-  >   · 浏览器 → http://192.168.100.128（80 端口）
-  >   · 80 上的 nginx：自己发前端静态页面 + 把 /api 请求转给 8080
-  >   · 8080 上的 jar：处理接口、连服务器上的 MySQL
-  >
-  > 【1】后端：准备与打包
-  >   · 改工程数据源 → jdbc:mysql://192.168.100.128:3306/tlias，root/1234
-  >   · 服务器 MySQL 上执行 tlias.sql 建库建表
-  >   · 本地连服务器数据库跑通、测过（这一步不能跳：jar 带的是打包那刻的配置）
-  >   · maven 父工程执行 package → 得到 tlias-web-management.jar
-  >   · 确认成功：本地起服务能查到数据
-  >
-  > 【2】后端：上传并跑起来
-  >   · mkdir /usr/local/tlias-app
-  >   · 上传 jar 到 /usr/local/tlias-app
-  >   · 先前台试一次：java -jar tlias-web-management.jar
-  >     （看到 Tomcat started on port 8080 / Started ...Application）→ Ctrl+C 停掉
-  >   · 后台运行：
-  >       nohup java -jar tlias-web-management.jar &> tlias.log &
-  >   · 确认成功：ps -ef | grep java 能看到这个进程；
-  >     tail -f tlias.log 能看到启动日志
-  >
-  > 【3】前端：放静态资源
-  >   · 把页面资源里的文件（index.html、assets/、favicon.ico）
-  >     上传到 /usr/local/nginx/html
-  >   · 确认成功：/usr/local/nginx/html 下直接能看到 index.html
-  >
-  > 【4】入口：配 nginx
-  >   · 编辑 /usr/local/nginx/conf/nginx.conf，http { } 里的 server 块：
-  >       server {
-  >           listen       80;
-  >           server_name  localhost;
-  >           client_max_body_size 10m;
-  >
-  >           location / {
-  >               root   html;
-  >               index  index.html index.htm;
-  >               try_files $uri $uri/ /index.html;
-  >           }
-  >
-  >           location ^~ /api/ {
-  >               rewrite ^/api/(.*)$ /$1 break;
-  >               proxy_pass http://localhost:8080;
-  >           }
-  >       }
-  >   · 确认成功：改完执行 sbin/nginx -s reload（第一次是 sbin/nginx）
-  >
-  > 【5】放行端口
-  >   · systemctl status firewalld                （或 firewall-cmd --state）
-  >   · firewall-cmd --zone=public --add-port=80/tcp --permanent
-  >   · firewall-cmd --reload
-  >   · firewall-cmd --zone=public --list-ports   → 看到 80/tcp
-  >   · （8080 不用对外放行：nginx 在服务器内部访问它）
-  >
-  > 【6】验证
-  >   · 浏览器 http://192.168.100.128 → Tlias 页面出来（说明 location / 那一路通）
-  >   · 打开员工管理/部门管理 → 表格有数据（说明 /api 那一路也通）
-  >   · 服务重启：kill -9 旧 PID + 重新 nohup（后端）；
-  >     改配置后 sbin/nginx -s reload（前端）
-  >
-  > 【7】四种故障对号入座
-  >   打不开 → 80 放行 / nginx 进程
-  >   页面能开数据空 → /api 那段没配或没 reload（404）
-  >   502 → 后端没起 / proxy_pass 端口不对
-  >   转发后 404 → rewrite 没写对（/api 前缀没摘掉）
-  > ```
-  > 检查点：① 顺序是"后端先起 → 前端资源就位 → 配 nginx → 放行端口"；② 每一站都有"怎么确认成功"；③ 两段 location 一字不错，尤其 `rewrite` 的 `/$1` 与 `proxy_pass` 的 `localhost:8080`；④ 能说清"页面归 location /，数据归 location ^~ /api/"，四种故障会定位；⑤ 与 [第 7 章](/posts/编程学习/javaweb学习笔记/59-部门管理-前后端联调与反向代理/)那套 Windows 联调对得上。
+  **一级 · 思路**：整条链路是"**一个入口、两个服务**"——入口是 80 的 nginx；两个服务是 nginx 自己和 8080 的 jar。清单按"**先后端、再前端、最后入口**"的顺序做最顺（后端先起来，代理转过去才有人接）
+  **二级 · 方法**：后端 = 改数据源 + `package` + `/usr/local/tlias-app` + `nohup java -jar … &> tlias.log &`；前端 = 页面资源 → `/usr/local/nginx/html`；入口 = `conf/nginx.conf` 的 `server` 块两段 location + 防火墙放行 80 + `sbin/nginx`/`-s reload`
+  **三级 · 骨架**：① 后端打 jar（`____` 生命周期，先改 `____` 并测通）；② 后端跑起来（`nohup java -jar ____ &> ____ &`）；③ 前端传 `____/html`；④ 配 nginx（`listen ____` / `location ^~ ____` / `proxy_pass http://____:____`）；⑤ 放行 80（`--____=80/tcp --permanent` + `--reload`）；⑥ 访问 `http://____`，页面 + 数据都出来了才算成功
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  清单：Tlias 部署到 Linux 服务器（PPT 第 63～70 页）
+  
+  【0】先画清楚分工
+    · 浏览器 → http://192.168.100.128（80 端口）
+    · 80 上的 nginx：自己发前端静态页面 + 把 /api 请求转给 8080
+    · 8080 上的 jar：处理接口、连服务器上的 MySQL
+  
+  【1】后端：准备与打包
+    · 改工程数据源 → jdbc:mysql://192.168.100.128:3306/tlias，root/1234
+    · 服务器 MySQL 上执行 tlias.sql 建库建表
+    · 本地连服务器数据库跑通、测过（这一步不能跳：jar 带的是打包那刻的配置）
+    · maven 父工程执行 package → 得到 tlias-web-management.jar
+    · 确认成功：本地起服务能查到数据
+  
+  【2】后端：上传并跑起来
+    · mkdir /usr/local/tlias-app
+    · 上传 jar 到 /usr/local/tlias-app
+    · 先前台试一次：java -jar tlias-web-management.jar
+      （看到 Tomcat started on port 8080 / Started ...Application）→ Ctrl+C 停掉
+    · 后台运行：
+        nohup java -jar tlias-web-management.jar &> tlias.log &
+    · 确认成功：ps -ef | grep java 能看到这个进程；
+      tail -f tlias.log 能看到启动日志
+  
+  【3】前端：放静态资源
+    · 把页面资源里的文件（index.html、assets/、favicon.ico）
+      上传到 /usr/local/nginx/html
+    · 确认成功：/usr/local/nginx/html 下直接能看到 index.html
+  
+  【4】入口：配 nginx
+    · 编辑 /usr/local/nginx/conf/nginx.conf，http { } 里的 server 块：
+        server {
+            listen       80;
+            server_name  localhost;
+            client_max_body_size 10m;
+  
+            location / {
+                root   html;
+                index  index.html index.htm;
+                try_files $uri $uri/ /index.html;
+            }
+  
+            location ^~ /api/ {
+                rewrite ^/api/(.*)$ /$1 break;
+                proxy_pass http://localhost:8080;
+            }
+        }
+    · 确认成功：改完执行 sbin/nginx -s reload（第一次是 sbin/nginx）
+  
+  【5】放行端口
+    · systemctl status firewalld                （或 firewall-cmd --state）
+    · firewall-cmd --zone=public --add-port=80/tcp --permanent
+    · firewall-cmd --reload
+    · firewall-cmd --zone=public --list-ports   → 看到 80/tcp
+    · （8080 不用对外放行：nginx 在服务器内部访问它）
+  
+  【6】验证
+    · 浏览器 http://192.168.100.128 → Tlias 页面出来（说明 location / 那一路通）
+    · 打开员工管理/部门管理 → 表格有数据（说明 /api 那一路也通）
+    · 服务重启：kill -9 旧 PID + 重新 nohup（后端）；
+      改配置后 sbin/nginx -s reload（前端）
+  
+  【7】四种故障对号入座
+    打不开 → 80 放行 / nginx 进程
+    页面能开数据空 → /api 那段没配或没 reload（404）
+    502 → 后端没起 / proxy_pass 端口不对
+    转发后 404 → rewrite 没写对（/api 前缀没摘掉）
+  ```
+  检查点：① 顺序是"后端先起 → 前端资源就位 → 配 nginx → 放行端口"；② 每一站都有"怎么确认成功"；③ 两段 location 一字不错，尤其 `rewrite` 的 `/$1` 与 `proxy_pass` 的 `localhost:8080`；④ 能说清"页面归 location /，数据归 location ^~ /api/"，四种故障会定位；⑤ 与 [第 7 章](/posts/编程学习/javaweb学习笔记/59-部门管理-前后端联调与反向代理/)那套 Windows 联调对得上。
+
+  :::
+

@@ -14,7 +14,7 @@ cover: false
 
 [107 篇](/posts/编程学习/javaweb学习笔记/107-linux常用命令/)把 Linux 上的命令摸熟了，但那时候干的事还是"看目录、看文件、打包解压"——服务器上真正要跑的东西一样都还没有：**MySQL 要有人装、JDK 要有人装、Nginx 要有人装**。这一篇（PPT 第 52～62 页）就是给一台刚装好的 CentOS 7 **装软件环境**，也是 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)能部署项目的前提。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **这一篇的安装步骤本轮没有在本机实测**——装 JDK / MySQL / Nginx 要 root 权限、要联网用 yum 装依赖、还要把服务注册进系统，属于"会真的改动一台 Linux 环境"的操作，[106 篇](/posts/编程学习/javaweb学习笔记/106-linux概述与系统安装/)那台 WSL 实验环境里没有执行（实验环境里 `which java nginx mysql vim` 只找得到 `vim`，java/nginx/mysql 一个都没装——也正好说明"环境是空的"这件事）。下面按 **PPT 第 52～62 页与课程讲义**的步骤写，每一步都写清"命令 + 它在干什么 + 怎么才算成功"。
 
 | PPT 页 | 内容 | 本篇对应小节 |
@@ -66,7 +66,7 @@ cover: false
 | （顺带）**yum** | yum 安装 | 装 Nginx 的依赖（pcre、zlib、openssl）用的就是 `yum install`；要装 `vim` 也是 `yum install vim`（[107 篇](/posts/编程学习/javaweb学习笔记/107-linux常用命令/)那句） |
 | （顺带）**rpm** | rpm 安装 | 这一节里 rpm 出场是在**卸载**：`rpm -qa` 查、`rpm -e --nodeps` 卸 MySQL 的死对头 mariadb |
 
-> [!TIP]
+> [!TIP] 提示
 > PPT 上有些命令写出来是 `rpm –qa`、`rpm –e –nodeps …`——那个**长一点的横杠是 PPT 的排版字符**，实际敲键盘要用短横杠 `-`：`rpm -qa | grep mariadb`、`rpm -e --nodeps …`。照 PPT 抄命令时这一步最容易"看着一模一样却敲不出来"。
 
 ## 这一节要装的三样（PPT 第 55、57、61 页）
@@ -123,7 +123,7 @@ java -version
 
 能打出 `openjdk version "17.0.10" …` 就成功了。如果报 `command not found`，先回头查两处：`JAVA_HOME` 写的目录名**和解压出来的目录名是否一字不差**（用 `ls /usr/local` 看一眼真实目录名）、以及 `source /etc/profile` 有没有执行。
 
-> [!TIP]
+> [!TIP] 提示
 > JDK 装完，[109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)里那句 `java -jar xxxxxx.jar` 才有得用——这一节装的三样东西，都是下一篇要直接用的。
 
 ## 安装 MySQL（PPT 第 58～59 页）
@@ -194,7 +194,7 @@ mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local
 - 第三条是**初始化数据目录**：`--user=mysql` 指定用 mysql 用户跑、`--basedir` 是 MySQL 装在哪、`--datadir` 是数据放哪（`/usr/local/mysql/data`）。它会建好系统库和系统表。
 - ⚠️ **初始化完成后，输出里会打出一行 root 用户的临时密码**（形如 `root@localhost: xxxxxxxx`），**当场复制记下来**——这个密码是自动生成的，关掉就找不回来了，下一步登录就靠它。
 
-> [!TIP]
+> [!TIP] 提示
 > 这一步是本站补充的经验：如果初始化时报"权限不足"，多半是 `/usr/local/mysql` 目录的属主不对（解压/移动时都是 root 的），先执行 `chown -R mysql:mysql /usr/local/mysql` 把目录交给 mysql 用户，把没初始化完整的 `data` 目录清掉再重跑第三条命令。
 
 ### ⑥ 启动服务、登录 MySQL（第 59 页）
@@ -227,7 +227,7 @@ FLUSH PRIVILEGES;
 
 验证远程连接：在 Windows 上用 SQLyog / Navicat 之类的工具连 `192.168.100.128:3306`，用户名 root、密码 `1234`。连不上先别怀疑 SQL——先把下一节的防火墙端口放行做了（**防火墙就是"外面连不进来"最常见的原因**）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > `GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'` 加上密码 `1234`，是**教学环境图省事**的写法（课程原文如此）。生产环境不会给 root 开远程、也不会用这种弱密码——真要上线，应该按业务建专用账号、只授必要权限、配强密码。这里照 PPT 写，是为了和课程的步骤一致。
 
 ## 防火墙操作（PPT 第 60 页）
@@ -393,191 +393,239 @@ sbin/nginx               # 启动 nginx 服务（PPT 原文）
   需求：你用 FinalShell 连上了一台干净的 CentOS 7，安装包 `jdk-17.0.10_linux-x64_bin.tar.gz` 已经传到当前目录（root 的家目录）。请写出把 JDK 装到 `/usr/local` 并让它**在任何目录下都能直接用**的完整命令序列，并说明每一步在干什么、怎么确认成功。
   素材：安装包是二进制发布包（linux-x64 平台已编译好）；系统里原本没有任何 java。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五件事——**放文件**（把解压结果放进 `/usr/local`）、**配环境变量**（让系统知道 JDK 在哪、让命令全局可用）、**让配置立即生效**、**验证**
-  > **二级 · 方法**：解压用 `tar -zxvf … -C /usr/local`（`-C` 指定解压到哪）；环境变量写在 `/etc/profile` 里，两行是 `export JAVA_HOME=/usr/local/jdk-17.0.10` 和 `export PATH=$JAVA_HOME/bin:$PATH`；生效用 `source`；验证用 `java -version`
-  > **三级 · 骨架**：① `tar -____ jdk-17.0.10_linux-x64_bin.tar.gz ____ /usr/local`；② `vim ____` 末尾追加 `export JAVA_HOME=____` 与 `export PATH=$JAVA_HOME/bin:$____`；③ `____ /etc/profile`；④ `java ____` 看版本
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 解压到 /usr/local（-z gzip、-x 解压、-v 过程、-f 文件名、-C 指定目录）
-  > tar -zxvf jdk-17.0.10_linux-x64_bin.tar.gz -C /usr/local
-  > #    解压后 /usr/local 下多出 jdk-17.0.10 目录
-  >
-  > # ② 配环境变量（/etc/profile 是所有用户登录都会读的全局配置）
-  > vim /etc/profile
-  > #    在文件末尾追加这两行（G 跳到末尾 → i 插入 → ESC → :wq 保存退出）：
-  > #    export JAVA_HOME=/usr/local/jdk-17.0.10
-  > #    export PATH=$JAVA_HOME/bin:$PATH
-  > #    （JAVA_HOME 给别的程序引用；把 $JAVA_HOME/bin 加进 PATH 才能全局敲 java）
-  >
-  > # ③ 让配置在当前窗口立即生效（不做这步要重新登录）
-  > source /etc/profile
-  >
-  > # ④ 验证：能打出 openjdk version "17.0.10" 就算成功
-  > java -version
-  > ```
-  > 注意点：① `JAVA_HOME` 写的目录名必须和解压出来的目录名**一字不差**（`ls /usr/local` 看一眼）；② `PATH` 里把 `$JAVA_HOME/bin` 放在前面（PATH 从左往右找，放前面优先用自己装的这个 JDK）；③ 报 `command not found` 先查这两处和有没有 `source`。
+  **一级 · 思路**：五件事——**放文件**（把解压结果放进 `/usr/local`）、**配环境变量**（让系统知道 JDK 在哪、让命令全局可用）、**让配置立即生效**、**验证**
+  **二级 · 方法**：解压用 `tar -zxvf … -C /usr/local`（`-C` 指定解压到哪）；环境变量写在 `/etc/profile` 里，两行是 `export JAVA_HOME=/usr/local/jdk-17.0.10` 和 `export PATH=$JAVA_HOME/bin:$PATH`；生效用 `source`；验证用 `java -version`
+  **三级 · 骨架**：① `tar -____ jdk-17.0.10_linux-x64_bin.tar.gz ____ /usr/local`；② `vim ____` 末尾追加 `export JAVA_HOME=____` 与 `export PATH=$JAVA_HOME/bin:$____`；③ `____ /etc/profile`；④ `java ____` 看版本
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 解压到 /usr/local（-z gzip、-x 解压、-v 过程、-f 文件名、-C 指定目录）
+  tar -zxvf jdk-17.0.10_linux-x64_bin.tar.gz -C /usr/local
+  #    解压后 /usr/local 下多出 jdk-17.0.10 目录
+  
+  # ② 配环境变量（/etc/profile 是所有用户登录都会读的全局配置）
+  vim /etc/profile
+  #    在文件末尾追加这两行（G 跳到末尾 → i 插入 → ESC → :wq 保存退出）：
+  #    export JAVA_HOME=/usr/local/jdk-17.0.10
+  #    export PATH=$JAVA_HOME/bin:$PATH
+  #    （JAVA_HOME 给别的程序引用；把 $JAVA_HOME/bin 加进 PATH 才能全局敲 java）
+  
+  # ③ 让配置在当前窗口立即生效（不做这步要重新登录）
+  source /etc/profile
+  
+  # ④ 验证：能打出 openjdk version "17.0.10" 就算成功
+  java -version
+  ```
+  注意点：① `JAVA_HOME` 写的目录名必须和解压出来的目录名**一字不差**（`ls /usr/local` 看一眼）；② `PATH` 里把 `$JAVA_HOME/bin` 放在前面（PATH 从左往右找，放前面优先用自己装的这个 JDK）；③ 报 `command not found` 先查这两处和有没有 `source`。
+
+  :::
+
 
 - [ ] **2-2 把 MySQL 装进 /usr/local 并注册成系统服务**
   需求：一台干净的 CentOS 7，安装包 `mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz` 已经上传。请写出**从"清理旧包"到"注册成系统服务"**的全部命令，并说明：① 为什么要先清理；② 为什么要把目录改名成 `mysql` 放到 `/usr/local`；③ 注册服务那两句各在干什么。
   素材：CentOS 7 **自带 mariadb**；MySQL 自带一份启动脚本在 `support-files/mysql.server`；系统里还没配过任何 MySQL 环境变量。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四件事按顺序——**把抢位置的旧包卸掉** → **把装好的目录放到 /usr/local 并改名** → **配环境变量** → **把它登记成一个系统服务**
-  > **二级 · 方法**：查旧包 `rpm -qa | grep mariadb`、卸旧包 `rpm -e --nodeps 包名`；解压 `tar -xvf …tar.xz`、移动改名 `mv 解压出来的目录 /usr/local/mysql`；环境变量两行 `export MYSQL_HOME=/usr/local/mysql`、`export PATH=$MYSQL_HOME/bin:$PATH`；注册服务 `cp …/support-files/mysql.server /etc/init.d/mysql` 和 `chkconfig --add mysql`
-  > **三级 · 骨架**：① `rpm -qa | grep ____` → `rpm -e --____ 包名`；② `tar -____ mysql-…tar.xz` → `mv mysql-8.0.30-… /usr/local/____`；③ `/etc/profile` 里加 `export MYSQL_HOME=____`、`export PATH=$MYSQL_HOME/bin:$____`；④ `cp /usr/local/mysql/support-files/mysql.____ /etc/init.d/mysql` → `chkconfig --____ mysql`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 卸载自带的 mariadb（不卸会让 MySQL 安装失败）
-  > rpm -qa | grep mariadb                      # 查出带 mariadb 的包（-qa 列出所有已安装包）
-  > rpm -e --nodeps mariadb-libs-5.5.60-1.el7_5.x86_64
-  > #    -e 卸载；--nodeps 不管依赖直接卸；包名用上一条查出来的实际名字
-  >
-  > # ② 解压到当前目录，并把整份目录移到 /usr/local 改名为 mysql
-  > tar -xvf mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
-  > mv mysql-8.0.30-linux-glibc2.12-x86_64 /usr/local/mysql
-  > #    /usr/local/mysql 是这套安装的约定落点，后面的脚本与配置都按它写
-  >
-  > # ③ 配环境变量（/etc/profile 末尾追加两行）
-  > export MYSQL_HOME=/usr/local/mysql
-  > export PATH=$MYSQL_HOME/bin:$PATH
-  > source /etc/profile
-  >
-  > # ④ 注册成系统服务
-  > cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
-  > chkconfig --add mysql
-  > #    之后就可以用 systemctl start mysql 这类命令来管它
-  > ```
-  > 注意点：① 卸载要用**查出来的真实包名**（版本号可能和 PPT 不同）；② `--nodeps` 的作用是"忽略依赖强制卸"；③ 改名成 `mysql` + 放 `/usr/local` 是约定落点，后面所有路径（`MYSQL_HOME`、注册服务、初始化）都依赖它；④ 别忘了 `source /etc/profile`。
+  **一级 · 思路**：四件事按顺序——**把抢位置的旧包卸掉** → **把装好的目录放到 /usr/local 并改名** → **配环境变量** → **把它登记成一个系统服务**
+  **二级 · 方法**：查旧包 `rpm -qa | grep mariadb`、卸旧包 `rpm -e --nodeps 包名`；解压 `tar -xvf …tar.xz`、移动改名 `mv 解压出来的目录 /usr/local/mysql`；环境变量两行 `export MYSQL_HOME=/usr/local/mysql`、`export PATH=$MYSQL_HOME/bin:$PATH`；注册服务 `cp …/support-files/mysql.server /etc/init.d/mysql` 和 `chkconfig --add mysql`
+  **三级 · 骨架**：① `rpm -qa | grep ____` → `rpm -e --____ 包名`；② `tar -____ mysql-…tar.xz` → `mv mysql-8.0.30-… /usr/local/____`；③ `/etc/profile` 里加 `export MYSQL_HOME=____`、`export PATH=$MYSQL_HOME/bin:$____`；④ `cp /usr/local/mysql/support-files/mysql.____ /etc/init.d/mysql` → `chkconfig --____ mysql`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 卸载自带的 mariadb（不卸会让 MySQL 安装失败）
+  rpm -qa | grep mariadb                      # 查出带 mariadb 的包（-qa 列出所有已安装包）
+  rpm -e --nodeps mariadb-libs-5.5.60-1.el7_5.x86_64
+  #    -e 卸载；--nodeps 不管依赖直接卸；包名用上一条查出来的实际名字
+  
+  # ② 解压到当前目录，并把整份目录移到 /usr/local 改名为 mysql
+  tar -xvf mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
+  mv mysql-8.0.30-linux-glibc2.12-x86_64 /usr/local/mysql
+  #    /usr/local/mysql 是这套安装的约定落点，后面的脚本与配置都按它写
+  
+  # ③ 配环境变量（/etc/profile 末尾追加两行）
+  export MYSQL_HOME=/usr/local/mysql
+  export PATH=$MYSQL_HOME/bin:$PATH
+  source /etc/profile
+  
+  # ④ 注册成系统服务
+  cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+  chkconfig --add mysql
+  #    之后就可以用 systemctl start mysql 这类命令来管它
+  ```
+  注意点：① 卸载要用**查出来的真实包名**（版本号可能和 PPT 不同）；② `--nodeps` 的作用是"忽略依赖强制卸"；③ 改名成 `mysql` + 放 `/usr/local` 是约定落点，后面所有路径（`MYSQL_HOME`、注册服务、初始化）都依赖它；④ 别忘了 `source /etc/profile`。
+
+  :::
+
 
 - [ ] **2-3 初始化 MySQL 并第一次登录**
   需求：MySQL 已经放在 `/usr/local/mysql`、环境变量和服务都注册好了，但**数据目录还是空的**（服务起不来）。请写出初始化的命令、说明为什么要先建一个专门的用户，并说明**初始化输出里必须留意什么**、之后怎么启动和登录。
   素材：初始化要用 `mysqld` 的 `--initialize`；MySQL 装在哪、数据放哪都可以用参数指定；启动服务用 `systemctl`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三步——**建一个专用用户/组**（服务用它的身份跑）→ **初始化数据目录**（同时会生成 root 的临时密码）→ **启动服务并用临时密码登录**
-  > **二级 · 方法**：`groupadd mysql`、`useradd -r -g mysql -s /bin/false mysql`；`mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data`（`--basedir` 程序位置、`--datadir` 数据位置）；`systemctl start mysql`、`mysql -uroot -p临时密码`
-  > **三级 · 骨架**：① `____ mysql` 建组、`useradd -r -g mysql -s ____ mysql` 建用户；② `mysqld --____ --user=mysql --basedir=____ --datadir=____`；③ 记下输出里的 `root@localhost: ____`；④ `systemctl ____ mysql`、`mysql -uroot -p____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 建专用的组和用户（-r 系统用户；-s /bin/false 表示不能登录系统）
-  > groupadd mysql
-  > useradd -r -g mysql -s /bin/false mysql
-  >
-  > # ② 初始化数据目录（同时生成 root 的临时密码）
-  > mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
-  > #    --user=mysql      用 mysql 用户的身份跑（不用 root，安全）
-  > #    --basedir=…       MySQL 程序装在哪个目录
-  > #    --datadir=…       数据目录（数据文件、系统库都在这儿）
-  >
-  > # ★ 输出里会打印一行形如：… root@localhost: 7fKd!x9q2LmZ
-  > #   这就是 root 的临时密码，立刻复制记下来（关掉就找不回来了）
-  >
-  > # ③ 启动服务并用临时密码登录
-  > systemctl start mysql
-  > mysql -uroot -p7fKd!x9q2LmZ     # -p 后面紧跟密码，中间不要空格
-  > exit                            # 登录成功后是 mysql> 提示符，exit 退出
-  > ```
-  > 注意点：① 专用用户的意义是"数据库服务不用 root 跑"（`-s /bin/false` 让它不能登录系统）；② `--basedir` / `--datadir` 要和实际位置对上；③ **临时密码只在初始化那一步的输出里出现一次**，必须当场记下；④ 启动是 `systemctl start mysql`——前提是前面已经 `cp` 脚本 + `chkconfig --add mysql` 注册过了。
+  **一级 · 思路**：三步——**建一个专用用户/组**（服务用它的身份跑）→ **初始化数据目录**（同时会生成 root 的临时密码）→ **启动服务并用临时密码登录**
+  **二级 · 方法**：`groupadd mysql`、`useradd -r -g mysql -s /bin/false mysql`；`mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data`（`--basedir` 程序位置、`--datadir` 数据位置）；`systemctl start mysql`、`mysql -uroot -p临时密码`
+  **三级 · 骨架**：① `____ mysql` 建组、`useradd -r -g mysql -s ____ mysql` 建用户；② `mysqld --____ --user=mysql --basedir=____ --datadir=____`；③ 记下输出里的 `root@localhost: ____`；④ `systemctl ____ mysql`、`mysql -uroot -p____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 建专用的组和用户（-r 系统用户；-s /bin/false 表示不能登录系统）
+  groupadd mysql
+  useradd -r -g mysql -s /bin/false mysql
+  
+  # ② 初始化数据目录（同时生成 root 的临时密码）
+  mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+  #    --user=mysql      用 mysql 用户的身份跑（不用 root，安全）
+  #    --basedir=…       MySQL 程序装在哪个目录
+  #    --datadir=…       数据目录（数据文件、系统库都在这儿）
+  
+  # ★ 输出里会打印一行形如：… root@localhost: 7fKd!x9q2LmZ
+  #   这就是 root 的临时密码，立刻复制记下来（关掉就找不回来了）
+  
+  # ③ 启动服务并用临时密码登录
+  systemctl start mysql
+  mysql -uroot -p7fKd!x9q2LmZ     # -p 后面紧跟密码，中间不要空格
+  exit                            # 登录成功后是 mysql> 提示符，exit 退出
+  ```
+  注意点：① 专用用户的意义是"数据库服务不用 root 跑"（`-s /bin/false` 让它不能登录系统）；② `--basedir` / `--datadir` 要和实际位置对上；③ **临时密码只在初始化那一步的输出里出现一次**，必须当场记下；④ 启动是 `systemctl start mysql`——前提是前面已经 `cp` 脚本 + `chkconfig --add mysql` 注册过了。
+
+  :::
+
 
 - [ ] **2-4 让 root 能远程连接（改密码 + 授权远程）**
   需求：MySQL 已经能用临时密码在本机登录。要求：① 把本机 root 的密码改成 `1234`；② 让**别的机器**（Windows 上的图形化客户端、以后部署在服务器上的项目）也能用 root 连过来；③ 让授权立即生效；④ 写出在别的机器上验证连接的方式。请写出这四条 SQL 并逐条解释。
   素材：MySQL 8 默认的认证插件换过了，很多旧客户端认不了；`localhost` 和 `%` 表示两类不同的"来源主机"。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：两件事分开做——**本机用户改密码**（他原来存在，只是密码是临时的）；**再建一个"允许任意主机登录"的用户并授权**（他要新建）；最后**刷新权限**让改动马上生效
-  > **二级 · 方法**：改密码用 `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';`；新建远程用户 `CREATE USER 'root'@'%' IDENTIFIED BY '1234';`；授权 `GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';`；刷新 `FLUSH PRIVILEGES;`。验证：在 Windows 上用 SQLyog/Navicat 连 `192.168.100.128:3306`
-  > **三级 · 骨架**：① `____ USER 'root'@'____' IDENTIFIED WITH mysql_native_password BY '1234';`；② `CREATE USER 'root'@'____' IDENTIFIED BY '1234';`；③ `____ ALL PRIVILEGES ON *.* TO 'root'@'%';`；④ `____ PRIVILEGES;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- ① 把本机（localhost）root 的密码从临时密码改成 1234
-  > ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
-  > --   IDENTIFIED WITH mysql_native_password：指定用这个认证插件
-  > --   （MySQL 8 默认换了新插件，旧客户端/驱动认不了，课程统一用它）
-  >
-  > -- ② 新建"允许从任意主机连过来"的 root 用户
-  > CREATE USER 'root'@'%' IDENTIFIED BY '1234';
-  > --   localhost 只认本机连接，'%' 认任意主机 —— 这就是"授权远程访问"的关键
-  >
-  > -- ③ 把这个用户能干的活授权给他（*.* = 所有库所有表）
-  > GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-  >
-  > -- ④ 刷新权限表，让上面的授权立即生效
-  > FLUSH PRIVILEGES;
-  > ```
-  > 验证：在 Windows 上用 SQLyog / Navicat 新建连接 → 主机 `192.168.100.128`、端口 `3306`、用户 `root`、密码 `1234` → 能进就成功。
-  > 连不上的排查顺序：先看**防火墙有没有放行 3306**（`firewall-cmd --zone=public --add-port=3306/tcp --permanent` + `firewall-cmd --reload`），再看这四条 SQL 是不是都执行了（尤其是 `'%'` 那条）。
-  > 另外提醒：给 root 开远程 + 弱密码是**教学环境图省事**的写法（PPT 原文如此），生产上要按业务建专用账号、只授必要权限。
+  **一级 · 思路**：两件事分开做——**本机用户改密码**（他原来存在，只是密码是临时的）；**再建一个"允许任意主机登录"的用户并授权**（他要新建）；最后**刷新权限**让改动马上生效
+  **二级 · 方法**：改密码用 `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';`；新建远程用户 `CREATE USER 'root'@'%' IDENTIFIED BY '1234';`；授权 `GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';`；刷新 `FLUSH PRIVILEGES;`。验证：在 Windows 上用 SQLyog/Navicat 连 `192.168.100.128:3306`
+  **三级 · 骨架**：① `____ USER 'root'@'____' IDENTIFIED WITH mysql_native_password BY '1234';`；② `CREATE USER 'root'@'____' IDENTIFIED BY '1234';`；③ `____ ALL PRIVILEGES ON *.* TO 'root'@'%';`；④ `____ PRIVILEGES;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- ① 把本机（localhost）root 的密码从临时密码改成 1234
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
+  --   IDENTIFIED WITH mysql_native_password：指定用这个认证插件
+  --   （MySQL 8 默认换了新插件，旧客户端/驱动认不了，课程统一用它）
+  
+  -- ② 新建"允许从任意主机连过来"的 root 用户
+  CREATE USER 'root'@'%' IDENTIFIED BY '1234';
+  --   localhost 只认本机连接，'%' 认任意主机 —— 这就是"授权远程访问"的关键
+  
+  -- ③ 把这个用户能干的活授权给他（*.* = 所有库所有表）
+  GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+  
+  -- ④ 刷新权限表，让上面的授权立即生效
+  FLUSH PRIVILEGES;
+  ```
+  验证：在 Windows 上用 SQLyog / Navicat 新建连接 → 主机 `192.168.100.128`、端口 `3306`、用户 `root`、密码 `1234` → 能进就成功。
+  连不上的排查顺序：先看**防火墙有没有放行 3306**（`firewall-cmd --zone=public --add-port=3306/tcp --permanent` + `firewall-cmd --reload`），再看这四条 SQL 是不是都执行了（尤其是 `'%'` 那条）。
+  另外提醒：给 root 开远程 + 弱密码是**教学环境图省事**的写法（PPT 原文如此），生产上要按业务建专用账号、只授必要权限。
+
+  :::
+
 
 - [ ] **2-5 防火墙里开放一个端口**
   需求：MySQL 装好了，可是 Windows 上的客户端连不上 `192.168.100.128:3306`。请写出**在防火墙里开放 3306 端口的完整四步**（含每一步的命令与目的），并说明：① `systemctl` 和 `firewall-cmd` 这两组命令分别管什么；② 为什么生产服务器不建议直接关掉防火墙。
   素材：CentOS 7 的防火墙服务叫 `firewalld`；`firewall-cmd` 的规则有"一次性"和"永久"的区别。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四步是"**先看状态 → 加规则 → 让它生效 → 复核**"；两组命令的分工是"管服务"和"管规则"
-  > **二级 · 方法**：查状态 `systemctl status firewalld`（或 `firewall-cmd --state`）；加规则 `firewall-cmd --zone=public --add-port=3306/tcp --permanent`；生效 `firewall-cmd --reload`；复核 `firewall-cmd --zone=public --list-ports`。`--permanent` 写永久配置，不加则重启后失效
-  > **三级 · 骨架**：① `systemctl ____ firewalld` / `firewall-cmd --____`；② `firewall-cmd --zone=____ --add-port=____/tcp --____`；③ `firewall-cmd --____`；④ `firewall-cmd --zone=public --list-____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 查防火墙状态（开着才需要放行）
-  > systemctl status firewalld        # 或 firewall-cmd --state
-  >
-  > # ② 加放行规则：3306/tcp，写进永久配置
-  > firewall-cmd --zone=public --add-port=3306/tcp --permanent
-  >
-  > # ③ 立即生效：重新加载防火墙规则
-  > firewall-cmd --reload
-  >
-  > # ④ 复核：放行列表里应该有 3306/tcp
-  > firewall-cmd --zone=public --list-ports
-  > ```
-  > ① 两组命令的分工：
-  >    · `systemctl`（`status` / `stop` / `start` / `disable firewalld`）——管**防火墙这个服务本身**（启停、开机自启）；
-  >    · `firewall-cmd`（`--state` / `--add-port` / `--remove-port` / `--reload` / `--list-ports`）——管**防火墙里的规则**（放行哪个端口）。
-  > ② 生产不建议关防火墙的原因：关掉等于"所有端口对外全开"，安全风险大；正确做法是**按端口放行**——该开的（80、3306 等）开，其余挡在外面。关闭/永久关闭（`systemctl stop firewalld` / `systemctl disable firewalld`）只适合教学或内网临时环境。
-  > 另外：`--zone=public` 是规则作用的区域，`--permanent` 表示写永久配置（**加了它也必须 `--reload` 才马上生效**）。
+  **一级 · 思路**：四步是"**先看状态 → 加规则 → 让它生效 → 复核**"；两组命令的分工是"管服务"和"管规则"
+  **二级 · 方法**：查状态 `systemctl status firewalld`（或 `firewall-cmd --state`）；加规则 `firewall-cmd --zone=public --add-port=3306/tcp --permanent`；生效 `firewall-cmd --reload`；复核 `firewall-cmd --zone=public --list-ports`。`--permanent` 写永久配置，不加则重启后失效
+  **三级 · 骨架**：① `systemctl ____ firewalld` / `firewall-cmd --____`；② `firewall-cmd --zone=____ --add-port=____/tcp --____`；③ `firewall-cmd --____`；④ `firewall-cmd --zone=public --list-____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 查防火墙状态（开着才需要放行）
+  systemctl status firewalld        # 或 firewall-cmd --state
+  
+  # ② 加放行规则：3306/tcp，写进永久配置
+  firewall-cmd --zone=public --add-port=3306/tcp --permanent
+  
+  # ③ 立即生效：重新加载防火墙规则
+  firewall-cmd --reload
+  
+  # ④ 复核：放行列表里应该有 3306/tcp
+  firewall-cmd --zone=public --list-ports
+  ```
+  ① 两组命令的分工：
+     · `systemctl`（`status` / `stop` / `start` / `disable firewalld`）——管**防火墙这个服务本身**（启停、开机自启）；
+     · `firewall-cmd`（`--state` / `--add-port` / `--remove-port` / `--reload` / `--list-ports`）——管**防火墙里的规则**（放行哪个端口）。
+  ② 生产不建议关防火墙的原因：关掉等于"所有端口对外全开"，安全风险大；正确做法是**按端口放行**——该开的（80、3306 等）开，其余挡在外面。关闭/永久关闭（`systemctl stop firewalld` / `systemctl disable firewalld`）只适合教学或内网临时环境。
+  另外：`--zone=public` 是规则作用的区域，`--permanent` 表示写永久配置（**加了它也必须 `--reload` 才马上生效**）。
+
+  :::
+
 
 - [ ] **2-6 源码编译安装 Nginx 并在浏览器里验证**
   需求：请写出在 CentOS 7 上用**源码编译**的方式安装 Nginx（`nginx-1.20.2.tar.gz`）并启动、验证的完整步骤，并说明：① 为什么要先装那几个依赖包；② `./configure --prefix=/usr/local/nginx` 里的 `--prefix` 决定了什么；③ 装完怎么验证"成了"、访问不通时先查什么。
   素材：Nginx 编译要用到 pcre（正则）、zlib（gzip 压缩）、openssl（加密）相关的库；装完的目录结构里有 `conf`、`html`、`logs`、`sbin`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：源码编译的标准三步是"**配置 → 编译 → 安装**"，前面还要先"把编译要用的库装齐"、最后"启动并访问验证"
-  > **二级 · 方法**：依赖 `yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel`；解压 `tar -zxvf nginx-1.20.2.tar.gz`；`cd` 进目录后 `./configure --prefix=/usr/local/nginx` → `make` → `make install`；进 `/usr/local/nginx` 执行 `sbin/nginx` 启动；浏览器访问服务器 IP（默认 80）
-  > **三级 · 骨架**：① `yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-____`；② `tar -____ nginx-1.20.2.tar.gz` → `cd nginx-1.20.2`；③ `./____ --prefix=____`；④ `make`；⑤ `make ____`；⑥ `cd /usr/local/nginx` → `____/nginx`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 装编译时要用到的依赖（yum 的"自动解决依赖"就体现在这里）
-  > yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel
-  > #    pcre → 正则（location / rewrite 用）；zlib → gzip 压缩；openssl → 加密/HTTPS
-  >
-  > # ② 上传并解压源码包
-  > tar -zxvf nginx-1.20.2.tar.gz
-  > cd nginx-1.20.2
-  >
-  > # ③ 配置：检查环境 + 生成 Makefile，并指定装到哪
-  > ./configure --prefix=/usr/local/nginx
-  >
-  > # ④ 编译
-  > make
-  >
-  > # ⑤ 安装到 --prefix 指定的目录
-  > make install
-  >
-  > # ⑥ 启动（进安装目录，执行 sbin 下的可执行文件）
-  > cd /usr/local/nginx
-  > sbin/nginx
-  > ```
-  > 验证：浏览器访问服务器 IP（如 `http://192.168.100.128`）看到「Welcome to nginx!」就成功。
-  > ① 依赖的作用：pcre 提供正则（location 匹配、rewrite 重写）、zlib 负责 gzip 压缩、openssl 负责加密——**缺了 configure 或编译会报错**。
-  > ② `--prefix=/usr/local/nginx` 决定**装到哪个目录**：装完后 `conf`（配置）、`html`（静态资源）、`logs`（日志）、`sbin`（可执行文件）都在这个目录下（[109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)前端页面要放进这个 `html`）。
-  > ③ 访问不通先查两条：`ps -ef | grep nginx` 看进程在不在；80 端口有没有在防火墙里放行（`firewall-cmd --zone=public --add-port=80/tcp --permanent` + `firewall-cmd --reload`）。
+  **一级 · 思路**：源码编译的标准三步是"**配置 → 编译 → 安装**"，前面还要先"把编译要用的库装齐"、最后"启动并访问验证"
+  **二级 · 方法**：依赖 `yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel`；解压 `tar -zxvf nginx-1.20.2.tar.gz`；`cd` 进目录后 `./configure --prefix=/usr/local/nginx` → `make` → `make install`；进 `/usr/local/nginx` 执行 `sbin/nginx` 启动；浏览器访问服务器 IP（默认 80）
+  **三级 · 骨架**：① `yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-____`；② `tar -____ nginx-1.20.2.tar.gz` → `cd nginx-1.20.2`；③ `./____ --prefix=____`；④ `make`；⑤ `make ____`；⑥ `cd /usr/local/nginx` → `____/nginx`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 装编译时要用到的依赖（yum 的"自动解决依赖"就体现在这里）
+  yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel
+  #    pcre → 正则（location / rewrite 用）；zlib → gzip 压缩；openssl → 加密/HTTPS
+  
+  # ② 上传并解压源码包
+  tar -zxvf nginx-1.20.2.tar.gz
+  cd nginx-1.20.2
+  
+  # ③ 配置：检查环境 + 生成 Makefile，并指定装到哪
+  ./configure --prefix=/usr/local/nginx
+  
+  # ④ 编译
+  make
+  
+  # ⑤ 安装到 --prefix 指定的目录
+  make install
+  
+  # ⑥ 启动（进安装目录，执行 sbin 下的可执行文件）
+  cd /usr/local/nginx
+  sbin/nginx
+  ```
+  验证：浏览器访问服务器 IP（如 `http://192.168.100.128`）看到「Welcome to nginx!」就成功。
+  ① 依赖的作用：pcre 提供正则（location 匹配、rewrite 重写）、zlib 负责 gzip 压缩、openssl 负责加密——**缺了 configure 或编译会报错**。
+  ② `--prefix=/usr/local/nginx` 决定**装到哪个目录**：装完后 `conf`（配置）、`html`（静态资源）、`logs`（日志）、`sbin`（可执行文件）都在这个目录下（[109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)前端页面要放进这个 `html`）。
+  ③ 访问不通先查两条：`ps -ef | grep nginx` 看进程在不在；80 端口有没有在防火墙里放行（`firewall-cmd --zone=public --add-port=80/tcp --permanent` + `firewall-cmd --reload`）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -592,74 +640,82 @@ sbin/nginx               # 启动 nginx 服务（PPT 原文）
   7. **装 Nginx**：装依赖 → 解压源码包 → `./configure --prefix=` → `make` → `make install` → 启动，浏览器访问服务器 IP 看到「Welcome to nginx!」（访问不通就把 80 也放行）；
   8. **收尾**：把清单顺着念一遍——每一步都有一个"看得见的结果"（版本号、`mysql>` 提示符、客户端连上、欢迎页），对着 PPT 第 54 页的四种安装方式说清每种用在了哪里。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一步是"把五个小节的命令按**正确的顺序**串起来"——顺序错了会互相卡住（比如没卸 mariadb 就装不了 MySQL、没 `source` 就敲不到 java、没放行端口就连不上）；每一步都留一个**可核对的痕迹**
-  > **二级 · 方法**：JDK 是 `tar -zxvf … -C /usr/local` + `/etc/profile`；MySQL 是 `rpm -e --nodeps` + `mv … /usr/local/mysql` + `cp …/mysql.server /etc/init.d/mysql` + `chkconfig --add mysql` + `mysqld --initialize` + `systemctl start mysql` + 四条 SQL；端口用 `firewall-cmd …--add-port=…/tcp --permanent` + `--reload`；Nginx 是 `yum install` 依赖 + `./configure --prefix=/usr/local/nginx` + `make` + `make install` + `sbin/nginx`
-  > **三级 · 骨架**：清单六站——① JDK（验证：`java -____`）；② MySQL 准备（验证：`ls /usr/local/mysql`）；③ MySQL 初始化与授权（验证：别的机器能连上）；④ 防火墙（验证：`--list-____` 里有端口）；⑤ Nginx（验证：浏览器看到 `____`）；⑥ 顺一遍顺序与原因
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 清单：给空白 CentOS 7 装齐服务器环境（PPT 第 52～62 页）
-  >
-  > 【0】先明确三样东西各解决什么问题
-  >   · JDK  → 服务器上能跑 java（java -jar 执行项目）
-  >   · MySQL → 项目要连的数据库
-  >   · Nginx → 把页面发给浏览器的 Web 服务器（下一节还要给后端做反向代理）
-  >   安装方式对号：JDK / MySQL = 二进制发布包；Nginx = 源码编译；
-  >   中间用得上 yum（装 Nginx 依赖）和 rpm（卸 mariadb）
-  >
-  > 【1】安装 JDK
-  >   · 上传 jdk-17.0.10_linux-x64_bin.tar.gz
-  >   · tar -zxvf jdk-17.0.10_linux-x64_bin.tar.gz -C /usr/local
-  >   · vim /etc/profile 追加：
-  >       export JAVA_HOME=/usr/local/jdk-17.0.10
-  >       export PATH=$JAVA_HOME/bin:$PATH
-  >   · source /etc/profile
-  >   · 确认成功：java -version 输出 17.0.10
-  >
-  > 【2】MySQL：清理与就位
-  >   · rpm -qa | grep mariadb  →  rpm -e --nodeps 查出来的包名
-  >   · tar -xvf mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
-  >   · mv mysql-8.0.30-linux-glibc2.12-x86_64 /usr/local/mysql
-  >   · /etc/profile 追加 MYSQL_HOME 与 PATH，然后 source
-  >   · cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
-  >   · chkconfig --add mysql
-  >   · 确认成功：/usr/local 下有 mysql 目录；chkconfig --list mysql 能看到服务
-  >
-  > 【3】MySQL：初始化、登录、授权
-  >   · groupadd mysql
-  >   · useradd -r -g mysql -s /bin/false mysql
-  >   · mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
-  >     ★ 记下输出里的 root@localhost 临时密码
-  >   · systemctl start mysql
-  >   · mysql -uroot -p临时密码
-  >   · 四条 SQL：
-  >       ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
-  >       CREATE USER 'root'@'%' IDENTIFIED BY '1234';
-  >       GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-  >       FLUSH PRIVILEGES;
-  >   · 确认成功：Windows 上的图形化客户端能连 192.168.100.128:3306
-  >
-  > 【4】防火墙（连不上就先想它）
-  >   · systemctl status firewalld              （或 firewall-cmd --state）
-  >   · firewall-cmd --zone=public --add-port=3306/tcp --permanent
-  >   · firewall-cmd --reload
-  >   · firewall-cmd --zone=public --list-ports   → 列表里能看到 3306/tcp
-  >   · 记住：生产服务器不建议关闭防火墙，按端口放行
-  >
-  > 【5】安装 Nginx（源码编译）
-  >   · yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel
-  >   · tar -zxvf nginx-1.20.2.tar.gz  →  cd nginx-1.20.2
-  >   · ./configure --prefix=/usr/local/nginx
-  >   · make  →  make install
-  >   · cd /usr/local/nginx  →  sbin/nginx
-  >   · 确认成功：浏览器访问服务器 IP 看到「Welcome to nginx!」
-  >     （打不开先查 ps -ef | grep nginx 和 80 端口放行）
-  >
-  > 【6】对照 PPT 第 54 页
-  >   二进制发布包：JDK、MySQL（解压 + 改配置就能用）
-  >   源码编译：Nginx（configure → make → make install）
-  >   yum：装 Nginx 依赖（自动解决依赖）
-  >   rpm：卸载 mariadb（-qa 查、-e --nodeps 卸）
-  > ```
-  > 检查点：① 顺序对（先卸 mariadb 再装 MySQL；先 source 再用 java；先注册服务再 systemctl start）；② 每一步都有一个"看得见的结果"；③ 临时密码、`'%'` 授权、防火墙四步这三个细节没漏；④ 能说清三种包各属于哪种安装方式、yum 和 rpm 各在哪儿出场。
+  **一级 · 思路**：这一步是"把五个小节的命令按**正确的顺序**串起来"——顺序错了会互相卡住（比如没卸 mariadb 就装不了 MySQL、没 `source` 就敲不到 java、没放行端口就连不上）；每一步都留一个**可核对的痕迹**
+  **二级 · 方法**：JDK 是 `tar -zxvf … -C /usr/local` + `/etc/profile`；MySQL 是 `rpm -e --nodeps` + `mv … /usr/local/mysql` + `cp …/mysql.server /etc/init.d/mysql` + `chkconfig --add mysql` + `mysqld --initialize` + `systemctl start mysql` + 四条 SQL；端口用 `firewall-cmd …--add-port=…/tcp --permanent` + `--reload`；Nginx 是 `yum install` 依赖 + `./configure --prefix=/usr/local/nginx` + `make` + `make install` + `sbin/nginx`
+  **三级 · 骨架**：清单六站——① JDK（验证：`java -____`）；② MySQL 准备（验证：`ls /usr/local/mysql`）；③ MySQL 初始化与授权（验证：别的机器能连上）；④ 防火墙（验证：`--list-____` 里有端口）；⑤ Nginx（验证：浏览器看到 `____`）；⑥ 顺一遍顺序与原因
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  清单：给空白 CentOS 7 装齐服务器环境（PPT 第 52～62 页）
+  
+  【0】先明确三样东西各解决什么问题
+    · JDK  → 服务器上能跑 java（java -jar 执行项目）
+    · MySQL → 项目要连的数据库
+    · Nginx → 把页面发给浏览器的 Web 服务器（下一节还要给后端做反向代理）
+    安装方式对号：JDK / MySQL = 二进制发布包；Nginx = 源码编译；
+    中间用得上 yum（装 Nginx 依赖）和 rpm（卸 mariadb）
+  
+  【1】安装 JDK
+    · 上传 jdk-17.0.10_linux-x64_bin.tar.gz
+    · tar -zxvf jdk-17.0.10_linux-x64_bin.tar.gz -C /usr/local
+    · vim /etc/profile 追加：
+        export JAVA_HOME=/usr/local/jdk-17.0.10
+        export PATH=$JAVA_HOME/bin:$PATH
+    · source /etc/profile
+    · 确认成功：java -version 输出 17.0.10
+  
+  【2】MySQL：清理与就位
+    · rpm -qa | grep mariadb  →  rpm -e --nodeps 查出来的包名
+    · tar -xvf mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
+    · mv mysql-8.0.30-linux-glibc2.12-x86_64 /usr/local/mysql
+    · /etc/profile 追加 MYSQL_HOME 与 PATH，然后 source
+    · cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql
+    · chkconfig --add mysql
+    · 确认成功：/usr/local 下有 mysql 目录；chkconfig --list mysql 能看到服务
+  
+  【3】MySQL：初始化、登录、授权
+    · groupadd mysql
+    · useradd -r -g mysql -s /bin/false mysql
+    · mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+      ★ 记下输出里的 root@localhost 临时密码
+    · systemctl start mysql
+    · mysql -uroot -p临时密码
+    · 四条 SQL：
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '1234';
+        CREATE USER 'root'@'%' IDENTIFIED BY '1234';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+        FLUSH PRIVILEGES;
+    · 确认成功：Windows 上的图形化客户端能连 192.168.100.128:3306
+  
+  【4】防火墙（连不上就先想它）
+    · systemctl status firewalld              （或 firewall-cmd --state）
+    · firewall-cmd --zone=public --add-port=3306/tcp --permanent
+    · firewall-cmd --reload
+    · firewall-cmd --zone=public --list-ports   → 列表里能看到 3306/tcp
+    · 记住：生产服务器不建议关闭防火墙，按端口放行
+  
+  【5】安装 Nginx（源码编译）
+    · yum install -y pcre pcre-devel zlib zlib-devel openssl openssl-devel
+    · tar -zxvf nginx-1.20.2.tar.gz  →  cd nginx-1.20.2
+    · ./configure --prefix=/usr/local/nginx
+    · make  →  make install
+    · cd /usr/local/nginx  →  sbin/nginx
+    · 确认成功：浏览器访问服务器 IP 看到「Welcome to nginx!」
+      （打不开先查 ps -ef | grep nginx 和 80 端口放行）
+  
+  【6】对照 PPT 第 54 页
+    二进制发布包：JDK、MySQL（解压 + 改配置就能用）
+    源码编译：Nginx（configure → make → make install）
+    yum：装 Nginx 依赖（自动解决依赖）
+    rpm：卸载 mariadb（-qa 查、-e --nodeps 卸）
+  ```
+  检查点：① 顺序对（先卸 mariadb 再装 MySQL；先 source 再用 java；先注册服务再 systemctl start）；② 每一步都有一个"看得见的结果"；③ 临时密码、`'%'` 授权、防火墙四步这三个细节没漏；④ 能说清三种包各属于哪种安装方式、yum 和 rpm 各在哪儿出场。
+
+  :::
+

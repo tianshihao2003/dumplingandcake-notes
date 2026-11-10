@@ -83,7 +83,7 @@ PPT 第 43 页把第 4 章的四块内容又列了一遍（**SpringBoot Web入�
 </dependencies>
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 45 页的准备工作只说了"勾 web 依赖、lombok"两样，但 PPT 第 47 页的代码里用了 **hutool 的 `IoUtil`**——所以 pom 里还得补上第三个依赖 `cn.hutool:hutool-all`（课程代码里是 **5.8.28**，最终代码工程里是 5.8.27，版本差别不大）。少了它，`IoUtil.readLines(...)` 这行直接编译不过。
 
 ## 第 2 步：把静态页面和 user.txt 放到位（PPT 第 45-46 页）
@@ -198,7 +198,7 @@ public class User {
 }
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 属性名要和 JSON 里的字段名对得上：接口返回的 JSON 是 `{"id":1,"username":"daqiao",...}`，这里的属性名就是 `id`、`username`——SpringBoot 把对象转 JSON 时**直接拿属性名当字段名**，所以前端 `&#123;&#123;user.updateTime}}` 才能取到值。
 
 ## 第 4 步：开发服务端程序（PPT 第 47 页）
@@ -276,10 +276,10 @@ List<User>（8 个 User 对象）→ return 出去 → 自动转成 JSON
 | `LocalDateTime.parse(parts[5], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))` | 把 `"2024-07-15 15:05:45"` 按这个格式解析成时间对象 |
 | `new User(id, username, password, name, age, updateTime)` | 调 Lombok 生成的**全参构造方法**，组装成一个 User |
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 47 页这页代码有个**笔误**：它写的是 `LocalDateTime uTime = LocalDateTime.parse(parts[5], ...)`，可下一行 `return new User(id, username, password, name, age, updateTime)` 用的却是 `updateTime`——变量名前后不一致（少了 `t` 和多写了 `update`）。**以课程代码为准**，变量名统一叫 `updateTime`（和实体类属性同名）就对了。
 
-> [!NOTE]
+> [!NOTE] 注意
 > `List<User> userList = lines.stream()...         .collect(Collectors.toList());`（PPT 里的写法）和课程最终代码里的 `... .toList()` 是**等价**的两种收尾方式：`Collectors.toList()` 收出来的是可变的 `ArrayList`，Java 16 之后的 `Stream.toList()` 收出来的是**不可变**的 List。这个案例只是读完返回，不改集合内容，所以两种写法都对。
 
 ### `@RestController` 和 `@ResponseBody`（PPT 第 46 页）
@@ -300,7 +300,7 @@ PPT 第 46 页专门把这点单拎出来讲：
 
 这两者的区别有实测对照（本机在入门工程里另加了两个方法分别试的，下面就是跑出来的结果）：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Spring Boot 3.2.8 / Tomcat 10.1.26）
 >
 > ```java
@@ -324,7 +324,7 @@ PPT 第 46 页专门把这点单拎出来讲：
 
 工程跑起来以后，用 `curl` 直接看 `/list` 的响应头和响应体：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Spring Boot 3.2.8 / 内嵌 Tomcat / JDK 17）
 >
 > ```text
@@ -348,7 +348,7 @@ PPT 第 46 页专门把这点单拎出来讲：
 > 1. **`Content-Type: application/json`**：不是我们写的——方法返回 `List<User>`，SpringBoot 发现响应体是对象/集合，用内置的 Jackson 把它转成 JSON，顺带把类型设成了 `application/json`（[34 篇](/posts/编程学习/javaweb学习笔记/34-http响应数据格式与状态码/)里说的"响应头通常不用手动设置"，这里就是活例子；[35 篇](/posts/编程学习/javaweb学习笔记/35-springboot设置响应数据/)实测里"返回字符串时是 `text/plain`"也和它对得上）；
 > 2. **时间是 ISO 格式**：`"updateTime":"2024-07-15T15:05:45"`——中间的**空格变成了 `T`**，这是 Jackson 对 `LocalDateTime` 的默认序列化格式。前端把这串字符串原样显示，所以效果图上看到的就是 `2024-07-15T15:05:45` 这个样子。
 
-> [!TIP]
+> [!TIP] 提示
 > 上面这段实测响应里的 id 是 **201** 开头，而 PPT 效果图（以及你跟着课程敲的这一版）应该是 1-8——因为本机的实验工程用的是**最终代码**，它的业务实现类被换成了 2 号（`UserServiceImpl2`，把 id 都加了 200），那是 [39 篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)里"同类型多个 bean 怎么办"的实验对象。**本篇这一版代码里没有这个 200**，返回的 id 就是 `user.txt` 里的 1-8。
 
 ## 案例跑通了，但代码有问题（PPT 第 47 页）
@@ -423,56 +423,64 @@ public List<User> list() {
   3. 返回值到浏览器上要**是 JSON 数组**，而不是一个页面名字。
   （练习文件 `test_36_用户列表接口.java` 里已经给了包名、实体类路径和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四件事——类上标明"这是个处理请求的类"、"访问哪个地址进这个方法"、方法体里读文件+解析、返回集合。返回集合还要保证"不被当成页面名"
-  > **二级 · 方法**：类上用 `@RestController`（它自带 `@ResponseBody`），方法上用 `@RequestMapping("/list")`；读文件用 `this.getClass().getClassLoader().getResourceAsStream("user.txt")`；按行读用 hutool 的 `IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>())`；解析用 `lines.stream().map(...).collect(Collectors.toList())`，每行 `split(",")` 后 `Integer.parseInt`、`LocalDateTime.parse(..., DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))`；最后 `return userList;`
-  > **三级 · 骨架**：`@____ public class UserController { @____("/list") public List<User> list(){ InputStream in = this.getClass().getClassLoader().getResourceAsStream("____"); ArrayList<String> lines = IoUtil.____(in, StandardCharsets.UTF_8, new ArrayList<>()); List<User> userList = lines.____().map(line -> { String[] parts = line.split("____"); return new User(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], Integer.parseInt(parts[4]), LocalDateTime.____(parts[5], DateTimeFormatter.ofPattern("____"))); }).collect(Collectors.toList()); return ____; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima.controller;
-  >
-  > import cn.hutool.core.io.IoUtil;
-  > import com.itheima.pojo.User;
-  > import org.springframework.web.bind.annotation.RequestMapping;
-  > import org.springframework.web.bind.annotation.RestController;
-  >
-  > import java.io.InputStream;
-  > import java.nio.charset.StandardCharsets;
-  > import java.time.LocalDateTime;
-  > import java.time.format.DateTimeFormatter;
-  > import java.util.ArrayList;
-  > import java.util.List;
-  > import java.util.stream.Collectors;
-  >
-  > @RestController   // = @Controller + @ResponseBody：返回值直接写进响应体，集合会先转 JSON
-  > public class UserController {
-  >
-  >     @RequestMapping("/list")
-  >     public List<User> list() throws Exception {
-  >         // 1. 从 classpath 读取 user.txt（编译后 resources 下的文件就在 classpath 根）
-  >         InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
-  >         ArrayList<String> lines = IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>());
-  >
-  >         // 2. 一行文本 -> 一个 User 对象
-  >         List<User> userList = lines.stream().map(line -> {
-  >             String[] parts = line.split(",");
-  >             Integer id = Integer.parseInt(parts[0]);
-  >             String username = parts[1];
-  >             String password = parts[2];
-  >             String name = parts[3];
-  >             Integer age = Integer.parseInt(parts[4]);
-  >             LocalDateTime updateTime = LocalDateTime.parse(parts[5],
-  >                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-  >             return new User(id, username, password, name, age, updateTime);
-  >         }).collect(Collectors.toList());
-  >
-  >         // 3. 响应数据
-  >         return userList;
-  >     }
-  > }
-  > ```
-  > 三点检查：① 访问 `http://localhost:8080/list` 得到 JSON 数组（实测响应头是 `HTTP/1.1 200` + `Content-Type: application/json`）；② 把类上的注解换成 `@Controller` 再访问会变成 **404**——返回值被当成视图名了，这就是"第 3 个要求"的由来；③ 把 `getResourceAsStream("user.txt")` 改成 `new FileInputStream("user.txt")`，IDEA 里可能还能跑，打包成 jar 后就找不到了。
+  **一级 · 思路**：四件事——类上标明"这是个处理请求的类"、"访问哪个地址进这个方法"、方法体里读文件+解析、返回集合。返回集合还要保证"不被当成页面名"
+  **二级 · 方法**：类上用 `@RestController`（它自带 `@ResponseBody`），方法上用 `@RequestMapping("/list")`；读文件用 `this.getClass().getClassLoader().getResourceAsStream("user.txt")`；按行读用 hutool 的 `IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>())`；解析用 `lines.stream().map(...).collect(Collectors.toList())`，每行 `split(",")` 后 `Integer.parseInt`、`LocalDateTime.parse(..., DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))`；最后 `return userList;`
+  **三级 · 骨架**：`@____ public class UserController { @____("/list") public List<User> list(){ InputStream in = this.getClass().getClassLoader().getResourceAsStream("____"); ArrayList<String> lines = IoUtil.____(in, StandardCharsets.UTF_8, new ArrayList<>()); List<User> userList = lines.____().map(line -> { String[] parts = line.split("____"); return new User(Integer.parseInt(parts[0]), parts[1], parts[2], parts[3], Integer.parseInt(parts[4]), LocalDateTime.____(parts[5], DateTimeFormatter.ofPattern("____"))); }).collect(Collectors.toList()); return ____; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima.controller;
+  
+  import cn.hutool.core.io.IoUtil;
+  import com.itheima.pojo.User;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+  
+  import java.io.InputStream;
+  import java.nio.charset.StandardCharsets;
+  import java.time.LocalDateTime;
+  import java.time.format.DateTimeFormatter;
+  import java.util.ArrayList;
+  import java.util.List;
+  import java.util.stream.Collectors;
+  
+  @RestController   // = @Controller + @ResponseBody：返回值直接写进响应体，集合会先转 JSON
+  public class UserController {
+  
+      @RequestMapping("/list")
+      public List<User> list() throws Exception {
+          // 1. 从 classpath 读取 user.txt（编译后 resources 下的文件就在 classpath 根）
+          InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
+          ArrayList<String> lines = IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>());
+  
+          // 2. 一行文本 -> 一个 User 对象
+          List<User> userList = lines.stream().map(line -> {
+              String[] parts = line.split(",");
+              Integer id = Integer.parseInt(parts[0]);
+              String username = parts[1];
+              String password = parts[2];
+              String name = parts[3];
+              Integer age = Integer.parseInt(parts[4]);
+              LocalDateTime updateTime = LocalDateTime.parse(parts[5],
+                      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+              return new User(id, username, password, name, age, updateTime);
+          }).collect(Collectors.toList());
+  
+          // 3. 响应数据
+          return userList;
+      }
+  }
+  ```
+  三点检查：① 访问 `http://localhost:8080/list` 得到 JSON 数组（实测响应头是 `HTTP/1.1 200` + `Content-Type: application/json`）；② 把类上的注解换成 `@Controller` 再访问会变成 **404**——返回值被当成视图名了，这就是"第 3 个要求"的由来；③ 把 `getResourceAsStream("user.txt")` 改成 `new FileInputStream("user.txt")`，IDEA 里可能还能跑，打包成 jar 后就找不到了。
+
+  :::
+
 
 - [ ] **2-2 把 user.txt 的一行解析成对象**
   给定 `user.txt` 的第一行文本：
@@ -484,44 +492,52 @@ public List<User> list() {
   请写代码把它变成 `com.itheima.pojo.User` 对象（六个属性依次填进去）：数字段要变成数字、时间字符串要变成时间对象、剩下的原样是字符串。写完打印这个对象看一眼。
   （练习文件 `test_36_解析一行用户数据.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把一行"切开"成 6 段，再按实体类每个属性的类型逐个转换，最后交给全参构造方法组装
-  > **二级 · 方法**：`split(",")` 得到 `String[]`；`Integer.parseInt(...)` 转数字；`LocalDateTime.parse(字符串, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))` 转时间；`new User(...)` 组装
-  > **三级 · 骨架**：`String[] parts = line.split("____"); User user = new User(Integer.____(parts[0]), parts[1], parts[2], parts[3], Integer.parseInt(parts[____]), LocalDateTime.____(parts[5], DateTimeFormatter.ofPattern("____")));`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import com.itheima.pojo.User;
-  >
-  > import java.time.LocalDateTime;
-  > import java.time.format.DateTimeFormatter;
-  >
-  > public class ParseLineTest {
-  >     public static void main(String[] args) {
-  >         String line = "1,daqiao,1234567890,大乔,22,2024-07-15 15:05:45";
-  >
-  >         // 1. 按逗号切成 6 段
-  >         String[] parts = line.split(",");
-  >
-  >         // 2. 按类型转换：数字段 parseInt，时间段 parse（格式要和文本一模一样）
-  >         Integer id = Integer.parseInt(parts[0]);            // "1" -> 1
-  >         String username = parts[1];                          // daqiao
-  >         String password = parts[2];                          // 1234567890
-  >         String name = parts[3];                              // 大乔
-  >         Integer age = Integer.parseInt(parts[4]);            // "22" -> 22
-  >         LocalDateTime updateTime = LocalDateTime.parse(parts[5],
-  >                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-  >
-  >         // 3. 组装（Lombok 的 @AllArgsConstructor 生成的构造方法）
-  >         User user = new User(id, username, password, name, age, updateTime);
-  >         System.out.println(user);
-  >         // 输出：User(id=1, username=daqiao, password=1234567890, name=大乔, age=22, updateTime=2024-07-15T15:05)
-  >     }
-  > }
-  > ```
-  > 检查点：① `split` 的参数就是**分隔符**（`","`），不是正则里的 `".",`；② `LocalDateTime.parse` 的格式串必须和文本一致（`yyyy-MM-dd HH:mm:ss`，中间那个空格也是格式的一部分），差一个字符就抛 `DateTimeParseException`；③ 如果打印出来中文是乱码，是编码没指定对——读文件时要给 `StandardCharsets.UTF_8`。
+  **一级 · 思路**：先把一行"切开"成 6 段，再按实体类每个属性的类型逐个转换，最后交给全参构造方法组装
+  **二级 · 方法**：`split(",")` 得到 `String[]`；`Integer.parseInt(...)` 转数字；`LocalDateTime.parse(字符串, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))` 转时间；`new User(...)` 组装
+  **三级 · 骨架**：`String[] parts = line.split("____"); User user = new User(Integer.____(parts[0]), parts[1], parts[2], parts[3], Integer.parseInt(parts[____]), LocalDateTime.____(parts[5], DateTimeFormatter.ofPattern("____")));`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import com.itheima.pojo.User;
+  
+  import java.time.LocalDateTime;
+  import java.time.format.DateTimeFormatter;
+  
+  public class ParseLineTest {
+      public static void main(String[] args) {
+          String line = "1,daqiao,1234567890,大乔,22,2024-07-15 15:05:45";
+  
+          // 1. 按逗号切成 6 段
+          String[] parts = line.split(",");
+  
+          // 2. 按类型转换：数字段 parseInt，时间段 parse（格式要和文本一模一样）
+          Integer id = Integer.parseInt(parts[0]);            // "1" -> 1
+          String username = parts[1];                          // daqiao
+          String password = parts[2];                          // 1234567890
+          String name = parts[3];                              // 大乔
+          Integer age = Integer.parseInt(parts[4]);            // "22" -> 22
+          LocalDateTime updateTime = LocalDateTime.parse(parts[5],
+                  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+  
+          // 3. 组装（Lombok 的 @AllArgsConstructor 生成的构造方法）
+          User user = new User(id, username, password, name, age, updateTime);
+          System.out.println(user);
+          // 输出：User(id=1, username=daqiao, password=1234567890, name=大乔, age=22, updateTime=2024-07-15T15:05)
+      }
+  }
+  ```
+  检查点：① `split` 的参数就是**分隔符**（`","`），不是正则里的 `".",`；② `LocalDateTime.parse` 的格式串必须和文本一致（`yyyy-MM-dd HH:mm:ss`，中间那个空格也是格式的一部分），差一个字符就抛 `DateTimeParseException`；③ 如果打印出来中文是乱码，是编码没指定对——读文件时要给 `StandardCharsets.UTF_8`。
+
+  :::
+
 
 - [ ] **2-3 接口为什么返回了 404**
   小王写完接口，类上用的是 `@Controller`，方法返回字符串 `"abc"`。启动工程后浏览器访问 `/demo`，得到 **404**。请回答：
@@ -530,32 +546,40 @@ public List<User> list() {
   3. 本案例的 `/list` 接口要返回 JSON 数组，两种改法里哪一种更省事？
   （练习文件 `test_36_接口为什么返回404.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先想"`@Controller` 默认拿返回值去干什么"，再想"有没有一个注解能改成'把返回值写进响应体'"，最后想"有没有一个注解把这两件事合起来"
-  > **二级 · 方法**：类上换 `@RestController`，或者保留 `@Controller`、在方法（或类）上加 `@ResponseBody`
-  > **三级 · 骨架**：改法一 `@____RestMethod` → 换成 `@____Controller`；改法二 在方法上加 `@____Body`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **因为 `@Controller` 默认把方法返回值当成"视图名"**：SpringMVC 拿 `"abc"` 去找叫 abc 的页面（视图），工程里既没有模板引擎也没有这个页面，所以 404。实测（Spring Boot 3.2.8）就是这个结果。
-  > 2. 两种改法：
-  >    ```java
-  >    // 改法一：类上的 @Controller 换成 @RestController（= @Controller + @ResponseBody）
-  >    @RestController
-  >    public class DemoController {
-  >        @RequestMapping("/demo")
-  >        public String demo() { return "abc"; }
-  >    }
-  >    ```
-  >    ```java
-  >    // 改法二：保留 @Controller，给方法（或类）加上 @ResponseBody
-  >    @Controller
-  >    public class DemoController {
-  >        @RequestMapping("/demo")
-  >        @ResponseBody
-  >        public String demo() { return "abc"; }
-  >    }
-  >    ```
-  > 3. 本案例返回的是 `List<User>`，**用 `@RestController` 更省事**——一次注解管住整个类的所有方法（本机实测：`@Controller` + `@ResponseBody` 返回字符串的效果和 `@RestController` 完全一样，但每个方法都得记得加 `@ResponseBody`）。
+  **一级 · 思路**：先想"`@Controller` 默认拿返回值去干什么"，再想"有没有一个注解能改成'把返回值写进响应体'"，最后想"有没有一个注解把这两件事合起来"
+  **二级 · 方法**：类上换 `@RestController`，或者保留 `@Controller`、在方法（或类）上加 `@ResponseBody`
+  **三级 · 骨架**：改法一 `@____RestMethod` → 换成 `@____Controller`；改法二 在方法上加 `@____Body`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **因为 `@Controller` 默认把方法返回值当成"视图名"**：SpringMVC 拿 `"abc"` 去找叫 abc 的页面（视图），工程里既没有模板引擎也没有这个页面，所以 404。实测（Spring Boot 3.2.8）就是这个结果。
+  2. 两种改法：
+     ```java
+     // 改法一：类上的 @Controller 换成 @RestController（= @Controller + @ResponseBody）
+     @RestController
+     public class DemoController {
+         @RequestMapping("/demo")
+         public String demo() { return "abc"; }
+     }
+     ```
+     ```java
+     // 改法二：保留 @Controller，给方法（或类）加上 @ResponseBody
+     @Controller
+     public class DemoController {
+         @RequestMapping("/demo")
+         @ResponseBody
+         public String demo() { return "abc"; }
+     }
+     ```
+  3. 本案例返回的是 `List<User>`，**用 `@RestController` 更省事**——一次注解管住整个类的所有方法（本机实测：`@Controller` + `@ResponseBody` 返回字符串的效果和 `@RestController` 完全一样，但每个方法都得记得加 `@ResponseBody`）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -581,72 +605,80 @@ public List<User> list() {
   | 响应数据 | `@RestController` = `@Controller` + `@ResponseBody`；集合自动转 JSON，`Content-Type: application/json` |
   | 遗留问题 | 一个方法三件事 → 复用性差、难以维护（下一篇拆三层） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整个案例就是"**文件 → 对象集合 → JSON**"这一条链，外加"页面从哪来"（静态资源）和"返回值怎么变成 JSON"（`@RestController`）两个配角
-  > **二级 · 方法**：建工程勾 web+lombok、pom 补 hutool；页面进 `resources/static`、数据文件进 `resources` 根；实体类用 Lombok 三件套；接口用 `@RestController` + `@RequestMapping("/list")`；读文件 `getResourceAsStream`、按行读 `IoUtil.readLines`、解析 `stream().map(...)`；验证用 curl 看状态码和 `Content-Type`
-  > **三级 · 骨架**：`@____ public class UserController { @____("/list") public List<User> list(){ ... } }`；验证三连 = `curl -si http://localhost:8080/list`（看头）、`curl -s http://localhost:8080/list`（看体）、浏览器打开 `http://localhost:8080/user.html`（看效果）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1** 六步的落地写法：
-  > 1. 工程与依赖：坐标随意（课程是 `com.itheima:springboot-web-demo`），pom 关键三行：
-  >    ```xml
-  >    <dependency>
-  >        <groupId>org.springframework.boot</groupId>
-  >        <artifactId>spring-boot-starter-web</artifactId>
-  >    </dependency>
-  >    <dependency>
-  >        <groupId>org.projectlombok</groupId>
-  >        <artifactId>lombok</artifactId>
-  >        <optional>true</optional>
-  >    </dependency>
-  >    <dependency>
-  >        <groupId>cn.hutool</groupId>
-  >        <artifactId>hutool-all</artifactId>
-  >        <version>5.8.28</version>
-  >    </dependency>
-  >    ```
-  > 2. 文件位置：
-  >    ```text
-  >    src/main/resources/
-  >    ├── user.txt              ← 给 Java 代码读（classpath 根，文件名就是 user.txt）
-  >    ├── application.properties
-  >    └── static/               ← 给浏览器访问（映射到网站根路径）
-  >        ├── user.html
-  >        └── js/
-  >            ├── axios.min.js
-  >            └── vue.esm-browser.js
-  >    ```
-  >    此时浏览器访问 `http://localhost:8080/user.html` 应能看到标题和表头（本机实测静态资源返回 `200 text/html`），表格里没有数据行。
-  > 3. 实体类：
-  >    ```java
-  >    package com.itheima.pojo;
-  >
-  >    import lombok.AllArgsConstructor;
-  >    import lombok.Data;
-  >    import lombok.NoArgsConstructor;
-  >    import java.time.LocalDateTime;
-  >
-  >    @Data
-  >    @NoArgsConstructor
-  >    @AllArgsConstructor
-  >    public class User {
-  >        private Integer id;
-  >        private String username;
-  >        private String password;
-  >        private String name;
-  >        private Integer age;
-  >        private LocalDateTime updateTime;
-  >    }
-  >    ```
-  > 4. 请求处理类：就是本篇"第 4 步"那段完整代码（`@RestController` + `@RequestMapping("/list")` + 读文件 + `stream().map(...)` + `return userList;`）。
-  > 5. 验证：
-  >    ```text
-  >    $ curl -si "http://localhost:8080/list" | head -4
-  >    HTTP/1.1 200
-  >    Content-Type: application/json
-  >    Transfer-Encoding: chunked
-  >    ```
-  >    能拿到这个头，说明"返回值 → JSON → 响应体"这条链全通了；响应头里的 `Content-Type` 是 SpringBoot 自动加的。
-  > 6. 页面效果与故障演练：
-  >    - 刷新 `user.html`，8 行数据出现（对课程资料里的 8 个用户：大乔、小乔、貂蝉、吕布、赵云、张飞、关羽、刘备）；
-  >    - 把 `@RestController` 换成 `@Controller` 后重启，`curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/list` 得到 **404**——返回值 `List<User>` 被当成视图名了（本机实测结论），这就反向印证了"`@RestController = @Controller + @ResponseBody`"。
+  **一级 · 思路**：整个案例就是"**文件 → 对象集合 → JSON**"这一条链，外加"页面从哪来"（静态资源）和"返回值怎么变成 JSON"（`@RestController`）两个配角
+  **二级 · 方法**：建工程勾 web+lombok、pom 补 hutool；页面进 `resources/static`、数据文件进 `resources` 根；实体类用 Lombok 三件套；接口用 `@RestController` + `@RequestMapping("/list")`；读文件 `getResourceAsStream`、按行读 `IoUtil.readLines`、解析 `stream().map(...)`；验证用 curl 看状态码和 `Content-Type`
+  **三级 · 骨架**：`@____ public class UserController { @____("/list") public List<User> list(){ ... } }`；验证三连 = `curl -si http://localhost:8080/list`（看头）、`curl -s http://localhost:8080/list`（看体）、浏览器打开 `http://localhost:8080/user.html`（看效果）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1** 六步的落地写法：
+  1. 工程与依赖：坐标随意（课程是 `com.itheima:springboot-web-demo`），pom 关键三行：
+     ```xml
+     <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+     </dependency>
+     <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <optional>true</optional>
+     </dependency>
+     <dependency>
+         <groupId>cn.hutool</groupId>
+         <artifactId>hutool-all</artifactId>
+         <version>5.8.28</version>
+     </dependency>
+     ```
+  2. 文件位置：
+     ```text
+     src/main/resources/
+     ├── user.txt              ← 给 Java 代码读（classpath 根，文件名就是 user.txt）
+     ├── application.properties
+     └── static/               ← 给浏览器访问（映射到网站根路径）
+         ├── user.html
+         └── js/
+             ├── axios.min.js
+             └── vue.esm-browser.js
+     ```
+     此时浏览器访问 `http://localhost:8080/user.html` 应能看到标题和表头（本机实测静态资源返回 `200 text/html`），表格里没有数据行。
+  3. 实体类：
+     ```java
+     package com.itheima.pojo;
+  
+     import lombok.AllArgsConstructor;
+     import lombok.Data;
+     import lombok.NoArgsConstructor;
+     import java.time.LocalDateTime;
+  
+     @Data
+     @NoArgsConstructor
+     @AllArgsConstructor
+     public class User {
+         private Integer id;
+         private String username;
+         private String password;
+         private String name;
+         private Integer age;
+         private LocalDateTime updateTime;
+     }
+     ```
+  4. 请求处理类：就是本篇"第 4 步"那段完整代码（`@RestController` + `@RequestMapping("/list")` + 读文件 + `stream().map(...)` + `return userList;`）。
+  5. 验证：
+     ```text
+     $ curl -si "http://localhost:8080/list" | head -4
+     HTTP/1.1 200
+     Content-Type: application/json
+     Transfer-Encoding: chunked
+     ```
+     能拿到这个头，说明"返回值 → JSON → 响应体"这条链全通了；响应头里的 `Content-Type` 是 SpringBoot 自动加的。
+  6. 页面效果与故障演练：
+     - 刷新 `user.html`，8 行数据出现（对课程资料里的 8 个用户：大乔、小乔、貂蝉、吕布、赵云、张飞、关羽、刘备）；
+     - 把 `@RestController` 换成 `@Controller` 后重启，`curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/list` 得到 **404**——返回值 `List<User>` 被当成视图名了（本机实测结论），这就反向印证了"`@RestController = @Controller + @ResponseBody`"。
+
+  :::
+

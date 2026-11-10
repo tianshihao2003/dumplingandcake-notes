@@ -41,7 +41,7 @@ PPT 第 46 页：
 | `application.yaml` | yaml | 缩进表示层级；**简洁、以数据为中心** |
 | `application.yml` | yml | 同上（**yml 是 yaml 的简写**，两种扩展名等价） |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 三种文件都是 SpringBoot 的**约定名**：默认放在 `src/main/resources`（classpath 根）下、文件名必须是 `application`，SpringBoot 启动时会自动读取。这也是为什么换格式**不用改任何 Java 代码**——只是把同一份配置换个写法。
 
 同一份数据源配置，两种格式对照（PPT 第 46 页的原文代码）：
@@ -66,7 +66,7 @@ spring:
 
 看出规律了吗：**properties 里每一行的点（`.`）就是 yml 里的层级**，`spring.datasource.username` 拆开就是 `spring` → `datasource` → `username` 三层缩进。最后一层的名字（`username`、`password`）后面跟冒号和值。
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 46 页这段示例里驱动类名写的是 **`com.mysql.jdbc.Driver`**（MySQL 5.x 时代的旧类名）；课程**代码工程**里用的是 **`com.mysql.cj.jdbc.Driver`**（MySQL 8.x 驱动的新类名，`cj` = Connector/J）。照着现在用的 `mysql-connector-j` 8.x 依赖，应该写后者——这也是 [49 篇](/posts/编程学习/javaweb学习笔记/49-jdbc入门/)里 JDBC 注册驱动的那个类名。
 
 ## yml 的语法四条（PPT 第 47 页）
@@ -120,7 +120,7 @@ hobby:
 
 写法说明：**每一行用一个短横线 `-` 加一个空格开头**，表示"这是一个数组/集合的元素"，每个元素一行；元素可以是字符串、数字、也可以再嵌套对象。
 
-> [!TIP]
+> [!TIP] 提示
 > 两种写法的记忆点：**对象 = 名字下面缩进 + 键值对；数组 = 名字下面缩进 + 一排 `- `**。对象在 Java 里是"一个东西有若干属性"，数组是"一组并列的东西"——看 yml 时先问"这个键下面是一堆键值对，还是一排短横线"。
 
 ### 注意：以 0 开头的值要用引号引起来
@@ -137,7 +137,7 @@ app-demo:
   code-quoted: '0123456'     # 加引号
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（SpringBoot 工程里用 `@Value` 把这两个值注入后打印）：
 >
 > ```text
@@ -223,7 +223,7 @@ mybatis:
 
 改完格式会不会"有的配置生效、有的不生效"？本机用两个配套工程对照过：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**——`aliyun-mybatis-quickstart` 用 **`application.properties`**（点分号、平铺），`springboot-mybatis-quickstart` 用 **`application.yml`**（缩进、层级）；**两套配置都跑通了同一批 5 个测试**（查全部、删除、新增、修改、按用户名密码查询），功能完全等价。
 >
 > 也就是说：**格式只影响"怎么写"，不影响"写了算不算"**——只要键的层级对得上（`spring.datasource.username` ⇄ `spring: datasource: username:`），SpringBoot 读到的就是同一份配置。
@@ -284,65 +284,89 @@ mybatis:
   做完再回答：properties 里每行那个点（`.`），在 yml 里变成了什么？
   （练习文件 `test_56_配置格式改写.yml` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把 `spring.datasource` 这个前缀抽出来当"父层"，它下面的四个键退一格变成子层；等号换成冒号 + 空格
-  > **二级 · 方法**：第一层写 `spring:`，第二层缩进写 `datasource:`，第三层再缩进写四个键（`driver-class-name` / `url` / `username` / `password`）
-  > **三级 · 骨架**：`spring:` ↳（缩进）`datasource:` ↳（再缩进）`driver-class-name: ____` / `url: ____` / `username: ____` / `password: ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```yaml
-  > spring:
-  >   datasource:
-  >     driver-class-name: com.mysql.cj.jdbc.Driver
-  >     url: jdbc:mysql://localhost:3306/web01
-  >     username: root
-  >     password: 1234
-  > ```
-  > 回答：properties 里的**每个点（`.`）= yml 里的一层缩进**。`spring.datasource.username` 拆开就是 `spring` → `datasource` → `username` 三层。四个键是同级兄弟，**必须左对齐**（都缩进 4 个空格、写在 `datasource:` 下面）；冒号后面记得留空格。本机实测这套 yml 与 properties 版跑同一批测试结果一致。
+  **一级 · 思路**：把 `spring.datasource` 这个前缀抽出来当"父层"，它下面的四个键退一格变成子层；等号换成冒号 + 空格
+  **二级 · 方法**：第一层写 `spring:`，第二层缩进写 `datasource:`，第三层再缩进写四个键（`driver-class-name` / `url` / `username` / `password`）
+  **三级 · 骨架**：`spring:` ↳（缩进）`datasource:` ↳（再缩进）`driver-class-name: ____` / `url: ____` / `username: ____` / `password: ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```yaml
+  spring:
+    datasource:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/web01
+      username: root
+      password: 1234
+  ```
+  回答：properties 里的**每个点（`.`）= yml 里的一层缩进**。`spring.datasource.username` 拆开就是 `spring` → `datasource` → `username` 三层。四个键是同级兄弟，**必须左对齐**（都缩进 4 个空格、写在 `datasource:` 下面）；冒号后面记得留空格。本机实测这套 yml 与 properties 版跑同一批测试结果一致。
+
+  :::
+
 
 - [ ] **2-2 用 yml 定义一组"对象"和一组"数组"**
   需求：在一个 yml 文件里写两块配置——① 一个叫 `user` 的对象，属性是姓名 `张三`、年龄 `18`、密码 `123456`；② 一个叫 `hobby` 的集合，元素依次是 `Java`、`Game`、`Sport`。要求注释写清哪块是对象、哪块是数组，且**不要违反四条语法规则**。
   （练习文件 `test_56_配置格式改写.yml` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：对象是"名字下面缩进一层写键值对"；集合是"名字下面缩进一层、每行一个短横线开头的元素"
-  > **二级 · 方法**：对象用 `user:` + 缩进键值对；数组用 `hobby:` + `- Java` 这样的行（短横线后必须有空格）；注释用 `#`
-  > **三级 · 骨架**：`# 定义对象/Map集合` + `user:` ↳ `name: ____` / `age: ____` / `password: ____` ；`# 定义数组/List/Set集合` + `hobby:` ↳ `- ____` / `- ____` / `- ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```yaml
-  > #定义对象/Map集合
-  > user:
-  >   name: 张三
-  >   age: 18
-  >   password: 123456
-  >
-  > #定义数组/List/Set集合
-  > hobby:
-  >   - Java
-  >   - Game
-  >   - Sport
-  > ```
-  > 检查点：① 冒号后面都有空格；② 层级缩进用空格、同级左对齐（`name`/`age`/`password` 三个对得整整齐齐；三个 `- ` 也对齐）；③ 注释用 `#`。（课程 `资料/06. 后端Web基础…/代码/application.yml` 里就是这份示例，值换成了 `Tom`/`男`/`Java, Game, Sport`。）
+  **一级 · 思路**：对象是"名字下面缩进一层写键值对"；集合是"名字下面缩进一层、每行一个短横线开头的元素"
+  **二级 · 方法**：对象用 `user:` + 缩进键值对；数组用 `hobby:` + `- Java` 这样的行（短横线后必须有空格）；注释用 `#`
+  **三级 · 骨架**：`# 定义对象/Map集合` + `user:` ↳ `name: ____` / `age: ____` / `password: ____` ；`# 定义数组/List/Set集合` + `hobby:` ↳ `- ____` / `- ____` / `- ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```yaml
+  #定义对象/Map集合
+  user:
+    name: 张三
+    age: 18
+    password: 123456
+  
+  #定义数组/List/Set集合
+  hobby:
+    - Java
+    - Game
+    - Sport
+  ```
+  检查点：① 冒号后面都有空格；② 层级缩进用空格、同级左对齐（`name`/`age`/`password` 三个对得整整齐齐；三个 `- ` 也对齐）；③ 注释用 `#`。（课程 `资料/06. 后端Web基础…/代码/application.yml` 里就是这份示例，值换成了 `Tom`/`男`/`Java, Game, Sport`。）
+
+  :::
+
 
 - [ ] **2-3 0 开头的"编号"为什么读出来变了样**
   需求：你在 yml 里配了一个业务编号 `998877` 之外，还配了一个**以 0 开头**的编号 `0123456`，代码里读出来却发现不是 `0123456`。
   完成：① 不加引号时读出来的数值是多少？为什么会这样（按几进制解析）？② 把值改成什么写法才能原样读出来？③ 顺带回答：如果这个 0 开头的值里**含 8 或 9**（不是合法八进制），不加引号会怎样？
   （练习文件 `test_56_配置格式改写.yml` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：yml（YAML）把 0 开头的数字当成别的进制，把 `0123456` 按这个进制换算成十进制是多少？
-  > **二级 · 方法**：八进制按位权展开（第 n 位 × 8 的幂）；要原样保留就给值加**单引号**，把它变成字符串
-  > **三级 · 骨架**：答案 `____`（用计算器算 8 进制 `123456` 的十进制值）；写法 `code: '____'`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 读出来是 **42798**——YAML 把 `0123456` 当**八进制**（`0` 前缀是八进制标记），按位权展开 1×8⁵ + 2×8⁴ + 3×8³ + 4×8² + 5×8 + 6 = **42798**。**本机实测**（用 `@Value` 注入后打印）：
-  >    ```text
-  >    == yml 不加引号的 0123456 = [42798]
-  >    == yml 加引号的 0123456   = [0123456]
-  >    ```
-  > ② 写成 `code: '0123456'`（**加单引号**），它就被当成字符串、原样读出 `0123456`。PPT 第 47 页那句"以 0 开头的值需要用 `''` 引起来，因为以 0 开头在 yml 中表示 8 进制的数据"就是这个意思。
-  > ③ 含 8 或 9 的值（如 `0123458`）**不是合法的八进制数**，YAML 无法把它当数字，只能当字符串、原样读出来——但这属于"侥幸"，值一变（换成合法八进制）就又会被改掉，所以**规范做法是凡 0 开头想原样保留的一律加引号**。
+  **一级 · 思路**：yml（YAML）把 0 开头的数字当成别的进制，把 `0123456` 按这个进制换算成十进制是多少？
+  **二级 · 方法**：八进制按位权展开（第 n 位 × 8 的幂）；要原样保留就给值加**单引号**，把它变成字符串
+  **三级 · 骨架**：答案 `____`（用计算器算 8 进制 `123456` 的十进制值）；写法 `code: '____'`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 读出来是 **42798**——YAML 把 `0123456` 当**八进制**（`0` 前缀是八进制标记），按位权展开 1×8⁵ + 2×8⁴ + 3×8³ + 4×8² + 5×8 + 6 = **42798**。**本机实测**（用 `@Value` 注入后打印）：
+     ```text
+     == yml 不加引号的 0123456 = [42798]
+     == yml 加引号的 0123456   = [0123456]
+     ```
+  ② 写成 `code: '0123456'`（**加单引号**），它就被当成字符串、原样读出 `0123456`。PPT 第 47 页那句"以 0 开头的值需要用 `''` 引起来，因为以 0 开头在 yml 中表示 8 进制的数据"就是这个意思。
+  ③ 含 8 或 9 的值（如 `0123458`）**不是合法的八进制数**，YAML 无法把它当数字，只能当字符串、原样读出来——但这属于"侥幸"，值一变（换成合法八进制）就又会被改掉，所以**规范做法是凡 0 开头想原样保留的一律加引号**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -366,31 +390,39 @@ mybatis:
   | 配置等效 | 第 4、5 步——换格式后 5 个测试照跑（本机实测两个工程各用一种格式都通过） |
   | 0 开头的值 | 第 6 步——八进制坑与加引号的写法 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把每条 properties 的键按"点"切开，变成本层的父节点 + 缩进一层的子节点；`mybatis` 那两块里，`log-impl` 在 `configuration` 下面、`mapper-locations` 直接在 `mybatis` 下面
-  > **二级 · 方法**：`spring:` → `application:`（`name:`）/ `datasource:`（四项）；`mybatis:` → `configuration:`（`log-impl:`）/ `mapper-locations:`
-  > **三级 · 骨架**：`spring:` ↳ `application:` ↳ `name: ____`，↳ `datasource:` ↳ `url:` / `driver-class-name:` / `username:` / `password:`；`mybatis:` ↳ `configuration:` ↳ `log-impl: ____`，↳ `mapper-locations: ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > 2~3. yml 版（与课程 `springboot-mybatis-quickstart` 的 `application.yml` 一致）：
-  >    ```yaml
-  >    spring:
-  >      application:
-  >        name: springboot-mybatis-quickstart
-  >      #数据库的连接信息
-  >      datasource:
-  >        url: jdbc:mysql://localhost:3306/web01
-  >        driver-class-name: com.mysql.cj.jdbc.Driver
-  >        username: root
-  >        password: 1234
-  >
-  >    #Mybatis的相关配置
-  >    mybatis:
-  >      configuration:
-  >        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  >      mapper-locations: classpath:mapper/*.xml
-  >    ```
-  >    （课程工程里 `datasource` 下还有一行 `type: com.alibaba.druid.pool.DruidDataSource`，那是[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)切 Druid 用的，本题不含。）
-  > 4~5. 本机实测：`aliyun-mybatis-quickstart` 用 `application.properties`、`springboot-mybatis-quickstart` 用 `application.yml`，**两套配置跑同一批 5 个测试（查全部/删除/新增/修改/按用户名密码查询）全部通过**，日志与数据结果一致。原因是 SpringBoot 按**约定的文件名**在 classpath 根目录读取配置，把内容解析成同一棵"配置树"——点分号的 `spring.datasource.username` 与缩进的 `spring: datasource: username:` 在它眼里是同一个键，**格式只影响写法、不影响是否生效**。
-  > 6. PPT 第 49 页问答：① 支持 `application.properties`、`application.yaml`、`application.yml` 三类；② yml 的特点是**简洁、以数据为中心**，格式为"值前必须有空格 / 缩进用空格不许 Tab / 同级左对齐 / `#` 注释"，另有注意项——**以 0 开头的值表示八进制，想表示本身含义要用 `''` 引起来**。我会采用的写法：凡是编号、工号、密码这类"看着像数字但要当字符串用"的值，**一律加单引号**（如 `code: '0123456'`），避免被悄悄转成八进制（本机实测 `0123456` → `42798`）。
+  **一级 · 思路**：把每条 properties 的键按"点"切开，变成本层的父节点 + 缩进一层的子节点；`mybatis` 那两块里，`log-impl` 在 `configuration` 下面、`mapper-locations` 直接在 `mybatis` 下面
+  **二级 · 方法**：`spring:` → `application:`（`name:`）/ `datasource:`（四项）；`mybatis:` → `configuration:`（`log-impl:`）/ `mapper-locations:`
+  **三级 · 骨架**：`spring:` ↳ `application:` ↳ `name: ____`，↳ `datasource:` ↳ `url:` / `driver-class-name:` / `username:` / `password:`；`mybatis:` ↳ `configuration:` ↳ `log-impl: ____`，↳ `mapper-locations: ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  2~3. yml 版（与课程 `springboot-mybatis-quickstart` 的 `application.yml` 一致）：
+     ```yaml
+     spring:
+       application:
+         name: springboot-mybatis-quickstart
+       #数据库的连接信息
+       datasource:
+         url: jdbc:mysql://localhost:3306/web01
+         driver-class-name: com.mysql.cj.jdbc.Driver
+         username: root
+         password: 1234
+  
+     #Mybatis的相关配置
+     mybatis:
+       configuration:
+         log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+       mapper-locations: classpath:mapper/*.xml
+     ```
+     （课程工程里 `datasource` 下还有一行 `type: com.alibaba.druid.pool.DruidDataSource`，那是[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)切 Druid 用的，本题不含。）
+  4~5. 本机实测：`aliyun-mybatis-quickstart` 用 `application.properties`、`springboot-mybatis-quickstart` 用 `application.yml`，**两套配置跑同一批 5 个测试（查全部/删除/新增/修改/按用户名密码查询）全部通过**，日志与数据结果一致。原因是 SpringBoot 按**约定的文件名**在 classpath 根目录读取配置，把内容解析成同一棵"配置树"——点分号的 `spring.datasource.username` 与缩进的 `spring: datasource: username:` 在它眼里是同一个键，**格式只影响写法、不影响是否生效**。
+  6. PPT 第 49 页问答：① 支持 `application.properties`、`application.yaml`、`application.yml` 三类；② yml 的特点是**简洁、以数据为中心**，格式为"值前必须有空格 / 缩进用空格不许 Tab / 同级左对齐 / `#` 注释"，另有注意项——**以 0 开头的值表示八进制，想表示本身含义要用 `''` 引起来**。我会采用的写法：凡是编号、工号、密码这类"看着像数字但要当字符串用"的值，**一律加单引号**（如 `code: '0123456'`），避免被悄悄转成八进制（本机实测 `0123456` → `42798`）。
+
+  :::
+

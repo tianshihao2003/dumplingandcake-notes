@@ -79,7 +79,7 @@ with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
     print(a_list)
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 取**属性值**的写法是去掉 `text()`、直接写属性名：`//td/img/@src`（取图片地址），`//div/a/@href`（取链接地址）。
 
 ## 相关
@@ -106,70 +106,106 @@ with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
 
 - [ ] **2-1** 取 `<h1>` 的文本
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先想"从哪儿找"（路径），再想"要元素本身，还是要它的文本"
-  > **二级 · 方法**：定位用 `//`；取文本用 `text()`
-  > **三级 · 骨架**：`//h1/____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```text
-  > //h1/text()                     # 也可写 /html/body/div[1]/h1/text()
-  > ```
+  **一级 · 思路**：先想"从哪儿找"（路径），再想"要元素本身，还是要它的文本"
+  **二级 · 方法**：定位用 `//`；取文本用 `text()`
+  **三级 · 骨架**：`//h1/____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```text
+  //h1/text()                     # 也可写 /html/body/div[1]/h1/text()
+  ```
+
+  :::
+
 
 - [ ] **2-2** 取链接 `<a>` 的 href 属性值（注意页面里有一个链接没有地址，看它会不会出现在结果里）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题要的不是文本，而是元素身上的属性值
-  > **二级 · 方法**：取属性值直接在属性名前加 `@`
-  > **三级 · 骨架**：`//a/____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```text
-  > //a/@href
-  > ```
+  **一级 · 思路**：这一题要的不是文本，而是元素身上的属性值
+  **二级 · 方法**：取属性值直接在属性名前加 `@`
+  **三级 · 骨架**：`//a/____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```text
+  //a/@href
+  ```
+
+  :::
+
 
 - [ ] **2-3** 取"有 target 属性且值为 _blank"的 `<a>` 的文本
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先用方括号按"带什么条件"把元素筛出来，再取它的文本
-  > **二级 · 方法**：带条件用 `[@属性='值']`；取文本用 `text()`
-  > **三级 · 骨架**：`//a[@____='_blank']/____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```text
-  > //a[@target='_blank']/text()
-  > ```
+  **一级 · 思路**：先用方括号按"带什么条件"把元素筛出来，再取它的文本
+  **二级 · 方法**：带条件用 `[@属性='值']`；取文本用 `text()`
+  **三级 · 骨架**：`//a[@____='_blank']/____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```text
+  //a[@target='_blank']/text()
+  ```
+
+  :::
+
 
 - [ ] **2-4** 取第二个 `<div>` 里最后一个 `<p>` 的文本
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：路径分两段：先定位"第几个 div"，再定位这个 div 里"最后一个 p"，最后取文本
-  > **二级 · 方法**：第几个用 `[n]`；最后一个用 `[last()]`；取文本用 `text()`
-  > **三级 · 骨架**：`//div[____]/p[____]/____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```text
-  > //div[2]/p[last()]/text()
-  > ```
+  **一级 · 思路**：路径分两段：先定位"第几个 div"，再定位这个 div 里"最后一个 p"，最后取文本
+  **二级 · 方法**：第几个用 `[n]`；最后一个用 `[last()]`；取文本用 `text()`
+  **三级 · 骨架**：`//div[____]/p[____]/____`
 
-> [!TIP]- 实跑验证（本机 Python 3.12 + lxml 6.1.3 跑 `resources/xpath_practice.html`，2026-09-23）
-> ```python
-> from lxml import html
->
-> with open("resources/xpath_practice.html", "r", encoding="utf-8") as f:
->     document = html.fromstring(f.read())
->
-> for expr in ["//h1/text()", "//a/@href", "//a[@target='_blank']/text()", "//div[2]/p[last()]/text()"]:
->     print(expr, "->", document.xpath(expr))
-> ```
-> ```text
-> //h1/text() -> ['Xpath 练习页']
-> //a/@href -> ['https://www.itcast.cn', 'https://www.baidu.com']
-> //a[@target='_blank']/text() -> ['百度一下']
-> //div[2]/p[last()]/text() -> ['段落三：我是第二个 div 里最后一个 p，只有我能被末尾定位取到。']
-> ```
-> 对照看：2-2 只出 2 个地址，是因为第 3 个 `<a>` 没有 href 属性；取文本用 `text()`，取属性值直接在属性名前加 `@`。
+  :::
 
-> [!NOTE]
+
+  ::: details 参考答案（做完再点开）
+
+  ```text
+  //div[2]/p[last()]/text()
+  ```
+
+  :::
+
+
+::: details 实跑验证（本机 Python 3.12 + lxml 6.1.3 跑 `resources/xpath_practice.html`，2026-09-23）
+
+```python
+from lxml import html
+
+with open("resources/xpath_practice.html", "r", encoding="utf-8") as f:
+    document = html.fromstring(f.read())
+
+for expr in ["//h1/text()", "//a/@href", "//a[@target='_blank']/text()", "//div[2]/p[last()]/text()"]:
+    print(expr, "->", document.xpath(expr))
+```
+```text
+//h1/text() -> ['Xpath 练习页']
+//a/@href -> ['https://www.itcast.cn', 'https://www.baidu.com']
+//a[@target='_blank']/text() -> ['百度一下']
+//div[2]/p[last()]/text() -> ['段落三：我是第二个 div 里最后一个 p，只有我能被末尾定位取到。']
+```
+对照看：2-2 只出 2 个地址，是因为第 3 个 `<a>` 没有 href 属性；取文本用 `text()`，取属性值直接在属性名前加 `@`。
+
+:::
+
+
+> [!NOTE] 注意
 > - 页面 `resources/xpath_practice.html` 是**练习专用**的：正文那份 `仙逆人物志.html` 里没有 `<a>`、第二个 div 里也没有 `<p>`，它的题目跑到最后会是空列表，练不了。
 > - 练习库 `46-Xpath语法/` 里：`test_01_basic.py` ↔ 2-1、`test_05_links.py` ↔ 2-2、`test_06_blank_target.py` ↔ 2-3、`test_04_second_div_last_p.py` ↔ 2-4；另外 `test_02_last.py`、`test_03_attrs.py` 覆盖的是正文"配合 lxml 使用"里的倒数第二行、属性过滤与通配符那几个示例，可以当加练。

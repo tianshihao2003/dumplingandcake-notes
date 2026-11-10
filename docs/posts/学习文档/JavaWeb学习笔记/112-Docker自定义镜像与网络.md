@@ -16,7 +16,7 @@ cover: false
 
 这一篇（PPT 第 34～45 页）解决的是另外两件事：**自己的项目怎么做成镜像**（自定义镜像），以及**容器之间怎么互相找到**（网络）。这两块是同级关系——PPT 第 22 / 25 / 34 / 42 页那张目录页上，"Docker 核心"下面挂的四个入口是：**常见命令 → 数据卷 → 自定义镜像 → 网络**，[111 篇](/posts/编程学习/javaweb学习笔记/111-docker常见命令与数据卷/)点亮了前两个，**这一篇点亮后两个**。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **这一篇的实测边界（先说清楚）**：
 > - **自定义镜像这一半做了本机实测**——用一份"模拟 Java 应用"的 Dockerfile 走通了**构建 → 运行 → 看日志 → 端口映射**的全过程，证据在下面专门有一节，来自本机 Docker Desktop（CLI 29.1.3）。
 > - **网络那一半没有逐个敲命令**（`docker network create/ls/connect/...` 这一组）。它按 PPT 第 43～44 页写，另外补了两处本机实测能对上的旁证：`docker inspect` 里容器的网络是 `bridge`，以及 nginx 容器的访问日志里宿主机显示为 `172.17.0.1`。
@@ -54,7 +54,7 @@ PPT 第 35 页先把"镜像"这个词定死：
 
 一句话读懂这个对照：**左边是"在别人的机器上装一遍"，右边是"把装的过程写成一个文件、打成包"**。左边做完只在那一台机器上有效，换台机器得从头再来一遍（[108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)那一长串 MySQL 安装命令就是这么来的）；右边做完得到一个**镜像**，这个镜像拿到任何装了 Docker 的机器上都能跑出一模一样的环境——这才是 Docker 真正想解决的问题。
 
-> [!TIP]
+> [!TIP] 提示
 > 对照 [110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)里"为什么要用 Docker"那三条痛点看：**命令太多记不住、步骤太多易出错、安装包找不到**。自定义镜像这一节，就是把"这些步骤"从"每次手敲"变成"写一次、打包、到处跑"。
 
 ## 镜像结构（PPT 第 36～37 页）
@@ -87,7 +87,7 @@ PPT 第 35 页先把"镜像"这个词定死：
 
 所以"一个 Java 应用的镜像"= **一套 CentOS 7 底座 + 若干层（JDK、环境变量、jar） + 一个启动入口**。把它从下往上看，正好就是第 36 页那张图的读法；把它从上往下拆，就是第 39 页那份 Dockerfile 的写法。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **"每次操作都形成新的一层"到底是什么意思？**
 > Dockerfile 里每一条**会改动文件系统**的指令（`RUN`、`COPY`、`ADD`），都会在它下面那一层之上**再叠一个只读层**。Dockerfile 里写了多少个这样的指令，镜像就是多少层叠出来的。
 >
@@ -125,7 +125,7 @@ PPT 第 35 页先把"镜像"这个词定死：
 | 层 Layer | **`COPY` / `RUN` / `ENV`**（拷文件、跑安装命令、配环境变量） |
 | 入口 Entrypoint | **`ENTRYPOINT`**（外加 `EXPOSE` 声明端口，方便使用者知道该映射哪个端口） |
 
-> [!TIP]
+> [!TIP] 提示
 > 两个容易看错的点先记下来，后面逐行讲的时候还会回来：
 > ① `RUN` 里写的是**构建镜像时**要执行的命令（装 JDK、建目录），**不是**容器启动后要跑的东西；
 > ② `ENTRYPOINT` 写的才是**容器启动时**要跑的东西——一个在"做镜像"，一个在"用镜像"。
@@ -177,7 +177,7 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 | `EXPOSE 8080` | 声明"这个镜像里的应用会监听 8080" | PPT 说得明白：**"是给镜像使用者看的"**——它是一个**声明/文档**，本身**不会开放任何端口**。真正对外映射端口的是 `docker run -p`（[110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)的端口映射）。不过有了它，别人拿到镜像就知道"该 `-p 8080:8080`" |
 | `ENTRYPOINT ["java", "-jar", "/app/app.jar"]` | **容器启动时执行的命令**——跑起这个 jar | 这才是"镜像运行入口"。用的是**方括号的 exec 形式**（JSON 数组，命令和参数分开写、不经过 shell）；PPT 第 38 页的示例写成 `ENTRYPOINT java -jar xx.jar`（shell 形式）也能跑，**课程最终用的是方括号这一种**。用**绝对路径** `/app/app.jar` 最稳，不依赖当前工作目录 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > **这份 Dockerfile 里没有"写运行脚本"这一行显式的东西**——PPT 第 35 页把"编写运行脚本，运行 Jar 包"列成一步，落到 Dockerfile 里其实就是**最后那行 `ENTRYPOINT`**：它就是那个"运行脚本"。所以第 35 页那张对照表的四步，在这份文件里对应的是：`FROM`（准备运行环境）→ `COPY`+`RUN`+`ENV`（装 JDK 配环境）→ `COPY`（拷 jar）→ `ENTRYPOINT`（运行脚本）。
 
 ## 构建镜像（PPT 第 40 页）
@@ -320,7 +320,7 @@ Deleted: sha256:515b06ccd7401fa26de5bed7173dfe4071a50bc764b2feaa9c13905bf2d10632
 | 容器 + **`eth0`** + **`vethX` / `vethY` / `vethZ`** | 每个容器里有一块网卡 `eth0`；宿主机上对应一根"虚拟网线"（`veth`，virtual ethernet），一头插在 `docker0` 上、一头插进容器里 |
 | 容器下的 **`mysql`**、**`java 应用`**、地址 **`172.17.0.2 / 172.17.0.3 / 172.17.0.4`** | 容器从这座网桥上分到各自的 IP，**能互相通信**（在同一个网段里）——图里画的正是"mysql 容器"和"java 应用容器"这两个典型角色 |
 
-> [!TIP]
+> [!TIP] 提示
 > 第 43 页那张图在本机有两处能对上的旁证（都来自本机实测）：
 > - `docker inspect` 看一个容器的网络，写的是 **`网络: bridge`**——默认就是挂在这座网桥上；
 > - 更直观的一处：本机起 nginx 容器后用 curl 从**宿主机**访问它，容器里 nginx 的访问日志第一列是 **`172.17.0.1`**——正是网桥在宿主机这一侧的地址。也就是说，从容器往外看，"宿主机"就是 `docker0` 那个 IP。
@@ -380,7 +380,7 @@ spring:
 
 而**"起容器时就指定网络"**靠的是 `docker run` 的 `--network` 参数（课程里就是 `--network itheima`）；用 Docker Compose 部署时，这件事由 yml 里的 `networks` 配置负责（[113 篇](/posts/编程学习/javaweb学习笔记/113-docker项目部署与dockercompose/)）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 一个常见的坑：**"容器之间能通"和"能用容器名访问"不是一回事**。默认的 `bridge` 网桥上没有容器名解析，就算两个容器网段相同、能 ping 通 IP，写容器名照样解析不了；**只有加入（同一个）自定义网络的容器才能通过容器名互相访问**。记住这一句，部署时"数据库连不上/域名解析失败"的毛病基本都能对上号。
 
 ## 收尾：从"会敲命令"到"会做镜像"（PPT 第 45 页）
@@ -451,41 +451,49 @@ spring:
   写完后回答两个小问题：**为什么"装 JDK"要写成"拷进来 + 解压"两条指令**？**这份文件里哪一行对应 PPT 第 35 页说的"编写运行脚本"**？
   （练习文件 `test_112_Dockerfile.txt` 里给了完整的写作区和检查点。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：照"镜像结构三部分"的顺序写——**先定底座，再从下往上搭层，最后收口到启动入口**；中间"装 JDK"这一步，本机的压缩包不会自己跑进镜像里，得先拷、再在镜像里解压
-  > **二级 · 方法**：底座用 `FROM centos:7`；拷文件用 `COPY 源 目标`；解压用 `RUN tar -xzf ... -C ...`（顺手 `&& rm` 删掉安装包）；环境变量用 `ENV`（`JAVA_HOME` 指向解压出来的目录，`PATH` 里把 `$JAVA_HOME/bin` 拼在最前面）；目录用 `RUN mkdir -p /app` + `WORKDIR /app`；声明端口用 `EXPOSE 8080`；启动命令用 `ENTRYPOINT ["java","-jar","/app/app.jar"]`
-  > **三级 · 骨架**：`FROM ____` ↳ `COPY jdk17.tar.gz ____` ↳ `RUN tar -xzf ____ -C /usr/local/ && rm ____` ↳ `ENV JAVA_HOME=____` ↳ `ENV PATH=$JAVA_HOME/bin:$____` ↳ `RUN mkdir -p /app` ↳ `WORKDIR ____` ↳ `COPY app.jar ____` ↳ `EXPOSE ____` ↳ `ENTRYPOINT ["java","-jar","____"]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```dockerfile
-  > # 使用 CentOS 7 作为基础镜像
-  > FROM centos:7
-  >
-  > # 添加 JDK 到镜像中：先把压缩包拷进去，再在镜像里解压（解完把包删掉）
-  > COPY jdk17.tar.gz /usr/local/
-  > RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
-  >
-  > # 设置环境变量：JAVA_HOME 指向解压出来的目录，PATH 里带上它的 bin
-  > ENV JAVA_HOME=/usr/local/jdk-17.0.10
-  > ENV PATH=$JAVA_HOME/bin:$PATH
-  >
-  > # 创建应用目录，并把后面的工作目录切过去
-  > RUN mkdir -p /app
-  > WORKDIR /app
-  >
-  > # 复制应用 JAR 文件到容器（相对路径，落到 /app/app.jar）
-  > COPY app.jar app.jar
-  >
-  > # 暴露端口（声明给镜像使用者看）
-  > EXPOSE 8080
-  >
-  > # 运行命令：容器启动时执行
-  > ENTRYPOINT ["java", "-jar", "/app/app.jar"]
-  > ```
-  > **两个小问题**：
-  > ① "装 JDK"要分成两条，是因为 **`COPY` 只能把本机的文件搬进镜像、不会解压**，而 `RUN` 才能执行 Linux 命令；所以先 `COPY` 把压缩包搬进去、再 `RUN` 在镜像里解压。**注意**：`COPY` 那一层里的压缩包**已经留在镜像里**了，后面 `rm` 只是让它在"当前状态"下看不见，镜像体积并不会因此变小（想彻底省体积要用多阶段构建，课程没讲）。
-  > ② PPT 第 35 页的"编写运行脚本，运行 Jar 包"，落到这份文件里就是最后一行 **`ENTRYPOINT ["java","-jar","/app/app.jar"]`**——它就是那个"启动脚本"。
-  > 检查点：① 第一行是 `FROM centos:7`；② 装 JDK 是 `COPY` + `RUN` 两条、且有 `&& rm`；③ `JAVA_HOME` 指向 `jdk-17.0.10`、`PATH` 里保留了 `$PATH`；④ `WORKDIR` 在 `COPY app.jar` 之前；⑤ `EXPOSE 8080` 写成了"声明"而不是指望它开端口；⑥ 最后一行用方括号 exec 形式、写绝对路径。
+  **一级 · 思路**：照"镜像结构三部分"的顺序写——**先定底座，再从下往上搭层，最后收口到启动入口**；中间"装 JDK"这一步，本机的压缩包不会自己跑进镜像里，得先拷、再在镜像里解压
+  **二级 · 方法**：底座用 `FROM centos:7`；拷文件用 `COPY 源 目标`；解压用 `RUN tar -xzf ... -C ...`（顺手 `&& rm` 删掉安装包）；环境变量用 `ENV`（`JAVA_HOME` 指向解压出来的目录，`PATH` 里把 `$JAVA_HOME/bin` 拼在最前面）；目录用 `RUN mkdir -p /app` + `WORKDIR /app`；声明端口用 `EXPOSE 8080`；启动命令用 `ENTRYPOINT ["java","-jar","/app/app.jar"]`
+  **三级 · 骨架**：`FROM ____` ↳ `COPY jdk17.tar.gz ____` ↳ `RUN tar -xzf ____ -C /usr/local/ && rm ____` ↳ `ENV JAVA_HOME=____` ↳ `ENV PATH=$JAVA_HOME/bin:$____` ↳ `RUN mkdir -p /app` ↳ `WORKDIR ____` ↳ `COPY app.jar ____` ↳ `EXPOSE ____` ↳ `ENTRYPOINT ["java","-jar","____"]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```dockerfile
+  # 使用 CentOS 7 作为基础镜像
+  FROM centos:7
+  
+  # 添加 JDK 到镜像中：先把压缩包拷进去，再在镜像里解压（解完把包删掉）
+  COPY jdk17.tar.gz /usr/local/
+  RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
+  
+  # 设置环境变量：JAVA_HOME 指向解压出来的目录，PATH 里带上它的 bin
+  ENV JAVA_HOME=/usr/local/jdk-17.0.10
+  ENV PATH=$JAVA_HOME/bin:$PATH
+  
+  # 创建应用目录，并把后面的工作目录切过去
+  RUN mkdir -p /app
+  WORKDIR /app
+  
+  # 复制应用 JAR 文件到容器（相对路径，落到 /app/app.jar）
+  COPY app.jar app.jar
+  
+  # 暴露端口（声明给镜像使用者看）
+  EXPOSE 8080
+  
+  # 运行命令：容器启动时执行
+  ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+  ```
+  **两个小问题**：
+  ① "装 JDK"要分成两条，是因为 **`COPY` 只能把本机的文件搬进镜像、不会解压**，而 `RUN` 才能执行 Linux 命令；所以先 `COPY` 把压缩包搬进去、再 `RUN` 在镜像里解压。**注意**：`COPY` 那一层里的压缩包**已经留在镜像里**了，后面 `rm` 只是让它在"当前状态"下看不见，镜像体积并不会因此变小（想彻底省体积要用多阶段构建，课程没讲）。
+  ② PPT 第 35 页的"编写运行脚本，运行 Jar 包"，落到这份文件里就是最后一行 **`ENTRYPOINT ["java","-jar","/app/app.jar"]`**——它就是那个"启动脚本"。
+  检查点：① 第一行是 `FROM centos:7`；② 装 JDK 是 `COPY` + `RUN` 两条、且有 `&& rm`；③ `JAVA_HOME` 指向 `jdk-17.0.10`、`PATH` 里保留了 `$PATH`；④ `WORKDIR` 在 `COPY app.jar` 之前；⑤ `EXPOSE 8080` 写成了"声明"而不是指望它开端口；⑥ 最后一行用方括号 exec 形式、写绝对路径。
+
+  :::
+
 
 - [ ] **2-2 讲清镜像结构和"为什么每次操作都会多一层"**
   需求：请依次回答：
@@ -509,33 +517,41 @@ spring:
   ENTRYPOINT ["java", "-jar", "/app/app.jar"]
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把三条线索接起来——**"镜像=文件包"**（PPT 第 35 页）→ **"底座 + 一层层加 + 一个启动口"**（PPT 第 36～37 页）→ **"改文件系统的指令各叠一层"**
-  > **二级 · 方法**：底座看 `FROM`；"层"看 `COPY`/`RUN`/`ENV` 这些往上加东西的指令；入口看 `ENTRYPOINT`（`EXPOSE` 只是声明，算"给使用者看的说明"）；分层的好处在"共享 + 缓存"、代价在"体积 + 构建时间"，所以用 `&&` 把一次安装串成一条 `RUN`
-  > **三级 · 骨架**：① 镜像是把 `____`、`____`、`____` 一起打包的文件包；② 三部分：**基础镜像**（`____` 指令）/ **层**（`____`/`____`/`____` 指令）/ **入口**（`____` 指令）；③ 归类表自己列一遍；④ 好处是层能 `____`、构建能 `____`，代价是 `____`；⑤ 答"不会变小"，因为 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **① 镜像是什么**：包含了**应用程序、程序运行的系统函数库、运行配置**等文件的**文件包**；构建镜像就是把这些文件打包的过程。
-  > **② 镜像结构三部分**：
-  > - **基础镜像 BaseImage**——应用依赖的系统函数库、环境、配置、文件等；
-  > - **层 Layer**——添加安装包、依赖、配置等，**每次操作都形成新的一层**；
-  > - **入口 Entrypoint**——镜像运行入口，一般是程序启动的脚本和参数。
-  > **③ 指令归类**：
-  >
-  > | 指令 | 归到哪一部分 | 说明 |
-  > | --- | --- | --- |
-  > | `FROM centos:7` | **基础镜像** | 一行定底座 |
-  > | `COPY jdk17.tar.gz ...` + `RUN tar ... && rm ...` | **层** | 装 JDK 这一层（拷贝 + 解压） |
-  > | `ENV JAVA_HOME=...` / `ENV PATH=...` | **层**（配置那一层） | 加的是配置（只改元数据、不占体积） |
-  > | `RUN mkdir -p /app` / `WORKDIR /app` | **层**（+ 影响后面所有指令的目录） | 建目录算一层；`WORKDIR` 本身只改元数据 |
-  > | `COPY app.jar app.jar` | **层** | 应用本身进来 |
-  > | `EXPOSE 8080` | **入口那一侧**（声明） | 只声明"容器会监听 8080"，给使用者看，不真的开端口 |
-  > | `ENTRYPOINT [...]` | **入口** | 容器启动时执行的命令 |
-  >
-  > **④ 为什么会一层层加上去**：Dockerfile 里每一条**会改动文件系统**的指令（`RUN`、`COPY`）都会在下面那一层之上**再叠一个只读层**——Dockerfile 里有几条这样的指令，镜像就是几层叠出来的。
-  > **好处**：层可以**共享**（多个镜像基于同一个底座时只存一份；`docker pull` 时一行行 `Pull complete` 就是在分层下载），构建还能**命中缓存**（没变的层直接复用，所以把不常变的写前面）。
-  > **代价**：层越多，镜像越大、构建越慢，`docker history` 一长串；所以同一次安装里的命令习惯用 `&&` 串成**一条 `RUN`**（如"解压 + 删安装包"）。
-  > **⑤ 会变小吗**：**不会**。后面层里删除，只是让它"在最终视图里看不见"，前面那一层里这个文件**照样存在、照样占体积**（比如 `COPY jdk17.tar.gz` 那一层里的安装包，永远留在镜像里）——想真正省体积，要在**同一个 `RUN` 里**做完"用 + 删"，或者用多阶段构建。
+  **一级 · 思路**：把三条线索接起来——**"镜像=文件包"**（PPT 第 35 页）→ **"底座 + 一层层加 + 一个启动口"**（PPT 第 36～37 页）→ **"改文件系统的指令各叠一层"**
+  **二级 · 方法**：底座看 `FROM`；"层"看 `COPY`/`RUN`/`ENV` 这些往上加东西的指令；入口看 `ENTRYPOINT`（`EXPOSE` 只是声明，算"给使用者看的说明"）；分层的好处在"共享 + 缓存"、代价在"体积 + 构建时间"，所以用 `&&` 把一次安装串成一条 `RUN`
+  **三级 · 骨架**：① 镜像是把 `____`、`____`、`____` 一起打包的文件包；② 三部分：**基础镜像**（`____` 指令）/ **层**（`____`/`____`/`____` 指令）/ **入口**（`____` 指令）；③ 归类表自己列一遍；④ 好处是层能 `____`、构建能 `____`，代价是 `____`；⑤ 答"不会变小"，因为 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **① 镜像是什么**：包含了**应用程序、程序运行的系统函数库、运行配置**等文件的**文件包**；构建镜像就是把这些文件打包的过程。
+  **② 镜像结构三部分**：
+  - **基础镜像 BaseImage**——应用依赖的系统函数库、环境、配置、文件等；
+  - **层 Layer**——添加安装包、依赖、配置等，**每次操作都形成新的一层**；
+  - **入口 Entrypoint**——镜像运行入口，一般是程序启动的脚本和参数。
+  **③ 指令归类**：
+  
+  | 指令 | 归到哪一部分 | 说明 |
+  | --- | --- | --- |
+  | `FROM centos:7` | **基础镜像** | 一行定底座 |
+  | `COPY jdk17.tar.gz ...` + `RUN tar ... && rm ...` | **层** | 装 JDK 这一层（拷贝 + 解压） |
+  | `ENV JAVA_HOME=...` / `ENV PATH=...` | **层**（配置那一层） | 加的是配置（只改元数据、不占体积） |
+  | `RUN mkdir -p /app` / `WORKDIR /app` | **层**（+ 影响后面所有指令的目录） | 建目录算一层；`WORKDIR` 本身只改元数据 |
+  | `COPY app.jar app.jar` | **层** | 应用本身进来 |
+  | `EXPOSE 8080` | **入口那一侧**（声明） | 只声明"容器会监听 8080"，给使用者看，不真的开端口 |
+  | `ENTRYPOINT [...]` | **入口** | 容器启动时执行的命令 |
+  
+  **④ 为什么会一层层加上去**：Dockerfile 里每一条**会改动文件系统**的指令（`RUN`、`COPY`）都会在下面那一层之上**再叠一个只读层**——Dockerfile 里有几条这样的指令，镜像就是几层叠出来的。
+  **好处**：层可以**共享**（多个镜像基于同一个底座时只存一份；`docker pull` 时一行行 `Pull complete` 就是在分层下载），构建还能**命中缓存**（没变的层直接复用，所以把不常变的写前面）。
+  **代价**：层越多，镜像越大、构建越慢，`docker history` 一长串；所以同一次安装里的命令习惯用 `&&` 串成**一条 `RUN`**（如"解压 + 删安装包"）。
+  **⑤ 会变小吗**：**不会**。后面层里删除，只是让它"在最终视图里看不见"，前面那一层里这个文件**照样存在、照样占体积**（比如 `COPY jdk17.tar.gz` 那一层里的安装包，永远留在镜像里）——想真正省体积，要在**同一个 `RUN` 里**做完"用 + 删"，或者用多阶段构建。
+
+  :::
+
 
 - [ ] **2-3 逐行解释这份 Dockerfile，并回答四个追问**
   需求：请逐行说明下面这份 Dockerfile 每一行在干什么，然后回答四个问题：
@@ -558,28 +574,36 @@ spring:
   ENTRYPOINT ["java", "-jar", "/app/app.jar"]
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"这条指令是**构建时**干的还是**运行时**干的"分两类去读——`RUN`/`COPY`/`ENV` 是构建时把镜像搭起来；`EXPOSE`/`ENTRYPOINT` 是留给"运行时"的（一个声明、一个真正执行）；`WORKDIR` 比较特殊，它改的是"后面指令的环境"
-  > **二级 · 方法**：`FROM` 定底座；`COPY` 搬文件；`RUN` 在镜像里执行命令；`ENV` 配的环境变量**后面的指令就能用**（所以 `$JAVA_HOME` 来自上一行，`$PATH` 是原有的）；`WORKDIR` 是**持续生效**的切目录；`EXPOSE` 只是"给使用者看"的声明，真开端口靠 `docker run -p`；`ENTRYPOINT` 的方括号形式（exec 形式）和去掉方括号的 shell 形式差别在"命令怎么被执行"
-  > **三级 · 骨架**：① `EXPOSE` = `____`（声明），真正对外靠 `docker run ____`；② `$JAVA_HOME` 来自 `____` 那一行，写前面是为了 `____`，末尾的 `$PATH` 是为了 `____`；③ 不行，因为 `RUN cd` 只 `____`，后面指令又 `____`；④ 方括号是 `____` 形式（直接执行），不带方括号是 `____` 形式（经过 shell）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **逐行**：
-  > - `FROM centos:7`——**指定基础镜像**：一个完整的 CentOS 7 环境（`/etc`、`/lib`、`/bin` 都在）；写死 `7` 是为了不让版本漂移；
-  > - `COPY jdk17.tar.gz /usr/local/`——**把本机的 JDK 压缩包拷进镜像**的 `/usr/local/`（`COPY 源 目标`，源是构建上下文里的文件）；
-  > - `RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz`——**在镜像里解压**到 `/usr/local/`，并顺手删掉压缩包；`&&` 让"解压 + 删包"算**一次操作**（一层）；
-  > - `ENV JAVA_HOME=/usr/local/jdk-17.0.10`——配 `JAVA_HOME`，指向**解压出来的目录名**（这个名字是压缩包定的，升级 JDK 时要跟着改）；
-  > - `ENV PATH=$JAVA_HOME/bin:$PATH`——把 JDK 的 `bin` **拼到 PATH 最前面**；
-  > - `RUN mkdir -p /app`——建应用目录（`-p`：父目录一起建、已存在不报错）；
-  > - `WORKDIR /app`——把**后面指令的工作目录**切到 `/app`；
-  > - `COPY app.jar app.jar`——把 jar 拷进来，目标是相对路径，落到 `/app/app.jar`（就是上面 `WORKDIR` 的效果）；
-  > - `EXPOSE 8080`——**声明**容器运行时监听 8080；
-  > - `ENTRYPOINT ["java", "-jar", "/app/app.jar"]`——**容器启动时**执行的命令，跑起这个 jar。
-  > **四个追问**：
-  > ① **不会**。`EXPOSE` 是"**给镜像使用者看的**"声明，它不会替你开放端口；真正让外面能访问的是 `docker run -p 宿主机端口:容器端口`（本机实测里就是 `-p 8083:8080`，`docker ps` 的 PORTS 列显示 `0.0.0.0:8083->8080/tcp`）。
-  > ② `$JAVA_HOME` 来自**上一行刚设的 `ENV JAVA_HOME=...`**——PPT 说 ENV"**可在后面指令使用**"就是这个意思；`$JAVA_HOME/bin` 写在前面是为了**优先用这里装进来的 JDK**（PATH 是从左往右找命令的）；末尾的 `$PATH` 是**把系统原来的搜索路径保留下来**，否则 `ls`、`tar` 这些命令就都不好找了。
-  > ③ **不行**。`RUN cd /app` 只在那**一条命令**里切了目录，**下一条指令又回到原来的工作目录**（每条指令各自独立执行）；`WORKDIR` 是**持续生效**的——它一设，后面 `COPY app.jar app.jar` 的目标、`ENTRYPOINT` 里的相对路径起点都跟着变。
-  > ④ 方括号那种叫 **exec 形式**——命令和参数**分开写、不经过 shell**，就是"老老实实执行 `java -jar /app/app.jar`"；写成 `ENTRYPOINT java -jar /app/app.jar` 是 **shell 形式**，会被套进 `/bin/sh -c "..."` 里执行（好处是能写 shell 语法、能用环境变量展开，代价是信号传递等行为不一样）。课程最终用的是方括号这一种。
+  **一级 · 思路**：按"这条指令是**构建时**干的还是**运行时**干的"分两类去读——`RUN`/`COPY`/`ENV` 是构建时把镜像搭起来；`EXPOSE`/`ENTRYPOINT` 是留给"运行时"的（一个声明、一个真正执行）；`WORKDIR` 比较特殊，它改的是"后面指令的环境"
+  **二级 · 方法**：`FROM` 定底座；`COPY` 搬文件；`RUN` 在镜像里执行命令；`ENV` 配的环境变量**后面的指令就能用**（所以 `$JAVA_HOME` 来自上一行，`$PATH` 是原有的）；`WORKDIR` 是**持续生效**的切目录；`EXPOSE` 只是"给使用者看"的声明，真开端口靠 `docker run -p`；`ENTRYPOINT` 的方括号形式（exec 形式）和去掉方括号的 shell 形式差别在"命令怎么被执行"
+  **三级 · 骨架**：① `EXPOSE` = `____`（声明），真正对外靠 `docker run ____`；② `$JAVA_HOME` 来自 `____` 那一行，写前面是为了 `____`，末尾的 `$PATH` 是为了 `____`；③ 不行，因为 `RUN cd` 只 `____`，后面指令又 `____`；④ 方括号是 `____` 形式（直接执行），不带方括号是 `____` 形式（经过 shell）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **逐行**：
+  - `FROM centos:7`——**指定基础镜像**：一个完整的 CentOS 7 环境（`/etc`、`/lib`、`/bin` 都在）；写死 `7` 是为了不让版本漂移；
+  - `COPY jdk17.tar.gz /usr/local/`——**把本机的 JDK 压缩包拷进镜像**的 `/usr/local/`（`COPY 源 目标`，源是构建上下文里的文件）；
+  - `RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz`——**在镜像里解压**到 `/usr/local/`，并顺手删掉压缩包；`&&` 让"解压 + 删包"算**一次操作**（一层）；
+  - `ENV JAVA_HOME=/usr/local/jdk-17.0.10`——配 `JAVA_HOME`，指向**解压出来的目录名**（这个名字是压缩包定的，升级 JDK 时要跟着改）；
+  - `ENV PATH=$JAVA_HOME/bin:$PATH`——把 JDK 的 `bin` **拼到 PATH 最前面**；
+  - `RUN mkdir -p /app`——建应用目录（`-p`：父目录一起建、已存在不报错）；
+  - `WORKDIR /app`——把**后面指令的工作目录**切到 `/app`；
+  - `COPY app.jar app.jar`——把 jar 拷进来，目标是相对路径，落到 `/app/app.jar`（就是上面 `WORKDIR` 的效果）；
+  - `EXPOSE 8080`——**声明**容器运行时监听 8080；
+  - `ENTRYPOINT ["java", "-jar", "/app/app.jar"]`——**容器启动时**执行的命令，跑起这个 jar。
+  **四个追问**：
+  ① **不会**。`EXPOSE` 是"**给镜像使用者看的**"声明，它不会替你开放端口；真正让外面能访问的是 `docker run -p 宿主机端口:容器端口`（本机实测里就是 `-p 8083:8080`，`docker ps` 的 PORTS 列显示 `0.0.0.0:8083->8080/tcp`）。
+  ② `$JAVA_HOME` 来自**上一行刚设的 `ENV JAVA_HOME=...`**——PPT 说 ENV"**可在后面指令使用**"就是这个意思；`$JAVA_HOME/bin` 写在前面是为了**优先用这里装进来的 JDK**（PATH 是从左往右找命令的）；末尾的 `$PATH` 是**把系统原来的搜索路径保留下来**，否则 `ls`、`tar` 这些命令就都不好找了。
+  ③ **不行**。`RUN cd /app` 只在那**一条命令**里切了目录，**下一条指令又回到原来的工作目录**（每条指令各自独立执行）；`WORKDIR` 是**持续生效**的——它一设，后面 `COPY app.jar app.jar` 的目标、`ENTRYPOINT` 里的相对路径起点都跟着变。
+  ④ 方括号那种叫 **exec 形式**——命令和参数**分开写、不经过 shell**，就是"老老实实执行 `java -jar /app/app.jar`"；写成 `ENTRYPOINT java -jar /app/app.jar` 是 **shell 形式**，会被套进 `/bin/sh -c "..."` 里执行（好处是能写 shell 语法、能用环境变量展开，代价是信号传递等行为不一样）。课程最终用的是方括号这一种。
+
+  :::
+
 
 - [ ] **2-4 把镜像构建出来、跑起来，并验证"环境变量和拷贝都生效了"**
   需求：Dockerfile 已经写好放在当前目录，里面有 `FROM`、`COPY`、`RUN`、`ENV JAVA_HOME`、`WORKDIR`、`COPY app.jar`、`EXPOSE 8080`、`ENTRYPOINT` 这些指令。请写出：
@@ -591,46 +615,54 @@ spring:
   ⑥ 用完怎么把容器和镜像都清掉。
   （练习文件 `test_112_Dockerfile与网络.md` 的题目2-4 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：照"**build → images → run → ps → 验证 → 清理**"这条链走；验证那一步要拿到"容器**里面**的状态"，所以要么进容器看、要么让容器启动时自己把状态打出来（看日志）
-  > **二级 · 方法**：构建 `docker build -t tlias:1.0 .`；查看 `docker images tlias`；运行 `docker run -d --name tlias-server -p 8080:8080 tlias:1.0`；查看 `docker ps --filter name=tlias-server`；看日志 `docker logs tlias-server`（`ENTRYPOINT` 的打印会出现在这里）；进容器看 `docker exec -it tlias-server sh`（再 `echo $JAVA_HOME`、`ls /app`）或直接 `docker exec tlias-server ls /app`；清理 `docker rm -f tlias-server` + `docker rmi tlias:1.0`
-  > **三级 · 骨架**：① `docker build -____ tlias:1.0 ____`；② `docker ____ tlias`；③ `docker run ____ --name tlias-server ____ 8080:8080 tlias:1.0`；④ `docker ps --filter ____`（看 PORTS 列）；⑤ `docker ____ tlias-server` 看启动日志 / `docker ____ tlias-server echo $JAVA_HOME`；⑥ `docker rm ____ tlias-server` + `docker ____ tlias:1.0`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 构建镜像：-t 是给镜像起名（repository:tag），末尾的 . 是 Dockerfile 所在目录
-  > #    （也就是"构建上下文"——COPY 只能拷这个范围里的文件，所以 jar 和 jdk 包要放在这里）
-  > docker build -t tlias:1.0 .
-  >
-  > # ② 看镜像有没有构建出来
-  > docker images tlias
-  > # REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
-  > # tlias        1.0   ...        ...       ...
-  >
-  > # ③ 跑容器：-d 后台、--name 起名（唯一）、-p 宿主机端口:容器端口
-  > docker run -d --name tlias-server -p 8080:8080 tlias:1.0
-  > # 返回一串容器 ID
-  >
-  > # ④ 确认它在跑、端口映射对不对
-  > docker ps --filter name=tlias-server
-  > # NAMES          STATUS         PORTS
-  > # tlias-server   Up ...         0.0.0.0:8080->8080/tcp
-  >
-  > # ⑤ 验证"环境变量设了、jar 在 /app 里"——两种手段：
-  > #    手段一：看日志（ENTRYPOINT 启动时打印的东西都会进这里）
-  > docker logs tlias-server
-  > # 本机实测里就是靠这一步看到 [容器启动] JAVA_HOME=/usr/local/jdk 与 jar 的内容
-  > #    手段二：进容器里看（exec 是"在容器里执行一条命令"）
-  > docker exec tlias-server echo $JAVA_HOME
-  > docker exec tlias-server ls /app
-  > # 也可以开一个交互式终端进去翻：docker exec -it tlias-server sh
-  >
-  > # ⑥ 清理：先删容器，再删镜像
-  > docker rm -f tlias-server
-  > docker rmi tlias:1.0
-  > ```
-  > 检查点：① 构建命令是 `docker build -t tlias:1.0 .`（`-t` 与 `.` 都能解释）；② 知道"`COPY` 的源只能在构建上下文里"；③ `-p 8080:8080` 里**左边是宿主机、右边是容器**；④ 用 `docker ps` 的 PORTS 列验证映射；⑤ 验证手段里至少有"看日志"这一条（并且知道日志来自 `ENTRYPOINT`）；⑥ 清理顺序是**先容器后镜像**（镜像被容器占用时删不掉）。
-  > 顺带提醒：本机实测时宿主机 8080 可能已经被占用，所以实验里换成了 `-p 8083:8080`（不影响理解——**左边随便换，右边必须是应用真正监听的端口**）。
+  **一级 · 思路**：照"**build → images → run → ps → 验证 → 清理**"这条链走；验证那一步要拿到"容器**里面**的状态"，所以要么进容器看、要么让容器启动时自己把状态打出来（看日志）
+  **二级 · 方法**：构建 `docker build -t tlias:1.0 .`；查看 `docker images tlias`；运行 `docker run -d --name tlias-server -p 8080:8080 tlias:1.0`；查看 `docker ps --filter name=tlias-server`；看日志 `docker logs tlias-server`（`ENTRYPOINT` 的打印会出现在这里）；进容器看 `docker exec -it tlias-server sh`（再 `echo $JAVA_HOME`、`ls /app`）或直接 `docker exec tlias-server ls /app`；清理 `docker rm -f tlias-server` + `docker rmi tlias:1.0`
+  **三级 · 骨架**：① `docker build -____ tlias:1.0 ____`；② `docker ____ tlias`；③ `docker run ____ --name tlias-server ____ 8080:8080 tlias:1.0`；④ `docker ps --filter ____`（看 PORTS 列）；⑤ `docker ____ tlias-server` 看启动日志 / `docker ____ tlias-server echo $JAVA_HOME`；⑥ `docker rm ____ tlias-server` + `docker ____ tlias:1.0`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 构建镜像：-t 是给镜像起名（repository:tag），末尾的 . 是 Dockerfile 所在目录
+  #    （也就是"构建上下文"——COPY 只能拷这个范围里的文件，所以 jar 和 jdk 包要放在这里）
+  docker build -t tlias:1.0 .
+  
+  # ② 看镜像有没有构建出来
+  docker images tlias
+  # REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
+  # tlias        1.0   ...        ...       ...
+  
+  # ③ 跑容器：-d 后台、--name 起名（唯一）、-p 宿主机端口:容器端口
+  docker run -d --name tlias-server -p 8080:8080 tlias:1.0
+  # 返回一串容器 ID
+  
+  # ④ 确认它在跑、端口映射对不对
+  docker ps --filter name=tlias-server
+  # NAMES          STATUS         PORTS
+  # tlias-server   Up ...         0.0.0.0:8080->8080/tcp
+  
+  # ⑤ 验证"环境变量设了、jar 在 /app 里"——两种手段：
+  #    手段一：看日志（ENTRYPOINT 启动时打印的东西都会进这里）
+  docker logs tlias-server
+  # 本机实测里就是靠这一步看到 [容器启动] JAVA_HOME=/usr/local/jdk 与 jar 的内容
+  #    手段二：进容器里看（exec 是"在容器里执行一条命令"）
+  docker exec tlias-server echo $JAVA_HOME
+  docker exec tlias-server ls /app
+  # 也可以开一个交互式终端进去翻：docker exec -it tlias-server sh
+  
+  # ⑥ 清理：先删容器，再删镜像
+  docker rm -f tlias-server
+  docker rmi tlias:1.0
+  ```
+  检查点：① 构建命令是 `docker build -t tlias:1.0 .`（`-t` 与 `.` 都能解释）；② 知道"`COPY` 的源只能在构建上下文里"；③ `-p 8080:8080` 里**左边是宿主机、右边是容器**；④ 用 `docker ps` 的 PORTS 列验证映射；⑤ 验证手段里至少有"看日志"这一条（并且知道日志来自 `ENTRYPOINT`）；⑥ 清理顺序是**先容器后镜像**（镜像被容器占用时删不掉）。
+  顺带提醒：本机实测时宿主机 8080 可能已经被占用，所以实验里换成了 `-p 8083:8080`（不影响理解——**左边随便换，右边必须是应用真正监听的端口**）。
+
+  :::
+
 
 - [ ] **2-5 让两个容器"用名字互相找到"（网络）**
   需求：你起了两个容器：数据库容器 `mysql` 和 Java 应用容器 `tlias-server`。应用里的数据库地址写的是 `jdbc:mysql://mysql:3306/tlias`，结果启动时报"找不到主机/域名解析失败"。请回答：
@@ -641,39 +673,47 @@ spring:
   ⑤ 落回部署：**nginx 容器**要转发请求给这个应用容器，它的 `proxy_pass` 该写什么？（顺便说一句：为什么写容器名比写 IP 好？）
   （练习文件 `test_112_Dockerfile与网络.md` 的题目2-5 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一句话定音——**加入自定义网络的容器才可以通过容器名互相访问**；所以要么让两个容器"进同一个自定义网络"，要么放弃"用名字"改用 IP
-  > **二级 · 方法**：建网络 `docker network create itheima`、查看 `docker network ls`、让跑着的容器加入 `docker network connect itheima tlias-server`；起容器时指定用 `--network itheima`；nginx 那边写 `proxy_pass http://tlias-server:8080;`（写"容器名 + 容器内的端口"）
-  > **三级 · 骨架**：① 默认的 `____` 网桥上没有容器名解析；② 修法一：两个容器都加进同一个 `____` 网络；修法二：把地址从 `____` 改成容器的 `____`（缺点：重建容器后 `____` 会变）；③ `docker network ____ itheima` / `docker network ____ itheima tlias-server` / `docker network ____`；④ `docker run -d --name tlias-server --____ itheima -p 8080:8080 tlias:1.0`；⑤ `proxy_pass http://____:____;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **① 为什么解析不了**：容器默认都接在 **bridge 网桥**上，那座网桥上**没有"容器名 → IP"的解析**；`mysql` 这个名字没人认识，自然解析失败（就算两个容器能 ping 通 IP，名字照样不认）。PPT 第 44 页那句就是答案：**加入自定义网络的容器才可以通过容器名互相访问**。
-  > **② 两种修法**：
-  > - **动网络**：建一个自定义网络（如 `itheima`），把 `mysql` 和 `tlias-server` **都加进这个网络**——配置里的 `mysql` 就能解析了（课程采用的正是这一种）；
-  > - **动配置**：把地址改成**能用 IP 访问到的地方**（比如指向宿主机的映射端口 `192.168.100.128:3307`，[110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)的端口映射写法）。
-  >   缺点：容器**一重建 IP（或端口）就变**，配置又得跟着改；容器名是稳定的，所以课程选第一种。
-  > **③ 命令**：
-  > ```bash
-  > docker network create itheima              # 创建一个网络
-  > docker network ls                          # 看看现在有哪些网络
-  > docker network connect itheima tlias-server  # 让"已经跑着"的容器加入这个网络
-  > docker network connect itheima mysql         # 数据库容器也加进去
-  > docker network inspect itheima             # 看这个网络里有哪些容器（可选，验证用）
-  > ```
-  > **④ 起容器时一次指定**：
-  > ```bash
-  > docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
-  > ```
-  > （课程资料里那条就是 `docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`。）
-  > **⑤ nginx 那边**：
-  > ```nginx
-  > location ^~ /api/ {
-  >     rewrite ^/api/(.*)$ /$1 break;
-  >     proxy_pass http://tlias-server:8080;   # 容器名:容器内端口
-  > }
-  > ```
-  > 写**容器名**而不是 IP 的好处：容器重建（更新版本、换配置）时 IP 会变，名字不变——配置不用跟着改。前提还是那一句：**nginx 容器和应用容器要在同一个自定义网络里**（[113 篇](/posts/编程学习/javaweb学习笔记/113-docker项目部署与dockercompose/)里 `--network itheima` / Compose 的 `networks` 干的就是这件事）。
-  > 检查点：① 能说出"默认网桥上没有容器名解析"；② 两种修法都说得出，并知道课程用的是"自定义网络"；③ 三条网络命令写对（create / ls / connect）；④ `--network itheima` 写在 `docker run` 上；⑤ `proxy_pass` 写的是"容器名 + 容器内端口 8080"，并且能解释"为什么不用 IP"。
+  **一级 · 思路**：一句话定音——**加入自定义网络的容器才可以通过容器名互相访问**；所以要么让两个容器"进同一个自定义网络"，要么放弃"用名字"改用 IP
+  **二级 · 方法**：建网络 `docker network create itheima`、查看 `docker network ls`、让跑着的容器加入 `docker network connect itheima tlias-server`；起容器时指定用 `--network itheima`；nginx 那边写 `proxy_pass http://tlias-server:8080;`（写"容器名 + 容器内的端口"）
+  **三级 · 骨架**：① 默认的 `____` 网桥上没有容器名解析；② 修法一：两个容器都加进同一个 `____` 网络；修法二：把地址从 `____` 改成容器的 `____`（缺点：重建容器后 `____` 会变）；③ `docker network ____ itheima` / `docker network ____ itheima tlias-server` / `docker network ____`；④ `docker run -d --name tlias-server --____ itheima -p 8080:8080 tlias:1.0`；⑤ `proxy_pass http://____:____;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **① 为什么解析不了**：容器默认都接在 **bridge 网桥**上，那座网桥上**没有"容器名 → IP"的解析**；`mysql` 这个名字没人认识，自然解析失败（就算两个容器能 ping 通 IP，名字照样不认）。PPT 第 44 页那句就是答案：**加入自定义网络的容器才可以通过容器名互相访问**。
+  **② 两种修法**：
+  - **动网络**：建一个自定义网络（如 `itheima`），把 `mysql` 和 `tlias-server` **都加进这个网络**——配置里的 `mysql` 就能解析了（课程采用的正是这一种）；
+  - **动配置**：把地址改成**能用 IP 访问到的地方**（比如指向宿主机的映射端口 `192.168.100.128:3307`，[110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)的端口映射写法）。
+    缺点：容器**一重建 IP（或端口）就变**，配置又得跟着改；容器名是稳定的，所以课程选第一种。
+  **③ 命令**：
+  ```bash
+  docker network create itheima              # 创建一个网络
+  docker network ls                          # 看看现在有哪些网络
+  docker network connect itheima tlias-server  # 让"已经跑着"的容器加入这个网络
+  docker network connect itheima mysql         # 数据库容器也加进去
+  docker network inspect itheima             # 看这个网络里有哪些容器（可选，验证用）
+  ```
+  **④ 起容器时一次指定**：
+  ```bash
+  docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
+  ```
+  （课程资料里那条就是 `docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`。）
+  **⑤ nginx 那边**：
+  ```nginx
+  location ^~ /api/ {
+      rewrite ^/api/(.*)$ /$1 break;
+      proxy_pass http://tlias-server:8080;   # 容器名:容器内端口
+  }
+  ```
+  写**容器名**而不是 IP 的好处：容器重建（更新版本、换配置）时 IP 会变，名字不变——配置不用跟着改。前提还是那一句：**nginx 容器和应用容器要在同一个自定义网络里**（[113 篇](/posts/编程学习/javaweb学习笔记/113-docker项目部署与dockercompose/)里 `--network itheima` / Compose 的 `networks` 干的就是这件事）。
+  检查点：① 能说出"默认网桥上没有容器名解析"；② 两种修法都说得出，并知道课程用的是"自定义网络"；③ 三条网络命令写对（create / ls / connect）；④ `--network itheima` 写在 `docker run` 上；⑤ `proxy_pass` 写的是"容器名 + 容器内端口 8080"，并且能解释"为什么不用 IP"。
+
+  :::
+
 
 ### 三、综合题
 
@@ -687,74 +727,82 @@ spring:
   6. **回头看**：把"部署 Java 应用的步骤"和"构建 Java 镜像的步骤"再对照一遍，说说镜像到底省掉了什么；
   7. **收尾**：把这一整套用到的命令按顺序列成一张清单（从 `docker build` 到 `docker network connect`），并说明每一步失败时你会先看什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链是"**准备文件 → 写 Dockerfile → build → run → 验证 → 接网络**"；顺序上有个不变的规律：**先让镜像能跑起来，再去解决它和别人的通信**——一上来就折腾网络，出了问题分不清是镜像的事还是网络的事
-  > **二级 · 方法**：文件三样（`Dockerfile`、`jdk17.tar.gz`、`app.jar`）放同一个目录当构建上下文；`docker build -t tlias:1.0 .`；`docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`（网络要先 `docker network create itheima`）；验证靠 `docker ps`（端口）、`docker logs`（ENTRYPOINT 打印）、`docker exec`（进容器看）；"名字能通"靠"都在同一个自定义网络里"
-  > **三级 · 骨架**：① 目录里放 `____`、`____`、`____`（因为 `COPY` 只能拷 `____` 里的文件）；② `FROM ____` → `COPY jdk17.tar.gz ____` → `RUN ____` → `ENV ____` → `WORKDIR ____` → `COPY app.jar ____` → `EXPOSE ____` → `ENTRYPOINT ____`；③ `docker build -t ____ ____`；④ `docker run -d --name ____ -p ____:____ tlias:1.0` + `docker ____` + `docker ____`；⑤ `docker network create ____` + `docker network connect ____ ____`（或 `--network`），因为同一个自定义网络里才 `____`；⑥ 省掉了 `____`；⑦ 清单按顺序列
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 【0】先规划
-  >   · 镜像 = 基础镜像（CentOS 7）+ 若干层（装 JDK、配环境变量、拷 jar）+ 入口（java -jar）
-  >   · 同一个目录里必须有：Dockerfile、jdk17.tar.gz、app.jar
-  >     原因：COPY 只能拷"构建上下文（末尾那个目录）"里的文件，
-  >           Dockerfile 里写 jdk17.tar.gz / app.jar 时，指的就是那个目录里的这两个文件。
-  >
-  > 【1】写 Dockerfile（文件内容）
-  >   FROM centos:7
-  >   COPY jdk17.tar.gz /usr/local/
-  >   RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
-  >   ENV JAVA_HOME=/usr/local/jdk-17.0.10
-  >   ENV PATH=$JAVA_HOME/bin:$PATH
-  >   RUN mkdir -p /app
-  >   WORKDIR /app
-  >   COPY app.jar app.jar
-  >   EXPOSE 8080
-  >   ENTRYPOINT ["java", "-jar", "/app/app.jar"]
-  >
-  > 【2】构建镜像
-  >   docker build -t tlias:1.0 .
-  >     · -t tlias:1.0 —— 给镜像起名与版本（不写 tag 默认 latest）
-  >     · 末尾的 .    —— Dockerfile 所在目录，同时是构建上下文
-  >   确认成功：docker images tlias 能看到 tlias:1.0
-  >
-  > 【3】跑起来
-  >   docker run -d --name tlias-server -p 8080:8080 tlias:1.0
-  >   确认成功：
-  >     · docker ps --filter name=tlias-server   → Up，PORTS 是 0.0.0.0:8080->8080/tcp
-  >     · docker logs tlias-server               → 能看到 ENTRYPOINT 打出来的启动信息
-  >       （本机实测里就是靠这一步看到 JAVA_HOME 与 jar 内容——证明 ENV 与 COPY 生效）
-  >     · docker exec tlias-server ls /app       → 能看到 app.jar
-  >     · docker exec tlias-server echo $JAVA_HOME → 能看到 /usr/local/jdk-17.0.10
-  >
-  > 【4】接上网络（容器名互访）
-  >   docker network create itheima
-  >   docker network connect itheima tlias-server
-  >   docker network connect itheima mysql
-  >   （下次直接：docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0）
-  >
-  >   为什么这样就能写 jdbc:mysql://mysql:3306/tlias：
-  >     因为 PPT 第 44 页那条规则——"加入自定义网络的容器才可以通过容器名互相访问"。
-  >     tlias-server 和 mysql 都在 itheima 这个自定义网络里，
-  >     所以应用里写容器名 mysql，Docker 能把它解析成 mysql 容器在网桥上的 IP；
-  >     3306 是"容器内"的端口（不是宿主机映射出去的那个 3307）。
-  >
-  > 【5】回头看"镜像省掉了什么"
-  >   · 手动部署：换台机器就要"装 JDK → 配环境变量 → 传 jar → 起进程"四步重来一遍；
-  >   · 镜像：这四步提前写进 Dockerfile、构建一次，
-  >     任何装了 Docker 的机器上 docker run 一下就是同一个环境。
-  >
-  > 【6】命令清单（顺序照抄）
-  >   ① 准备 Dockerfile + jdk17.tar.gz + app.jar（同一目录）
-  >   ② docker build -t tlias:1.0 .              失败先看：文件名/路径、COPY 的源在不在上下文里
-  >   ③ docker images tlias                      失败先看：上一步有没有真的成功
-  >   ④ docker network create itheima
-  >   ⑤ docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
-  >                                              失败先看：容器名重不重、端口占没占
-  >   ⑥ docker ps --filter name=tlias-server     看状态与端口映射
-  >   ⑦ docker logs tlias-server                 看应用有没有起来
-  >   ⑧ docker exec tlias-server ...             进容器里验证环境
-  >   ⑨ docker network connect itheima mysql     让数据库也进同一个网络
-  >   ⑩ 清理：docker rm -f tlias-server && docker rmi tlias:1.0
-  > ```
-  > 检查点：① 三样文件放同一目录并说得出理由（构建上下文）；② Dockerfile 指令顺序对、`WORKDIR` 在 `COPY app.jar` 之前、`ENTRYPOINT` 用方括号；③ 构建命令的 `-t` 与 `.` 解释到位；④ 运行命令里 `-p` 左右含义对、验证手段至少两种（含"看日志"）；⑤ 网络那一环能落到 PPT 第 44 页那句话上，并说清"3306 是容器内端口"；⑥ 清单齐全、每一步都有"失败先看什么"。
+  **一级 · 思路**：整条链是"**准备文件 → 写 Dockerfile → build → run → 验证 → 接网络**"；顺序上有个不变的规律：**先让镜像能跑起来，再去解决它和别人的通信**——一上来就折腾网络，出了问题分不清是镜像的事还是网络的事
+  **二级 · 方法**：文件三样（`Dockerfile`、`jdk17.tar.gz`、`app.jar`）放同一个目录当构建上下文；`docker build -t tlias:1.0 .`；`docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`（网络要先 `docker network create itheima`）；验证靠 `docker ps`（端口）、`docker logs`（ENTRYPOINT 打印）、`docker exec`（进容器看）；"名字能通"靠"都在同一个自定义网络里"
+  **三级 · 骨架**：① 目录里放 `____`、`____`、`____`（因为 `COPY` 只能拷 `____` 里的文件）；② `FROM ____` → `COPY jdk17.tar.gz ____` → `RUN ____` → `ENV ____` → `WORKDIR ____` → `COPY app.jar ____` → `EXPOSE ____` → `ENTRYPOINT ____`；③ `docker build -t ____ ____`；④ `docker run -d --name ____ -p ____:____ tlias:1.0` + `docker ____` + `docker ____`；⑤ `docker network create ____` + `docker network connect ____ ____`（或 `--network`），因为同一个自定义网络里才 `____`；⑥ 省掉了 `____`；⑦ 清单按顺序列
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  【0】先规划
+    · 镜像 = 基础镜像（CentOS 7）+ 若干层（装 JDK、配环境变量、拷 jar）+ 入口（java -jar）
+    · 同一个目录里必须有：Dockerfile、jdk17.tar.gz、app.jar
+      原因：COPY 只能拷"构建上下文（末尾那个目录）"里的文件，
+            Dockerfile 里写 jdk17.tar.gz / app.jar 时，指的就是那个目录里的这两个文件。
+  
+  【1】写 Dockerfile（文件内容）
+    FROM centos:7
+    COPY jdk17.tar.gz /usr/local/
+    RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
+    ENV JAVA_HOME=/usr/local/jdk-17.0.10
+    ENV PATH=$JAVA_HOME/bin:$PATH
+    RUN mkdir -p /app
+    WORKDIR /app
+    COPY app.jar app.jar
+    EXPOSE 8080
+    ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+  
+  【2】构建镜像
+    docker build -t tlias:1.0 .
+      · -t tlias:1.0 —— 给镜像起名与版本（不写 tag 默认 latest）
+      · 末尾的 .    —— Dockerfile 所在目录，同时是构建上下文
+    确认成功：docker images tlias 能看到 tlias:1.0
+  
+  【3】跑起来
+    docker run -d --name tlias-server -p 8080:8080 tlias:1.0
+    确认成功：
+      · docker ps --filter name=tlias-server   → Up，PORTS 是 0.0.0.0:8080->8080/tcp
+      · docker logs tlias-server               → 能看到 ENTRYPOINT 打出来的启动信息
+        （本机实测里就是靠这一步看到 JAVA_HOME 与 jar 内容——证明 ENV 与 COPY 生效）
+      · docker exec tlias-server ls /app       → 能看到 app.jar
+      · docker exec tlias-server echo $JAVA_HOME → 能看到 /usr/local/jdk-17.0.10
+  
+  【4】接上网络（容器名互访）
+    docker network create itheima
+    docker network connect itheima tlias-server
+    docker network connect itheima mysql
+    （下次直接：docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0）
+  
+    为什么这样就能写 jdbc:mysql://mysql:3306/tlias：
+      因为 PPT 第 44 页那条规则——"加入自定义网络的容器才可以通过容器名互相访问"。
+      tlias-server 和 mysql 都在 itheima 这个自定义网络里，
+      所以应用里写容器名 mysql，Docker 能把它解析成 mysql 容器在网桥上的 IP；
+      3306 是"容器内"的端口（不是宿主机映射出去的那个 3307）。
+  
+  【5】回头看"镜像省掉了什么"
+    · 手动部署：换台机器就要"装 JDK → 配环境变量 → 传 jar → 起进程"四步重来一遍；
+    · 镜像：这四步提前写进 Dockerfile、构建一次，
+      任何装了 Docker 的机器上 docker run 一下就是同一个环境。
+  
+  【6】命令清单（顺序照抄）
+    ① 准备 Dockerfile + jdk17.tar.gz + app.jar（同一目录）
+    ② docker build -t tlias:1.0 .              失败先看：文件名/路径、COPY 的源在不在上下文里
+    ③ docker images tlias                      失败先看：上一步有没有真的成功
+    ④ docker network create itheima
+    ⑤ docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
+                                               失败先看：容器名重不重、端口占没占
+    ⑥ docker ps --filter name=tlias-server     看状态与端口映射
+    ⑦ docker logs tlias-server                 看应用有没有起来
+    ⑧ docker exec tlias-server ...             进容器里验证环境
+    ⑨ docker network connect itheima mysql     让数据库也进同一个网络
+    ⑩ 清理：docker rm -f tlias-server && docker rmi tlias:1.0
+  ```
+  检查点：① 三样文件放同一目录并说得出理由（构建上下文）；② Dockerfile 指令顺序对、`WORKDIR` 在 `COPY app.jar` 之前、`ENTRYPOINT` 用方括号；③ 构建命令的 `-t` 与 `.` 解释到位；④ 运行命令里 `-p` 左右含义对、验证手段至少两种（含"看日志"）；⑤ 网络那一环能落到 PPT 第 44 页那句话上，并说清"3306 是容器内端口"；⑥ 清单齐全、每一步都有"失败先看什么"。
+
+  :::
+

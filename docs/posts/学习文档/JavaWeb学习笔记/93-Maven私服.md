@@ -16,7 +16,7 @@ cover: false
 
 `tlias-pojo`、`tlias-utils` 是团队自己的代码，中央仓库上当然没有；B 同事的电脑上也没有你本地的仓库。这一篇（PPT 第 23-35 页）讲的就是课件里的第三块内容：**私服**。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **本篇的私服配置没有实测。** 私服需要一台 Nexus 服务器（课程里是 `192.168.150.101:8081`，对应资料 `资料/04. maven私服/nexus.zip`），本机没有搭建、也没打算搭，所以下面的三步配置、仓库类型、上传下载流程全部**按课件与讲义原文整理**（代码与课程代码 `tlias-parent/pom.xml` 里的配置一致，配置项的写法没有改动）。文中的"本机实测"只会用在确实跑过的那部分（构建顺序、本地仓库的位置）。
 > 课件截图里 Nexus 的版本是 **OSS 3.40.0-03**；课程资料打包的 `nexus.zip` 里是 **3.75.1-01** —— 版本不影响操作，要记的是**地址和仓库名**。
 
@@ -56,7 +56,7 @@ PPT 第 26 页给出解法：**A 把模块上传到私服，B 直接从私服下
 
 这个顺序解释了私服的两个作用：**资源共享**（自己人写的模块放上去，全团队都能依赖）+ **资源同步**（有人下过的依赖，别人不用再去外网下一遍）。
 
-> [!NOTE]
+> [!NOTE] 注意
 > PPT 第 27 页的"注意"也交代了心态：**私服在企业项目开发中，一个项目/公司，只需要一台即可（无需我们自己搭建，会使用即可）。** —— 换句话说，这一节要掌握的是"**怎么配**"，搭服务器本身是运维的事。
 
 ### 必答问答（PPT 第 28 页）
@@ -87,12 +87,12 @@ PPT 第 30 页把私服的内部结构和要配置的东西画在一起了。私
 
 顺带一句：配置里出现的 `maven-public` 是私服里的"**仓库组**"地址 —— Nexus 会把 release、snapshot、central 几个仓库合成一个入口，下载时只要问这一个地址，不用挨个仓库去试。
 
-> [!TIP]
+> [!TIP] 提示
 > 课件里的私服地址是 `http://192.168.150.101:8081`（课程虚拟机）；课程代码 `tlias-parent/pom.xml` 里写的是 `http://localhost:8081`（老师本机的 Nexus）。**地址会随环境变，`id` 和"谁配谁"的对应关系不能变** —— 下一节的配置里会反复看到同一批 `id`。
 
 ## 四、三步配置（PPT 第 31-33 页）
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这三步是**固定套路**（PPT 第 35 页的原话是"固定的，参照讲义操作即可"），照抄的时候只要保证**地址、账号、id 三样东西前后对得上**就行。下面所有配置片段与 PPT 第 31-33 页逐字一致。
 
 ### ① 设置私服的访问用户名/密码（`settings.xml` 的 servers）
@@ -186,7 +186,7 @@ PPT 第 33 页："设置私服依赖下载的仓库组地址（settings.xml 中�
 | **`<mirror>`** | 告诉 Maven："要下载依赖时，**别去别处，统一去私服这个地址**" | `<mirrorOf>*</mirrorOf>` 表示**所有**仓库请求都走这个镜像；`maven-public` 是仓库组地址（一个入口覆盖 release + snapshot + central） |
 | **`<profile>`** | 声明"私服这个仓库，**发行版和快照版都能下**" | `<releases>`、`<snapshots>` 都设成 `enabled=true`；`<activeByDefault>true</activeByDefault>` 表示**默认激活**，不用每次手动指定 |
 
-> [!TIP]
+> [!TIP] 提示
 > 只看下载的话，**mirrors 一条就够**；课件里再加上 profiles，是为了把"这个仓库既能下发行版、也能下快照版"写明确 —— 快照版本默认不是"随便下"的，团队内部的开发版本要想让别人直接拉到，就得显式打开 `<snapshots><enabled>true</enabled></snapshots>`。
 
 ### 三处配置一览（照抄清单）
@@ -287,28 +287,36 @@ PPT 第 30 页在"本地仓库"和"私服"之间画了两条命令，正是这�
   3. 说明"id 对不上"会有什么后果。
   （练习文件 `test_93_私服配置.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：账号密码属于"机器相关"的东西（每个人的私服地址可能不同），所以它不写在工程里，而写在 Maven 自己的全局配置里
-  > **二级 · 方法**：在 `settings.xml` 里用 `<servers>` 包两个 `<server>`，每个里面有 `<id>`、`<username>`、`<password>`；`id` 要和发布地址那段配置（`<distributionManagement>`）里的 `id` 一一对应
-  > **三级 · 骨架**：`<server><id>maven-____</id><username>____</username><password>____</password></server>` ×2
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 写在 **`settings.xml`** 里（就是配本地仓库、阿里云镜像的那个文件）：
-  >    ```xml
-  >    <server>
-  >        <id>maven-releases</id>
-  >        <username>admin</username>
-  >        <password>admin</password>
-  >    </server>
-  >    <server>
-  >        <id>maven-snapshots</id>
-  >        <username>admin</username>
-  >        <password>admin</password>
-  >    </server>
-  >    ```
-  > 2. 两条的 `id` 分别是 **`maven-releases`**（发行版本仓库）和 **`maven-snapshots`**（快照版本仓库）；它们要和工程 pom 里 `<distributionManagement>` 的 `<repository>` / `<snapshotRepository>` 的 `<id>` **一一对应**。
-  > 3. **id 对不上，Maven 就不知道这次上传该用哪组账号密码**，发布时私服会拒绝这次认证（表现为上传失败/未授权）。这也是为什么课件里三个地方的 id 都用同一批名字 —— 靠 id 把"账号"和"地址"配对。
-  > （说明：本机没有 Nexus，这段配置按 PPT 第 31 页整理，没有实测。）
+  **一级 · 思路**：账号密码属于"机器相关"的东西（每个人的私服地址可能不同），所以它不写在工程里，而写在 Maven 自己的全局配置里
+  **二级 · 方法**：在 `settings.xml` 里用 `<servers>` 包两个 `<server>`，每个里面有 `<id>`、`<username>`、`<password>`；`id` 要和发布地址那段配置（`<distributionManagement>`）里的 `id` 一一对应
+  **三级 · 骨架**：`<server><id>maven-____</id><username>____</username><password>____</password></server>` ×2
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 写在 **`settings.xml`** 里（就是配本地仓库、阿里云镜像的那个文件）：
+     ```xml
+     <server>
+         <id>maven-releases</id>
+         <username>admin</username>
+         <password>admin</password>
+     </server>
+     <server>
+         <id>maven-snapshots</id>
+         <username>admin</username>
+         <password>admin</password>
+     </server>
+     ```
+  2. 两条的 `id` 分别是 **`maven-releases`**（发行版本仓库）和 **`maven-snapshots`**（快照版本仓库）；它们要和工程 pom 里 `<distributionManagement>` 的 `<repository>` / `<snapshotRepository>` 的 `<id>` **一一对应**。
+  3. **id 对不上，Maven 就不知道这次上传该用哪组账号密码**，发布时私服会拒绝这次认证（表现为上传失败/未授权）。这也是为什么课件里三个地方的 id 都用同一批名字 —— 靠 id 把"账号"和"地址"配对。
+  （说明：本机没有 Nexus，这段配置按 PPT 第 31 页整理，没有实测。）
+
+  :::
+
 
 - [ ] **2-2 告诉 Maven "我发布的东西该传到哪"**
   现在要把团队自己写的 `tlias-utils` 发布到私服（地址 `http://192.168.150.101:8081`），私服里有两个仓库：`maven-releases`、`maven-snapshots`。请写出这段**写在工程 pom 里**的配置：
@@ -317,28 +325,36 @@ PPT 第 30 页在"本地仓库"和"私服"之间画了两条命令，正是这�
   3. 说明模块的版本号怎么写，才会进"发行版本仓库"。
   （练习文件 `test_93_私服配置.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：上传地址是"工程相关"的（这个工程发到哪个私服），所以写在工程的 pom 里；两种版本对应两个地址，就是两个标签
-  > **二级 · 方法**：用 `<distributionManagement>`，里面 `<repository>` 收发行版本、`<snapshotRepository>` 收快照版本，两个 `id` 和 `settings.xml` 的 `<server>` 对应；放到父工程里，子工程继承后都能用
-  > **三级 · 骨架**：`<distributionManagement><repository><id>maven-____</id><url>____</url></repository><snapshotRepository>…</snapshotRepository></distributionManagement>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1.
-  >    ```xml
-  >    <distributionManagement>
-  >        <repository>
-  >            <id>maven-releases</id>
-  >            <url>http://192.168.150.101:8081/repository/maven-releases/</url>
-  >        </repository>
-  >        <snapshotRepository>
-  >            <id>maven-snapshots</id>
-  >            <url>http://192.168.150.101:8081/repository/maven-snapshots/</url>
-  >        </snapshotRepository>
-  >    </distributionManagement>
-  >    ```
-  > 2. 一般放在**父工程**里（课程代码就在 `tlias-parent/pom.xml`）：这样所有子工程都**继承**到同一份"上传地址说明"，发布时按各自的版本号自动进对应的仓库，不用每个模块都配一遍。
-  > 3. 版本号**不带 `-SNAPSHOT`** 时（如 `1.0`）属于 **RELEASE 发行版本**，会进 `<repository>` 指的 `maven-releases` 仓库；带 `-SNAPSHOT`（如 `1.0-SNAPSHOT`）属于 **SNAPSHOT 快照版本**，会进 `<snapshotRepository>` 指的 `maven-snapshots` 仓库。
-  > （说明：本机没有 Nexus，这段配置按 PPT 第 32 页整理，没有实测。）
+  **一级 · 思路**：上传地址是"工程相关"的（这个工程发到哪个私服），所以写在工程的 pom 里；两种版本对应两个地址，就是两个标签
+  **二级 · 方法**：用 `<distributionManagement>`，里面 `<repository>` 收发行版本、`<snapshotRepository>` 收快照版本，两个 `id` 和 `settings.xml` 的 `<server>` 对应；放到父工程里，子工程继承后都能用
+  **三级 · 骨架**：`<distributionManagement><repository><id>maven-____</id><url>____</url></repository><snapshotRepository>…</snapshotRepository></distributionManagement>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1.
+     ```xml
+     <distributionManagement>
+         <repository>
+             <id>maven-releases</id>
+             <url>http://192.168.150.101:8081/repository/maven-releases/</url>
+         </repository>
+         <snapshotRepository>
+             <id>maven-snapshots</id>
+             <url>http://192.168.150.101:8081/repository/maven-snapshots/</url>
+         </snapshotRepository>
+     </distributionManagement>
+     ```
+  2. 一般放在**父工程**里（课程代码就在 `tlias-parent/pom.xml`）：这样所有子工程都**继承**到同一份"上传地址说明"，发布时按各自的版本号自动进对应的仓库，不用每个模块都配一遍。
+  3. 版本号**不带 `-SNAPSHOT`** 时（如 `1.0`）属于 **RELEASE 发行版本**，会进 `<repository>` 指的 `maven-releases` 仓库；带 `-SNAPSHOT`（如 `1.0-SNAPSHOT`）属于 **SNAPSHOT 快照版本**，会进 `<snapshotRepository>` 指的 `maven-snapshots` 仓库。
+  （说明：本机没有 Nexus，这段配置按 PPT 第 32 页整理，没有实测。）
+
+  :::
+
 
 - [ ] **2-3 让同事能自动从私服下到团队的模块**
   同事 B 的工程要依赖 `tlias-utils`。除了在自己的工程 pom 里写依赖坐标，还要让 B 的 Maven"去哪找这个依赖"。请写出这段**写在 `settings.xml` 里**的配置：
@@ -347,43 +363,51 @@ PPT 第 30 页在"本地仓库"和"私服"之间画了两条命令，正是这�
   3. 回答：有了私服之后，Maven 找依赖的顺序是什么？
   （练习文件 `test_93_私服配置.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：下载地址也写在 `settings.xml`（每人环境不同），分两块：一块"把请求引到私服"（镜像），一块"声明这个仓库能下哪两种版本"
-  > **二级 · 方法**：`<mirrors>` 里一条 `<mirror>`，`<mirrorOf>` 匹配所有仓库；`<profiles>` 里一个 `<profile>`，`<repositories>` 里写仓库地址，`<releases>`/`<snapshots>` 都 `enabled=true`，`<activeByDefault>true</activeByDefault>` 让它默认生效
-  > **三级 · 骨架**：`<mirror><id>maven-public</id><mirrorOf>____</mirrorOf><url>____</url></mirror>`；`<profile><id>allow-snapshots</id><activation><activeByDefault>true</activeByDefault></activation><repositories>…</repositories></profile>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1~2.
-  >    ```xml
-  >    <mirror>
-  >        <id>maven-public</id>
-  >        <mirrorOf>*</mirrorOf>
-  >        <url>http://192.168.150.101:8081/repository/maven-public/</url>
-  >    </mirror>
-  >    ```
-  >    ```xml
-  >    <profile>
-  >        <id>allow-snapshots</id>
-  >        <activation>
-  >            <activeByDefault>true</activeByDefault>
-  >        </activation>
-  >        <repositories>
-  >            <repository>
-  >                <id>maven-public</id>
-  >                <url>http://192.168.150.101:8081/repository/maven-public/</url>
-  >                <releases>
-  >                    <enabled>true</enabled>
-  >                </releases>
-  >                <snapshots>
-  >                    <enabled>true</enabled>
-  >                </snapshots>
-  >            </repository>
-  >        </repositories>
-  >    </profile>
-  >    ```
-  >    两块的分工：`<mirrorOf>*</mirrorOf>` 把**所有**仓库请求都引到私服的仓库组地址；`<profile>` 则显式声明"这个地址既能下发行版、也能下快照版"，并且默认激活（不用手动选）。同事 B 的模块版本是 `1.0-SNAPSHOT`（快照版本），少了 `<snapshots><enabled>true</enabled></snapshots>` 这一项是拉不到的。
-  > 3. 查找顺序：**本地仓库 → 私服 → 中央仓库**。B 的本地仓库没有 `tlias-utils`，于是问私服；私服里正是 A 发布上去的那份，直接下载成功。
-  > （说明：本机没有 Nexus，这段配置按 PPT 第 33 页整理，没有实测。）
+  **一级 · 思路**：下载地址也写在 `settings.xml`（每人环境不同），分两块：一块"把请求引到私服"（镜像），一块"声明这个仓库能下哪两种版本"
+  **二级 · 方法**：`<mirrors>` 里一条 `<mirror>`，`<mirrorOf>` 匹配所有仓库；`<profiles>` 里一个 `<profile>`，`<repositories>` 里写仓库地址，`<releases>`/`<snapshots>` 都 `enabled=true`，`<activeByDefault>true</activeByDefault>` 让它默认生效
+  **三级 · 骨架**：`<mirror><id>maven-public</id><mirrorOf>____</mirrorOf><url>____</url></mirror>`；`<profile><id>allow-snapshots</id><activation><activeByDefault>true</activeByDefault></activation><repositories>…</repositories></profile>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1~2.
+     ```xml
+     <mirror>
+         <id>maven-public</id>
+         <mirrorOf>*</mirrorOf>
+         <url>http://192.168.150.101:8081/repository/maven-public/</url>
+     </mirror>
+     ```
+     ```xml
+     <profile>
+         <id>allow-snapshots</id>
+         <activation>
+             <activeByDefault>true</activeByDefault>
+         </activation>
+         <repositories>
+             <repository>
+                 <id>maven-public</id>
+                 <url>http://192.168.150.101:8081/repository/maven-public/</url>
+                 <releases>
+                     <enabled>true</enabled>
+                 </releases>
+                 <snapshots>
+                     <enabled>true</enabled>
+                 </snapshots>
+             </repository>
+         </repositories>
+     </profile>
+     ```
+     两块的分工：`<mirrorOf>*</mirrorOf>` 把**所有**仓库请求都引到私服的仓库组地址；`<profile>` 则显式声明"这个地址既能下发行版、也能下快照版"，并且默认激活（不用手动选）。同事 B 的模块版本是 `1.0-SNAPSHOT`（快照版本），少了 `<snapshots><enabled>true</enabled></snapshots>` 这一项是拉不到的。
+  3. 查找顺序：**本地仓库 → 私服 → 中央仓库**。B 的本地仓库没有 `tlias-utils`，于是问私服；私服里正是 A 发布上去的那份，直接下载成功。
+  （说明：本机没有 Nexus，这段配置按 PPT 第 33 页整理，没有实测。）
+
+  :::
+
 
 - [ ] **2-4 该用哪条命令、该用哪个版本**
   判断下面几种场景，分别回答"用 `install` 还是 `deploy`"和"版本号带不带 `-SNAPSHOT`"，并各说一句理由：
@@ -391,15 +415,23 @@ PPT 第 30 页在"本地仓库"和"私服"之间画了两条命令，正是这�
   2. `tlias-utils` 还在开发中，但同事要每天拉到你现在这份来联调；
   3. `tlias-utils` 测完了，团队要把它当正式版本固定下来给别人依赖。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先问"要给谁用"——自己 / 团队临时联调 / 团队正式使用；"给团队"就得传到私服（`deploy`），"版本稳不稳定"决定带不带 `-SNAPSHOT`
-  > **二级 · 方法**：本地自己用 → `install`；团队用 → `deploy`；开发中 → `-SNAPSHOT`（进快照仓库）；稳定发行 → 去掉 `-SNAPSHOT`（进发行仓库）
-  > **三级 · 骨架**：第 1 种 = `____` + 版本（随意，本地自己用）；第 2 种 = `____` + `____-SNAPSHOT`；第 3 种 = `____` + `____`（去掉后缀）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **`mvn install`**，版本带不带 `-SNAPSHOT` 都行（自己本机用，坐标能对上即可）。理由：`install` 把模块装进**本地仓库**，本机的 `tlias-web-management` 就能依赖到，完全不需要私服。
-  > 2. **`mvn deploy`**，版本用 **`-SNAPSHOT`**（如 `1.0-SNAPSHOT`）。理由：要给同事用就得发布到私服（`deploy`）；还在开发中属于**快照版本**，进 `maven-snapshots` 仓库 —— 本机实验工程里的 `tlias-pojo`、`tlias-utils` 版本正是 `1.0-SNAPSHOT`。
-  > 3. **`mvn deploy`**，版本**去掉 `-SNAPSHOT`**（如 `1.0`）。理由：测完、功能趋于稳定、更新停止，属于 **RELEASE 发行版本**，进 `maven-releases` 仓库；这样别人拿到的就是固定版本，不会被你后续的改动"带着走"。
+  **一级 · 思路**：先问"要给谁用"——自己 / 团队临时联调 / 团队正式使用；"给团队"就得传到私服（`deploy`），"版本稳不稳定"决定带不带 `-SNAPSHOT`
+  **二级 · 方法**：本地自己用 → `install`；团队用 → `deploy`；开发中 → `-SNAPSHOT`（进快照仓库）；稳定发行 → 去掉 `-SNAPSHOT`（进发行仓库）
+  **三级 · 骨架**：第 1 种 = `____` + 版本（随意，本地自己用）；第 2 种 = `____` + `____-SNAPSHOT`；第 3 种 = `____` + `____`（去掉后缀）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **`mvn install`**，版本带不带 `-SNAPSHOT` 都行（自己本机用，坐标能对上即可）。理由：`install` 把模块装进**本地仓库**，本机的 `tlias-web-management` 就能依赖到，完全不需要私服。
+  2. **`mvn deploy`**，版本用 **`-SNAPSHOT`**（如 `1.0-SNAPSHOT`）。理由：要给同事用就得发布到私服（`deploy`）；还在开发中属于**快照版本**，进 `maven-snapshots` 仓库 —— 本机实验工程里的 `tlias-pojo`、`tlias-utils` 版本正是 `1.0-SNAPSHOT`。
+  3. **`mvn deploy`**，版本**去掉 `-SNAPSHOT`**（如 `1.0`）。理由：测完、功能趋于稳定、更新停止，属于 **RELEASE 发行版本**，进 `maven-releases` 仓库；这样别人拿到的就是固定版本，不会被你后续的改动"带着走"。
+
+  :::
+
 
 ### 三、综合题
 
@@ -425,68 +457,76 @@ PPT 第 30 页在"本地仓库"和"私服"之间画了两条命令，正是这�
   | RELEASE / SNAPSHOT | 版本号后缀决定进哪个仓库 |
   | install / deploy | 本地仓库 vs 私服 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三步配置按"**账号（settings）→ 上传地址（pom）→ 下载地址（settings）**"的顺序写，每一步都回答"写给谁看、靠什么和下一步对上"
-  > **二级 · 方法**：账号和下载地址写在 `settings.xml`（环境相关），上传地址写在工程 pom（工程相关，放父工程）；两个 id 名（release/snapshot）贯穿三处；发布用 `deploy`、本机用 `install`；开发中带 `-SNAPSHOT`、稳定了去掉
-  > **三级 · 骨架**：`<servers>` → `<distributionManagement>` → `<mirrors>` + `<profiles>`；版本 `1.0-____` ↔ `1.0`；命令 `mvn ____` ↔ `mvn ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **登录配置**（`settings.xml`，两组，id 必须叫 `maven-releases`、`maven-snapshots`）：
-  >    ```xml
-  >    <server>
-  >        <id>maven-releases</id>
-  >        <username>admin</username>
-  >        <password>admin</password>
-  >    </server>
-  >    <server>
-  >        <id>maven-snapshots</id>
-  >        <username>admin</username>
-  >        <password>admin</password>
-  >    </server>
-  >    ```
-  > 2. **发布配置**（工程 pom —— 一般写在**父工程**，如 `tlias-parent/pom.xml`）：
-  >    ```xml
-  >    <distributionManagement>
-  >        <repository>
-  >            <id>maven-releases</id>
-  >            <url>http://192.168.150.101:8081/repository/maven-releases/</url>
-  >        </repository>
-  >        <snapshotRepository>
-  >            <id>maven-snapshots</id>
-  >            <url>http://192.168.150.101:8081/repository/maven-snapshots/</url>
-  >        </snapshotRepository>
-  >    </distributionManagement>
-  >    ```
-  > 3. **下载配置**（`settings.xml`）：
-  >    ```xml
-  >    <mirror>
-  >        <id>maven-public</id>
-  >        <mirrorOf>*</mirrorOf>
-  >        <url>http://192.168.150.101:8081/repository/maven-public/</url>
-  >    </mirror>
-  >    ```
-  >    ```xml
-  >    <profile>
-  >        <id>allow-snapshots</id>
-  >        <activation>
-  >            <activeByDefault>true</activeByDefault>
-  >        </activation>
-  >        <repositories>
-  >            <repository>
-  >                <id>maven-public</id>
-  >                <url>http://192.168.150.101:8081/repository/maven-public/</url>
-  >                <releases>
-  >                    <enabled>true</enabled>
-  >                </releases>
-  >                <snapshots>
-  >                    <enabled>true</enabled>
-  >                </snapshots>
-  >            </repository>
-  >        </repositories>
-  >    </profile>
-  >    ```
-  >    `<mirror>` 管"**去哪找**"（`<mirrorOf>*</mirrorOf>` = 所有请求都走私服）；`<profile>` 管"**能下什么**"（release、snapshot 都 `enabled=true`，且 `activeByDefault=true` 默认生效）。
-  > 4. **命令**：发布到私服用 **`mvn deploy`**；只想本机用（装进本地仓库）用 **`mvn install`**。前者比后者多做"上传"这一步，所以需要 1、2 两步的配置。
-  > 5. **版本策略**：还在开发时写 **`1.0-SNAPSHOT`**（快照版本，进 **`maven-snapshots`** 仓库）；稳定、正式发行时改成 **`1.0`**（RELEASE 发行版本，进 **`maven-releases`** 仓库）。
-  > 6. ① **查找顺序：本地仓库 → 私服 → 中央仓库**；② 报"未授权"先检查 **`settings.xml` 里 `<server>` 的 `<id>` 和工程 pom 里 `<distributionManagement>` 的 `<id>` 是否一一对应**（上传靠 id 把地址和账号配对），其次确认账号密码写对、以及自己是否有该仓库的上传权限。
-  > （说明：本机没有 Nexus，以上配置均按 PPT 第 31-33 页与课程代码整理，**没有实测**；本机实测过的只有本地仓库的构建与 `install`（见 [92 篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)）。）
+  **一级 · 思路**：三步配置按"**账号（settings）→ 上传地址（pom）→ 下载地址（settings）**"的顺序写，每一步都回答"写给谁看、靠什么和下一步对上"
+  **二级 · 方法**：账号和下载地址写在 `settings.xml`（环境相关），上传地址写在工程 pom（工程相关，放父工程）；两个 id 名（release/snapshot）贯穿三处；发布用 `deploy`、本机用 `install`；开发中带 `-SNAPSHOT`、稳定了去掉
+  **三级 · 骨架**：`<servers>` → `<distributionManagement>` → `<mirrors>` + `<profiles>`；版本 `1.0-____` ↔ `1.0`；命令 `mvn ____` ↔ `mvn ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **登录配置**（`settings.xml`，两组，id 必须叫 `maven-releases`、`maven-snapshots`）：
+     ```xml
+     <server>
+         <id>maven-releases</id>
+         <username>admin</username>
+         <password>admin</password>
+     </server>
+     <server>
+         <id>maven-snapshots</id>
+         <username>admin</username>
+         <password>admin</password>
+     </server>
+     ```
+  2. **发布配置**（工程 pom —— 一般写在**父工程**，如 `tlias-parent/pom.xml`）：
+     ```xml
+     <distributionManagement>
+         <repository>
+             <id>maven-releases</id>
+             <url>http://192.168.150.101:8081/repository/maven-releases/</url>
+         </repository>
+         <snapshotRepository>
+             <id>maven-snapshots</id>
+             <url>http://192.168.150.101:8081/repository/maven-snapshots/</url>
+         </snapshotRepository>
+     </distributionManagement>
+     ```
+  3. **下载配置**（`settings.xml`）：
+     ```xml
+     <mirror>
+         <id>maven-public</id>
+         <mirrorOf>*</mirrorOf>
+         <url>http://192.168.150.101:8081/repository/maven-public/</url>
+     </mirror>
+     ```
+     ```xml
+     <profile>
+         <id>allow-snapshots</id>
+         <activation>
+             <activeByDefault>true</activeByDefault>
+         </activation>
+         <repositories>
+             <repository>
+                 <id>maven-public</id>
+                 <url>http://192.168.150.101:8081/repository/maven-public/</url>
+                 <releases>
+                     <enabled>true</enabled>
+                 </releases>
+                 <snapshots>
+                     <enabled>true</enabled>
+                 </snapshots>
+             </repository>
+         </repositories>
+     </profile>
+     ```
+     `<mirror>` 管"**去哪找**"（`<mirrorOf>*</mirrorOf>` = 所有请求都走私服）；`<profile>` 管"**能下什么**"（release、snapshot 都 `enabled=true`，且 `activeByDefault=true` 默认生效）。
+  4. **命令**：发布到私服用 **`mvn deploy`**；只想本机用（装进本地仓库）用 **`mvn install`**。前者比后者多做"上传"这一步，所以需要 1、2 两步的配置。
+  5. **版本策略**：还在开发时写 **`1.0-SNAPSHOT`**（快照版本，进 **`maven-snapshots`** 仓库）；稳定、正式发行时改成 **`1.0`**（RELEASE 发行版本，进 **`maven-releases`** 仓库）。
+  6. ① **查找顺序：本地仓库 → 私服 → 中央仓库**；② 报"未授权"先检查 **`settings.xml` 里 `<server>` 的 `<id>` 和工程 pom 里 `<distributionManagement>` 的 `<id>` 是否一一对应**（上传靠 id 把地址和账号配对），其次确认账号密码写对、以及自己是否有该仓库的上传权限。
+  （说明：本机没有 Nexus，以上配置均按 PPT 第 31-33 页与课程代码整理，**没有实测**；本机实测过的只有本地仓库的构建与 `install`（见 [92 篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)）。）
+
+  :::
+

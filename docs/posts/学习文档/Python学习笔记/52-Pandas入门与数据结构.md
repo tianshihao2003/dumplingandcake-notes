@@ -23,7 +23,7 @@ Pandas 是一个功能强大的**结构化数据分析**工具集，底层基于
 pip install pandas
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课程 PPT 上写的 `npm install pandas` 是笔误——npm 是 Node.js 的包管理器，Python 用 `pip`。
 
 ### 两个核心数据结构
@@ -119,7 +119,7 @@ s4 = df1['语文']                                                  # 从 DataFr
 | `s.size` | 获取数据个数 |
 | `s.shape` | 获取数据维度（行,）——只有一个维度 |
 
-> [!TIP]
+> [!TIP] 提示
 > 记法：DataFrame 有 `columns`、类型是 `dtypes`（复数）；Series 没有 `columns`、类型是 `dtype`（单数）。
 
 ## 相关
@@ -143,54 +143,78 @@ s4 = df1['语文']                                                  # 从 DataFr
 - [ ] **2-1 构造 DataFrame**
   用"字典套列表"的方式造一个 3 名学员的成绩表（列：姓名、语文、数学），打印 `shape` 和 `columns`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：列名当字典的键，每列的数据当值
-  > **二级 · 方法**：`pd.DataFrame({...})`
-  > **三级 · 骨架**：`df = pd.DataFrame({"姓名": [...], "语文": [...], "数学": [...]})`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > import pandas as pd
-  >
-  > df = pd.DataFrame({
-  >     "姓名": ["小王", "小李", "小张"],
-  >     "语文": [90, 80, 70],
-  >     "数学": [80, 90, 80],
-  > })
-  > print(df.shape)      # (3, 3)
-  > print(df.columns.tolist())  # ['姓名', '语文', '数学']
-  > ```
+  **一级 · 思路**：列名当字典的键，每列的数据当值
+  **二级 · 方法**：`pd.DataFrame({...})`
+  **三级 · 骨架**：`df = pd.DataFrame({"姓名": [...], "语文": [...], "数学": [...]})`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  import pandas as pd
+  
+  df = pd.DataFrame({
+      "姓名": ["小王", "小李", "小张"],
+      "语文": [90, 80, 70],
+      "数学": [80, 90, 80],
+  })
+  print(df.shape)      # (3, 3)
+  print(df.columns.tolist())  # ['姓名', '语文', '数学']
+  ```
+
+  :::
+
 
 - [ ] **2-2 取属性**
   对上面造出的表，分别打印：行索引、列名、值、单元格数量、每列类型、维度。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：六个属性各一行
-  > **二级 · 方法**：`index` / `columns` / `values` / `size` / `dtypes` / `shape`
-  > **三级 · 骨架**：`print(df.index.tolist())`（转成列表看得更清楚）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > print(df.index.tolist())    # [0, 1, 2]
-  > print(df.columns.tolist())
-  > print(df.values.tolist())
-  > print(df.size)              # 9
-  > print(df.dtypes)
-  > print(df.shape)             # (3, 3)
-  > ```
+  **一级 · 思路**：六个属性各一行
+  **二级 · 方法**：`index` / `columns` / `values` / `size` / `dtypes` / `shape`
+  **三级 · 骨架**：`print(df.index.tolist())`（转成列表看得更清楚）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  print(df.index.tolist())    # [0, 1, 2]
+  print(df.columns.tolist())
+  print(df.values.tolist())
+  print(df.size)              # 9
+  print(df.dtypes)
+  print(df.shape)             # (3, 3)
+  ```
+
+  :::
+
 
 - [ ] **2-3 统计一列**
   取出"语文"这一列，打印最高分、最低分、平均分（平均分保留两位小数）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先取列，再用统计方法
-  > **二级 · 方法**：`df['语文'].max()` / `.min()` / `.mean()`
-  > **三级 · 骨架**：`f"{df['语文'].mean():.____}"` 保留两位小数
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > print(f"最高分: {df['语文'].max()}, 最低分: {df['语文'].min()}, 平均分: {df['语文'].mean():.2f}")
-  > ```
+  **一级 · 思路**：先取列，再用统计方法
+  **二级 · 方法**：`df['语文'].max()` / `.min()` / `.mean()`
+  **三级 · 骨架**：`f"{df['语文'].mean():.____}"` 保留两位小数
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  print(f"最高分: {df['语文'].max()}, 最低分: {df['语文'].min()}, 平均分: {df['语文'].mean():.2f}")
+  ```
+
+  :::
+

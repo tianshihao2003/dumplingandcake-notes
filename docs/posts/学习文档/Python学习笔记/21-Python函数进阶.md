@@ -407,72 +407,96 @@ print(add(100, 200))
 
   > **批改（2026-09-28）**：⚠️ 判断逻辑正确，但只测了 `triangle_type(3, 3, 999)`（不能构成三角形）一种情况，等边/等腰/普通三种分支都没验证；建议按参考答案把 4 种情况各跑一遍。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先过一遍"能不能围成三角形"的关（任意两边之和都要大于第三边），能围成的再按"三边相等 / 有两边相等 / 都不等"往下分
-  > **二级 · 方法**：外层 `if a + b > c and a + c > b and b + c > a:`，内层用 `if a == b == c:` / `elif a == b or a == c or b == c:` / `else:`，各分支 `return` 对应的字符串
-  > **三级 · 骨架**：`if a + b > ____ and a + c > b and b + c > a:` / `    if a == b == ____:` / `    elif a == b ____ a == c ____ b == c:` / `else: return "不能构成三角形"`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > def triangle_type(a, b, c):
-  >     if a + b > c and a + c > b and b + c > a:
-  >         if a == b == c:
-  >             return "等边三角形"
-  >         elif a == b or a == c or b == c:
-  >             return "等腰三角形"
-  >         else:
-  >             return "普通三角形"
-  >     else:
-  >         return "不能构成三角形"
-  >
-  > print(triangle_type(3, 4, 5))    # 普通三角形
-  > print(triangle_type(3, 3, 5))    # 等腰三角形
-  > print(triangle_type(8, 8, 8))    # 等边三角形
-  > print(triangle_type(3, 4, 7))    # 不能构成三角形
-  > ```
+  **一级 · 思路**：先过一遍"能不能围成三角形"的关（任意两边之和都要大于第三边），能围成的再按"三边相等 / 有两边相等 / 都不等"往下分
+  **二级 · 方法**：外层 `if a + b > c and a + c > b and b + c > a:`，内层用 `if a == b == c:` / `elif a == b or a == c or b == c:` / `else:`，各分支 `return` 对应的字符串
+  **三级 · 骨架**：`if a + b > ____ and a + c > b and b + c > a:` / `    if a == b == ____:` / `    elif a == b ____ a == c ____ b == c:` / `else: return "不能构成三角形"`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  def triangle_type(a, b, c):
+      if a + b > c and a + c > b and b + c > a:
+          if a == b == c:
+              return "等边三角形"
+          elif a == b or a == c or b == c:
+              return "等腰三角形"
+          else:
+              return "普通三角形"
+      else:
+          return "不能构成三角形"
+  
+  print(triangle_type(3, 4, 5))    # 普通三角形
+  print(triangle_type(3, 3, 5))    # 等腰三角形
+  print(triangle_type(8, 8, 8))    # 等边三角形
+  print(triangle_type(3, 4, 7))    # 不能构成三角形
+  ```
+
+  :::
+
 
 - [x] **2-2 成绩统计函数**
   定义一个函数 `calc_stats(*scores)`，接收任意数量的成绩，返回最高分、最低分、平均分。
 
   > **批改（2026-09-28）**：✅ 正确（最高分 96、最低分 78、平均分 87.8，输出与预期一致）。代码与文件末尾注释答案高度相似（连那组测试数据都一样），建议重做一遍确认掌握。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：参数个数不定，就把它收成一包整体处理：最高、最低、平均值各用现成函数算出来，一起返回
-  > **二级 · 方法**：定义时用不定长位置参数 `*scores`（收集成元组）；最高 `max(scores)`、最低 `min(scores)`、平均 `sum(scores) / len(scores)`（要保留一位小数可以再套 `round(值, 1)`）；`return 最高, 最低, 平均` 一次返回三个值
-  > **三级 · 骨架**：`def calc_stats(____scores):` / `    return ____(scores), min(scores), round(sum(scores) / ____(scores), 1)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > def calc_stats(*scores):
-  >     return max(scores), min(scores), round(sum(scores) / len(scores), 1)
-  >
-  > highest, lowest, avg = calc_stats(85, 92, 78, 96, 88)
-  > print(f"最高分: {highest}, 最低分: {lowest}, 平均分: {avg}")
-  > ```
+  **一级 · 思路**：参数个数不定，就把它收成一包整体处理：最高、最低、平均值各用现成函数算出来，一起返回
+  **二级 · 方法**：定义时用不定长位置参数 `*scores`（收集成元组）；最高 `max(scores)`、最低 `min(scores)`、平均 `sum(scores) / len(scores)`（要保留一位小数可以再套 `round(值, 1)`）；`return 最高, 最低, 平均` 一次返回三个值
+  **三级 · 骨架**：`def calc_stats(____scores):` / `    return ____(scores), min(scores), round(sum(scores) / ____(scores), 1)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  def calc_stats(*scores):
+      return max(scores), min(scores), round(sum(scores) / len(scores), 1)
+  
+  highest, lowest, avg = calc_stats(85, 92, 78, 96, 88)
+  print(f"最高分: {highest}, 最低分: {lowest}, 平均分: {avg}")
+  ```
+
+  :::
+
 
 - [x] **2-3 学生信息注册**
   定义一个函数 `register(name, age, gender, city='北京')`，使用默认参数，返回学生信息字典。
 
   > **批改（2026-09-28）**：✅ 正确（默认值 `城市=北京`、传参覆盖成 `城市=上海` 两组输出都对）。与文件末尾注释答案高度相似（注释和测试数据都一致），建议重做一遍确认掌握。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：其中一个参数在定义时就给好默认值——调用时不传就是默认的，传了就按传的来
-  > **二级 · 方法**：默认参数写在参数列表最后，如 `city='北京'`；函数里把参数装进字典 `return {"name": name, "age": age, "gender": gender, "city": city}`
-  > **三级 · 骨架**：`def register(name, age, gender, ____='北京'):` / `    return {"name": ____, "age": age, "gender": gender, "city": city}`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > def register(name, age, gender, city='北京'):
-  >     return {"name": name, "age": age, "gender": gender, "city": city}
-  >
-  > # 使用默认值
-  > stu1 = register("张三", 18, "男")
-  > print(stu1)  # {'name': '张三', 'age': 18, 'gender': '男', 'city': '北京'}
-  >
-  > # 覆盖默认值
-  > stu2 = register("李四", 20, "女", "上海")
-  > print(stu2)  # {'name': '李四', 'age': 20, 'gender': '女', 'city': '上海'}
-  > ```
+  **一级 · 思路**：其中一个参数在定义时就给好默认值——调用时不传就是默认的，传了就按传的来
+  **二级 · 方法**：默认参数写在参数列表最后，如 `city='北京'`；函数里把参数装进字典 `return {"name": name, "age": age, "gender": gender, "city": city}`
+  **三级 · 骨架**：`def register(name, age, gender, ____='北京'):` / `    return {"name": ____, "age": age, "gender": gender, "city": city}`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  def register(name, age, gender, city='北京'):
+      return {"name": name, "age": age, "gender": gender, "city": city}
+  
+  # 使用默认值
+  stu1 = register("张三", 18, "男")
+  print(stu1)  # {'name': '张三', 'age': 18, 'gender': '男', 'city': '北京'}
+  
+  # 覆盖默认值
+  stu2 = register("李四", 20, "女", "上海")
+  print(stu2)  # {'name': '李四', 'age': 20, 'gender': '女', 'city': '上海'}
+  ```
+
+  :::
+

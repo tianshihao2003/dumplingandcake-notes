@@ -122,7 +122,7 @@ public Integer deleteById(Integer id);
     }
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（`springboot-mybatis-quickstart` 工程，`web01.user` 表）——控制台里 MyBatis 的日志和打印结果是：
 >
 > ```text
@@ -175,7 +175,7 @@ PPT 页面上配的两个例子正好覆盖这两种场景：
 
 用 `${}` 时必须警惕：**拼进去的内容一定要来自程序自己的白名单**（比如 `tableName` 只能是代码里写死的几个表名之一），绝不能直接拿用户在界面上输入的值去拼，否则注入就回来了。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 一句话总结这个面试题：**`#` 是占位符、生成预编译 SQL、用于参数值、安全又性能高（推荐）；`$` 是拼接符、直接把值拼进 SQL、只用于表名字段名这类动态标识、不安全性能低。** 平时写 SQL 一律用 `#{}`，看到 `${}` 要多想一秒"这里拼的是不是用户输入"。
 
 ## 新增用户（PPT 第 34 页）
@@ -231,7 +231,7 @@ PPT 在 `#{username}` 这排下面标了四个字：**对象属性名**。这一
     }
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**——日志输出：
 >
 > ```text
@@ -270,7 +270,7 @@ PPT 第 35 页的需求和 SQL：
     }
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**——日志输出：
 >
 > ```text
@@ -343,7 +343,7 @@ PPT 这两页的问答是本节的口头考点：
 
 四个操作对应的测试都在 `SpringbootMybatisQuickstartApplicationTests` 里（`testFindAll`、`testDeleteById`、`testInsert`、`testUpdate`、`testFindByUsernameAndPassword` 五个），本机把这一套跑下来是 **5 个测试全过**。自己动手时按 [51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)的辅助配置把日志打开（`mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl`），就能像上面那样把每条 SQL 和参数都看见。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课程 `jdbc-demo` 工程里除 `JdbcTest` 外还有一个 `FileTest`，它硬编码了课程作者本机的路径 `C:\Users\你的用户名\Desktop\filename.txt`，跑起来会报：
 >
 > ```text
@@ -391,87 +391,111 @@ PPT 这两页的问答是本节的口头考点：
   需求：在 `UserMapper` 接口里加一个方法，**按用户 id 删除** `user` 表里的一行；调用完这个方法后，程序要能拿到"这次到底删了几行"。id **必须作为方法参数传进去**，不许写死。写完后配一个测试方法删掉 id 为 5 的用户，把行数打印出来。
   （练习文件 `test_54_增删改查.java` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：SQL 还是那句 `delete from user where id = ?`，只是参数从"写死"改成"从方法参数来"；返回值直接接住再打印
-  > **二级 · 方法**：接口方法上用 `@Delete("…")` 写 SQL，参数位置写 `#{id}`；返回值声明成 `Integer` 拿影响行数；测试方法用 `@Test` + `@Autowired` 注入的接口调用
-  > **三级 · 骨架**：`@Delete("delete from user where id = ____") public ____ deleteById(____ id);`（注解名、符号从提示里抄）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // UserMapper 里新增
-  > @Delete("delete from user where id = #{id}")
-  > public Integer deleteById(Integer id);
-  >
-  > // 测试类里新增
-  > @Test
-  > public void testDeleteById(){
-  >     Integer i = userMapper.deleteById(5);
-  >     System.out.println("执行完毕, 影响的记录数: " + i);
-  > }
-  > ```
-  > 本机实测（同样删 id=4 的那次）日志与输出：
-  > ```text
-  > ==>  Preparing: delete from user where id = ?
-  > ==> Parameters: 4(Integer)
-  > 执行完毕, 影响的记录数: 1
-  > ```
-  > 要点：**返回类型用 `Integer` 才能接住"影响行数"**；写成 `void` 也不会报错，只是拿不到这个数字。如果删一个**不存在的 id**，SQL 照样执行成功，返回的行数是 `0`——这也是"用返回值判断有没有删到"的用法。
+  **一级 · 思路**：SQL 还是那句 `delete from user where id = ?`，只是参数从"写死"改成"从方法参数来"；返回值直接接住再打印
+  **二级 · 方法**：接口方法上用 `@Delete("…")` 写 SQL，参数位置写 `#{id}`；返回值声明成 `Integer` 拿影响行数；测试方法用 `@Test` + `@Autowired` 注入的接口调用
+  **三级 · 骨架**：`@Delete("delete from user where id = ____") public ____ deleteById(____ id);`（注解名、符号从提示里抄）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // UserMapper 里新增
+  @Delete("delete from user where id = #{id}")
+  public Integer deleteById(Integer id);
+  
+  // 测试类里新增
+  @Test
+  public void testDeleteById(){
+      Integer i = userMapper.deleteById(5);
+      System.out.println("执行完毕, 影响的记录数: " + i);
+  }
+  ```
+  本机实测（同样删 id=4 的那次）日志与输出：
+  ```text
+  ==>  Preparing: delete from user where id = ?
+  ==> Parameters: 4(Integer)
+  执行完毕, 影响的记录数: 1
+  ```
+  要点：**返回类型用 `Integer` 才能接住"影响行数"**；写成 `void` 也不会报错，只是拿不到这个数字。如果删一个**不存在的 id**，SQL 照样执行成功，返回的行数是 `0`——这也是"用返回值判断有没有删到"的用法。
+
+  :::
+
 
 - [ ] **2-2 把一个用户对象存进表里**
   需求：写一个方法，把外面传进来的一个用户对象**新增**到 `user` 表；SQL 里的四个值（用户名、密码、姓名、年龄）**全部来自对象的属性**，不许写常量。写完写个测试：新增一个"高圆圆"（用户名 `gaoyuanyuan`、密码 `666888`、年龄 18）的用户，跑完看一眼日志里参数是不是四个。
   （练习文件 `test_54_增删改查.java` 的题目2-2 里给了写作区；实体类 `User` 的字段是 `id / username / password / name / age`。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：SQL 用 `insert into …`，四个值的位置放占位符；占位符里的名字要和**对象的属性名**对上；主键不用给（数据库自增），对象里放 `null` 即可
-  > **二级 · 方法**：接口方法上用 `@Insert("…")`；占位符 `#{username}`、`#{password}`、`#{name}`、`#{age}`；方法参数是 `User user`
-  > **三级 · 骨架**：`@Insert("insert into user(username, password, name, age) values (____, ____, ____, ____)") public void insert(____ user);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // UserMapper 里新增
-  > @Insert("insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})")
-  > public void insert(User user);
-  >
-  > // 测试类里新增
-  > @Test
-  > public void testInsert(){
-  >     User user = new User(null,"gaoyuanyuan","666888","高圆圆", 18);
-  >     userMapper.insert(user);
-  > }
-  > ```
-  > 本机实测日志：
-  > ```text
-  > ==>  Preparing: insert into user(username, password, name, age) values (?, ?, ?, ?)
-  > ==> Parameters: gaoyuanyuan(String), 666888(String), 高圆圆(String), 18(Integer)
-  > ```
-  > 两个易错点：① `#{}` 里必须写**属性名**，写 `#{userName}` 这种对不上的名字会在运行时报错；② 表里有 5 个列而 SQL 只写了 4 个（`id` 交给 `auto_increment`），所以构造对象时 id 位置传 `null`。
+  **一级 · 思路**：SQL 用 `insert into …`，四个值的位置放占位符；占位符里的名字要和**对象的属性名**对上；主键不用给（数据库自增），对象里放 `null` 即可
+  **二级 · 方法**：接口方法上用 `@Insert("…")`；占位符 `#{username}`、`#{password}`、`#{name}`、`#{age}`；方法参数是 `User user`
+  **三级 · 骨架**：`@Insert("insert into user(username, password, name, age) values (____, ____, ____, ____)") public void insert(____ user);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // UserMapper 里新增
+  @Insert("insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})")
+  public void insert(User user);
+  
+  // 测试类里新增
+  @Test
+  public void testInsert(){
+      User user = new User(null,"gaoyuanyuan","666888","高圆圆", 18);
+      userMapper.insert(user);
+  }
+  ```
+  本机实测日志：
+  ```text
+  ==>  Preparing: insert into user(username, password, name, age) values (?, ?, ?, ?)
+  ==> Parameters: gaoyuanyuan(String), 666888(String), 高圆圆(String), 18(Integer)
+  ```
+  两个易错点：① `#{}` 里必须写**属性名**，写 `#{userName}` 这种对不上的名字会在运行时报错；② 表里有 5 个列而 SQL 只写了 4 个（`id` 交给 `auto_increment`），所以构造对象时 id 位置传 `null`。
+
+  :::
+
 
 - [ ] **2-3 按用户名和密码查一条用户记录**
   需求：写一个方法，按**用户名和密码两个条件**从 `user` 表里查出**一条**用户记录并封装成对象返回；两个条件都必须是方法参数。写完写个测试，用"用户名 `zhouyu`、密码 `666888`"查一次并打印结果（前提是 2-2 或课程里的修改测试已经把这条数据造出来）。
   （练习文件 `test_54_条件查询与Param.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：SQL 是 `select * from user where 条件一 and 条件二`；**两个参数**时 MyBatis 不知道 `#{}` 里的名字指谁，得给每个形参挂上名字
-  > **二级 · 方法**：`@Select("…")` 写 SQL；用 `@Param("username")`、`@Param("password")` 给形参命名；返回单条记录，类型写 `User`
-  > **三级 · 骨架**：`@Select("select * from user where username = ____ and password = ____") public ____ findByUsernameAndPassword(@Param("____") String username, @Param("____") String password);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // UserMapper 里新增
-  > @Select("select * from user where username = #{username} and password = #{password}")
-  > public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
-  >
-  > // 测试类里新增
-  > @Test
-  > public void testFindByUsernameAndPassword(){
-  >     User user = userMapper.findByUsernameAndPassword("zhouyu", "666888");
-  >     System.out.println(user);
-  > }
-  > ```
-  > 说明：
-  > ① **两个参数时必须加 `@Param`**——它的作用就是给形参起名字，`#{username}` 才能找到对应参数；
-  > ② 在基于 SpringBoot 官方骨架创建的项目里，方法形参名在编译时被保留，`@Param` 可以省略（`#{形参名}` 直接取），但换工程或改编译参数就可能失效，**建议照写**；
-  > ③ 返回类型写 `User`（单条）。如果哪天 SQL 可能命中多条，就得改成 `List<User>`，否则 MyBatis 会因为"查到多条却只装一个对象"抛异常。
+  **一级 · 思路**：SQL 是 `select * from user where 条件一 and 条件二`；**两个参数**时 MyBatis 不知道 `#{}` 里的名字指谁，得给每个形参挂上名字
+  **二级 · 方法**：`@Select("…")` 写 SQL；用 `@Param("username")`、`@Param("password")` 给形参命名；返回单条记录，类型写 `User`
+  **三级 · 骨架**：`@Select("select * from user where username = ____ and password = ____") public ____ findByUsernameAndPassword(@Param("____") String username, @Param("____") String password);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // UserMapper 里新增
+  @Select("select * from user where username = #{username} and password = #{password}")
+  public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
+  
+  // 测试类里新增
+  @Test
+  public void testFindByUsernameAndPassword(){
+      User user = userMapper.findByUsernameAndPassword("zhouyu", "666888");
+      System.out.println(user);
+  }
+  ```
+  说明：
+  ① **两个参数时必须加 `@Param`**——它的作用就是给形参起名字，`#{username}` 才能找到对应参数；
+  ② 在基于 SpringBoot 官方骨架创建的项目里，方法形参名在编译时被保留，`@Param` 可以省略（`#{形参名}` 直接取），但换工程或改编译参数就可能失效，**建议照写**；
+  ③ 返回类型写 `User`（单条）。如果哪天 SQL 可能命中多条，就得改成 `List<User>`，否则 MyBatis 会因为"查到多条却只装一个对象"抛异常。
+
+  :::
+
 
 ### 三、综合题
 
@@ -496,69 +520,77 @@ PPT 这两页的问答是本节的口头考点：
   | 日志输出 | 第 3、4 步——`Preparing` 里是 `?`、`Parameters` 里是值 |
   | `#{}` 与 `${}` | 第 5、6 步——从日志里肉眼确认两者的差别 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这是把 2-1～2-3 的三个方法加一条修改，放进同一个接口、同一个测试类；重点不是"写出来"，而是**从日志里读懂 `#{}` 变成了什么**
-  > **二级 · 方法**：四个注解 `@Delete` / `@Insert` / `@Update` / `@Select`；参数取出统一用 `#{}`；影响行数用 `Integer` 接；多个形参加 `@Param`
-  > **三级 · 骨架**：删除 `@Delete("delete from user where id = ____") Integer deleteById(____ id);` / 新增 `@Insert("insert into user(____,____,____,____) values(____,____,____,____)")` / 修改 `@Update("update user set ____ where id = ____")` / 查询 `@Select("select * from user where ____ and ____")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > 1~2. 接口与测试（与课程源码一致）：
-  >    ```java
-  >    // ===== UserMapper.java =====
-  >    @Delete("delete from user where id = #{id}")
-  >    public Integer deleteById(Integer id);
-  >
-  >    @Insert("insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})")
-  >    public void insert(User user);
-  >
-  >    @Update("update user set username = #{username}, password = #{password}, name = #{name}, age = #{age} where id = #{id}")
-  >    public void update(User user);
-  >
-  >    @Select("select * from user where username = #{username} and password = #{password}")
-  >    public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
-  >    ```
-  >    ```java
-  >    // ===== 测试类 =====
-  >    @Test
-  >    public void testDeleteById(){
-  >        Integer i = userMapper.deleteById(4);
-  >        System.out.println("执行完毕, 影响的记录数: " + i);
-  >    }
-  >
-  >    @Test
-  >    public void testInsert(){
-  >        User user = new User(null,"gaoyuanyuan","666888","高圆圆", 18);
-  >        userMapper.insert(user);
-  >    }
-  >
-  >    @Test
-  >    public void testUpdate(){
-  >        User user = new User(1,"zhouyu","666888","周瑜", 20);
-  >        userMapper.update(user);
-  >    }
-  >
-  >    @Test
-  >    public void testFindByUsernameAndPassword(){
-  >        User user = userMapper.findByUsernameAndPassword("zhouyu", "666888");
-  >        System.out.println(user);
-  >    }
-  >    ```
-  > 3~4. 本机实测的四条日志（前三条来自课程测试类的实际运行，本机 5 个测试全过）：
-  >    ```text
-  >    # 删除
-  >    ==>  Preparing: delete from user where id = ?
-  >    ==> Parameters: 4(Integer)
-  >    执行完毕, 影响的记录数: 1
-  >
-  >    # 新增
-  >    ==>  Preparing: insert into user(username, password, name, age) values (?, ?, ?, ?)
-  >    ==> Parameters: gaoyuanyuan(String), 666888(String), 高圆圆(String), 18(Integer)
-  >
-  >    # 修改
-  >    ==>  Preparing: update user set username = ?, password = ?, name = ?, age = ? where id = ?
-  >    ==> Parameters: zhouyu(String), 666888(String), 周瑜(String), 20(Integer), 1(Integer)
-  >    ```
-  >    **四条 SQL 的文本里出现的全是 `?`，一个参数值都没有**；参数值统一在下一行 `Parameters:` 里按类型列出。MyBatis 打印的 `Preparing` 就是我们交给数据库的**预编译 SQL 模板**。
-  > 5. 三个问答：① DML **有返回值**，是影响的记录数（`Integer` 接住，实测删一条得到 1）；② `#` 是**占位符**（替换为 `?`、预编译、安全性能高、推荐），`$` 是**字符串拼接符**（直接拼进 SQL、有注入风险，只在表名字段名动态设置时用）；③ `@Param` 用于**多参数**时给形参**起名字**，官方骨架项目里编译会保留形参名、可省略。
-  > 6. 改成 `${id}` 后再跑，你看到的日志应该是：SQL 文本里**不再有 `?`**，数字被直接拼进去（形如 `delete from user where id = 5`），`Parameters:` 那行也就空了——这正是拼接符的特点：**参数值和 SQL 语法混在了一起**，而这句 SQL 一旦真的执行成功，就说明注入的入口已经打开了。所以正式代码里参数值一律用 `#{}`；本机实测的注入对照（`' or '1'='1` 在 `?` 面前失效）见 [50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)。
+  **一级 · 思路**：这是把 2-1～2-3 的三个方法加一条修改，放进同一个接口、同一个测试类；重点不是"写出来"，而是**从日志里读懂 `#{}` 变成了什么**
+  **二级 · 方法**：四个注解 `@Delete` / `@Insert` / `@Update` / `@Select`；参数取出统一用 `#{}`；影响行数用 `Integer` 接；多个形参加 `@Param`
+  **三级 · 骨架**：删除 `@Delete("delete from user where id = ____") Integer deleteById(____ id);` / 新增 `@Insert("insert into user(____,____,____,____) values(____,____,____,____)")` / 修改 `@Update("update user set ____ where id = ____")` / 查询 `@Select("select * from user where ____ and ____")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  1~2. 接口与测试（与课程源码一致）：
+     ```java
+     // ===== UserMapper.java =====
+     @Delete("delete from user where id = #{id}")
+     public Integer deleteById(Integer id);
+  
+     @Insert("insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})")
+     public void insert(User user);
+  
+     @Update("update user set username = #{username}, password = #{password}, name = #{name}, age = #{age} where id = #{id}")
+     public void update(User user);
+  
+     @Select("select * from user where username = #{username} and password = #{password}")
+     public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
+     ```
+     ```java
+     // ===== 测试类 =====
+     @Test
+     public void testDeleteById(){
+         Integer i = userMapper.deleteById(4);
+         System.out.println("执行完毕, 影响的记录数: " + i);
+     }
+  
+     @Test
+     public void testInsert(){
+         User user = new User(null,"gaoyuanyuan","666888","高圆圆", 18);
+         userMapper.insert(user);
+     }
+  
+     @Test
+     public void testUpdate(){
+         User user = new User(1,"zhouyu","666888","周瑜", 20);
+         userMapper.update(user);
+     }
+  
+     @Test
+     public void testFindByUsernameAndPassword(){
+         User user = userMapper.findByUsernameAndPassword("zhouyu", "666888");
+         System.out.println(user);
+     }
+     ```
+  3~4. 本机实测的四条日志（前三条来自课程测试类的实际运行，本机 5 个测试全过）：
+     ```text
+     # 删除
+     ==>  Preparing: delete from user where id = ?
+     ==> Parameters: 4(Integer)
+     执行完毕, 影响的记录数: 1
+  
+     # 新增
+     ==>  Preparing: insert into user(username, password, name, age) values (?, ?, ?, ?)
+     ==> Parameters: gaoyuanyuan(String), 666888(String), 高圆圆(String), 18(Integer)
+  
+     # 修改
+     ==>  Preparing: update user set username = ?, password = ?, name = ?, age = ? where id = ?
+     ==> Parameters: zhouyu(String), 666888(String), 周瑜(String), 20(Integer), 1(Integer)
+     ```
+     **四条 SQL 的文本里出现的全是 `?`，一个参数值都没有**；参数值统一在下一行 `Parameters:` 里按类型列出。MyBatis 打印的 `Preparing` 就是我们交给数据库的**预编译 SQL 模板**。
+  5. 三个问答：① DML **有返回值**，是影响的记录数（`Integer` 接住，实测删一条得到 1）；② `#` 是**占位符**（替换为 `?`、预编译、安全性能高、推荐），`$` 是**字符串拼接符**（直接拼进 SQL、有注入风险，只在表名字段名动态设置时用）；③ `@Param` 用于**多参数**时给形参**起名字**，官方骨架项目里编译会保留形参名、可省略。
+  6. 改成 `${id}` 后再跑，你看到的日志应该是：SQL 文本里**不再有 `?`**，数字被直接拼进去（形如 `delete from user where id = 5`），`Parameters:` 那行也就空了——这正是拼接符的特点：**参数值和 SQL 语法混在了一起**，而这句 SQL 一旦真的执行成功，就说明注入的入口已经打开了。所以正式代码里参数值一律用 `#{}`；本机实测的注入对照（`' or '1'='1` 在 `?` 面前失效）见 [50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)。
+
+  :::
+

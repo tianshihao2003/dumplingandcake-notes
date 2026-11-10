@@ -82,7 +82,7 @@ PPT 第 2 页在封面之后第一页就给了定义，第 11 页又原样重复
 
 一句话记住区别：**以前是"往机器上装软件"，现在是"把装好的软件搬过来跑"**。
 
-> [!TIP]
+> [!TIP] 提示
 > Docker 本身也要先装上：PPT 第 14 页的前提里写着"确保你的虚拟机已经安装 Docker，且网络开通"。Windows / macOS 上装的就是本篇实测用的 **Docker Desktop**（一个带界面的安装包，装完 `docker` 命令就有了），Linux 服务器上装的是 Docker Engine——两种装法都能得到同一套命令。本机这台 Docker Desktop 是早就装好的，本轮**没有走安装流程**（见后面的实测一节）。
 
 ## 一条命令装 MySQL（PPT 第 10、14 页）
@@ -131,7 +131,7 @@ a6cec8ff4765ca0876d0453f3ccab205fca29b5dce74f8cfbad8d76571bf79be
 | `Status: Downloaded newer image for mysql:latest` | 下载完成 |
 | `a6cec8ff4765…` | 最后这串十六进制是 `docker run` 打印的**容器 ID**——容器已经跑起来了 |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 日志里写的是 `mysql:latest`，而命令里写的是 `mysql:8`——因为这份日志是**没带 tag 的那次运行**留下的：不写版本号时默认就是 `latest`（PPT 第 19 页那句话的实例）。看到 `latest` 不用奇怪，它就是"最新版"的意思。
 
 和 [108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)那套手工流程一比，差别是全方位的：
@@ -294,7 +294,7 @@ a6cec8ff4765ca0876d0453f3ccab205fca29b5dce74f8cfbad8d76571bf79be
 
 ## 本机实测：Docker 环境与"拉镜像"的坑
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **这一节是本机实测（Docker Desktop 29.1.3）**——本机装了 Docker Desktop（Windows 版），实验期间启动过它、跑过容器，实验完成后已经关掉并把实验产物清干净了。下面这些输出都是当时记下来的。
 
 先看环境（`docker --version` / `docker compose version` / `docker info`）：
@@ -342,7 +342,7 @@ docker.m.daocloud.io/library/mongo        7        1.18GB
 
 注意这两个名字的结构：`docker.m.daocloud.io`（仓库地址）+ `library`（命名空间，官方镜像都在 library 下）+ `alpine`（镜像名）+ `latest`（tag）——正好是上面"镜像命名规范"那条规则的**完整形态**。本机的 `alpine` 镜像也正是 [111 篇](/posts/编程学习/javaweb学习笔记/111-docker常见命令与数据卷/) 里做容器、数据卷实验时用的"零下载"底座。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 看到 `failed to authorize ... EOF` 这类报错，**先别怀疑命令写错了**——多半是网络到 Docker Hub 不通。判断方法：`docker info` 看 `Registry Mirrors` 是不是空的；验证方法：用带前缀的镜像名再拉一次（本机实测同一个 `alpine` 带前缀就能用）。课程 PPT 里的 `docker run … mysql:8`、`docker pull nginx` 都是"网络畅通时的标准写法"。
 
 ## 小结
@@ -389,85 +389,117 @@ docker.m.daocloud.io/library/mongo        7        1.18GB
   需求：一台装好 Docker、能联网的 Linux 服务器（IP `192.168.100.128`）。要求用**一条命令**起一个 MySQL 容器：后台运行、容器名叫 `mysql`、用 `mysql:8` 这个镜像、时区设成上海、root 初始密码设成 `123`，并且让**服务器外面的机器**能连上这个数据库（映射到宿主机的 3307）。
   素材：容器里的 MySQL 监听 3306；服务器上原来装的 MySQL 要先停掉。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四个参数各管一件事——**后台**、**名字**、**端口**、**环境变量**，最后跟上镜像名；顺序是"命令 → 参数 → 镜像名"
-  > **二级 · 方法**：`docker run -d --name … -p 宿主机端口:容器端口 -e KEY=VALUE 镜像名:tag`；端口映射左外右内（宿主机 3307 → 容器 3306）；两条 `-e` 分别是 `TZ=Asia/Shanghai` 与 `MYSQL_ROOT_PASSWORD=123`
-  > **三级 · 骨架**：`docker run -____ --____ mysql -p ____:____ -e TZ=____ -e MYSQL_ROOT_PASSWORD=____ mysql:____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > docker run -d \
-  >   --name mysql \
-  >   -p 3307:3306 \
-  >   -e TZ=Asia/Shanghai \
-  >   -e MYSQL_ROOT_PASSWORD=123 \
-  >   mysql:8
-  > ```
-  > 逐段对号：`-d` 后台运行；`--name mysql` 容器名（唯一）；`-p 3307:3306` 宿主机的 3307 映射到容器里的 3306；`-e TZ=Asia/Shanghai` 时区；`-e MYSQL_ROOT_PASSWORD=123` root 初始密码；`mysql:8` 镜像名与版本。
-  > 验证：`docker ps` 能看到 `mysql` 容器在运行、PORTS 列显示 `0.0.0.0:3307->3306/tcp`；在别的机器上用客户端连 `192.168.100.128:3307`，用户名 root、密码 `123`。
-  > 注意：① 顺序是 `宿主机:容器`，写反了就连不上；② 名字重复会报冲突（先 `docker ps -a` 看看有没有同名容器）；③ 不写 tag 就是 `latest`，课程统一用 `mysql:8`。
+  **一级 · 思路**：四个参数各管一件事——**后台**、**名字**、**端口**、**环境变量**，最后跟上镜像名；顺序是"命令 → 参数 → 镜像名"
+  **二级 · 方法**：`docker run -d --name … -p 宿主机端口:容器端口 -e KEY=VALUE 镜像名:tag`；端口映射左外右内（宿主机 3307 → 容器 3306）；两条 `-e` 分别是 `TZ=Asia/Shanghai` 与 `MYSQL_ROOT_PASSWORD=123`
+  **三级 · 骨架**：`docker run -____ --____ mysql -p ____:____ -e TZ=____ -e MYSQL_ROOT_PASSWORD=____ mysql:____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  docker run -d \
+    --name mysql \
+    -p 3307:3306 \
+    -e TZ=Asia/Shanghai \
+    -e MYSQL_ROOT_PASSWORD=123 \
+    mysql:8
+  ```
+  逐段对号：`-d` 后台运行；`--name mysql` 容器名（唯一）；`-p 3307:3306` 宿主机的 3307 映射到容器里的 3306；`-e TZ=Asia/Shanghai` 时区；`-e MYSQL_ROOT_PASSWORD=123` root 初始密码；`mysql:8` 镜像名与版本。
+  验证：`docker ps` 能看到 `mysql` 容器在运行、PORTS 列显示 `0.0.0.0:3307->3306/tcp`；在别的机器上用客户端连 `192.168.100.128:3307`，用户名 root、密码 `123`。
+  注意：① 顺序是 `宿主机:容器`，写反了就连不上；② 名字重复会报冲突（先 `docker ps -a` 看看有没有同名容器）；③ 不写 tag 就是 `latest`，课程统一用 `mysql:8`。
+
+  :::
+
 
 - [ ] **2-2 读懂别人写的一条命令**
   需求：同事给了你一条命令，让你说清它干了什么：
   `docker run -d --name nginx -p 80:80 -e TZ=Asia/Shanghai nginx:1.20.2`
   请回答：① 这条命令要起什么、起完之后容器叫什么名字；② `-p 80:80` 两边的 80 分别是谁的端口、为什么这次两边可以写成一样；③ `-e TZ=Asia/Shanghai` 有什么用；④ 如果本地没有 `nginx:1.20.2` 这个镜像，Docker 会做什么；⑤ 命令跑完之后，用哪条命令能确认容器在运行。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把命令拆成"命令本体 + 参数 + 镜像名"三块，参数一个一个对号；"本地没有镜像"这件事想一想第 10 页那份拉取日志
-  > **二级 · 方法**：`-d` 后台、`--name` 名字、`-p 宿主机:容器`、`-e` 环境变量、`镜像名:tag`；本地没有镜像时 Docker 会**自动去镜像仓库搜索并下载**；查看运行中容器用 `docker ps`
-  > **三级 · 骨架**：① 起的是 ____ 应用、容器名 ____；② 左边 80 是 ____ 的、右边 80 是 ____ 的，两边相同是因为 ____；③ `-e` 设置的是 ____；④ 本地没有镜像时 Docker 会去 ____ 下载；⑤ 确认命令是 `docker ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 起的是 **nginx**（Web 服务器）；容器名字叫 **nginx**（`--name nginx`）。
-  > ② `-p 80:80` 是"**宿主机 80 : 容器 80**"：左边是服务器对外开的端口，右边是容器里 nginx 真正监听的端口。两边都写 80 是因为**宿主机的 80 正好空着**（没有被别的程序占用）——如果宿主机 80 被占了（比如 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)里那个装在机器上的 nginx 还在跑），就要改成 `-p 90:80` 之类，**左边随便换、右边不能动**（右边由镜像里的程序决定）。
-  > ③ `-e TZ=Asia/Shanghai` 把容器里的时区设成上海，避免日志时间差 8 小时。
-  > ④ 本地没有这个镜像时，Docker **自动去镜像仓库（默认 Docker Hub）搜索并下载**，下载完再创建容器——就像第 10 页日志里的 `Unable to find image … locally` → `Pulling` → `Downloaded`。
-  > ⑤ `docker ps`（PORTS 列会显示 `0.0.0.0:80->80/tcp`）。
-  > 补充：这条命令里的容器名、镜像名、端口都是"起容器的人自己定的"，只有 `-p` 右边那个 80 是镜像里的 nginx 决定的。
+  **一级 · 思路**：把命令拆成"命令本体 + 参数 + 镜像名"三块，参数一个一个对号；"本地没有镜像"这件事想一想第 10 页那份拉取日志
+  **二级 · 方法**：`-d` 后台、`--name` 名字、`-p 宿主机:容器`、`-e` 环境变量、`镜像名:tag`；本地没有镜像时 Docker 会**自动去镜像仓库搜索并下载**；查看运行中容器用 `docker ps`
+  **三级 · 骨架**：① 起的是 ____ 应用、容器名 ____；② 左边 80 是 ____ 的、右边 80 是 ____ 的，两边相同是因为 ____；③ `-e` 设置的是 ____；④ 本地没有镜像时 Docker 会去 ____ 下载；⑤ 确认命令是 `docker ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 起的是 **nginx**（Web 服务器）；容器名字叫 **nginx**（`--name nginx`）。
+  ② `-p 80:80` 是"**宿主机 80 : 容器 80**"：左边是服务器对外开的端口，右边是容器里 nginx 真正监听的端口。两边都写 80 是因为**宿主机的 80 正好空着**（没有被别的程序占用）——如果宿主机 80 被占了（比如 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)里那个装在机器上的 nginx 还在跑），就要改成 `-p 90:80` 之类，**左边随便换、右边不能动**（右边由镜像里的程序决定）。
+  ③ `-e TZ=Asia/Shanghai` 把容器里的时区设成上海，避免日志时间差 8 小时。
+  ④ 本地没有这个镜像时，Docker **自动去镜像仓库（默认 Docker Hub）搜索并下载**，下载完再创建容器——就像第 10 页日志里的 `Unable to find image … locally` → `Pulling` → `Downloaded`。
+  ⑤ `docker ps`（PORTS 列会显示 `0.0.0.0:80->80/tcp`）。
+  补充：这条命令里的容器名、镜像名、端口都是"起容器的人自己定的"，只有 `-p` 右边那个 80 是镜像里的 nginx 决定的。
+
+  :::
+
 
 - [ ] **2-3 镜像名里每一段是什么意思**
   需求：说出下面三个镜像名各自的 repository 和 tag，并说明它们分别会装到哪个版本：
   ① `mysql:8`　② `mysql`　③ `docker.m.daocloud.io/library/alpine:latest`
   然后回答：本机（`Registry Mirrors: []`）里用第 ② 种写法拉镜像会报什么错、为什么，两条解决办法分别是什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先按 `[repository]:[tag]` 切两段；再想"不写 tag 会怎样"；最后把"拉不到镜像"归到**网络到镜像仓库不通**这件事上
-  > **二级 · 方法**：`[repository]:[tag]`，不写 tag 默认 `latest`；本机没配 Registry Mirror 时直连 `auth.docker.io` 会失败（`failed to authorize ... EOF`）；办法是配镜像加速或用带国内源前缀的镜像名
-  > **三级 · 骨架**：① `mysql:8` → 镜像名 ____、版本 ____；② `mysql` → 等价于 `mysql:____`；③ 完整形式是"仓库地址/____/镜像名:tag"；④ 报错原文 `failed to ____ ... EOF`，原因是没配 ____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① `mysql:8`：repository = `mysql`、tag = `8`，装 MySQL 的 8.x 版本。
-  > ② `mysql`：**没写 tag，等价于 `mysql:latest`**（最新版）——第 10 页日志里的 `mysql:latest` 就是这么来的。
-  > ③ `docker.m.daocloud.io/library/alpine:latest`：这是**完整形式**——`docker.m.daocloud.io` 是仓库地址（国内源）、`library` 是命名空间（官方镜像都在它下面）、`alpine` 是镜像名、`latest` 是 tag。
-  > 拉不到镜像的部分：报错形如
-  > ```
-  > docker: Error response from daemon: failed to resolve reference "docker.io/library/alpine:latest":
-  >   failed to authorize: ... Get "https://auth.docker.io/token?...": EOF
-  > ```
-  > 原因是**没配镜像加速**（`docker info` 里 `Registry Mirrors: []`），直连 Docker Hub 的认证服务不通。
-  > 两条办法：① **配 Registry Mirror**（Docker Desktop 设置里加镜像加速地址），之后命令原样可用；② **用带国内源前缀的镜像名**（如 `docker.m.daocloud.io/library/mysql:8`），不改配置、只改镜像名。
+  **一级 · 思路**：先按 `[repository]:[tag]` 切两段；再想"不写 tag 会怎样"；最后把"拉不到镜像"归到**网络到镜像仓库不通**这件事上
+  **二级 · 方法**：`[repository]:[tag]`，不写 tag 默认 `latest`；本机没配 Registry Mirror 时直连 `auth.docker.io` 会失败（`failed to authorize ... EOF`）；办法是配镜像加速或用带国内源前缀的镜像名
+  **三级 · 骨架**：① `mysql:8` → 镜像名 ____、版本 ____；② `mysql` → 等价于 `mysql:____`；③ 完整形式是"仓库地址/____/镜像名:tag"；④ 报错原文 `failed to ____ ... EOF`，原因是没配 ____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① `mysql:8`：repository = `mysql`、tag = `8`，装 MySQL 的 8.x 版本。
+  ② `mysql`：**没写 tag，等价于 `mysql:latest`**（最新版）——第 10 页日志里的 `mysql:latest` 就是这么来的。
+  ③ `docker.m.daocloud.io/library/alpine:latest`：这是**完整形式**——`docker.m.daocloud.io` 是仓库地址（国内源）、`library` 是命名空间（官方镜像都在它下面）、`alpine` 是镜像名、`latest` 是 tag。
+  拉不到镜像的部分：报错形如
+  ```
+  docker: Error response from daemon: failed to resolve reference "docker.io/library/alpine:latest":
+    failed to authorize: ... Get "https://auth.docker.io/token?...": EOF
+  ```
+  原因是**没配镜像加速**（`docker info` 里 `Registry Mirrors: []`），直连 Docker Hub 的认证服务不通。
+  两条办法：① **配 Registry Mirror**（Docker Desktop 设置里加镜像加速地址），之后命令原样可用；② **用带国内源前缀的镜像名**（如 `docker.m.daocloud.io/library/mysql:8`），不改配置、只改镜像名。
+
+  :::
+
 
 - [ ] **2-4 找出这条命令里的问题**
   需求：小明照着 PPT 敲了下面这条命令，结果容器没起来。请逐条指出问题并给出正确写法（一共 4 处）：
   `docker run --name mysql -d -p 3306:3307 -e MYSQL_ROOT_PASSWORD 123 mysql:8`
   （他想要的是：后台运行的 MySQL 容器、名字叫 mysql、外面的 3307 连到容器里的 3306、root 密码 123。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一处一处对"他想要的"和"他写的"——名字、后台、端口方向、环境变量的写法
-  > **二级 · 方法**：`-p` 是"**宿主机:容器**"；`-e` 是"**KEY=VALUE**"，等号不能少、中间不能有空格
-  > **三级 · 骨架**：① 端口顺序应为 `-p ____:____`；② `-e` 要写成 `-e MYSQL_ROOT_PASSWORD=____`；③ 检查容器名是否与已有容器 ____；④ 别忘了镜像名后面的 ____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 问题（对照"他想要的"）：
-  > ① **端口映射写反了**：`-p 3306:3307` 是"宿主机 3306 → 容器 3307"，而他要的是外面 3307 连到容器里的 3306，应写 `-p 3307:3306`（**左外右内**）。写反的后果：连 3307 连不上，而且宿主机 3306 上如果还跑着老 MySQL 会直接冲突。
-  > ② **`-e` 少写了等号**：`-e MYSQL_ROOT_PASSWORD 123` 会被当成"环境变量 `MYSQL_ROOT_PASSWORD`（值为空）+ 一个多余的参数"，必须写 `-e MYSQL_ROOT_PASSWORD=123`。
-  > ③ **名字可能冲突**：`--name` 必须唯一，如果之前已经有个叫 `mysql` 的容器（哪怕是停止状态的），这条会报冲突——先 `docker ps -a` 查，有就先 `docker rm` 掉或者换个名字。
-  > ④ **`mysql:8` 只写了镜像名和 tag**——这条本身没错（不写 tag 默认 latest），但课程统一写 `mysql:8` 更稳；真正容易漏的是**镜像名必须放在最后**（参数写完后跟镜像名），顺序写错 Docker 会把它当成参数。
-  > 正确写法：
-  > ```bash
-  > docker run -d --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123 mysql:8
-  > ```
-  > 起完验证：`docker ps` 看状态与 PORTS；再看一眼容器里 MySQL 的日志 `docker logs mysql`（[111 篇](/posts/编程学习/javaweb学习笔记/111-docker常见命令与数据卷/)）。
+  **一级 · 思路**：一处一处对"他想要的"和"他写的"——名字、后台、端口方向、环境变量的写法
+  **二级 · 方法**：`-p` 是"**宿主机:容器**"；`-e` 是"**KEY=VALUE**"，等号不能少、中间不能有空格
+  **三级 · 骨架**：① 端口顺序应为 `-p ____:____`；② `-e` 要写成 `-e MYSQL_ROOT_PASSWORD=____`；③ 检查容器名是否与已有容器 ____；④ 别忘了镜像名后面的 ____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  问题（对照"他想要的"）：
+  ① **端口映射写反了**：`-p 3306:3307` 是"宿主机 3306 → 容器 3307"，而他要的是外面 3307 连到容器里的 3306，应写 `-p 3307:3306`（**左外右内**）。写反的后果：连 3307 连不上，而且宿主机 3306 上如果还跑着老 MySQL 会直接冲突。
+  ② **`-e` 少写了等号**：`-e MYSQL_ROOT_PASSWORD 123` 会被当成"环境变量 `MYSQL_ROOT_PASSWORD`（值为空）+ 一个多余的参数"，必须写 `-e MYSQL_ROOT_PASSWORD=123`。
+  ③ **名字可能冲突**：`--name` 必须唯一，如果之前已经有个叫 `mysql` 的容器（哪怕是停止状态的），这条会报冲突——先 `docker ps -a` 查，有就先 `docker rm` 掉或者换个名字。
+  ④ **`mysql:8` 只写了镜像名和 tag**——这条本身没错（不写 tag 默认 latest），但课程统一写 `mysql:8` 更稳；真正容易漏的是**镜像名必须放在最后**（参数写完后跟镜像名），顺序写错 Docker 会把它当成参数。
+  正确写法：
+  ```bash
+  docker run -d --name mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=123 mysql:8
+  ```
+  起完验证：`docker ps` 看状态与 PORTS；再看一眼容器里 MySQL 的日志 `docker logs mysql`（[111 篇](/posts/编程学习/javaweb学习笔记/111-docker常见命令与数据卷/)）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -480,66 +512,74 @@ docker.m.daocloud.io/library/mongo        7        1.18GB
   5. **万一拉不到镜像**：把本机实测那个坑（报错原文 + 两条解决办法）写进去。
   6. 最后用一张小表把"手工装 vs Docker 装"的差别列出来（找包、安装、启停、卸载、换版本）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这份说明要能"从零照着做通"——所以顺序是"为什么 → 怎么做（命令+参数）→ 怎么连（端口与连接串）→ 怎么确认 → 出问题怎么办"
-  > **二级 · 方法**：命令用 `docker run -d --name mysql -p 3307:3306 -e TZ=Asia/Shanghai -e MYSQL_ROOT_PASSWORD=123 mysql:8`；验证用 `docker ps` 和 `docker logs mysql`（或在别的机器上用客户端连 `192.168.100.128:3307`）；拉不到镜像时要么配 Registry Mirror、要么把镜像名换成带前缀的形式
-  > **三级 · 骨架**：① 三条痛点：命令多 / 步骤多 / 包难找；② 命令五段（`-d`、`--name`、`-p`、`-e`×2、镜像名）；③ 连接串 `jdbc:mysql://____:____`；④ 验证 `docker ____` + `docker ____ mysql`；⑤ 报错 `failed to ____ ... EOF` → 配加速或换 ____ 名
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 【用 Docker 起一个 MySQL（开发环境）】
-  >
-  > 一、为什么不用手工装
-  >   第 19 章那套手工装法的三条代价（PPT 第 8 页）：
-  >   · 命令太太太多，记不住（卸载→解压→环境变量→注册服务→初始化→授权，十几条）
-  >   · 步骤太太太多，易出错（顺序还有讲究，漏一步就卡住）
-  >   · 安装包哪里下载，找不到（官网翻版本、选平台、几百 MB）
-  >   Docker 的做法：环境已经装在镜像里，一条命令起容器。
-  >
-  > 二、起容器（服务器上执行，先确认机器上原来的 MySQL 已停掉）
-  >   docker run -d \
-  >     --name mysql \
-  >     -p 3307:3306 \
-  >     -e TZ=Asia/Shanghai \
-  >     -e MYSQL_ROOT_PASSWORD=123 \
-  >     mysql:8
-  >   参数对号：
-  >     docker run        创建并运行一个容器
-  >     -d                后台运行（不占终端）
-  >     --name mysql      容器名，必须唯一（后面 docker stop mysql 靠它）
-  >     -p 3307:3306      宿主机 3307 → 容器 3306（左外右内）
-  >     -e TZ=…           时区（不然日志和 now() 差 8 小时）
-  >     -e MYSQL_ROOT_PASSWORD=123   MySQL 镜像要求的 root 初始密码
-  >     mysql:8           镜像名:版本（本地没有会自动去仓库拉）
-  >
-  > 三、端口与连接串
-  >   容器的 3306 是隔离的、外面看不见，所以映射到宿主机 3307：
-  >   · 宿主机上原来的 MySQL 占用 3306，映射 3307 互不打架
-  >   · 项目/客户端连它写：jdbc:mysql://192.168.100.128:3307
-  >     （宿主机 IP + 宿主机端口，不是 3306、也不是容器的 IP）
-  >
-  > 四、验证
-  >   docker ps                      → 状态 Up，PORTS 显示 0.0.0.0:3307->3306/tcp
-  >   docker logs mysql              → 看 MySQL 启动日志（[111 篇]）
-  >   别的机器用客户端连 192.168.100.128:3307（root / 123）→ 能连上就成
-  >
-  > 五、拉不到镜像怎么办（本机实测的坑）
-  >   报错：
-  >     docker: Error response from daemon: failed to resolve reference
-  >     "docker.io/library/mysql:8": failed to authorize: … EOF
-  >   原因：没配镜像加速（docker info 里 Registry Mirrors 为空），连不上 Docker Hub。
-  >   办法①：在 Docker 设置里加 Registry Mirror，命令原样可用；
-  >   办法②：把镜像名换成带国内源前缀的写法（如 docker.m.daocloud.io/library/mysql:8）。
-  >
-  > 六、手工装 vs Docker 装
-  >   ┌────────┬──────────────────────────┬───────────────────────┐
-  >   │ 环节   │ 手工装（108 篇）          │ Docker                │
-  >   ├────────┼──────────────────────────┼───────────────────────┤
-  >   │ 找包   │ 官网翻版本、选平台、上传   │ 从镜像仓库自动拉       │
-  >   │ 安装   │ 十几条命令                │ 一条 docker run        │
-  >   │ 启停   │ systemctl start/stop      │ docker start/stop      │
-  >   │ 卸载   │ rpm -e + 删目录 + 清配置   │ docker rm              │
-  >   │ 换版本 │ 整套重来                  │ 换 tag 再来一条        │
-  >   └────────┴──────────────────────────┴───────────────────────┘
-  > ```
-  > 检查点：① 三条痛点写全；② 命令里五个参数一个不少、端口方向对；③ 连接串写的是宿主机 IP + 3307；④ 验证方式给了两条；⑤ 报错原文和两条办法都在。
+  **一级 · 思路**：这份说明要能"从零照着做通"——所以顺序是"为什么 → 怎么做（命令+参数）→ 怎么连（端口与连接串）→ 怎么确认 → 出问题怎么办"
+  **二级 · 方法**：命令用 `docker run -d --name mysql -p 3307:3306 -e TZ=Asia/Shanghai -e MYSQL_ROOT_PASSWORD=123 mysql:8`；验证用 `docker ps` 和 `docker logs mysql`（或在别的机器上用客户端连 `192.168.100.128:3307`）；拉不到镜像时要么配 Registry Mirror、要么把镜像名换成带前缀的形式
+  **三级 · 骨架**：① 三条痛点：命令多 / 步骤多 / 包难找；② 命令五段（`-d`、`--name`、`-p`、`-e`×2、镜像名）；③ 连接串 `jdbc:mysql://____:____`；④ 验证 `docker ____` + `docker ____ mysql`；⑤ 报错 `failed to ____ ... EOF` → 配加速或换 ____ 名
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  【用 Docker 起一个 MySQL（开发环境）】
+  
+  一、为什么不用手工装
+    第 19 章那套手工装法的三条代价（PPT 第 8 页）：
+    · 命令太太太多，记不住（卸载→解压→环境变量→注册服务→初始化→授权，十几条）
+    · 步骤太太太多，易出错（顺序还有讲究，漏一步就卡住）
+    · 安装包哪里下载，找不到（官网翻版本、选平台、几百 MB）
+    Docker 的做法：环境已经装在镜像里，一条命令起容器。
+  
+  二、起容器（服务器上执行，先确认机器上原来的 MySQL 已停掉）
+    docker run -d \
+      --name mysql \
+      -p 3307:3306 \
+      -e TZ=Asia/Shanghai \
+      -e MYSQL_ROOT_PASSWORD=123 \
+      mysql:8
+    参数对号：
+      docker run        创建并运行一个容器
+      -d                后台运行（不占终端）
+      --name mysql      容器名，必须唯一（后面 docker stop mysql 靠它）
+      -p 3307:3306      宿主机 3307 → 容器 3306（左外右内）
+      -e TZ=…           时区（不然日志和 now() 差 8 小时）
+      -e MYSQL_ROOT_PASSWORD=123   MySQL 镜像要求的 root 初始密码
+      mysql:8           镜像名:版本（本地没有会自动去仓库拉）
+  
+  三、端口与连接串
+    容器的 3306 是隔离的、外面看不见，所以映射到宿主机 3307：
+    · 宿主机上原来的 MySQL 占用 3306，映射 3307 互不打架
+    · 项目/客户端连它写：jdbc:mysql://192.168.100.128:3307
+      （宿主机 IP + 宿主机端口，不是 3306、也不是容器的 IP）
+  
+  四、验证
+    docker ps                      → 状态 Up，PORTS 显示 0.0.0.0:3307->3306/tcp
+    docker logs mysql              → 看 MySQL 启动日志（[111 篇]）
+    别的机器用客户端连 192.168.100.128:3307（root / 123）→ 能连上就成
+  
+  五、拉不到镜像怎么办（本机实测的坑）
+    报错：
+      docker: Error response from daemon: failed to resolve reference
+      "docker.io/library/mysql:8": failed to authorize: … EOF
+    原因：没配镜像加速（docker info 里 Registry Mirrors 为空），连不上 Docker Hub。
+    办法①：在 Docker 设置里加 Registry Mirror，命令原样可用；
+    办法②：把镜像名换成带国内源前缀的写法（如 docker.m.daocloud.io/library/mysql:8）。
+  
+  六、手工装 vs Docker 装
+    ┌────────┬──────────────────────────┬───────────────────────┐
+    │ 环节   │ 手工装（108 篇）          │ Docker                │
+    ├────────┼──────────────────────────┼───────────────────────┤
+    │ 找包   │ 官网翻版本、选平台、上传   │ 从镜像仓库自动拉       │
+    │ 安装   │ 十几条命令                │ 一条 docker run        │
+    │ 启停   │ systemctl start/stop      │ docker start/stop      │
+    │ 卸载   │ rpm -e + 删目录 + 清配置   │ docker rm              │
+    │ 换版本 │ 整套重来                  │ 换 tag 再来一条        │
+    └────────┴──────────────────────────┴───────────────────────┘
+  ```
+  检查点：① 三条痛点写全；② 命令里五个参数一个不少、端口方向对；③ 连接串写的是宿主机 IP + 3307；④ 验证方式给了两条；⑤ 报错原文和两条办法都在。
+
+  :::
+

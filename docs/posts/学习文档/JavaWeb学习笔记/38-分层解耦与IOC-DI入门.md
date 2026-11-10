@@ -83,7 +83,7 @@ PPT 第 58 页把答案一次给全：
 | **DI（依赖注入）** | 容器在**运行时**把对象所需要的资源**提供**给它 | 以前 `private UserDao userDao = new UserDaoImpl();`，现在容器把 `userDao` **塞**进来 |
 | **Bean** | IOC 容器里**创建、管理**的那些对象 | `UserServiceImpl`、`UserDaoImpl` 这些对象从此叫 Bean |
 
-> [!TIP]
+> [!TIP] 提示
 > 两个词其实是同一件事的两面：**"创建权交出去"是 IOC，"送进来"是 DI**。站在对象的角度想最直观——`UserServiceImpl` 不再自己去找 `UserDao`，而是"张嘴等着"容器把 `UserDao` 送进来。
 
 ## 必答问答（PPT 第 59 页）
@@ -209,7 +209,7 @@ public class UserController {
 | 依赖怎么来 | 自己 new 出来 | **容器运行时注入**（→ 依赖注入） |
 | 换一个实现类 | 改上层源码 | 应用层代码不用动，交给容器决定（[下一篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)细讲怎么指定） |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 两个注解的**位置**别放错：
 > - `@Component` **加在实现类上**（`UserDaoImpl`、`UserServiceImpl`），**不是接口上**——容器创建的是对象，接口是不能被实例化的；
 > - `@Autowired` 加在**需要依赖的那个成员变量上**（controller 里的 `userService`、service 里的 `userDao`）——它说的是"我这里要一个对象，容器帮我找找"。
@@ -225,7 +225,7 @@ public class UserController {
 
 改造是"换内部实现"，对外表现必须一样。本机把课程最终代码（三层 + IOC/DI 改造后）跑起来：
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Spring Boot 3.2.8 / 内嵌 Tomcat / JDK 17）
 >
 > ```text
@@ -239,7 +239,7 @@ public class UserController {
 
 顺手记一个实测细节，它是下一篇的引子：**交给容器的 bean，名字默认是"类名首字母小写"**——`UserServiceImpl` 在容器里叫 `userServiceImpl`、`UserDaoImpl` 叫 `userDaoImpl`（本机实测里 `@Qualifier("userServiceImpl")`、`@Resource(name = "userServiceImpl2")` 能生效，靠的就是这条默认命名规则）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 改造后如果启动报"找不到 bean"（类似 `No qualifying bean of type 'com.itheima.dao.UserDao' available`），先回头检查两件事：① 实现类上的 `@Component` 是不是漏了（或者错加到了接口上）；② 那个类是不是放在启动类所在包**之外**——这两条下一篇都会亲手做实验。
 
 ## 小结
@@ -303,24 +303,32 @@ public class UserController {
   3. 假设现在业务规则变了，新写了一个 `UserServiceImpl2`，想换掉原来的实现。改造**前**你要改哪些文件？改造**后**（把依赖交给容器）又要改哪些？把这个对比写出来。
   （练习文件 `test_38_找出耦合点.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：盯住每个成员变量的**等号右边**——那是"具体用谁"的决定权；再想"这个决定权出现在哪一层"是不是合适
-  > **二级 · 方法**：耦合点就是两处 `new XxxImpl()`；改造后这两行只剩"接口类型 + `@Autowired`"，具体实现由容器决定
-  > **三级 · 骨架**：改造后应当长成 `@____ private UserService userService;` / `@____ private UserDao userDao;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 两行耦合点（原样）：
-  >    ```java
-  >    private UserService userService = new UserServiceImpl();
-  >    private UserDao userDao = new UserDaoImpl();
-  >    ```
-  > 2. 为什么是耦合：**成员变量的类型已经是接口了（`UserService` / `UserDao`），可等号右边把"具体用哪个实现类"也写死了**——上层替下层做了"用谁、怎么创建"的决定。上层原本只需要知道"有这么一个能干活的接口"，现在却知道了下层的**类名**和**构造方式**；下层一换（或想换），上层的源码就得跟着改。这就是"依赖关联程度高"（耦合高）。
-  > 3. 对比：
-  >    | | 要改的地方 |
-  >    | --- | --- |
-  >    | 改造前 | 要**改 `UserController` 的源码**（把 `new UserServiceImpl()` 换成 `new UserServiceImpl2()`），然后重新编译运行 |
-  >    | 改造后（依赖交给容器） | 上层代码**不用动**（只有接口类型 + `@Autowired`）；换成哪个实现由容器决定——在实现类上标 `@Primary`、或注入处用 `@Qualifier` / `@Resource` 指定（[下一篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)实测三招） |
-  > 一句话：改造前是"**上层指哪打哪**"，改造后是"**上层提需求、容器给货**"。
+  **一级 · 思路**：盯住每个成员变量的**等号右边**——那是"具体用谁"的决定权；再想"这个决定权出现在哪一层"是不是合适
+  **二级 · 方法**：耦合点就是两处 `new XxxImpl()`；改造后这两行只剩"接口类型 + `@Autowired`"，具体实现由容器决定
+  **三级 · 骨架**：改造后应当长成 `@____ private UserService userService;` / `@____ private UserDao userDao;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 两行耦合点（原样）：
+     ```java
+     private UserService userService = new UserServiceImpl();
+     private UserDao userDao = new UserDaoImpl();
+     ```
+  2. 为什么是耦合：**成员变量的类型已经是接口了（`UserService` / `UserDao`），可等号右边把"具体用哪个实现类"也写死了**——上层替下层做了"用谁、怎么创建"的决定。上层原本只需要知道"有这么一个能干活的接口"，现在却知道了下层的**类名**和**构造方式**；下层一换（或想换），上层的源码就得跟着改。这就是"依赖关联程度高"（耦合高）。
+  3. 对比：
+     | | 要改的地方 |
+     | --- | --- |
+     | 改造前 | 要**改 `UserController` 的源码**（把 `new UserServiceImpl()` 换成 `new UserServiceImpl2()`），然后重新编译运行 |
+     | 改造后（依赖交给容器） | 上层代码**不用动**（只有接口类型 + `@Autowired`）；换成哪个实现由容器决定——在实现类上标 `@Primary`、或注入处用 `@Qualifier` / `@Resource` 指定（[下一篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)实测三招） |
+  一句话：改造前是"**上层指哪打哪**"，改造后是"**上层提需求、容器给货**"。
+
+  :::
+
 
 - [ ] **2-2 给三层加上 IOC/DI 改造**
   下面是一个能跑的三层工程（拆过层，但依赖全是自己 `new` 的）：
@@ -367,53 +375,61 @@ public class UserController {
   4. 改造完在文件末尾回答：容器是在什么时候把依赖送进来的（启动时还是每次请求时）？改造后 `UserController` 里还剩几个 `new`？
   （练习文件 `test_38_分层解耦改造.java` 里按 dao / service / controller 三块给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：两件事分开做——"谁可以被容器创建"（在实现类上标一个注解）、"谁需要别人送我对象"（在成员变量上标一个注解）
-  > **二级 · 方法**：把类交给容器用 `@Component`（加在实现类的 `public class` 上一行）；要依赖用 `@Autowired`（加在成员变量上一行）；成员变量只留"接口类型 + 名字"，**等号右边整个删掉**
-  > **三级 · 骨架**：`@____ public class UserDaoImpl implements UserDao { ... }` / `@____ private UserDao userDao;` / `@____ private UserService userService;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // ============ dao 层实现类：交给容器 ============
-  > @Component   // 原来没人管，现在交给 IOC 容器创建、管理（成为 bean）
-  > public class UserDaoImpl implements UserDao {
-  >     @Override
-  >     public List<String> list() {
-  >         InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
-  >         return IoUtil.readUtf8Lines(in, new ArrayList<>());
-  >     }
-  > }
-  > ```
-  > ```java
-  > // ============ service 层实现类：交给容器 + 注入 dao ============
-  > @Component   // 交给 IOC 容器管理
-  > public class UserServiceImpl implements UserService {
-  >
-  >     @Autowired   // 原来是自己 new UserDaoImpl()，现在由容器按类型找到 UserDaoImpl 的 bean 送进来
-  >     private UserDao userDao;
-  >
-  >     @Override
-  >     public List<User> list() {
-  >         List<String> lines = userDao.list();
-  >         return lines.stream().map(line -> { /* 解析封装…… */ }).toList();
-  >     }
-  > }
-  > ```
-  > ```java
-  > // ============ controller：注入 service ============
-  > @RestController
-  > public class UserController {
-  >
-  >     @Autowired   // 原来是自己 new UserServiceImpl()，现在由容器注入
-  >     private UserService userService;
-  >
-  >     @RequestMapping("/list")
-  >     public List<User> list() {
-  >         return userService.list();
-  >     }
-  > }
-  > ```
-  > 4. 两个回答：① 依赖是**应用启动时**由容器一次性准备好的（容器先把 `UserDaoImpl`、`UserServiceImpl` 创建成 bean，再把它们分别注入需要的地方；之后每次请求只是正常调用方法，不会再重新创建对象）；② 改造后 `UserController` 里 **`new` 的数量是 0**——这正是"控制反转"的直观标志。
+  **一级 · 思路**：两件事分开做——"谁可以被容器创建"（在实现类上标一个注解）、"谁需要别人送我对象"（在成员变量上标一个注解）
+  **二级 · 方法**：把类交给容器用 `@Component`（加在实现类的 `public class` 上一行）；要依赖用 `@Autowired`（加在成员变量上一行）；成员变量只留"接口类型 + 名字"，**等号右边整个删掉**
+  **三级 · 骨架**：`@____ public class UserDaoImpl implements UserDao { ... }` / `@____ private UserDao userDao;` / `@____ private UserService userService;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // ============ dao 层实现类：交给容器 ============
+  @Component   // 原来没人管，现在交给 IOC 容器创建、管理（成为 bean）
+  public class UserDaoImpl implements UserDao {
+      @Override
+      public List<String> list() {
+          InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
+          return IoUtil.readUtf8Lines(in, new ArrayList<>());
+      }
+  }
+  ```
+  ```java
+  // ============ service 层实现类：交给容器 + 注入 dao ============
+  @Component   // 交给 IOC 容器管理
+  public class UserServiceImpl implements UserService {
+  
+      @Autowired   // 原来是自己 new UserDaoImpl()，现在由容器按类型找到 UserDaoImpl 的 bean 送进来
+      private UserDao userDao;
+  
+      @Override
+      public List<User> list() {
+          List<String> lines = userDao.list();
+          return lines.stream().map(line -> { /* 解析封装…… */ }).toList();
+      }
+  }
+  ```
+  ```java
+  // ============ controller：注入 service ============
+  @RestController
+  public class UserController {
+  
+      @Autowired   // 原来是自己 new UserServiceImpl()，现在由容器注入
+      private UserService userService;
+  
+      @RequestMapping("/list")
+      public List<User> list() {
+          return userService.list();
+      }
+  }
+  ```
+  4. 两个回答：① 依赖是**应用启动时**由容器一次性准备好的（容器先把 `UserDaoImpl`、`UserServiceImpl` 创建成 bean，再把它们分别注入需要的地方；之后每次请求只是正常调用方法，不会再重新创建对象）；② 改造后 `UserController` 里 **`new` 的数量是 0**——这正是"控制反转"的直观标志。
+
+  :::
+
 
 - [ ] **2-3 改错题：三处改造没改对**
   小李照着步骤做分层解耦改造，写了下面三处代码，结果工程要么启动报错、要么运行起来空指针。请逐条指出**错在哪、会出什么现象、怎么改**：
@@ -441,34 +457,42 @@ public class UserController {
 
   （练习文件 `test_38_改错题.java` 里给了三处代码和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：第 ① 处把注解加在了"不能创建对象的东西"上；第 ② 处少了让容器认领这个类的标记；第 ③ 处注解的位置超出了它管得着的范围
-  > **二级 · 方法**：`@Component` 要加在**实现类**上（接口上加等于没加，容器造不出 bean）；`@Autowired` 要加在**成员变量**（或构造方法、setter 方法）上，不能标在方法体内的局部变量上
-  > **三级 · 骨架**：`@Component public class UserDao____ implements UserDao {...}` / `@Autowired private ____ userService;`（放在**类里**，方法外面）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **`@Component` 加在了接口上**：接口不能被实例化，容器不会为它创建 bean。现象：上层注入 `UserDao` 类型时找不到可用的 bean，启动直接失败（报 `No qualifying bean of type 'com.itheima.dao.UserDao' available` 这一类错误）。改法：把注解挪到**实现类**上——
-  > ```java
-  > public interface UserDao { List<String> list(); }   // 接口不需要注解
-  >
-  > @Component
-  > public class UserDaoImpl implements UserDao { ... } // 注解加在实现类上
-  > ```
-  > ② **`UserDaoImpl` 漏了 `@Component`**：这个类根本没交给容器，容器里没有它的 bean。现象和 ① 一样——注入时报"找不到类型为 `UserDao` 的 bean"（如果 service 里也还是 `new UserDaoImpl()`，那就是"改造没生效"，注入不生效的问题被掩盖了）。改法：在 `UserDaoImpl` 类上加 `@Component`。
-  > ③ **`@Autowired` 写在了方法体内的局部变量上**：容器只认识"类里的成员"（成员变量、构造方法、setter 方法），管不到方法执行到那一行时的局部变量。现象：注解**完全无效**，`userService` 是 `null`，调用 `userService.list()` 时抛 `NullPointerException`。改法：把依赖声明成**成员变量**，注解也标在成员变量上——
-  > ```java
-  > @RestController
-  > public class UserController {
-  >
-  >     @Autowired                 // 成员变量上（类里、方法外）
-  >     private UserService userService;
-  >
-  >     @RequestMapping("/list")
-  >     public List<User> list() {
-  >         return userService.list();
-  >     }
-  > }
-  > ```
+  **一级 · 思路**：第 ① 处把注解加在了"不能创建对象的东西"上；第 ② 处少了让容器认领这个类的标记；第 ③ 处注解的位置超出了它管得着的范围
+  **二级 · 方法**：`@Component` 要加在**实现类**上（接口上加等于没加，容器造不出 bean）；`@Autowired` 要加在**成员变量**（或构造方法、setter 方法）上，不能标在方法体内的局部变量上
+  **三级 · 骨架**：`@Component public class UserDao____ implements UserDao {...}` / `@Autowired private ____ userService;`（放在**类里**，方法外面）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **`@Component` 加在了接口上**：接口不能被实例化，容器不会为它创建 bean。现象：上层注入 `UserDao` 类型时找不到可用的 bean，启动直接失败（报 `No qualifying bean of type 'com.itheima.dao.UserDao' available` 这一类错误）。改法：把注解挪到**实现类**上——
+  ```java
+  public interface UserDao { List<String> list(); }   // 接口不需要注解
+  
+  @Component
+  public class UserDaoImpl implements UserDao { ... } // 注解加在实现类上
+  ```
+  ② **`UserDaoImpl` 漏了 `@Component`**：这个类根本没交给容器，容器里没有它的 bean。现象和 ① 一样——注入时报"找不到类型为 `UserDao` 的 bean"（如果 service 里也还是 `new UserDaoImpl()`，那就是"改造没生效"，注入不生效的问题被掩盖了）。改法：在 `UserDaoImpl` 类上加 `@Component`。
+  ③ **`@Autowired` 写在了方法体内的局部变量上**：容器只认识"类里的成员"（成员变量、构造方法、setter 方法），管不到方法执行到那一行时的局部变量。现象：注解**完全无效**，`userService` 是 `null`，调用 `userService.list()` 时抛 `NullPointerException`。改法：把依赖声明成**成员变量**，注解也标在成员变量上——
+  ```java
+  @RestController
+  public class UserController {
+  
+      @Autowired                 // 成员变量上（类里、方法外）
+      private UserService userService;
+  
+      @RequestMapping("/list")
+      public List<User> list() {
+          return userService.list();
+      }
+  }
+  ```
+
+  :::
+
 
 ### 三、综合题
 
@@ -494,47 +518,55 @@ public class UserController {
   | 接口与实现 | 成员变量类型仍是接口，实现由容器决定 |
   | 重构验证 | 对外接口与响应与改造前一致 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：改造永远从**最底层往上**做（先 dao、再 service、最后 controller），每改一层就把依赖它的那一层跟着改掉 `new`
-  > **二级 · 方法**：实现类加 `@Component`；需要依赖的成员变量改成 `@Autowired` + 接口类型（删掉等号右边）；验证照旧用 `curl -si`（看头）和浏览器（看页面）
-  > **三级 · 骨架**：`@____ public class UserServiceImpl implements UserService { @____ private UserDao userDao; ... }` / 换实现后的报错关键词 = `required a single bean, but 2 were found`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1** 分步结果：
-  > 1. 改造前基准（本机实测值，最终代码工程也是这个数）：
-  >    ```text
-  >    HTTP/1.1 200
-  >    Content-Type: application/json
-  >    Transfer-Encoding: chunked
-  >    ```
-  > 2. `@Component public class UserDaoImpl implements UserDao { ... }`
-  > 3. ```java
-  >    @Component
-  >    public class UserServiceImpl implements UserService {
-  >        @Autowired
-  >        private UserDao userDao;
-  >        // ……
-  >    }
-  >    ```
-  > 4. ```java
-  >    @RestController
-  >    public class UserController {
-  >        @Autowired
-  >        private UserService userService;
-  >        // ……
-  >    }
-  >    ```
-  > 5. 三项验证：`/list` 仍是 `200` + `application/json`；`user.html` 表格仍是 8 行；`userService`、`userDao` 都不是 null（能被容器注入，说明它们确实是 bean）。
-  > 6. 对照表：
-  >    | | 改造前 | 改造后 |
-  >    | --- | --- | --- |
-  >    | 改动文件 | — | 3 个（`UserDaoImpl`、`UserServiceImpl`、`UserController`） |
-  >    | `new` 的处数 | 2 | **0** |
-  >    | 对外响应 | `200` + `application/json` | 完全一样 |
-  > 7. 换实现的结果：新增第二个实现类后**启动会失败**，报错大意是——
-  >    ```text
-  >    Field userService in com.itheima.controller.UserController required a single bean, but 2 were found:
-  >        - userServiceImpl: defined in URL [...]
-  >        - userServiceImpl2: defined in URL [...]
-  >    ```
-  >    这是 `@Autowired` 默认**按类型**注入遇到"同类型两个 bean"时的正常反应——本机实测的完整日志见[下一篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)，那里会给三个解决方案（`@Primary` / `@Qualifier` / `@Resource`）。
+  **一级 · 思路**：改造永远从**最底层往上**做（先 dao、再 service、最后 controller），每改一层就把依赖它的那一层跟着改掉 `new`
+  **二级 · 方法**：实现类加 `@Component`；需要依赖的成员变量改成 `@Autowired` + 接口类型（删掉等号右边）；验证照旧用 `curl -si`（看头）和浏览器（看页面）
+  **三级 · 骨架**：`@____ public class UserServiceImpl implements UserService { @____ private UserDao userDao; ... }` / 换实现后的报错关键词 = `required a single bean, but 2 were found`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1** 分步结果：
+  1. 改造前基准（本机实测值，最终代码工程也是这个数）：
+     ```text
+     HTTP/1.1 200
+     Content-Type: application/json
+     Transfer-Encoding: chunked
+     ```
+  2. `@Component public class UserDaoImpl implements UserDao { ... }`
+  3. ```java
+     @Component
+     public class UserServiceImpl implements UserService {
+         @Autowired
+         private UserDao userDao;
+         // ……
+     }
+     ```
+  4. ```java
+     @RestController
+     public class UserController {
+         @Autowired
+         private UserService userService;
+         // ……
+     }
+     ```
+  5. 三项验证：`/list` 仍是 `200` + `application/json`；`user.html` 表格仍是 8 行；`userService`、`userDao` 都不是 null（能被容器注入，说明它们确实是 bean）。
+  6. 对照表：
+     | | 改造前 | 改造后 |
+     | --- | --- | --- |
+     | 改动文件 | — | 3 个（`UserDaoImpl`、`UserServiceImpl`、`UserController`） |
+     | `new` 的处数 | 2 | **0** |
+     | 对外响应 | `200` + `application/json` | 完全一样 |
+  7. 换实现的结果：新增第二个实现类后**启动会失败**，报错大意是——
+     ```text
+     Field userService in com.itheima.controller.UserController required a single bean, but 2 were found:
+         - userServiceImpl: defined in URL [...]
+         - userServiceImpl2: defined in URL [...]
+     ```
+     这是 `@Autowired` 默认**按类型**注入遇到"同类型两个 bean"时的正常反应——本机实测的完整日志见[下一篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)，那里会给三个解决方案（`@Primary` / `@Qualifier` / `@Resource`）。
+
+  :::
+

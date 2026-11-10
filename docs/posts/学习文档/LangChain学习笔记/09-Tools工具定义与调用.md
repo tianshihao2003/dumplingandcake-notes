@@ -77,7 +77,7 @@ final = model_with_tools.invoke(messages)
 print(final.content)
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 关键点：**模型自己不执行工具**。它只是"提出调用请求（tool_calls）"，真正执行的是你的代码，执行完再以 `ToolMessage` 回传——**这个"请求→执行→回传"的循环，就是智能体的最小骨架**。
 
 ![](https://img.tsh520.cn/file/blog/article/ch05-p006-四步工具调用流程.jpg)
@@ -140,7 +140,7 @@ rprint(convert_to_openai_tool(get_weather))
 | `properties` | 定义 **JSON 对象（Object）里可以包含哪些属性（键）**，以及每个属性对应的值类型和说明 |
 | `required` | **当 `type` 为 `"object"` 时使用**，是个数组，列出对象中**必须存在**的属性名 |
 
-> [!NOTE]
+> [!NOTE] 注意
 > **为什么没加 `@tool` 的函数也能当工具用？** 看 `convert_to_openai_tool` 底层源码：
 > ```python
 > elif isinstance(function, langchain_core.tools.base.BaseTool):
@@ -257,7 +257,7 @@ convert_to_openai_tool(get_weather)
 }
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **删了注解只是"参数类型丢失"，但下面这个会直接报错**：docstring 里写了参数说明、函数签名却没有对应参数时——
 > ```python
 > def get_weather(city):
@@ -327,7 +327,7 @@ def get_weather(dt: str, city: str = "北京"):
 "required": ["dt"]        # ← 只有没默认值的 dt 留在这里
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 想少让模型填参数，**就在签名里给默认值**——模型看不到 `required`，就不会硬编一个值出来。这也是"参数可选"最省事的表达方式（比在 description 里写"这个参数可以不填"可靠得多）。
 
 ## 定义方式二：@tool 装饰器（推荐）
@@ -405,7 +405,7 @@ convert_to_openai_tool(get_weather)
 "description": "根据城市名称查询当日天气的工具"      # ← 用的是 description，不是 docstring
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 什么时候用 `description` 而不是 docstring？**当描述需要带动态信息时**（比如从配置读出来的"当前环境：生产"），docstring 是静态字符串，`description=` 可以拼变量。
 
 **情况3：`parse_docstring=True` 解析 docstring**——默认情况下 `@tool` 会把 **docstring 整体当作 description**（连 `Args:` 那几行一起，整段塞进去）：
@@ -460,7 +460,7 @@ def get_weather(city: str, units: str = "celsius", include_forecast: bool = Fals
 
 description 只剩一句话，**参数说明各就各位**——这才是我们要的形态。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`parse_docstring=True` 是把 docstring 当"格式约定"来解释的，格式不对会直接抛异常**：
 > ```text
 > ValueError: Found invalid Google-Style docstring.
@@ -472,7 +472,7 @@ description 只剩一句话，**参数说明各就各位**——这才是我们�
 
 **不要用 `config` 或 `runtime` 作为参数名**，这些是 LangChain 内部保留的。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **课程只是提醒，这里给个实测证据**（本机 langchain-core 1.2.18）——用 `config` 当参数名，**工具的 `args` / schema 生成都正常，但在调用时必崩**：
 > ```python
 > @tool
@@ -506,7 +506,7 @@ def get_weather(city: str, unit: str = "celsius") -> str:
     return f"{city} 的天气：25 ({unit})"
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 用 Pydantic 的好处：**类型安全 + 参数校验**。模型传参前，Pydantic 会先验证类型与有效性，参数写错能立刻发现，而不是让模型拿到一个莫名的报错。
 
 ### Pydantic 的三件套：BaseModel / Field / Literal
@@ -524,7 +524,7 @@ class WeatherInput(BaseModel):
 print(WeatherInput(city="北京"))      # city='北京'
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`BaseModel` 子类初始化时不接收位置参数**，字段值必须用关键字参数传：
 > ```python
 > WeatherInput("北京")
@@ -547,7 +547,7 @@ class WeatherInput(BaseModel):
 print(WeatherInput())      # city='北京' include_forecast=False
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **每个字段的 `description` 参数至关重要——它直接影响大模型理解参数含义的能力。** 这是"给模型看的文档"，别省。
 
 **③ `Literal`**：限定参数只能是**几个固定字面量之一**。
@@ -632,7 +632,7 @@ convert_to_openai_tool(get_weather)
 }
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 注意这个分工：**`args_schema` 决定了发给模型的 schema**（参数名、描述、enum、default 都来自 Pydantic 模型），**而函数签名决定实际执行时收什么**。所以两边要**对得上**（上面的 `city` / `unit` / `include_forecast` 一一对应）。
 
 ### 用 JSON Schema 字典定义 args_schema
@@ -698,7 +698,7 @@ print(convert_to_openai_tool(get_weather))
 
 输出的 `parameters` **原样就是你给的那份字典**（连字段顺序都保持），`description` 仍取自 docstring。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **这个方式有个"看着能用，一调就崩"的坑——实测（本机 langchain-core 1.2.18）**：
 > 裸 JSON Schema **不会被翻译、也不做交叉校验**，它**原样发给模型**；但工具**执行时用的是函数签名**。上面这段代码里 schema 写的是 `location` / `units`，函数签名写的却是 `city` / `unit`——模型老老实实按 schema 传 `{"location": ..., "units": ...}`，结果：
 > ```text
@@ -735,10 +735,14 @@ print(convert_to_openai_tool(get_weather))
   ③ 直接调用它一次（传字典参数）；
   ④ 再用底层转换函数打印"最终会发给模型的工具描述"，指出哪一段是参数模式、哪些参数被列进了必填。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先定义、再观察属性、最后看转换出来的结构——它是 `type` + `function` 两层
-  > **二级 · 方法**：`@tool`；`add.name` / `add.description` / `add.args`；`add.invoke({"a": 1, "b": 2})`；`convert_to_openai_tool(add)`
-  > **三级 · 骨架**：`parameters` 里的 `properties` 就是参数模式、`required` 就是必填清单
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：先定义、再观察属性、最后看转换出来的结构——它是 `type` + `function` 两层
+  **二级 · 方法**：`@tool`；`add.name` / `add.description` / `add.args`；`add.invoke({"a": 1, "b": 2})`；`convert_to_openai_tool(add)`
+  **三级 · 骨架**：`parameters` 里的 `properties` 就是参数模式、`required` 就是必填清单
+
+  :::
+
 
 - [ ] **2-2 参数的说明和类型都从哪来（三种描述写法 + 一个报错实验）**
   ① 定义一个工具：参数是城市、带默认值"北京"，docstring 按规范写参数说明；打印工具描述，指出哪个参数多了默认值字段、`required` 里还剩谁；
@@ -746,10 +750,14 @@ print(convert_to_openai_tool(get_weather))
   ③ 再复制一份，把 docstring 里写的参数改成签名里没有的名字，看会发生什么（是定义时就炸，还是调用时才炸？）；
   ④ 最后用装饰器自带的描述字段覆盖 docstring，确认最终描述用的是哪一个；再打开解析开关，让 docstring 里的参数说明真正填进各个参数里。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：类型来自注解、默认值来自函数签名、描述来自 docstring；写得对不上就直接报错
-  > **二级 · 方法**：`@tool(description="...")` 覆盖、`@tool(parse_docstring=True)` 解析；报错信息是 `ValueError: Arg xxx in docstring not found in function signature.`
-  > **三级 · 骨架**：三次对比 `convert_to_openai_tool(...)["function"]["parameters"]` 的输出；打开解析开关后，参数说明才会出现在每个参数的 `description` 里
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：类型来自注解、默认值来自函数签名、描述来自 docstring；写得对不上就直接报错
+  **二级 · 方法**：`@tool(description="...")` 覆盖、`@tool(parse_docstring=True)` 解析；报错信息是 `ValueError: Arg xxx in docstring not found in function signature.`
+  **三级 · 骨架**：三次对比 `convert_to_openai_tool(...)["function"]["parameters"]` 的输出；打开解析开关后，参数说明才会出现在每个参数的 `description` 里
+
+  :::
+
 
 - [ ] **2-3 绑定工具，走完"请求 → 执行 → 回传"**
   ① 定义一个查天气的工具，绑定到模型上；
@@ -758,10 +766,14 @@ print(convert_to_openai_tool(get_weather))
   ④ 再调一次模型，拿到最终回复。
   顺序别写反：**先追加那条要调工具的 AI 消息，再追加工具结果**。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：模型不会自己执行工具，它只"申请"；真正执行的是你的代码，执行完再回传
-  > **二级 · 方法**：`model.bind_tools([get_weather])`、`response.tool_calls`、`ToolMessage(content=..., tool_call_id=...)`
-  > **三级 · 骨架**：`call = response.tool_calls[0]` → `result = get_weather.invoke(call["args"])` → `tool_call_id=call["id"]`
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：模型不会自己执行工具，它只"申请"；真正执行的是你的代码，执行完再回传
+  **二级 · 方法**：`model.bind_tools([get_weather])`、`response.tool_calls`、`ToolMessage(content=..., tool_call_id=...)`
+  **三级 · 骨架**：`call = response.tool_calls[0]` → `result = get_weather.invoke(call["args"])` → `tool_call_id=call["id"]`
+
+  :::
+
 
 - [ ] **2-4 用 Pydantic / JSON Schema 定义参数结构**
   ① 用 Pydantic 定义一个参数模型：城市带描述与默认值、单位只能在"摄氏度 / 华氏度"两个取值里选、是否要预报给个布尔默认值；
@@ -769,202 +781,210 @@ print(convert_to_openai_tool(get_weather))
   ③ 故意传一个不在取值范围内的单位，看在本地还是服务端被拦下、报什么错；再试试用位置参数初始化这个模型；
   ④ 换一种做法：直接用一份 JSON Schema 字典当参数结构（只写参数模式那一段），打印工具描述，验证它是不是原样输出；然后故意让字典里的键和函数参数名对不上，调用一次看报什么错。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：Pydantic 负责"给模型看的 schema + 本地校验"；字典方式更灵活，但它不做交叉校验
-  > **二级 · 方法**：`class WeatherInput(BaseModel)` + `Field(default=..., description=...)` + `Literal["celsius", "fahrenheit"]`；`@tool(args_schema=...)`
-  > **三级 · 骨架**：传错取值会抛 `ValidationError`（`literal_error`）；字典键对不上签名时会 `TypeError: ... unexpected keyword argument`——**字典的键必须和函数参数名严格一致**
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> import os
-> import json
-> from typing import Literal
->
-> from dotenv import load_dotenv
-> from langchain.chat_models import init_chat_model
-> from langchain.tools import tool
-> from langchain_core.messages import HumanMessage, ToolMessage
-> from langchain_core.utils.function_calling import convert_to_openai_tool
-> from pydantic import BaseModel, Field, ValidationError
->
-> load_dotenv(override=True)
->
-> model = init_chat_model(
->     model="deepseek-v4-flash",
->     model_provider="openai",
->     base_url=os.getenv("DEEPSEEK_BASE_URL"),
->     api_key=os.getenv("DEEPSEEK_API_KEY"),
-> )
->
-> # ========== 2-1 写一个工具，看看它的"说明书" ==========
-> @tool
-> def add(a: int, b: int) -> int:
->     """把两个整数相加
->
->     Args:
->         a: 第一个整数
->         b: 第二个整数
->
->     Returns:
->         两数之和
->     """
->     return a + b
->
-> print(add.name, "|", add.description.split("\n")[0], "|", add.args)
-> print("直接调用:", add.invoke({"a": 1, "b": 2}))
->
-> spec = convert_to_openai_tool(add)
-> print(json.dumps(spec, ensure_ascii=False, indent=2))
-> # parameters.properties = 参数模式；parameters.required = 必填清单
-> print("参数模式：", list(spec["function"]["parameters"]["properties"]))
-> print("必填清单：", spec["function"]["parameters"]["required"])
->
-> # ========== 2-2 参数的说明和类型都从哪来 ==========
-> # ① 默认值参数：schema 里多出 default，required 整段消失
-> @tool
-> def get_weather_a(city: str = "北京") -> str:
->     """
->     天气查询工具
->
->     Args:
->         city: 城市名称
->     """
->     return f"{city}天气晴朗"
->
-> spec_a = convert_to_openai_tool(get_weather_a)
-> print("\n默认值参数：", spec_a["function"]["parameters"])
-> print("有 required 吗：", "required" in spec_a["function"]["parameters"])     # False
->
-> # ② 删掉类型注解 -> properties 里只剩空对象
-> @tool
-> def get_weather_b(city) -> str:
->     """
->     天气查询工具
->     """
->     return f"{city}天气晴朗"
->
-> print("没有注解：", convert_to_openai_tool(get_weather_b)["function"]["parameters"])
-> # {'properties': {'city': {}}, 'required': ['city'], 'type': 'object'}
->
-> # ③ docstring 与签名对不上 -> 定义时就报错
-> try:
->     @tool(parse_docstring=True)
->     def get_weather_c(city: str) -> str:
->         """
->         天气查询工具
->
->         Args:
->             city: 城市名称
->             city2: 签名里根本没有这个参数
->         """
->         return f"{city}天气晴朗"
-> except ValueError as e:
->     print("定义时报错：", e)      # Arg city2 in docstring not found in function signature.
->
-> # ④ 用装饰器参数覆盖 docstring
-> @tool(description="根据城市名称查询当日天气的工具")
-> def get_weather_d(city: str) -> str:
->     """
->     天气查询工具（这段说明会被覆盖掉）
->     """
->     return f"{city}天气晴朗"
->
-> print("最终 description：", convert_to_openai_tool(get_weather_d)["function"]["description"])
->
-> # ④ 打开解析开关，参数说明才会各就各位
-> @tool(parse_docstring=True)
-> def get_weather_e(city: str, units: str = "celsius", include_forecast: bool = False) -> str:
->     """
->     获取当日天气，可选择是否同时查询未来五日天气预报
->
->     Args:
->         city: 城市
->         units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
->         include_forecast: 是否包含未来五日的天气预报
->     """
->     return "x"
->
-> print("解析后的参数：", json.dumps(
->     convert_to_openai_tool(get_weather_e)["function"]["parameters"], ensure_ascii=False))
->
-> # ========== 2-3 绑定工具：请求 -> 执行 -> 回传 ==========
-> @tool
-> def get_weather(city: str) -> str:
->     """获取指定城市的天气信息
->
->     Args:
->         city: 城市名称，如"北京"
->     """
->     return f"{city}天气晴朗，25℃"
->
-> model_with_tools = model.bind_tools([get_weather])
-> messages = [HumanMessage("今天北京天气如何")]
->
-> response = model_with_tools.invoke(messages)          # 第一次调用：模型只"申请"调工具
-> print("\n模型要求调用:", response.tool_calls)
->
-> if response.tool_calls:
->     messages.append(response)                          # 1) 先追加 AI 消息
->     call = response.tool_calls[0]
->     result = get_weather.invoke(call["args"])          # 2) 执行工具
->     messages.append(ToolMessage(content=result, tool_call_id=call["id"]))   # 3) 回传结果
->     final = model_with_tools.invoke(messages)          # 4) 再调一次
->     print("最终回复:", final.content)
->
-> # ========== 2-4 Pydantic 与 JSON Schema 两种参数结构 ==========
-> class WeatherInput(BaseModel):
->     city: str = Field(default="北京", description="城市")
->     unit: Literal["celsius", "fahrenheit"] = Field(default="celsius", description="气温单位")
->     include_forecast: bool = Field(default=False, description="是否包含未来五日天气预报")
->
-> @tool(args_schema=WeatherInput)
-> def get_weather_v2(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
->     """获取当日天气，可选未来五日天气预报"""
->     temp = 22 if unit == "celsius" else 72
->     result = f"{city}当天气温: {temp} {'摄氏度' if unit == 'celsius' else '华氏度'}"
->     if include_forecast:
->         result += "\n未来五天都是晴天"
->     return result
->
-> params = convert_to_openai_tool(get_weather_v2)["function"]["parameters"]
-> print("\nPydantic 版参数：", json.dumps(params, ensure_ascii=False))
-> print("unit 的取值限制：", params["properties"]["unit"].get("enum"))    # ['celsius', 'fahrenheit']
-> print("有 required 吗：", "required" in params)                        # False（三个参数都有默认值）
-> print("实际调用：", get_weather_v2.invoke({"city": "上海", "unit": "fahrenheit"}))
->
-> try:
->     WeatherInput(city="北京", unit="kelvin")           # 本地就被拦下
-> except ValidationError as e:
->     print("传了范围外的值 ->", e.errors()[0]["type"], "|", e.errors()[0]["msg"])
->
-> try:
->     WeatherInput("北京")                              # 位置参数不被接受
-> except TypeError as e:
->     print("位置参数 ->", e)
->
-> # 直接用 JSON Schema 字典：只有 parameters 那一段
-> weather_schema = {
->     "type": "object",
->     "properties": {
->         "location": {"type": "string"},
->         "units": {"type": "string"},
->         "include_forecast": {"type": "boolean"},
->     },
->     "required": ["location", "units", "include_forecast"],
-> }
->
-> @tool(args_schema=weather_schema)
-> def get_weather_v3(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
->     """获取当日天气，可选未来五日天气预报"""
->     return f"{city} {unit} {include_forecast}"
->
-> print("字典版参数（原样输出）：", json.dumps(
->     convert_to_openai_tool(get_weather_v3)["function"]["parameters"], ensure_ascii=False))
->
-> try:
->     # 模型会老老实实按 schema 传参 -> 被 Python 签名拦下
->     get_weather_v3.invoke({"location": "杭州", "units": "celsius", "include_forecast": False})
-> except TypeError as e:
->     print("字典键和参数名不一致 ->", e)
-> # 结论：字典里的键必须和函数参数名严格一致（把签名改成 location / units 才能真的调用）
-> ```
+  **一级 · 思路**：Pydantic 负责"给模型看的 schema + 本地校验"；字典方式更灵活，但它不做交叉校验
+  **二级 · 方法**：`class WeatherInput(BaseModel)` + `Field(default=..., description=...)` + `Literal["celsius", "fahrenheit"]`；`@tool(args_schema=...)`
+  **三级 · 骨架**：传错取值会抛 `ValidationError`（`literal_error`）；字典键对不上签名时会 `TypeError: ... unexpected keyword argument`——**字典的键必须和函数参数名严格一致**
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+import os
+import json
+from typing import Literal
+
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from langchain.tools import tool
+from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.utils.function_calling import convert_to_openai_tool
+from pydantic import BaseModel, Field, ValidationError
+
+load_dotenv(override=True)
+
+model = init_chat_model(
+    model="deepseek-v4-flash",
+    model_provider="openai",
+    base_url=os.getenv("DEEPSEEK_BASE_URL"),
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+)
+
+# ========== 2-1 写一个工具，看看它的"说明书" ==========
+@tool
+def add(a: int, b: int) -> int:
+    """把两个整数相加
+
+    Args:
+        a: 第一个整数
+        b: 第二个整数
+
+    Returns:
+        两数之和
+    """
+    return a + b
+
+print(add.name, "|", add.description.split("\n")[0], "|", add.args)
+print("直接调用:", add.invoke({"a": 1, "b": 2}))
+
+spec = convert_to_openai_tool(add)
+print(json.dumps(spec, ensure_ascii=False, indent=2))
+# parameters.properties = 参数模式；parameters.required = 必填清单
+print("参数模式：", list(spec["function"]["parameters"]["properties"]))
+print("必填清单：", spec["function"]["parameters"]["required"])
+
+# ========== 2-2 参数的说明和类型都从哪来 ==========
+# ① 默认值参数：schema 里多出 default，required 整段消失
+@tool
+def get_weather_a(city: str = "北京") -> str:
+    """
+    天气查询工具
+
+    Args:
+        city: 城市名称
+    """
+    return f"{city}天气晴朗"
+
+spec_a = convert_to_openai_tool(get_weather_a)
+print("\n默认值参数：", spec_a["function"]["parameters"])
+print("有 required 吗：", "required" in spec_a["function"]["parameters"])     # False
+
+# ② 删掉类型注解 -> properties 里只剩空对象
+@tool
+def get_weather_b(city) -> str:
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+print("没有注解：", convert_to_openai_tool(get_weather_b)["function"]["parameters"])
+# {'properties': {'city': {}}, 'required': ['city'], 'type': 'object'}
+
+# ③ docstring 与签名对不上 -> 定义时就报错
+try:
+    @tool(parse_docstring=True)
+    def get_weather_c(city: str) -> str:
+        """
+        天气查询工具
+
+        Args:
+            city: 城市名称
+            city2: 签名里根本没有这个参数
+        """
+        return f"{city}天气晴朗"
+except ValueError as e:
+    print("定义时报错：", e)      # Arg city2 in docstring not found in function signature.
+
+# ④ 用装饰器参数覆盖 docstring
+@tool(description="根据城市名称查询当日天气的工具")
+def get_weather_d(city: str) -> str:
+    """
+    天气查询工具（这段说明会被覆盖掉）
+    """
+    return f"{city}天气晴朗"
+
+print("最终 description：", convert_to_openai_tool(get_weather_d)["function"]["description"])
+
+# ④ 打开解析开关，参数说明才会各就各位
+@tool(parse_docstring=True)
+def get_weather_e(city: str, units: str = "celsius", include_forecast: bool = False) -> str:
+    """
+    获取当日天气，可选择是否同时查询未来五日天气预报
+
+    Args:
+        city: 城市
+        units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
+        include_forecast: 是否包含未来五日的天气预报
+    """
+    return "x"
+
+print("解析后的参数：", json.dumps(
+    convert_to_openai_tool(get_weather_e)["function"]["parameters"], ensure_ascii=False))
+
+# ========== 2-3 绑定工具：请求 -> 执行 -> 回传 ==========
+@tool
+def get_weather(city: str) -> str:
+    """获取指定城市的天气信息
+
+    Args:
+        city: 城市名称，如"北京"
+    """
+    return f"{city}天气晴朗，25℃"
+
+model_with_tools = model.bind_tools([get_weather])
+messages = [HumanMessage("今天北京天气如何")]
+
+response = model_with_tools.invoke(messages)          # 第一次调用：模型只"申请"调工具
+print("\n模型要求调用:", response.tool_calls)
+
+if response.tool_calls:
+    messages.append(response)                          # 1) 先追加 AI 消息
+    call = response.tool_calls[0]
+    result = get_weather.invoke(call["args"])          # 2) 执行工具
+    messages.append(ToolMessage(content=result, tool_call_id=call["id"]))   # 3) 回传结果
+    final = model_with_tools.invoke(messages)          # 4) 再调一次
+    print("最终回复:", final.content)
+
+# ========== 2-4 Pydantic 与 JSON Schema 两种参数结构 ==========
+class WeatherInput(BaseModel):
+    city: str = Field(default="北京", description="城市")
+    unit: Literal["celsius", "fahrenheit"] = Field(default="celsius", description="气温单位")
+    include_forecast: bool = Field(default=False, description="是否包含未来五日天气预报")
+
+@tool(args_schema=WeatherInput)
+def get_weather_v2(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
+    """获取当日天气，可选未来五日天气预报"""
+    temp = 22 if unit == "celsius" else 72
+    result = f"{city}当天气温: {temp} {'摄氏度' if unit == 'celsius' else '华氏度'}"
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
+
+params = convert_to_openai_tool(get_weather_v2)["function"]["parameters"]
+print("\nPydantic 版参数：", json.dumps(params, ensure_ascii=False))
+print("unit 的取值限制：", params["properties"]["unit"].get("enum"))    # ['celsius', 'fahrenheit']
+print("有 required 吗：", "required" in params)                        # False（三个参数都有默认值）
+print("实际调用：", get_weather_v2.invoke({"city": "上海", "unit": "fahrenheit"}))
+
+try:
+    WeatherInput(city="北京", unit="kelvin")           # 本地就被拦下
+except ValidationError as e:
+    print("传了范围外的值 ->", e.errors()[0]["type"], "|", e.errors()[0]["msg"])
+
+try:
+    WeatherInput("北京")                              # 位置参数不被接受
+except TypeError as e:
+    print("位置参数 ->", e)
+
+# 直接用 JSON Schema 字典：只有 parameters 那一段
+weather_schema = {
+    "type": "object",
+    "properties": {
+        "location": {"type": "string"},
+        "units": {"type": "string"},
+        "include_forecast": {"type": "boolean"},
+    },
+    "required": ["location", "units", "include_forecast"],
+}
+
+@tool(args_schema=weather_schema)
+def get_weather_v3(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
+    """获取当日天气，可选未来五日天气预报"""
+    return f"{city} {unit} {include_forecast}"
+
+print("字典版参数（原样输出）：", json.dumps(
+    convert_to_openai_tool(get_weather_v3)["function"]["parameters"], ensure_ascii=False))
+
+try:
+    # 模型会老老实实按 schema 传参 -> 被 Python 签名拦下
+    get_weather_v3.invoke({"location": "杭州", "units": "celsius", "include_forecast": False})
+except TypeError as e:
+    print("字典键和参数名不一致 ->", e)
+# 结论：字典里的键必须和函数参数名严格一致（把签名改成 location / units 才能真的调用）
+```
+
+:::
+

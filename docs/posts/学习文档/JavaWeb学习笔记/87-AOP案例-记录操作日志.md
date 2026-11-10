@@ -34,7 +34,7 @@ PPT 第 28 页是章节导航页（AOP基础 / AOP进阶 / **AOP案例**），�
 | 返回值 | 环绕通知里 `proceed()` 的返回值 |
 | 方法执行时长 | 目标方法前后各取一次 `System.currentTimeMillis()`，相减 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 别和 [71 篇](/posts/编程学习/javaweb学习笔记/71-事务进阶与操作日志/)的案例弄混：那一篇记的是 `emp_log`（在 Service 里**手写**一句 `insertLog`，记录"新增员工"这一件事的成败，用来演示 `REQUIRES_NEW`）；这一篇记的是 `operate_log`（**所有**增删改接口的通用操作流水，靠 AOP 一处编织完成，业务代码一行不动）。表不同、颗粒度不同、实现手段也不同。
 
 ### 前置准备：表、实体类、Mapper（课程资料 `03. Aop案例/日志表.sql`）
@@ -95,7 +95,7 @@ public interface OperateLogMapper {
 }
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **数据库连接沿用课程工程 `application.yml` 那一套**：主机 `localhost`、端口 `3306`、库名 `tlias`、用户名 `root`，课程示例密码是 `1234`——**动手时把 `password` 换成你自己 MySQL 的密码**。（[71 篇](/posts/编程学习/javaweb学习笔记/71-事务进阶与操作日志/)的 `emp_log` 和这张 `operate_log` 都建在 `tlias` 库里。）
 
 ## 两个关键选择（PPT 第 30 页）
@@ -192,7 +192,7 @@ public Result add(@RequestBody Dept dept){
 
 界定一下两种表达式在项目里的分工（[86 篇](/posts/编程学习/javaweb学习笔记/86-aop进阶/)已总结：谁描述起来方便就用谁）：这里要记的是"散落在各个 Controller 里、命名不完全一致的增删改方法"，`execution` 描述起来又长又容易漏，给方法贴个 `@Log` 反而最省事。
 
-> [!TIP]
+> [!TIP] 提示
 > 第 30 页还顺手给了案例的 AI 提示词（课程资料 `prompt.txt`）——把需求、目标包名、表结构、实体类、Mapper 方法一起交给 AI，让它生成切面代码。原样摘一段：
 > ```text
 > 假如你是一名java开发工程师, 请帮我基于Spring AOP实现记录系统所有增、删、改功能接口的操作日志。具体信息如下：
@@ -356,7 +356,7 @@ TokenFilter.doFilter
 - `remove` 在 `doFilter` **之后**——等"放行出去的整条链路"（含切面写日志）全部跑完，才轮到它执行，所以日志那里一定取得着值；
 - 为什么非要 remove？**因为 Tomcat 用线程池处理请求，线程是复用的**：一个请求处理完，那条线程会被还回去接待下一个请求。如果不清，下一个请求万一是没登录、没走 set 的路径（或者属于另一个员工），就可能读到**上一个请求遗留的 id**——日志就记到别人头上了。`ThreadLocalMap` 里长期挂着没清的值，也是内存泄漏的隐患。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 工程里其实有**两套**登录校验代码：`TokenFilter`（Filter 方案，当前启用）和 `TokenInterceptor`（拦截器方案，`WebConfig` 里注册代码是注释状态，[84 篇](/posts/编程学习/javaweb学习笔记/84-拦截器interceptor/)讲过）。案例的 set/remove 写在 `TokenFilter` 里，因为**真正在发挥作用的是它**；如果改用拦截器方案，对应的位置就是 `preHandle` 里 set、`afterCompletion` 里 remove——"在哪里解析令牌，就在哪里 set/remove"。
 
 ### ③ 切面里取
@@ -453,7 +453,7 @@ public class OperationLogAspect {
 - **`Arrays.toString(joinPoint.getArgs())`**：`getArgs()` 返回的是 `Object[]`，直接拼字符串只会打印数组地址，用 `Arrays.toString` 才有可读内容（本机实测库里的 `[Dept(id=null, name=AOP测试部, ...)]` 就是这个方法打出来的）；
 - **异常时这条日志不会写**：`proceed()` 抛异常后，`logOperation` 里剩下的代码（构建实体、`insert`）全部跳过——这是 [86 篇](/posts/编程学习/javaweb学习笔记/86-aop进阶/)实测过的环绕通知行为（异常时 `@Around` 后半段不执行）。课程案例的目标是"记录成功的操作流水"，所以放在 `proceed()` 之后；如果业务要求"失败也要记"，就得把写日志放进 `finally` 里（课程 PPT 没展开这一点，按需处理）。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 课程工程 `OperationLogAspect.java` 里还 import 了 `org.aspectj.lang.reflect.MethodSignature` 和 `java.lang.reflect.Method` 两个类，但代码里并没有用到——它们是"想拿更多方法信息"时的进阶入口（`joinPoint.getSignature()` 的实际类型就是 `MethodSignature`，可以取参数名、方法上其它注解等）。照抄时可以删掉这两行 import，代码更干净。
 
 ## 本机实测：三条日志，操作人都是 1
@@ -466,7 +466,7 @@ public class OperationLogAspect {
 | 2 | **1** | 2026-09-29 23:28:45 | update | `[Dept(id=100, name=AOP改名部, ...)]` | `Result(code=1, msg=success, ...)` | 9 |
 | 3 | **1** | 2026-09-29 23:28:45 | delete | `[100]` | `Result(code=1, msg=success, ...)` | 9 |
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（`tlias` 库，连接信息同上：本地 `localhost:3306`、库 `tlias`、用户 `root`，密码用你自己 MySQL 的）：这张表就是上面两份代码跑出来的证据，三点都能对上：
 > 1. **`operate_emp_id` 三条全是 `1`**——这就是 **ThreadLocal 链路的硬证据**：登录时 `TokenFilter` 解析 JWT 拿到员工 id（登录员工 shinaian 的 id 是 1）→ `CurrentHolder.setCurrentId(1)` 存进 ThreadLocal → 同一个请求线程里，切面 `getCurrentUserId()` 取到 `1` → 写进日志表。切面自己并不知道"谁在操作"，全靠这条链传过来；
 > 2. **`method_name` 是 `add` / `update` / `delete`、参数和返回值都齐全**——这三样正是连接点提供的：类名（目标类全类名，`com.itheima.controller.DeptController` 这种形状）、`getSignature().getName()`、`getArgs()`、`proceed()` 的返回值；注意第 1 条记的是 **`add`**（`DeptController` 新增方法的名字）——**如果切入点写的是 `execution(... *.save(..))`，这一条根本不会出现**，正好印证了前面"注解写法更稳"的结论；
@@ -527,63 +527,71 @@ PPT 第 34 页用两个问题和答案给这一节收尾：
   （素材与写作区见 `test_87_操作日志案例.java` 的题目2-1。）
   （"操作人"这一项暂时写 `CurrentHolder.getCurrentId()` 即可，2-2 再亲手实现它。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：要"自动"就得用 AOP——写一个切面类，在**目标方法前后都留一段自己的代码**（前取开始时间、后取结束时间并接住返回值）；不要动业务代码意味着"记哪些方法"要另想办法标注（2-3 专门练这个，这里可以先用 `execution` 写法顶上）
-  > **二级 · 方法**：类上 `@Aspect` + `@Component`（`@Slf4j` 顺手拿到 log）；方法上 `@Around("execution(* com.itheima.controller.*.save(..)) || ...")`，参数用 `ProceedingJoinPoint`；方法里：记时间 → `joinPoint.proceed()` → 记时间 → `new OperateLog()` 七个字段逐个 set → `operateLogMapper.insert(olog)` → `return result`；字段来源：`getTarget().getClass().getName()`、`getSignature().getName()`、`Arrays.toString(getArgs())`、`result.toString()`、`TokenFilter` 存进 ThreadLocal 的 id
-  > **三级 · 骨架**：`@____ @____ public class OperationLogAspect { @Autowired private OperateLogMapper ____; @____("____") public ____ logOperation(____ joinPoint) throws Throwable { long startTime = ____; Object result = ____.____(); long costTime = System.currentTimeMillis() - startTime; OperateLog olog = new OperateLog(); olog.setOperateEmpId(____); olog.setOperateTime(____.____()); olog.setClassName(____); olog.setMethodName(____); olog.setMethodParams(____); olog.setReturnValue(____); olog.setCostTime(____); ____.insert(____); return ____; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima.aop;
-  >
-  > import com.itheima.mapper.OperateLogMapper;
-  > import com.itheima.pojo.OperateLog;
-  > import com.itheima.utils.CurrentHolder;
-  > import lombok.extern.slf4j.Slf4j;
-  > import org.aspectj.lang.ProceedingJoinPoint;
-  > import org.aspectj.lang.annotation.Around;
-  > import org.aspectj.lang.annotation.Aspect;
-  > import org.springframework.beans.factory.annotation.Autowired;
-  > import org.springframework.stereotype.Component;
-  >
-  > import java.time.LocalDateTime;
-  > import java.util.Arrays;
-  >
-  > @Slf4j
-  > @Aspect
-  > @Component
-  > public class OperationLogAspect {
-  >
-  >     @Autowired
-  >     private OperateLogMapper operateLogMapper;
-  >
-  >     @Around("execution(* com.itheima.controller.*.save(..)) ||" +
-  >             "execution(* com.itheima.controller.*.delete(..)) ||" +
-  >             "execution(* com.itheima.controller.*.update(..))")
-  >     public Object logOperation(ProceedingJoinPoint joinPoint) throws Throwable {
-  >         long startTime = System.currentTimeMillis();                 // 目标方法前
-  >         Object result = joinPoint.proceed();                        // 执行原始方法，接住返回值
-  >         long costTime = System.currentTimeMillis() - startTime;     // 目标方法后
-  >
-  >         OperateLog olog = new OperateLog();
-  >         olog.setOperateEmpId(CurrentHolder.getCurrentId());         // 操作人（本机实测写进库的是 1）
-  >         olog.setOperateTime(LocalDateTime.now());
-  >         olog.setClassName(joinPoint.getTarget().getClass().getName());
-  >         olog.setMethodName(joinPoint.getSignature().getName());
-  >         olog.setMethodParams(Arrays.toString(joinPoint.getArgs()));
-  >         olog.setReturnValue(result != null ? result.toString() : "void");
-  >         olog.setCostTime(costTime);
-  >
-  >         log.info("记录操作日志: {}", olog);
-  >         operateLogMapper.insert(olog);
-  >
-  >         return result;                                              // 原样还给 Controller
-  >     }
-  > }
-  > ```
-  > ① **只能用 `@Around`**：要算耗时就得"目标方法前后都插一脚"，要记返回值就得接住 `proceed()` 的结果——`@Before` 时目标方法还没跑（没有返回值、没有结束时间），`@AfterReturning` 只有后半段（没有开始时间），都不满足；只有环绕通知前后两段都在自己手里（`proceed()` 之前记开始时间、之后记结束时间并拿到返回值）。
-  > ② **必须 `return result`**：这个切面把 Controller 的方法"包"起来了，Controller 拿到的返回值其实是**切面方法的返回值**（[85 篇](/posts/编程学习/javaweb学习笔记/85-aop基础/)讲的动态代理执行流程：调用方以为在调 Controller，实际先进代理/切面）——不 return，Controller 收到 `null`，前端拿不到 `Result`，接口看起来就"坏了"。
-  > 补充：`operateLogMapper.insert(olog)` 放在 `proceed()` **之后**，所以目标方法抛异常时这条日志不会写（异常直接把后面的代码跳过了）；要"失败也记"就得挪进 `finally`。
+  **一级 · 思路**：要"自动"就得用 AOP——写一个切面类，在**目标方法前后都留一段自己的代码**（前取开始时间、后取结束时间并接住返回值）；不要动业务代码意味着"记哪些方法"要另想办法标注（2-3 专门练这个，这里可以先用 `execution` 写法顶上）
+  **二级 · 方法**：类上 `@Aspect` + `@Component`（`@Slf4j` 顺手拿到 log）；方法上 `@Around("execution(* com.itheima.controller.*.save(..)) || ...")`，参数用 `ProceedingJoinPoint`；方法里：记时间 → `joinPoint.proceed()` → 记时间 → `new OperateLog()` 七个字段逐个 set → `operateLogMapper.insert(olog)` → `return result`；字段来源：`getTarget().getClass().getName()`、`getSignature().getName()`、`Arrays.toString(getArgs())`、`result.toString()`、`TokenFilter` 存进 ThreadLocal 的 id
+  **三级 · 骨架**：`@____ @____ public class OperationLogAspect { @Autowired private OperateLogMapper ____; @____("____") public ____ logOperation(____ joinPoint) throws Throwable { long startTime = ____; Object result = ____.____(); long costTime = System.currentTimeMillis() - startTime; OperateLog olog = new OperateLog(); olog.setOperateEmpId(____); olog.setOperateTime(____.____()); olog.setClassName(____); olog.setMethodName(____); olog.setMethodParams(____); olog.setReturnValue(____); olog.setCostTime(____); ____.insert(____); return ____; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima.aop;
+  
+  import com.itheima.mapper.OperateLogMapper;
+  import com.itheima.pojo.OperateLog;
+  import com.itheima.utils.CurrentHolder;
+  import lombok.extern.slf4j.Slf4j;
+  import org.aspectj.lang.ProceedingJoinPoint;
+  import org.aspectj.lang.annotation.Around;
+  import org.aspectj.lang.annotation.Aspect;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.stereotype.Component;
+  
+  import java.time.LocalDateTime;
+  import java.util.Arrays;
+  
+  @Slf4j
+  @Aspect
+  @Component
+  public class OperationLogAspect {
+  
+      @Autowired
+      private OperateLogMapper operateLogMapper;
+  
+      @Around("execution(* com.itheima.controller.*.save(..)) ||" +
+              "execution(* com.itheima.controller.*.delete(..)) ||" +
+              "execution(* com.itheima.controller.*.update(..))")
+      public Object logOperation(ProceedingJoinPoint joinPoint) throws Throwable {
+          long startTime = System.currentTimeMillis();                 // 目标方法前
+          Object result = joinPoint.proceed();                        // 执行原始方法，接住返回值
+          long costTime = System.currentTimeMillis() - startTime;     // 目标方法后
+  
+          OperateLog olog = new OperateLog();
+          olog.setOperateEmpId(CurrentHolder.getCurrentId());         // 操作人（本机实测写进库的是 1）
+          olog.setOperateTime(LocalDateTime.now());
+          olog.setClassName(joinPoint.getTarget().getClass().getName());
+          olog.setMethodName(joinPoint.getSignature().getName());
+          olog.setMethodParams(Arrays.toString(joinPoint.getArgs()));
+          olog.setReturnValue(result != null ? result.toString() : "void");
+          olog.setCostTime(costTime);
+  
+          log.info("记录操作日志: {}", olog);
+          operateLogMapper.insert(olog);
+  
+          return result;                                              // 原样还给 Controller
+      }
+  }
+  ```
+  ① **只能用 `@Around`**：要算耗时就得"目标方法前后都插一脚"，要记返回值就得接住 `proceed()` 的结果——`@Before` 时目标方法还没跑（没有返回值、没有结束时间），`@AfterReturning` 只有后半段（没有开始时间），都不满足；只有环绕通知前后两段都在自己手里（`proceed()` 之前记开始时间、之后记结束时间并拿到返回值）。
+  ② **必须 `return result`**：这个切面把 Controller 的方法"包"起来了，Controller 拿到的返回值其实是**切面方法的返回值**（[85 篇](/posts/编程学习/javaweb学习笔记/85-aop基础/)讲的动态代理执行流程：调用方以为在调 Controller，实际先进代理/切面）——不 return，Controller 收到 `null`，前端拿不到 `Result`，接口看起来就"坏了"。
+  补充：`operateLogMapper.insert(olog)` 放在 `proceed()` **之后**，所以目标方法抛异常时这条日志不会写（异常直接把后面的代码跳过了）；要"失败也记"就得挪进 `finally`。
+
+  :::
+
 
 - [ ] **2-2 把"当前登录员工是谁"从令牌校验那道关传到切面里**
   需求：令牌校验那道关（`TokenFilter`）早就把员工 id 从令牌里解析出来了，可是它解析完就丢；切面里又拿不到请求对象，没法自己再解析一遍。请**不改任何业务方法的签名**，把这个 id 从过滤器传到切面里：
@@ -592,46 +600,54 @@ PPT 第 34 页用两个问题和答案给这一节收尾：
   ③ 说明为什么"清"这一步非做不可。
   （素材与写作区见 `test_87_ThreadLocal工具类.java`。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：用"只属于当前线程的储物柜"——过滤器、Controller、Service、切面都跑在**同一条请求线程**上，找个线程级别的共享变量就能绕开"改方法签名/传请求对象"；工具类就是把存取这套动作包成有业务含义的静态方法
-  > **二级 · 方法**：`ThreadLocal<Integer>` 的 `set(T)` / `get()` / `remove()`；工具类三个静态方法 `setCurrentId(Integer)` / `getCurrentId()` / `remove()`；`TokenFilter` 里在 `JwtUtils.parseToken(token)` 拿到 `claims.get("id")` 之后 `set`，在 `filterChain.doFilter(request, response)` **返回之后** `remove`
-  > **三级 · 骨架**：`public class CurrentHolder { private static final ____<Integer> CURRENT_LOCAL = new ____<>(); public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.____(employeeId); } public static Integer getCurrentId() { return CURRENT_LOCAL.____(); } public static void remove() { CURRENT_LOCAL.____(); } }`；Filter 里：`Integer empId = Integer.valueOf(claims.get("id").toString()); ____.____(empId); ... filterChain.doFilter(request, response); ____.____();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 工具类（与课程资料 `04. ThreadLocal/CurrentHolder.java` 一致）：
-  > ```java
-  > package com.itheima.utils;
-  >
-  > public class CurrentHolder {
-  >
-  >     private static final ThreadLocal<Integer> CURRENT_LOCAL = new ThreadLocal<>();
-  >
-  >     public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.set(employeeId); }
-  >     public static Integer getCurrentId() { return CURRENT_LOCAL.get(); }
-  >     public static void remove() { CURRENT_LOCAL.remove(); }
-  > }
-  > ```
-  > ② `TokenFilter` 的两处改动：
-  > ```java
-  >         try {
-  >             Claims claims = JwtUtils.parseToken(token);
-  >             Integer empId = Integer.valueOf(claims.get("id").toString());
-  >             CurrentHolder.setCurrentId(empId);                     // 请求进入时存
-  >             log.info("当前登录员工ID: {}, 将其存入ThreadLocal", empId);
-  >         } catch (Exception e) {
-  >             log.info("令牌非法, 响应401");
-  >             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-  >             return;
-  >         }
-  >
-  >         //6. 校验通过, 放行
-  >         filterChain.doFilter(request, response);
-  >
-  >         //7. 删除ThreadLocal中的数据
-  >         CurrentHolder.remove();                                    // 请求处理完清掉
-  > ```
-  > 位置的道理：`set` 必须在放行**之前**（后面的链路上有人要取），`remove` 必须在放行**之后**（切面写日志发生在放行内部，清早了就取不到了）；`remove` 写在 `doFilter` 之后，等于"这次请求从头到尾处理完"才清。
-  > ③ **为什么必须清**：Tomcat 用**线程池**，一条线程处理完一个请求会被还回去接待下一个请求。如果不清，下一个请求（比如没登录、根本没走 set 的那条路径）复用这条线程时，`get()` 会读到**上一个请求残留的 id**——日志就记到别的员工头上了；此外 `ThreadLocalMap` 里长期挂着不再使用的值，也是内存泄漏的隐患。
+  **一级 · 思路**：用"只属于当前线程的储物柜"——过滤器、Controller、Service、切面都跑在**同一条请求线程**上，找个线程级别的共享变量就能绕开"改方法签名/传请求对象"；工具类就是把存取这套动作包成有业务含义的静态方法
+  **二级 · 方法**：`ThreadLocal<Integer>` 的 `set(T)` / `get()` / `remove()`；工具类三个静态方法 `setCurrentId(Integer)` / `getCurrentId()` / `remove()`；`TokenFilter` 里在 `JwtUtils.parseToken(token)` 拿到 `claims.get("id")` 之后 `set`，在 `filterChain.doFilter(request, response)` **返回之后** `remove`
+  **三级 · 骨架**：`public class CurrentHolder { private static final ____<Integer> CURRENT_LOCAL = new ____<>(); public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.____(employeeId); } public static Integer getCurrentId() { return CURRENT_LOCAL.____(); } public static void remove() { CURRENT_LOCAL.____(); } }`；Filter 里：`Integer empId = Integer.valueOf(claims.get("id").toString()); ____.____(empId); ... filterChain.doFilter(request, response); ____.____();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 工具类（与课程资料 `04. ThreadLocal/CurrentHolder.java` 一致）：
+  ```java
+  package com.itheima.utils;
+  
+  public class CurrentHolder {
+  
+      private static final ThreadLocal<Integer> CURRENT_LOCAL = new ThreadLocal<>();
+  
+      public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.set(employeeId); }
+      public static Integer getCurrentId() { return CURRENT_LOCAL.get(); }
+      public static void remove() { CURRENT_LOCAL.remove(); }
+  }
+  ```
+  ② `TokenFilter` 的两处改动：
+  ```java
+          try {
+              Claims claims = JwtUtils.parseToken(token);
+              Integer empId = Integer.valueOf(claims.get("id").toString());
+              CurrentHolder.setCurrentId(empId);                     // 请求进入时存
+              log.info("当前登录员工ID: {}, 将其存入ThreadLocal", empId);
+          } catch (Exception e) {
+              log.info("令牌非法, 响应401");
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+              return;
+          }
+  
+          //6. 校验通过, 放行
+          filterChain.doFilter(request, response);
+  
+          //7. 删除ThreadLocal中的数据
+          CurrentHolder.remove();                                    // 请求处理完清掉
+  ```
+  位置的道理：`set` 必须在放行**之前**（后面的链路上有人要取），`remove` 必须在放行**之后**（切面写日志发生在放行内部，清早了就取不到了）；`remove` 写在 `doFilter` 之后，等于"这次请求从头到尾处理完"才清。
+  ③ **为什么必须清**：Tomcat 用**线程池**，一条线程处理完一个请求会被还回去接待下一个请求。如果不清，下一个请求（比如没登录、根本没走 set 的那条路径）复用这条线程时，`get()` 会读到**上一个请求残留的 id**——日志就记到别的员工头上了；此外 `ThreadLocalMap` 里长期挂着不再使用的值，也是内存泄漏的隐患。
+
+  :::
+
 
 - [ ] **2-3 让"给哪些接口记日志"由方法上的标记决定**
   需求：现在的做法是拿方法名去猜（`save` / `delete` / `update`），可项目里总有不按这三个名字命名的方法——课程工程 `DeptController` 新增部门的方法就叫 `add`。请改成"**给方法贴一个标记，贴了才记日志**"：
@@ -640,57 +656,65 @@ PPT 第 34 页用两个问题和答案给这一节收尾：
   ③ 回答：这种写法比按方法名匹配强在哪？（至少两点）
   ④ 把 `DeptController` 的增删改三个方法改成这个写法的样子（只写方法与注解）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**："标记"就是自定义注解——自己定义一个什么都不写的方法级注解，贴在方法头上；切面的切入点表达式改成"**匹配贴了某注解的方法**"
-  > **二级 · 方法**：注解定义处 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`，`public @interface Log {}`；切点表达式用 `@annotation(注解全类名)`，如 `@Around("@annotation(com.itheima.anno.Log)")`
-  > **三级 · 骨架**：`@____(ElementType.METHOD) @____(RetentionPolicy.____) public @interface Log {}`；`@____("@annotation(com.itheima.anno.____)")`；方法：`@____ @DeleteMapping public Result delete(Integer id){ ... }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 自定义注解（`com.itheima.anno.Log`）：
-  > ```java
-  > package com.itheima.anno;
-  >
-  > import java.lang.annotation.ElementType;
-  > import java.lang.annotation.Retention;
-  > import java.lang.annotation.RetentionPolicy;
-  > import java.lang.annotation.Target;
-  >
-  > @Target(ElementType.METHOD)          // 只能加在方法上
-  > @Retention(RetentionPolicy.RUNTIME)  // 运行期保留：AOP 在运行时读它
-  > public @interface Log {
-  > }
-  > ```
-  > ② 切入点表达式：
-  > ```java
-  > @Around("@annotation(com.itheima.anno.Log)")
-  > ```
-  > ③ 比按方法名匹配强的两点：
-  > - **不会漏**——方法名不再受 `save/delete/update` 约束，哪怕叫 `add`、`modify`、`removeAllDisabled`，只要贴了 `@Log` 就记（课程工程 `DeptController.add` 正是被 `execution(...*.save(..))` 漏掉的那个）；
-  > - **控制范围直观、改动集中**——想让某个方法记日志就在它头上加一个 `@Log`，不想记就去掉；不用去动切点表达式（改表达式是在动"全局匹配规则"，改注解是在动"这一个方法"，风险小得多）。
-  > ④ `DeptController` 里三个方法的样子（与课程工程一致）：
-  > ```java
-  > @Log
-  > @DeleteMapping
-  > public Result delete(Integer id){
-  >     deptService.deleteById(id);
-  >     return Result.success();
-  > }
-  >
-  > @Log
-  > @PostMapping
-  > public Result add(@RequestBody Dept dept){
-  >     deptService.add(dept);
-  >     return Result.success();
-  > }
-  >
-  > @Log
-  > @PutMapping
-  > public Result update(@RequestBody Dept dept){
-  >     deptService.update(dept);
-  >     return Result.success();
-  > }
-  > ```
-  > （查询方法 `list`、`getInfo` 不贴 `@Log`——它们不写日志。）
+  **一级 · 思路**："标记"就是自定义注解——自己定义一个什么都不写的方法级注解，贴在方法头上；切面的切入点表达式改成"**匹配贴了某注解的方法**"
+  **二级 · 方法**：注解定义处 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`，`public @interface Log {}`；切点表达式用 `@annotation(注解全类名)`，如 `@Around("@annotation(com.itheima.anno.Log)")`
+  **三级 · 骨架**：`@____(ElementType.METHOD) @____(RetentionPolicy.____) public @interface Log {}`；`@____("@annotation(com.itheima.anno.____)")`；方法：`@____ @DeleteMapping public Result delete(Integer id){ ... }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 自定义注解（`com.itheima.anno.Log`）：
+  ```java
+  package com.itheima.anno;
+  
+  import java.lang.annotation.ElementType;
+  import java.lang.annotation.Retention;
+  import java.lang.annotation.RetentionPolicy;
+  import java.lang.annotation.Target;
+  
+  @Target(ElementType.METHOD)          // 只能加在方法上
+  @Retention(RetentionPolicy.RUNTIME)  // 运行期保留：AOP 在运行时读它
+  public @interface Log {
+  }
+  ```
+  ② 切入点表达式：
+  ```java
+  @Around("@annotation(com.itheima.anno.Log)")
+  ```
+  ③ 比按方法名匹配强的两点：
+  - **不会漏**——方法名不再受 `save/delete/update` 约束，哪怕叫 `add`、`modify`、`removeAllDisabled`，只要贴了 `@Log` 就记（课程工程 `DeptController.add` 正是被 `execution(...*.save(..))` 漏掉的那个）；
+  - **控制范围直观、改动集中**——想让某个方法记日志就在它头上加一个 `@Log`，不想记就去掉；不用去动切点表达式（改表达式是在动"全局匹配规则"，改注解是在动"这一个方法"，风险小得多）。
+  ④ `DeptController` 里三个方法的样子（与课程工程一致）：
+  ```java
+  @Log
+  @DeleteMapping
+  public Result delete(Integer id){
+      deptService.deleteById(id);
+      return Result.success();
+  }
+  
+  @Log
+  @PostMapping
+  public Result add(@RequestBody Dept dept){
+      deptService.add(dept);
+      return Result.success();
+  }
+  
+  @Log
+  @PutMapping
+  public Result update(@RequestBody Dept dept){
+      deptService.update(dept);
+      return Result.success();
+  }
+  ```
+  （查询方法 `list`、`getInfo` 不贴 `@Log`——它们不写日志。）
+
+  :::
+
 
 - [ ] **2-4 排查：日志表里 `operate_emp_id` 全是 NULL**
   需求：切面代码（七个字段逐个 set、`insert` 落库）都没问题，日志表也**确实写进去了**，但 `operate_emp_id` 这一列**全是 NULL**——"谁操作的"没记上。请按"数据从哪来"的顺序倒着排查，回答：
@@ -698,21 +722,29 @@ PPT 第 34 页用两个问题和答案给这一节收尾：
   ② 依次列出**至少三个**可能导致它是 NULL 的原因，以及每个原因的验证办法；
   ③ 其中有一个原因和"代码写得对不对"无关，而是和**时机**有关——是哪个？怎么改？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：从"值的来源"倒推——切面 `get()` 的那份值是谁 `set` 的？set 的代码进没进？set 之前那一步（解析令牌拿 id）成没成功？存进去之后有没有**太早被清掉**？把这条链从头到尾走一遍，每一环都能出问题
-  > **二级 · 方法**：链路是"`TokenFilter` 里 `CurrentHolder.setCurrentId(empId)`（值来自 `claims.get("id")`）→ ThreadLocal → 切面 `getCurrentId()`"；三个常见原因：① 切面里"操作人"那一项压根没从 ThreadLocal 取（写死或漏 set）；② `TokenFilter` 里解析出 id 后**没有 set**（或 set 写在了 `return`/异常分支后面，没执行到）；③ `remove()` **写早**了——比如写在 `filterChain.doFilter` **之前**，值在进 Controller 之前就被清掉；验证办法：在 `set`、`get` 两处各加一行 `log.info` 看日志顺序，或逐个注释/打开对应代码做对照
-  > **三级 · 骨架**：① 链路：`____.____(empId)` → ThreadLocal → `____.____()`；② 原因清单：`切面没取 / Filter 没存 / remove 太早 / 令牌里没有 id（用户没登录或 claims 键名不对）`；③ 时机问题：`____()` 的位置，必须放在 `filterChain.doFilter(...)` 的 ____ 面
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 调用链：`TokenFilter` 解析令牌 `Integer empId = Integer.valueOf(claims.get("id").toString());` → `CurrentHolder.setCurrentId(empId)` **存**进 ThreadLocal → 切面里 `CurrentHolder.getCurrentId()` **取** → `olog.setOperateEmpId(...)` → `insert` 落库。靠的是"整条请求链路跑在同一条线程上"这个前提。
-  > ② 可能的原因与验证：
-  > | 原因 | 怎么验证 |
-  > | --- | --- |
-  > | 切面里没从 ThreadLocal 取（漏了这一行 / 取了别的值） | 看切面代码里 `olog.setOperateEmpId(...)` 的参数是不是 `CurrentHolder.getCurrentId()` |
-  > | `TokenFilter` 里解析出 id 后没有 `set`（或 `set` 没被执行到） | 在 `set` 那行后面加一句 `log.info("存入: {}", empId)`，看服务端日志有没有打、打的值对不对 |
-  > | `remove()` 放得太早——写在 `filterChain.doFilter(...)` **之前** | 看 `remove()` 的位置：它在放行前执行的话，值在进 Controller / 切面之前就被清掉了，`get()` 只能拿到 `null` |
-  > | 令牌里本来就没有 `id`（用户没登录、id 键名写错、令牌非法走了 401 分支） | 看 `claims.get("id")` 拿到的值；对照登录时 `claims.put("id", e.getId())` 的键名 |
-  > ③ 与"时机"有关的是 **`remove()` 的位置**：它必须写在 `filterChain.doFilter(request, response)` **之后**（放行的整条链路——含 AOP 写日志——全部跑完才清）；写在 `doFilter` 之前，切面取到的就是 `null`。同理，`set` 必须在 `doFilter` **之前**，顺序不能颠倒。
+  **一级 · 思路**：从"值的来源"倒推——切面 `get()` 的那份值是谁 `set` 的？set 的代码进没进？set 之前那一步（解析令牌拿 id）成没成功？存进去之后有没有**太早被清掉**？把这条链从头到尾走一遍，每一环都能出问题
+  **二级 · 方法**：链路是"`TokenFilter` 里 `CurrentHolder.setCurrentId(empId)`（值来自 `claims.get("id")`）→ ThreadLocal → 切面 `getCurrentId()`"；三个常见原因：① 切面里"操作人"那一项压根没从 ThreadLocal 取（写死或漏 set）；② `TokenFilter` 里解析出 id 后**没有 set**（或 set 写在了 `return`/异常分支后面，没执行到）；③ `remove()` **写早**了——比如写在 `filterChain.doFilter` **之前**，值在进 Controller 之前就被清掉；验证办法：在 `set`、`get` 两处各加一行 `log.info` 看日志顺序，或逐个注释/打开对应代码做对照
+  **三级 · 骨架**：① 链路：`____.____(empId)` → ThreadLocal → `____.____()`；② 原因清单：`切面没取 / Filter 没存 / remove 太早 / 令牌里没有 id（用户没登录或 claims 键名不对）`；③ 时机问题：`____()` 的位置，必须放在 `filterChain.doFilter(...)` 的 ____ 面
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 调用链：`TokenFilter` 解析令牌 `Integer empId = Integer.valueOf(claims.get("id").toString());` → `CurrentHolder.setCurrentId(empId)` **存**进 ThreadLocal → 切面里 `CurrentHolder.getCurrentId()` **取** → `olog.setOperateEmpId(...)` → `insert` 落库。靠的是"整条请求链路跑在同一条线程上"这个前提。
+  ② 可能的原因与验证：
+  | 原因 | 怎么验证 |
+  | --- | --- |
+  | 切面里没从 ThreadLocal 取（漏了这一行 / 取了别的值） | 看切面代码里 `olog.setOperateEmpId(...)` 的参数是不是 `CurrentHolder.getCurrentId()` |
+  | `TokenFilter` 里解析出 id 后没有 `set`（或 `set` 没被执行到） | 在 `set` 那行后面加一句 `log.info("存入: {}", empId)`，看服务端日志有没有打、打的值对不对 |
+  | `remove()` 放得太早——写在 `filterChain.doFilter(...)` **之前** | 看 `remove()` 的位置：它在放行前执行的话，值在进 Controller / 切面之前就被清掉了，`get()` 只能拿到 `null` |
+  | 令牌里本来就没有 `id`（用户没登录、id 键名写错、令牌非法走了 401 分支） | 看 `claims.get("id")` 拿到的值；对照登录时 `claims.put("id", e.getId())` 的键名 |
+  ③ 与"时机"有关的是 **`remove()` 的位置**：它必须写在 `filterChain.doFilter(request, response)` **之后**（放行的整条链路——含 AOP 写日志——全部跑完才清）；写在 `doFilter` 之前，切面取到的就是 `null`。同理，`set` 必须在 `doFilter` **之前**，顺序不能颠倒。
+
+  :::
+
 
 ### 三、综合题
 
@@ -742,58 +774,66 @@ PPT 第 34 页用两个问题和答案给这一节收尾：
   | `OperateLogMapper.insert` | 第 1、5、8 步——七项日志落进 `operate_log` 表 |
   | 线程池与 remove 的必要性 | 第 4、9 步——不复用线程时不清会串数据 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：第 2～5 步就是本篇的四块代码逐块敲出来（注解、工具类、Filter 两行改动、切面）；第 7 步别忘了**先登录拿令牌、再带着令牌请求**（不带令牌会吃 401，`TokenFilter` 连解析都进不去）
-  > **二级 · 方法**：注解用 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`；工具类里 `ThreadLocal<Integer>` 的 `set/get/remove`；Filter 里在 `claims.get("id")` 之后 `set`、在 `filterChain.doFilter(...)` 之后 `remove`；切面里 `@Around("@annotation(com.itheima.anno.Log)")`；请求用 Apifox/Postman 或 `curl`（请求头带 `token`）
-  > **三级 · 骨架**：`@____ @____ public class CurrentHolder { private static final ____<Integer> CURRENT_LOCAL = new ____<>(); ... }`；切面：`@____("@annotation(com.itheima.anno.____)") public Object logOperation(ProceedingJoinPoint ____) throws Throwable { ... }`；请求：登录 `POST /login` 拿 `token` → 新增/修改/删除部门 `POST /depts`、`PUT /depts`、`DELETE /depts?id=____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 建表（课程资料 `03. Aop案例/日志表.sql`）：
-  >    ```sql
-  >    create table operate_log(
-  >        id int unsigned primary key auto_increment comment 'ID',
-  >        operate_emp_id int unsigned comment '操作人ID',
-  >        operate_time datetime comment '操作时间',
-  >        class_name varchar(100) comment '操作的类名',
-  >        method_name varchar(100) comment '操作的方法名',
-  >        method_params varchar(2000) comment '方法参数',
-  >        return_value varchar(2000) comment '返回值',
-  >        cost_time bigint unsigned comment '方法执行耗时, 单位:ms'
-  >    ) comment '操作日志表';
-  >    ```
-  > 2. 注解：
-  >    ```java
-  >    @Target(ElementType.METHOD)          // 只贴方法
-  >    @Retention(RetentionPolicy.RUNTIME)  // 运行期保留，AOP 才读得到（写 SOURCE/CLASS 都会被丢掉）
-  >    public @interface Log { }
-  >    ```
-  > 3. 工具类：
-  >    ```java
-  >    public class CurrentHolder {
-  >        private static final ThreadLocal<Integer> CURRENT_LOCAL = new ThreadLocal<>();
-  >        public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.set(employeeId); }
-  >        public static Integer getCurrentId() { return CURRENT_LOCAL.get(); }
-  >        public static void remove() { CURRENT_LOCAL.remove(); }
-  >    }
-  >    ```
-  > 4. `TokenFilter` 的两行（位置是重点）：
-  >    ```java
-  >    Claims claims = JwtUtils.parseToken(token);
-  >    Integer empId = Integer.valueOf(claims.get("id").toString());
-  >    CurrentHolder.setCurrentId(empId);        // 放行之前存
-  >    ...
-  >    filterChain.doFilter(request, response);  // 放行的整条链路（含 AOP）在这里面跑完
-  >    CurrentHolder.remove();                   // 之后才清
-  >    ```
-  > 5~6. 切面与 Controller 见本篇正文（`OperationLogAspect` + `DeptController` 三个方法上的 `@Log`）。
-  > 7~8. **本机实测**：依次调新增、修改、删除部门接口后，`operate_log` 里共 **3 条**：
-  >
-  >    | id | operate_emp_id | operate_time | method_name | 方法参数（截断） | 返回值（截断） | cost_time |
-  >    | --- | --- | --- | --- | --- | --- | --- |
-  >    | 1 | **1** | 2026-09-29 23:28:44 | add | `[Dept(id=null, name=AOP测试部, ...)]` | `Result(code=1, msg=success, ...)` | 15 |
-  >    | 2 | **1** | 2026-09-29 23:28:45 | update | `[Dept(id=100, name=AOP改名部, ...)]` | `Result(code=1, msg=success, ...)` | 9 |
-  >    | 3 | **1** | 2026-09-29 23:28:45 | delete | `[100]` | `Result(code=1, msg=success, ...)` | 9 |
-  >
-  >    `operate_emp_id` 全是 **1** 的原因：登录员工 shinaian 的 id 是 1，登录时它被写进 JWT（`claims.put("id", e.getId())`）；每个请求带着这个令牌 → `TokenFilter` 解析出 id 并 `CurrentHolder.setCurrentId(1)` → 同一个请求线程里切面 `getCurrentId()` 取到的就是 1 → 写进日志表。**切面自己不知道"谁在操作"，值完全靠这条链路传过来**（这就是 ThreadLocal 的用处）。
-  > 9. 把"操作人"那行换成 `null` 之后再调一次删除接口，这条新记录的 `operate_emp_id` 会是 **NULL**（这一列没有非空约束，`insert` 写进去的就是 `null`）——说明这一列的值**只可能**来自 `CurrentHolder.getCurrentId()` 这一行（ThreadLocal 里由 `TokenFilter` 存进来的值），也能反过来体会：一旦 `set`/`get`/`remove` 三个时机里任何一个错了，这一列就会是 NULL。
-  > 10. 收尾：把实验写入的日志行删掉（`operate_log` 清空）、`dept` 表恢复原样，停掉应用。
+  **一级 · 思路**：第 2～5 步就是本篇的四块代码逐块敲出来（注解、工具类、Filter 两行改动、切面）；第 7 步别忘了**先登录拿令牌、再带着令牌请求**（不带令牌会吃 401，`TokenFilter` 连解析都进不去）
+  **二级 · 方法**：注解用 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`；工具类里 `ThreadLocal<Integer>` 的 `set/get/remove`；Filter 里在 `claims.get("id")` 之后 `set`、在 `filterChain.doFilter(...)` 之后 `remove`；切面里 `@Around("@annotation(com.itheima.anno.Log)")`；请求用 Apifox/Postman 或 `curl`（请求头带 `token`）
+  **三级 · 骨架**：`@____ @____ public class CurrentHolder { private static final ____<Integer> CURRENT_LOCAL = new ____<>(); ... }`；切面：`@____("@annotation(com.itheima.anno.____)") public Object logOperation(ProceedingJoinPoint ____) throws Throwable { ... }`；请求：登录 `POST /login` 拿 `token` → 新增/修改/删除部门 `POST /depts`、`PUT /depts`、`DELETE /depts?id=____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 建表（课程资料 `03. Aop案例/日志表.sql`）：
+     ```sql
+     create table operate_log(
+         id int unsigned primary key auto_increment comment 'ID',
+         operate_emp_id int unsigned comment '操作人ID',
+         operate_time datetime comment '操作时间',
+         class_name varchar(100) comment '操作的类名',
+         method_name varchar(100) comment '操作的方法名',
+         method_params varchar(2000) comment '方法参数',
+         return_value varchar(2000) comment '返回值',
+         cost_time bigint unsigned comment '方法执行耗时, 单位:ms'
+     ) comment '操作日志表';
+     ```
+  2. 注解：
+     ```java
+     @Target(ElementType.METHOD)          // 只贴方法
+     @Retention(RetentionPolicy.RUNTIME)  // 运行期保留，AOP 才读得到（写 SOURCE/CLASS 都会被丢掉）
+     public @interface Log { }
+     ```
+  3. 工具类：
+     ```java
+     public class CurrentHolder {
+         private static final ThreadLocal<Integer> CURRENT_LOCAL = new ThreadLocal<>();
+         public static void setCurrentId(Integer employeeId) { CURRENT_LOCAL.set(employeeId); }
+         public static Integer getCurrentId() { return CURRENT_LOCAL.get(); }
+         public static void remove() { CURRENT_LOCAL.remove(); }
+     }
+     ```
+  4. `TokenFilter` 的两行（位置是重点）：
+     ```java
+     Claims claims = JwtUtils.parseToken(token);
+     Integer empId = Integer.valueOf(claims.get("id").toString());
+     CurrentHolder.setCurrentId(empId);        // 放行之前存
+     ...
+     filterChain.doFilter(request, response);  // 放行的整条链路（含 AOP）在这里面跑完
+     CurrentHolder.remove();                   // 之后才清
+     ```
+  5~6. 切面与 Controller 见本篇正文（`OperationLogAspect` + `DeptController` 三个方法上的 `@Log`）。
+  7~8. **本机实测**：依次调新增、修改、删除部门接口后，`operate_log` 里共 **3 条**：
+  
+     | id | operate_emp_id | operate_time | method_name | 方法参数（截断） | 返回值（截断） | cost_time |
+     | --- | --- | --- | --- | --- | --- | --- |
+     | 1 | **1** | 2026-09-29 23:28:44 | add | `[Dept(id=null, name=AOP测试部, ...)]` | `Result(code=1, msg=success, ...)` | 15 |
+     | 2 | **1** | 2026-09-29 23:28:45 | update | `[Dept(id=100, name=AOP改名部, ...)]` | `Result(code=1, msg=success, ...)` | 9 |
+     | 3 | **1** | 2026-09-29 23:28:45 | delete | `[100]` | `Result(code=1, msg=success, ...)` | 9 |
+  
+     `operate_emp_id` 全是 **1** 的原因：登录员工 shinaian 的 id 是 1，登录时它被写进 JWT（`claims.put("id", e.getId())`）；每个请求带着这个令牌 → `TokenFilter` 解析出 id 并 `CurrentHolder.setCurrentId(1)` → 同一个请求线程里切面 `getCurrentId()` 取到的就是 1 → 写进日志表。**切面自己不知道"谁在操作"，值完全靠这条链路传过来**（这就是 ThreadLocal 的用处）。
+  9. 把"操作人"那行换成 `null` 之后再调一次删除接口，这条新记录的 `operate_emp_id` 会是 **NULL**（这一列没有非空约束，`insert` 写进去的就是 `null`）——说明这一列的值**只可能**来自 `CurrentHolder.getCurrentId()` 这一行（ThreadLocal 里由 `TokenFilter` 存进来的值），也能反过来体会：一旦 `set`/`get`/`remove` 三个时机里任何一个错了，这一列就会是 NULL。
+  10. 收尾：把实验写入的日志行删掉（`operate_log` 清空）、`dept` 表恢复原样，停掉应用。
+
+  :::
+

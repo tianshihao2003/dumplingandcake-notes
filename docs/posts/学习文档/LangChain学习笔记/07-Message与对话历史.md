@@ -64,7 +64,7 @@ LangChain 1.0 提供了**跨模型统一的 Message 标准**（OpenAI / Anthropi
 }
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > `ToolMessage` 里的 `tool_call_id` **必须和 AI 消息里那次调用的 `id` 匹配**，否则模型不知道"这个结果对应哪个请求"。
 
 **为什么要区分消息类型？** ① 明确角色 ② 通过 system 精确控制 AI 行为 ③ 构建完整的多轮上下文 ④ 更容易追踪和调试。
@@ -78,7 +78,7 @@ LangChain 1.0 提供了**跨模型统一的 Message 标准**（OpenAI / Anthropi
 | 助手 | `{"role": "assistant", "content": "..."}` | `AIMessage("...")` |
 | 工具 | `{"role": "tool", "content": "...", "tool_call_id": "..."}` | `ToolMessage(content="...", tool_call_id="...")` |
 
-> [!TIP]
+> [!TIP] 提示
 > **JSON 字典格式**更通用（易序列化、易存文件、易走网络）；**对象格式**能携带更丰富的类型信息（如 `tool_calls`、`content_blocks`）。日常用字典就够了，需要精细控制时用对象。
 
 ### 各消息类型的参数列表
@@ -156,7 +156,7 @@ print(response.content)
              {"name":"audience","claim":"请列出谁说了什么，不要判断对错。"}]}
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`name` 能不能生效，取决于"客户端有没有传"和"服务端认不认"两件事。**
 > - 课程拓展：用 `ChatOpenRouter` 调用时，**name 没有正确传给模型服务**——同样的代码，输出里全是 `unknown`。
 > - **本机实测（`ChatDeepSeek` + 假服务端抓请求体）**：`name` **确实被发出去了**（`{"content": "Hello!", "name": "alice", "role": "user"}`），但同一个消息里的 **`id` 没有出现在请求体中**——`id` 只是**本地标识**，用于自己追踪消息，模型看不到。
@@ -220,7 +220,7 @@ ToolMessage(
 )
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`ToolMessage` 必须紧邻匹配的那条 `AIMessage`**：顺序是 `[AIMessage(tool_calls), ToolMessage]`，中间的 `tool_call_id` 要和前者 `tool_calls` 里的 `id` 一致。
 > **实测补充**：客户端**不做本地校验**——把 `ToolMessage` 放到 `AIMessage` 前面、或写成不匹配的 `tool_call_id`，LangChain 都会**原样发给服务端**（用假服务端抓请求体可以看到 `role: "tool"` 照样发出去），报错要等服务端返回。所以顺序错了不会在本地被拦住，只会得到一个"莫名其妙的远程报错"。
 
@@ -289,7 +289,7 @@ response = model.invoke(
 print(response.content)
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > `encode_image()` 做了两件事：**读文件 → Base64 编码 → 拼成 Data URI**。`image_url` 的值就是这个 `data:image/xxx;base64,...` 字符串——**它和"URL 链接"是同一条通路**，服务端要么去下载 URL，要么直接解码 Data URI。
 > 参数 `img_type` 默认写死 `"jpeg"`，而示例图片是 PNG——所以严格来说应该传 `encode_image(img_path, "png")`，前缀要和真实格式对上。
 
@@ -306,7 +306,7 @@ print(response.content)
 - 统一格式：**每个 block 都有 `type` 字段**区分内容类型
 - 支持类型：`text`、`image`、`audio`、`video`、`tool_call`、`reasoning`
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 1.2 里 `content` 依然存在（向前兼容），但新增了 `content_blocks`，把 `content` 解析为**标准、类型安全**的表示。**带图片或工具结果的复杂对话，建议用 `content_blocks` 构建**——一套标准代码无缝切换不同厂商的模型。
 >
 > 支持的字段类型详见官方文档：&lt;https://docs.langchain.com/oss/python/langchain/messages#openai>
@@ -391,7 +391,7 @@ response = model.invoke(
 
 两者对同一张图的回答（一个说"香水、金色瓶盖、暖色背景"，另一个说"化妆品或香水、玻璃瓶、光影效果"）——**格式统一，语义各自发挥**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 两种写法的 `base64_image` **不是一回事**：`content=[{"type":"image_url", ...}]` 需要的是**带 `data:image/png;base64,` 前缀的 Data URI**；而 `content_blocks` 的 `{"type":"image","base64":...}` 需要的是**纯 Base64 字符串**（格式由 `mime_type` 单独声明）。混着用会直接报错。
 
 ### 用法②：输出格式化与「懒加载」
@@ -428,10 +428,10 @@ print("content_blocks  ->", response.content_blocks)
 
 对比一下同一份响应里的原始字段：思考内容在 `additional_kwargs={'reasoning_content': '好的，用户说…'}` 里，token 明细在 `usage_metadata={'input_tokens': 8, 'output_tokens': 76, 'total_tokens': 84, 'output_token_details': {'reasoning': 63}}` 里（63 个 token 花在思考上）。
 
-> [!TIP]
+> [!TIP] 提示
 > **优先检查 `response.content_blocks`，而不是 `response.content`**——特别是当你需要获取"思维链（reasoning）"或者"引用（Citations）"信息时，`content` 里根本没有这些内容。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`content_blocks` 是懒加载的：调用（访问）时才解析。** 所以它不会拖慢消息的构造与传递；但反过来说，**别指望构造完那一刻它就已经算好了**——真要用就在拿到响应后立刻访问它，避免消息被后续流程改动后再解析出意料之外的结果。
 
 **实测（本机 langchain-core 1.2.18）**：手工构造一条 OpenAI 风格的 `content=[{"type":"image_url","image_url":{...}}]`，访问 `content_blocks` 会被**自动规整**成标准块——键名从 `image_url.url` 变成 `base64`，并补上 `mime_type`：
@@ -504,7 +504,7 @@ def keep_recent_messages(messages, max_pairs=3):
     return system_msgs + recent_msgs
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 这就是最简单的"上下文工程"：**system 不能丢**（丢了 AI 就换了个人），历史可以截断。第 8 章的 SummarizationMiddleware 是更聪明的做法——不是直接丢弃，而是把旧对话**压缩成摘要**。
 
 ## 多轮对话聊天机器人（实战）
@@ -580,136 +580,156 @@ while True:
   手工构造四条消息并逐条打印：① 系统消息（用省略字段名的写法）；② 用户消息（带上自定义的发言者信息）；③ 助手消息（内容留空、只带一次工具调用请求）；④ 工具消息（内容与 ID 对上前一条）。最后打印助手消息里的调用列表、工具消息里的调用 ID，并判断两者是否一致。
   再真正调用一次模型（随便问一句话），打印返回消息上"助手消息特有的"那几个属性，看看没调工具时它们分别是什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四条消息各对应一个类，前两条是喂给模型的输入，后两条是"要调工具"和"工具结果"
-  > **二级 · 方法**：`SystemMessage("...")` / `HumanMessage(content=..., name=..., id=...)` / `AIMessage(content="", tool_calls=[{...}])` / `ToolMessage(content=..., name=..., tool_call_id=...)`
-  > **三级 · 骨架**：`ai_msg.tool_calls[0]["id"] == tool_msg.tool_call_id`；调用后看 `resp.tool_calls`、`resp.response_metadata`、`resp.usage_metadata`
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：四条消息各对应一个类，前两条是喂给模型的输入，后两条是"要调工具"和"工具结果"
+  **二级 · 方法**：`SystemMessage("...")` / `HumanMessage(content=..., name=..., id=...)` / `AIMessage(content="", tool_calls=[{...}])` / `ToolMessage(content=..., name=..., tool_call_id=...)`
+  **三级 · 骨架**：`ai_msg.tool_calls[0]["id"] == tool_msg.tool_call_id`；调用后看 `resp.tool_calls`、`resp.response_metadata`、`resp.usage_metadata`
+
+  :::
+
 
 - [ ] **2-2 同一张图，两种多模态写法**
   写两个小函数：一个把本地图片读成"带 `data:image/...;base64,` 前缀的完整字符串"，另一个只做 Base64 编码。用同一张 PNG 分别构造两条带图提问的用户消息：① 走供应商规范的字典列表（图片块的值用带前缀的完整字符串）；② 走统一的标准块（值是纯 Base64，格式由另一个字段声明）。打印两条消息的内容结构做对比，并说明为什么这两种值不能混着用。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：老写法是"整个完整字符串塞进图片地址键"，新写法是"纯 Base64 + 单独的格式字段"
-  > **二级 · 方法**：`HumanMessage(content=[{"type": "image_url", "image_url": data_uri}])` 对比 `HumanMessage(content_blocks=[{"type": "image", "base64": b64, "mime_type": "image/png"}])`
-  > **三级 · 骨架**：`base64.b64encode(f.read()).decode()`；前缀写成 `f"data:image/{img_type};base64,{...}"`（图片是 PNG 就别用默认的 jpeg）
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：老写法是"整个完整字符串塞进图片地址键"，新写法是"纯 Base64 + 单独的格式字段"
+  **二级 · 方法**：`HumanMessage(content=[{"type": "image_url", "image_url": data_uri}])` 对比 `HumanMessage(content_blocks=[{"type": "image", "base64": b64, "mime_type": "image/png"}])`
+  **三级 · 骨架**：`base64.b64encode(f.read()).decode()`；前缀写成 `f"data:image/{img_type};base64,{...}"`（图片是 PNG 就别用默认的 jpeg）
+
+  :::
+
 
 - [ ] **2-3 手动维护对话历史（并对比"不传历史"）**
   ① 用一个列表贯穿全程：先告诉模型"我叫张三"，调用后**把 AI 回复也追加进列表**，第二轮再问"我叫什么？"，确认它答得出来；② 另起一次调用，只发"我叫什么？"这一句、不带任何历史，对比两次输出并解释原因。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：列表要在多次调用之间一直沿用，不能每轮重新创建一个
-  > **二级 · 方法**：`conversation.append({"role": "assistant", "content": resp.content})`
-  > **三级 · 骨架**：第二次调用传的是**整个列表**；结论要落到"模型是无状态的，记忆靠客户端维护"
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：列表要在多次调用之间一直沿用，不能每轮重新创建一个
+  **二级 · 方法**：`conversation.append({"role": "assistant", "content": resp.content})`
+  **三级 · 骨架**：第二次调用传的是**整个列表**；结论要落到"模型是无状态的，记忆靠客户端维护"
+
+  :::
+
 
 - [ ] **2-4 给历史做裁剪**
   写一个函数（签名建议 `keep_recent_messages(messages, max_pairs=2)`）：先分离系统消息与对话消息，再只保留最近 N 轮（每轮 = 用户 + 助手两条）。造一个 3 轮以上的消息列表，打印裁剪前后的条数，并确认系统消息还在、最早那几轮已经丢掉。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先分离 system 消息，再对"对话部分"做切片
-  > **二级 · 方法**：列表推导 + `dialog_msgs[-max_pairs * 2:]`
-  > **三级 · 骨架**：`return system_msgs + recent_msgs`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> import base64
-> import os
-> from dotenv import load_dotenv
-> from langchain.chat_models import init_chat_model
-> from langchain.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
->
-> load_dotenv(override=True)
->
-> model = init_chat_model(
->     model="deepseek-v4-flash",
->     model_provider="openai",
->     base_url=os.getenv("DEEPSEEK_BASE_URL"),
->     api_key=os.getenv("DEEPSEEK_API_KEY"),
-> )
->
-> # ========== 2-1 四种消息都构造一遍 ==========
-> system_msg = SystemMessage("你是一个简洁的助手")            # 字段名可以省略
-> human_msg = HumanMessage(content="1+1=?", name="alice", id="msg_001")
-> ai_msg = AIMessage(content="", tool_calls=[{
->     "name": "get_weather",
->     "args": {"city": "北京"},
->     "id": "call_00_demo",
->     "type": "tool_call",
-> }])
-> tool_msg = ToolMessage(content="北京天气晴朗", name="get_weather", tool_call_id="call_00_demo")
->
-> for m in (system_msg, human_msg, ai_msg, tool_msg):
->     print(f"{type(m).__name__:<14} content={m.content!r}")
-> print("发言者信息：", human_msg.name, "/", human_msg.id)          # alice / msg_001
-> print("tool_calls：", ai_msg.tool_calls)
-> print("工具消息三字段：", tool_msg.content, "/", tool_msg.name, "/", tool_msg.tool_call_id)
-> print("ID 是否匹配：", ai_msg.tool_calls[0]["id"] == tool_msg.tool_call_id)
->
-> # 真调用一次，观察助手消息特有的属性
-> real = model.invoke([HumanMessage("用一句话介绍你自己")])
-> print("response_metadata：", real.response_metadata)
-> print("usage_metadata：", real.usage_metadata)
-> print("tool_calls（没调工具时）：", real.tool_calls)
->
-> # ========== 2-2 同一张图的两种多模态写法 ==========
-> def encode_image_uri(img_path, img_type="png"):
->     """读文件 -> Base64 -> 拼成 Data URI（供应商规范写法用）"""
->     with open(img_path, "rb") as f:
->         return f"data:image/{img_type};base64,{base64.b64encode(f.read()).decode()}"
->
-> def encode_image_b64(img_path):
->     """只做 Base64 编码，不带前缀（统一的标准块写法用）"""
->     with open(img_path, "rb") as f:
->         return base64.b64encode(f.read()).decode()
->
-> # 演示用：先写一张 1x1 的 PNG 出来（真实项目里换成你自己的图片即可）
-> with open("image_test.png", "wb") as f:
->     f.write(base64.b64decode(
->         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8AAAwAB/AGt4iRJAAAAAElFTkSuQmCC"))
->
-> data_uri = encode_image_uri("image_test.png", "png")   # data:image/png;base64,xxxx
-> pure_b64 = encode_image_b64("image_test.png")          # xxxx
->
-> msg_old = HumanMessage(content=[
->     {"type": "text", "text": "这张图里有什么？"},
->     {"type": "image_url", "image_url": data_uri},                      # 值 = 带前缀的 Data URI
-> ])
-> msg_new = HumanMessage(content_blocks=[
->     {"type": "text", "text": "这张图里有什么？"},
->     {"type": "image", "base64": pure_b64, "mime_type": "image/png"},   # 值 = 纯 Base64 + 格式字段
-> ])
-> print("老写法 content 里图片块的值：", msg_old.content[1]["image_url"][:40], "...")
-> print("新写法 content_blocks 的类型：", [b["type"] for b in msg_new.content_blocks])
-> print("新写法图片块的键名：", sorted(msg_new.content_blocks[1].keys()))
-> # 两者不能混用：带前缀的字符串会再被套一层前缀、纯 Base64 又缺了格式声明，服务端直接报错
->
-> # ========== 2-3 手动维护对话历史 ==========
-> conversation = [{"role": "system", "content": "你是简洁的助手，回答不超过一句话"}]
-> conversation.append({"role": "user", "content": "我叫张三"})
-> r1 = model.invoke(conversation)
-> conversation.append({"role": "assistant", "content": r1.content})   # 关键：保存 AI 回复
-> conversation.append({"role": "user", "content": "我叫什么？"})
-> r2 = model.invoke(conversation)                                     # 传完整历史
-> print("[记得历史]", r2.content)
->
-> r3 = model.invoke("我叫什么？")                                      # 不传历史
-> print("[没传历史]", r3.content)     # 它不知道你是谁——模型是无状态的，记忆全靠客户端维护
->
-> # ========== 2-4 给历史做裁剪 ==========
-> def keep_recent_messages(messages, max_pairs=2):
->     """保留 system 消息 + 最近 max_pairs 轮对话（每轮 2 条）"""
->     system_msgs = [m for m in messages if m["role"] == "system"]
->     dialog_msgs = [m for m in messages if m["role"] != "system"]
->     return system_msgs + dialog_msgs[-max_pairs * 2:]
->
-> demo = [{"role": "system", "content": "你是助手"}]
-> for i in range(1, 4):                       # 造 3 轮对话
->     demo.append({"role": "user", "content": f"第{i}轮问题"})
->     demo.append({"role": "assistant", "content": f"第{i}轮回答"})
-> trimmed = keep_recent_messages(demo, 2)
-> print(f"裁剪前 {len(demo)} 条 -> 裁剪后 {len(trimmed)} 条")     # 7 -> 5
-> print("system 还在吗：", any(m["role"] == "system" for m in trimmed))
-> print("留下的对话：", [m["content"] for m in trimmed[1:]])
-> ```
+  **一级 · 思路**：先分离 system 消息，再对"对话部分"做切片
+  **二级 · 方法**：列表推导 + `dialog_msgs[-max_pairs * 2:]`
+  **三级 · 骨架**：`return system_msgs + recent_msgs`
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+import base64
+import os
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from langchain.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
+
+load_dotenv(override=True)
+
+model = init_chat_model(
+    model="deepseek-v4-flash",
+    model_provider="openai",
+    base_url=os.getenv("DEEPSEEK_BASE_URL"),
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+)
+
+# ========== 2-1 四种消息都构造一遍 ==========
+system_msg = SystemMessage("你是一个简洁的助手")            # 字段名可以省略
+human_msg = HumanMessage(content="1+1=?", name="alice", id="msg_001")
+ai_msg = AIMessage(content="", tool_calls=[{
+    "name": "get_weather",
+    "args": {"city": "北京"},
+    "id": "call_00_demo",
+    "type": "tool_call",
+}])
+tool_msg = ToolMessage(content="北京天气晴朗", name="get_weather", tool_call_id="call_00_demo")
+
+for m in (system_msg, human_msg, ai_msg, tool_msg):
+    print(f"{type(m).__name__:<14} content={m.content!r}")
+print("发言者信息：", human_msg.name, "/", human_msg.id)          # alice / msg_001
+print("tool_calls：", ai_msg.tool_calls)
+print("工具消息三字段：", tool_msg.content, "/", tool_msg.name, "/", tool_msg.tool_call_id)
+print("ID 是否匹配：", ai_msg.tool_calls[0]["id"] == tool_msg.tool_call_id)
+
+# 真调用一次，观察助手消息特有的属性
+real = model.invoke([HumanMessage("用一句话介绍你自己")])
+print("response_metadata：", real.response_metadata)
+print("usage_metadata：", real.usage_metadata)
+print("tool_calls（没调工具时）：", real.tool_calls)
+
+# ========== 2-2 同一张图的两种多模态写法 ==========
+def encode_image_uri(img_path, img_type="png"):
+    """读文件 -> Base64 -> 拼成 Data URI（供应商规范写法用）"""
+    with open(img_path, "rb") as f:
+        return f"data:image/{img_type};base64,{base64.b64encode(f.read()).decode()}"
+
+def encode_image_b64(img_path):
+    """只做 Base64 编码，不带前缀（统一的标准块写法用）"""
+    with open(img_path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+# 演示用：先写一张 1x1 的 PNG 出来（真实项目里换成你自己的图片即可）
+with open("image_test.png", "wb") as f:
+    f.write(base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8AAAwAB/AGt4iRJAAAAAElFTkSuQmCC"))
+
+data_uri = encode_image_uri("image_test.png", "png")   # data:image/png;base64,xxxx
+pure_b64 = encode_image_b64("image_test.png")          # xxxx
+
+msg_old = HumanMessage(content=[
+    {"type": "text", "text": "这张图里有什么？"},
+    {"type": "image_url", "image_url": data_uri},                      # 值 = 带前缀的 Data URI
+])
+msg_new = HumanMessage(content_blocks=[
+    {"type": "text", "text": "这张图里有什么？"},
+    {"type": "image", "base64": pure_b64, "mime_type": "image/png"},   # 值 = 纯 Base64 + 格式字段
+])
+print("老写法 content 里图片块的值：", msg_old.content[1]["image_url"][:40], "...")
+print("新写法 content_blocks 的类型：", [b["type"] for b in msg_new.content_blocks])
+print("新写法图片块的键名：", sorted(msg_new.content_blocks[1].keys()))
+# 两者不能混用：带前缀的字符串会再被套一层前缀、纯 Base64 又缺了格式声明，服务端直接报错
+
+# ========== 2-3 手动维护对话历史 ==========
+conversation = [{"role": "system", "content": "你是简洁的助手，回答不超过一句话"}]
+conversation.append({"role": "user", "content": "我叫张三"})
+r1 = model.invoke(conversation)
+conversation.append({"role": "assistant", "content": r1.content})   # 关键：保存 AI 回复
+conversation.append({"role": "user", "content": "我叫什么？"})
+r2 = model.invoke(conversation)                                     # 传完整历史
+print("[记得历史]", r2.content)
+
+r3 = model.invoke("我叫什么？")                                      # 不传历史
+print("[没传历史]", r3.content)     # 它不知道你是谁——模型是无状态的，记忆全靠客户端维护
+
+# ========== 2-4 给历史做裁剪 ==========
+def keep_recent_messages(messages, max_pairs=2):
+    """保留 system 消息 + 最近 max_pairs 轮对话（每轮 2 条）"""
+    system_msgs = [m for m in messages if m["role"] == "system"]
+    dialog_msgs = [m for m in messages if m["role"] != "system"]
+    return system_msgs + dialog_msgs[-max_pairs * 2:]
+
+demo = [{"role": "system", "content": "你是助手"}]
+for i in range(1, 4):                       # 造 3 轮对话
+    demo.append({"role": "user", "content": f"第{i}轮问题"})
+    demo.append({"role": "assistant", "content": f"第{i}轮回答"})
+trimmed = keep_recent_messages(demo, 2)
+print(f"裁剪前 {len(demo)} 条 -> 裁剪后 {len(trimmed)} 条")     # 7 -> 5
+print("system 还在吗：", any(m["role"] == "system" for m in trimmed))
+print("留下的对话：", [m["content"] for m in trimmed[1:]])
+```
+
+:::
+
 
 ### 三、综合题
 
@@ -721,33 +741,41 @@ while True:
   4. 每轮把用户消息追加进列表后，**调用模型前先裁剪**（保留系统消息 + 最近 10 轮），并打印裁剪前后的条数；
   5. 用流式输出逐字打印回复，同时把完整回复攒起来、追加成助手消息，供下一轮使用。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：初始化模型 → 维护消息列表 → 循环输入 → 裁剪 → 流式输出 → 追加历史
-  > **二级 · 方法**：`while True` + `input()` + `model.stream(messages)` + 2-4 写好的裁剪函数
-  > **三级 · 骨架**：`for chunk in model.stream(messages): print(chunk.content, end="", flush=True)`，用 `full += chunk.content` 攒完整回复后再 append
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> messages = [{"role": "system", "content": "你是小谷姐姐，一名耐心、友好的智能助手。"}]
->
-> while True:
->     user_input = input("\n你：")
->     if user_input.strip().lower() == "quit":
->         print("再见！")
->         break
->
->     messages.append({"role": "user", "content": user_input})
->
->     before = len(messages)                                # 裁剪要放在"调用模型之前"
->     messages = keep_recent_messages(messages, 10)         # 见 2-4
->     print(f"（历史 {before} 条 -> 裁剪后 {len(messages)} 条）")
->
->     print("AI：", end="")
->     full = ""
->     for chunk in model.stream(messages):
->         print(chunk.content, end="", flush=True)
->         full += chunk.content
->     print()
->
->     messages.append({"role": "assistant", "content": full})
-> ```
+  **一级 · 思路**：初始化模型 → 维护消息列表 → 循环输入 → 裁剪 → 流式输出 → 追加历史
+  **二级 · 方法**：`while True` + `input()` + `model.stream(messages)` + 2-4 写好的裁剪函数
+  **三级 · 骨架**：`for chunk in model.stream(messages): print(chunk.content, end="", flush=True)`，用 `full += chunk.content` 攒完整回复后再 append
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+messages = [{"role": "system", "content": "你是小谷姐姐，一名耐心、友好的智能助手。"}]
+
+while True:
+    user_input = input("\n你：")
+    if user_input.strip().lower() == "quit":
+        print("再见！")
+        break
+
+    messages.append({"role": "user", "content": user_input})
+
+    before = len(messages)                                # 裁剪要放在"调用模型之前"
+    messages = keep_recent_messages(messages, 10)         # 见 2-4
+    print(f"（历史 {before} 条 -> 裁剪后 {len(messages)} 条）")
+
+    print("AI：", end="")
+    full = ""
+    for chunk in model.stream(messages):
+        print(chunk.content, end="", flush=True)
+        full += chunk.content
+    print()
+
+    messages.append({"role": "assistant", "content": full})
+```
+
+:::
+

@@ -137,7 +137,7 @@ PPT 第 55 页给的就是这一段：
 </dependency>
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 课程代码 `maven-project01/pom.xml` 里这个依赖比 PPT 多一行 `<scope>test</scope>`——那是**依赖范围**，表示这个 jar 只在测试程序里用。它属于这一章"单元测试"的第四节，[29-Maven依赖范围与常见问题](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)会专门讲；这里先按 PPT 的样子理解成"引入 junit 依赖"即可。
 
 ### 第 2 步：在 test/java 下建测试类、写测试方法
@@ -232,7 +232,7 @@ mvn test -Dtest=UserServiceTest    # 只跑指定的测试类（-Dtest=类名）
 
 PPT 第 55 页最后一句话是判断标准：**（测试通过：绿色；测试失败：红色）**。
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）——用一个最小 Maven 项目（只有 `junit-jupiter:5.9.1` + 课程的 `UserService` 和 `UserServiceTest`）跑 `mvn test`，真实输出如下：
 >
 > ```text
@@ -260,7 +260,7 @@ PPT 第 55 页最后一句话是判断标准：**（测试通过：绿色；测�
 > 3. **`Tests run: 7`** 而不是 5 个方法——因为课程测试类里有一个 `@ParameterizedTest` 参数化测试（一个方法传了 3 组参数），实际执行了 4 + 3 = **7 次**。
 > 4. 最后一行的 **`BUILD SUCCESS`** 就是"全绿"。顺带一提，PPT 第 55 页示例里那个身份证号 `110002200505091218`，本机实测年龄是 **21**、性别是 **男**——同一份业务代码，换一个身份证号结果就变，这正是要写测试的原因。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 命令行跑测试时注意两件事：**① 测试失败会让 Maven 构建直接失败**（`BUILD FAILURE`，`mvn package` 也就打不出包了），这正是前一篇说的"`test` 阶段跑不过、`package` 阶段就被挡住"；**② 一定要用 JDK 17 跑**（课程代码 `pom.xml` 里 `<maven.compiler.source>17</maven.compiler.source>`，命令行里的 `java -version` 若是 1.8 会编译不过），最省事的方式是让 Maven 用它自己的 `JAVA_HOME`。
 
 ## 单元测试放在哪：test 目录，别写进 main
@@ -288,7 +288,7 @@ PPT 第 56、57 页是问答页，这几问要能直接答出来：
 
 最后这一问（PPT 第 57 页）是这一篇和下一篇之间的"钩子"，答案之所以是"并不是"，是因为**你不写断言的话，测试方法跑完就结束，JUnit 根本不知道结果对不对**——它只知道"这个方法没抛异常"。本机实测做了一个直观的验证：
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机实测（Maven 3.9.14 / JDK 17）：写一个方法名说"应该是男"、但实际上拿到"女"的测试方法，**只要不写断言，它照样绿**：
 >
 > ```java
@@ -362,23 +362,31 @@ PPT 第 56、57 页是问答页，这几问要能直接答出来：
   3. 写在"装依赖的容器"标签里，并且用中文注释标出哪行是组织名、哪行是模块名、哪行是版本号。
   （练习文件 `test_27_junit依赖配置.xml` 里已经给了 pom 骨架和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：项目要用的第三方 jar 都写在 pom 里一个"容器标签"里；每个 jar 用一个"条目标签"描述，条目里放三行坐标
-  > **二级 · 方法**：容器是 `<dependencies>`，条目是 `<dependency>`；三行是 `<groupId>` / `<artifactId>` / `<version>`
-  > **三级 · 骨架**：`<dependencies><dependency><groupId>____</groupId><artifactId>____</artifactId><version>____</version></dependency></dependencies>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <dependencies>
-  >     <!-- junit 依赖：JUnit 5 的坐标 -->
-  >     <dependency>
-  >         <groupId>org.junit.jupiter</groupId>     <!-- 组织名 -->
-  >         <artifactId>junit-jupiter</artifactId>  <!-- 模块名 -->
-  >         <version>5.9.1</version>                <!-- 版本号 -->
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > 检查点：① `<dependencies>` 是 `<project>` 的**直接子标签**（和 `<modelVersion>`、`<properties>` 平级）；② 三行坐标一行都不能少，少一行 Maven 就定位不到 jar；③ 写完记得在 IDEA 里**点刷新按钮**加载依赖，命令行则相当于每次构建都重新读 pom（这是[上一篇](/posts/编程学习/javaweb学习笔记/26-maven依赖管理与生命周期/)讲过的两条注意事项）。本机实测加上这个依赖后 `mvn dependency:tree` 能看到 `org.junit.jupiter:junit-jupiter:jar:5.9.1` 这一行。
+  **一级 · 思路**：项目要用的第三方 jar 都写在 pom 里一个"容器标签"里；每个 jar 用一个"条目标签"描述，条目里放三行坐标
+  **二级 · 方法**：容器是 `<dependencies>`，条目是 `<dependency>`；三行是 `<groupId>` / `<artifactId>` / `<version>`
+  **三级 · 骨架**：`<dependencies><dependency><groupId>____</groupId><artifactId>____</artifactId><version>____</version></dependency></dependencies>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <dependencies>
+      <!-- junit 依赖：JUnit 5 的坐标 -->
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>     <!-- 组织名 -->
+          <artifactId>junit-jupiter</artifactId>  <!-- 模块名 -->
+          <version>5.9.1</version>                <!-- 版本号 -->
+      </dependency>
+  </dependencies>
+  ```
+  检查点：① `<dependencies>` 是 `<project>` 的**直接子标签**（和 `<modelVersion>`、`<properties>` 平级）；② 三行坐标一行都不能少，少一行 Maven 就定位不到 jar；③ 写完记得在 IDEA 里**点刷新按钮**加载依赖，命令行则相当于每次构建都重新读 pom（这是[上一篇](/posts/编程学习/javaweb学习笔记/26-maven依赖管理与生命周期/)讲过的两条注意事项）。本机实测加上这个依赖后 `mvn dependency:tree` 能看到 `org.junit.jupiter:junit-jupiter:jar:5.9.1` 这一行。
+
+  :::
+
 
 - [ ] **2-2 写第一个 JUnit 测试类**
   被测的业务类是 `UserService`，其中有一个方法 `public Integer getAge(String idCard)`（根据身份证号算年龄）。请：
@@ -387,31 +395,39 @@ PPT 第 56、57 页是问答页，这几问要能直接答出来：
   3. 把结果打印出来，方法上别忘了声明能"启动执行"的注解。
   （练习文件 `test_27_第一个测试类.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：测试类要放对目录（主程序是 main、测试程序是哪一个？）；类名后面加 `Test`；方法要是 public void；启动执行的注解是哪一个？
-  > **二级 · 方法**：目录是 `src/test/java`；类名 `UserServiceTest`；方法 `public void testGetAge()`；注解 `@Test`（要 import `org.junit.jupiter.api.Test`）
-  > **三级 · 骨架**：`@Test public void ____(){ Integer age = new UserService().____("____"); System.out.println(age); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > public class UserServiceTest {
-  >
-  >     @Test
-  >     public void testGetAge(){
-  >         // 1. 创建要测试的对象
-  >         UserService userService = new UserService();
-  >         // 2. 调用要测试的方法（传入身份证号）
-  >         Integer age = userService.getAge("100000200010011011");
-  >         // 3. 打印结果（还没学断言，先打印看结果）
-  >         System.out.println(age);
-  >     }
-  > }
-  > ```
-  > 文件应该出现在 `src/test/java/com/itheima/UserServiceTest.java`（和主程序同包名，但目录是 `test` 不是 `main`）。本机实测（Maven 3.9.14 / JDK 17）：`mvn test` 输出里会有 `Tests run: 1, Failures: 0, Errors: 0`，以及打印出来的 **25**（出生日期 2000-10-01，到 2026-09-29 为 25 周岁）。
+  **一级 · 思路**：测试类要放对目录（主程序是 main、测试程序是哪一个？）；类名后面加 `Test`；方法要是 public void；启动执行的注解是哪一个？
+  **二级 · 方法**：目录是 `src/test/java`；类名 `UserServiceTest`；方法 `public void testGetAge()`；注解 `@Test`（要 import `org.junit.jupiter.api.Test`）
+  **三级 · 骨架**：`@Test public void ____(){ Integer age = new UserService().____("____"); System.out.println(age); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  public class UserServiceTest {
+  
+      @Test
+      public void testGetAge(){
+          // 1. 创建要测试的对象
+          UserService userService = new UserService();
+          // 2. 调用要测试的方法（传入身份证号）
+          Integer age = userService.getAge("100000200010011011");
+          // 3. 打印结果（还没学断言，先打印看结果）
+          System.out.println(age);
+      }
+  }
+  ```
+  文件应该出现在 `src/test/java/com/itheima/UserServiceTest.java`（和主程序同包名，但目录是 `test` 不是 `main`）。本机实测（Maven 3.9.14 / JDK 17）：`mvn test` 输出里会有 `Tests run: 1, Failures: 0, Errors: 0`，以及打印出来的 **25**（出生日期 2000-10-01，到 2026-09-29 为 25 周岁）。
+
+  :::
+
 
 - [ ] **2-3 写一个"故意不写断言"的测试方法，并解释它为什么是绿的**
   再写一个测试方法（比如测 `getGender`），要求：
@@ -421,34 +437,42 @@ PPT 第 56、57 页是问答页，这几问要能直接答出来：
   4. 在文件末尾的注释里回答：这个"和方法名矛盾"的测试为什么还是绿色的？怎么改才让它真正检查结果？
   （练习文件 `test_27_不写断言的测试.java` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：JUnit 判断一个测试"失败"，靠的是"方法抛异常了"；不写断言就等于什么也没检查
-  > **二级 · 方法**：断言是 JUnit 提供的辅助方法（`Assertions.assertEquals(预期, 实际, 提示信息)`）；不写它，测试只知道"没报错"
-  > **三级 · 骨架**：打印用 `System.out.println(____)`；真正检查结果要用 `Assertions.____("男", gender)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.DisplayName;
-  > import org.junit.jupiter.api.Test;
-  >
-  > public class UserServiceTest {
-  >
-  >     @Test
-  >     @DisplayName("测试：这个身份证号的性别应该是『男』（方法名这么说的）")
-  >     public void testGenderShouldBeMale(){
-  >         UserService userService = new UserService();
-  >         // 身份证第 17 位是 2（偶数）→ 实际返回"女"
-  >         String gender = userService.getGender("100000200010011022");
-  >         System.out.println("方法名说应该是男，实际返回的是：" + gender);
-  >         // 不写断言 → 测试依然是绿的
-  >     }
-  > }
-  > ```
-  > 两个问题的答案：
-  > 1. **为什么还是绿的**：JUnit 判断失败的唯一标准是"测试方法抛出了异常"。没有断言，方法就只是创建对象、调方法、打印，正常结束 → `Failures: 0`、`BUILD SUCCESS`。本机实测（Maven 3.9.14 / JDK 17）输出正是：`测试方法名说性别应该是男，实际返回的是：女` + `Tests run: 1, Failures: 0, Errors: 0`。
-  > 2. **怎么改**：加断言，把它变成"结果和预期不一致就报错"。例如 `Assertions.assertEquals("男", gender, "性别获取有问题");`——这样它会立刻变成红色，并在报告里给出 `expected: <男> but was: <女>`（断言的完整用法见[下一篇](/posts/编程学习/javaweb学习笔记/28-junit断言与常见注解/)）。
+  **一级 · 思路**：JUnit 判断一个测试"失败"，靠的是"方法抛异常了"；不写断言就等于什么也没检查
+  **二级 · 方法**：断言是 JUnit 提供的辅助方法（`Assertions.assertEquals(预期, 实际, 提示信息)`）；不写它，测试只知道"没报错"
+  **三级 · 骨架**：打印用 `System.out.println(____)`；真正检查结果要用 `Assertions.____("男", gender)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.DisplayName;
+  import org.junit.jupiter.api.Test;
+  
+  public class UserServiceTest {
+  
+      @Test
+      @DisplayName("测试：这个身份证号的性别应该是『男』（方法名这么说的）")
+      public void testGenderShouldBeMale(){
+          UserService userService = new UserService();
+          // 身份证第 17 位是 2（偶数）→ 实际返回"女"
+          String gender = userService.getGender("100000200010011022");
+          System.out.println("方法名说应该是男，实际返回的是：" + gender);
+          // 不写断言 → 测试依然是绿的
+      }
+  }
+  ```
+  两个问题的答案：
+  1. **为什么还是绿的**：JUnit 判断失败的唯一标准是"测试方法抛出了异常"。没有断言，方法就只是创建对象、调方法、打印，正常结束 → `Failures: 0`、`BUILD SUCCESS`。本机实测（Maven 3.9.14 / JDK 17）输出正是：`测试方法名说性别应该是男，实际返回的是：女` + `Tests run: 1, Failures: 0, Errors: 0`。
+  2. **怎么改**：加断言，把它变成"结果和预期不一致就报错"。例如 `Assertions.assertEquals("男", gender, "性别获取有问题");`——这样它会立刻变成红色，并在报告里给出 `expected: <男> but was: <女>`（断言的完整用法见[下一篇](/posts/编程学习/javaweb学习笔记/28-junit断言与常见注解/)）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -471,53 +495,61 @@ PPT 第 56、57 页是问答页，这几问要能直接答出来：
   | 命名规范 | 类 `XxxxTest`（规范）、方法 `public void`（规定） |
   | 绿色 ≠ 没问题 | 只用 `System.out.println` 打印时，测试永远是绿的 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"四步快速入门"按顺序做一遍——依赖已经在 pom 里了，剩下三件事：建对目录、起对名字、加对注解；打印只是过渡手段，重点是让测试真的跑起来
-  > **二级 · 方法**：测试类放 `src/test/java/com/itheima/`；类名 `UserServiceTest`；两个方法 `public void testGetAge()` / `public void testGetGender()`，各加 `@Test`；运行用 IDEA 的绿色三角或命令行 `mvn test`
-  > **三级 · 骨架**：`public class UserService____Test { @Test public void ____(){ ... } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > /**
-  >  * 测试类：类名规范是 XxxxTest
-  >  */
-  > public class UserServiceTest {
-  >
-  >     @Test
-  >     public void testGetAge(){
-  >         UserService userService = new UserService();
-  >         Integer age = userService.getAge("100000200010011011");
-  >         System.out.println("年龄：" + age);
-  >     }
-  >
-  >     @Test
-  >     public void testGetGender(){
-  >         UserService userService = new UserService();
-  >         String gender = userService.getGender("100000200010011011");
-  >         System.out.println("性别：" + gender);
-  >     }
-  > }
-  > ```
-  > 4. **运行结果**（本机实测，Maven 3.9.14 / JDK 17，`mvn test`）：
-  >    ```text
-  >    [INFO] Running com.itheima.UserServiceTest
-  >    性别：男
-  >    年龄：25
-  >    [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in com.itheima.UserServiceTest
-  >    [INFO] Results:
-  >    [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
-  >    [INFO] BUILD SUCCESS
-  >    ```
-  >    关键看两行：**`Tests run: 2, Failures: 0, Errors: 0`** 和最后的 **`BUILD SUCCESS`**（打印顺序不一定和方法的书写顺序一致，JUnit 不保证方法执行顺序——本机这次先打印的是"性别"再是"年龄"）。
-  > 5. 三个问题：
-  >    ① **为什么放 test 目录**：Maven 的标准结构规定**主程序放 `main`、测试程序放 `test`**，两者分开才能"便于维护"（JUnit 的优点之一）；而且测试代码不应该参与打包上线，写在 `main` 里会混进主程序、还可能被打进 jar。PPT 第 65 页对"能不能写在 main 目录"的回答是"**可以，但是不规范**"。
-  >    ② **类名不叫 `XxxxTest` 的问题**：违反命名**规范**，团队里别人一眼看不出这是测试类，某些构建工具/插件按 `*Test` 模式找测试时还可能**根本不会执行**它（测试写了等于没写）。
-  >    ③ **方法写成 `static void` 能不能跑**：**不能**。JUnit 的规定是测试方法必须声明为 **`public void`** 的**实例方法**，`static` 方法不符合规范，会被当成普通方法跳过（同理，`private`、带返回值的方法也都不会被执行）。
+  **一级 · 思路**：把"四步快速入门"按顺序做一遍——依赖已经在 pom 里了，剩下三件事：建对目录、起对名字、加对注解；打印只是过渡手段，重点是让测试真的跑起来
+  **二级 · 方法**：测试类放 `src/test/java/com/itheima/`；类名 `UserServiceTest`；两个方法 `public void testGetAge()` / `public void testGetGender()`，各加 `@Test`；运行用 IDEA 的绿色三角或命令行 `mvn test`
+  **三级 · 骨架**：`public class UserService____Test { @Test public void ____(){ ... } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  /**
+   * 测试类：类名规范是 XxxxTest
+   */
+  public class UserServiceTest {
+  
+      @Test
+      public void testGetAge(){
+          UserService userService = new UserService();
+          Integer age = userService.getAge("100000200010011011");
+          System.out.println("年龄：" + age);
+      }
+  
+      @Test
+      public void testGetGender(){
+          UserService userService = new UserService();
+          String gender = userService.getGender("100000200010011011");
+          System.out.println("性别：" + gender);
+      }
+  }
+  ```
+  4. **运行结果**（本机实测，Maven 3.9.14 / JDK 17，`mvn test`）：
+     ```text
+     [INFO] Running com.itheima.UserServiceTest
+     性别：男
+     年龄：25
+     [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in com.itheima.UserServiceTest
+     [INFO] Results:
+     [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+     [INFO] BUILD SUCCESS
+     ```
+     关键看两行：**`Tests run: 2, Failures: 0, Errors: 0`** 和最后的 **`BUILD SUCCESS`**（打印顺序不一定和方法的书写顺序一致，JUnit 不保证方法执行顺序——本机这次先打印的是"性别"再是"年龄"）。
+  5. 三个问题：
+     ① **为什么放 test 目录**：Maven 的标准结构规定**主程序放 `main`、测试程序放 `test`**，两者分开才能"便于维护"（JUnit 的优点之一）；而且测试代码不应该参与打包上线，写在 `main` 里会混进主程序、还可能被打进 jar。PPT 第 65 页对"能不能写在 main 目录"的回答是"**可以，但是不规范**"。
+     ② **类名不叫 `XxxxTest` 的问题**：违反命名**规范**，团队里别人一眼看不出这是测试类，某些构建工具/插件按 `*Test` 模式找测试时还可能**根本不会执行**它（测试写了等于没写）。
+     ③ **方法写成 `static void` 能不能跑**：**不能**。JUnit 的规定是测试方法必须声明为 **`public void`** 的**实例方法**，`static` 方法不符合规范，会被当成普通方法跳过（同理，`private`、带返回值的方法也都不会被执行）。
+
+  :::
+
 
 ---
 

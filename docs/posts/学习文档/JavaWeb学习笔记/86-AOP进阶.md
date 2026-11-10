@@ -104,7 +104,7 @@ public class MyAspect1 {
 ![环绕通知的完整写法](https://img.tsh520.cn/file/blog/article/15-环绕通知切面.jpg)
 *图：PPT 第 15 页贴的切面——`@Around` 方法里 `Object result = pjp.proceed();` 这一行就是"注意 1"，最后的 `return result;` 就是"注意 2"*
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 一个方法上同时有多个通知时，它们是按**通知类型**的顺序"包"起来的——最外层是 `@Around`，往里依次是 `@Before` → 目标方法 → `@AfterReturning` / `@After` / `@AfterThrowing`，最后再回到 `@Around` 的后半段。把这句结构记住，下面两组实测日志就不用死记了。
 
 ### 必答问答（PPT 第 17 页 上半页）
@@ -164,7 +164,7 @@ after ....              ← 仍然执行（无论是否异常）
 2. **`after` 还在**——"无论是否有异常都会执行"；
 3. **`@Around` 的"后一半"没执行**——异常是在 `pjp.proceed()` 那一刻从目标方法里抛出来的，它一路向外抛，`around` 方法里 `proceed()` 之后的代码（`log.info("around ... after ....")`）**被跳过**；异常继续往上抛，最终变成了 HTTP 500。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 第 3 条很容易踩坑：如果你在环绕通知里写了"收尾代码"（比如关资源、清理数据），它**不一定能被执行到**。真要保证"无论如何都执行"，得用 `try-finally` 包住 `pjp.proceed()`。
 
 ## `@Pointcut`：把公共切入点抽出来（PPT 第 16 页）
@@ -198,7 +198,7 @@ public Object recordTime(ProceedingJoinPoint joinPoint) throws Throwable {
 | `private` | **仅能在当前切面类中**引用该表达式 |
 | `public` | 在**其他外部的切面类**中也可以引用该表达式（引用时要写全名，如 `类名.方法名()`） |
 
-> [!TIP]
+> [!TIP] 提示
 > 为什么抽出来值得？上一节的 `MyAspect1` 里五个通知本来要写五遍同一个表达式——一旦要改（比如只统计 `list`），五处都得改；抽成 `pt()` 以后只改一处。这就是 PPT 说的"提高复用性"。
 
 ### 必答问答（PPT 第 17 页 下半页）
@@ -312,7 +312,7 @@ execution(访问修饰符?  返回值  包名.类名.?方法名(方法参数) th
 | **包名.类名** | 可省略 |
 | **`throws` 异常** | 可省略（注意是**方法上声明抛出的异常**，不是**实际抛出**的异常） |
 
-> [!WARNING]
+> [!WARNING] 警告
 > "包名.类名可省略"虽然语法允许，但课程代码的注释里写得很直接：`//@Before("execution(void delete(java.lang.Integer))") //包名.类名 强烈不建议省略`——省掉之后，全工程所有叫 `delete` 的方法（不分包、不分类）都会被你切中，属于自找麻烦。
 
 ### 两个通配符（PPT 第 22 页）
@@ -506,7 +506,7 @@ public void before(JoinPoint joinPoint) {
 
 逐行对上：`joinPoint.getTarget()` → 目标对象（`类名@哈希值`）；`joinPoint.getTarget().getClass().getName()` → 目标类全名；`joinPoint.getSignature().getName()` → 方法名 `list`；`joinPoint.getArgs()` → 参数数组（`list()` 没有参数，打印出来是 `[]`）。如果换成 `delete(Integer id)`，最后一行就会打印出参数值——PPT 第 27 页列的四个方法在这里全部验证过。
 
-> [!TIP]
+> [!TIP] 提示
 > 连接点信息是[87 篇](/posts/编程学习/javaweb学习笔记/87-aop案例-记录操作日志/)的"地基"：操作日志要记的"执行方法的全类名、方法名、运行参数、返回值"，前三个从连接点里取，返回值则是 `proceed()` 的返回值。
 
 ## 小结
@@ -552,271 +552,303 @@ public void before(JoinPoint joinPoint) {
   需求：有一个切面类，要切住 `com.itheima.service.impl` 包下的所有方法，并在五个时机各打印一行日志：① 目标方法执行前；② 目标方法执行前后都打印（前后两行）；③ 目标方法执行后，不管成功失败都打印；④ 目标方法正常返回后打印；⑤ 目标方法抛异常后打印。要求：这五段逻辑写在**同一个切面类**里，切入点表达式只写**一处**、五个通知都引用它（别把表达式复制五遍）。写完再回答：五种通知里哪一种必须自己"让原始方法执行"？它的返回值有什么硬性要求？
   （练习文件 `test_86_通知类型与顺序.java` 的题目 2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把切入点用"抽出一个空方法 + 一个注解"的方式定义成公用的一份，再让五个通知方法各自引用它；注意"前后都打印"的那个要自己调原始方法、还要把结果交回去
-  > **二级 · 方法**：`@Pointcut("execution(* com.itheima.service.impl.*.*(..))")` 定义 `pt()`；五个注解 `@Before("pt()")` / `@Around("pt()")` / `@After("pt()")` / `@AfterReturning("pt()")` / `@AfterThrowing("pt()")`；环绕通知的参数是 `ProceedingJoinPoint`、方法里 `pjp.proceed()`、返回 `Object`
-  > **三级 · 骨架**：
-  > ```java
-  > @Slf4j
-  > @____
-  > @____
-  > public class MyAspect1 {
-  >
-  >     @____("execution(* com.itheima.service.impl.*.*(..))")
-  >     private void pt(){}
-  >
-  >     @____("pt()")
-  >     public void before(){ log.info("before ...."); }
-  >
-  >     @____("pt()")
-  >     public Object around(____ pjp) throws Throwable {
-  >         log.info("around ... before ....");
-  >         Object result = ____;
-  >         log.info("around ... after ....");
-  >         return ____;
-  >     }
-  >
-  >     @____("pt()")
-  >     public void after(){ log.info("after ...."); }
-  >
-  >     @____("pt()")
-  >     public void afterReturning(){ log.info("afterReturning ...."); }
-  >
-  >     @____("pt()")
-  >     public void afterThrowing(){ log.info("afterThrowing ...."); }
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @Slf4j
-  > @Aspect
-  > @Component
-  > public class MyAspect1 {
-  >
-  >     @Pointcut("execution(* com.itheima.service.impl.*.*(..))")
-  >     private void pt(){}
-  >
-  >     //前置通知 - 目标方法运行之前运行
-  >     @Before("pt()")
-  >     public void before(){
-  >         log.info("before ....");
-  >     }
-  >
-  >     //环绕通知 - 目标方法运行之前、后运行
-  >     @Around("pt()")
-  >     public Object around(ProceedingJoinPoint pjp) throws Throwable {
-  >         log.info("around ... before ....");
-  >         Object result = pjp.proceed();
-  >         log.info("around ... after ....");
-  >         return result;
-  >     }
-  >
-  >     //后置通知 - 目标方法运行之后运行, 无论是否出现异常都会执行
-  >     @After("pt()")
-  >     public void after(){
-  >         log.info("after ....");
-  >     }
-  >
-  >     //返回后通知 - 目标方法运行之后运行, 如果出现异常不会运行
-  >     @AfterReturning("pt()")
-  >     public void afterReturning(){
-  >         log.info("afterReturning ....");
-  >     }
-  >
-  >     //异常后通知 - 目标方法运行之后运行, 只有出现异常才会运行
-  >     @AfterThrowing("pt()")
-  >     public void afterThrowing(){
-  >         log.info("afterThrowing ....");
-  >     }
-  > }
-  > ```
-  > 回答：必须自己"让原始方法执行"的是 **`@Around` 环绕通知**——它要在 `pjp.proceed()` 那一行手动触发目标方法；返回值**必须声明为 `Object`**（用来接收原始方法的返回值，再由它交回给调用方）。其它四种通知只管"插一句话"，目标方法由框架照常执行。
+  **一级 · 思路**：先把切入点用"抽出一个空方法 + 一个注解"的方式定义成公用的一份，再让五个通知方法各自引用它；注意"前后都打印"的那个要自己调原始方法、还要把结果交回去
+  **二级 · 方法**：`@Pointcut("execution(* com.itheima.service.impl.*.*(..))")` 定义 `pt()`；五个注解 `@Before("pt()")` / `@Around("pt()")` / `@After("pt()")` / `@AfterReturning("pt()")` / `@AfterThrowing("pt()")`；环绕通知的参数是 `ProceedingJoinPoint`、方法里 `pjp.proceed()`、返回 `Object`
+  **三级 · 骨架**：
+  ```java
+  @Slf4j
+  @____
+  @____
+  public class MyAspect1 {
+  
+      @____("execution(* com.itheima.service.impl.*.*(..))")
+      private void pt(){}
+  
+      @____("pt()")
+      public void before(){ log.info("before ...."); }
+  
+      @____("pt()")
+      public Object around(____ pjp) throws Throwable {
+          log.info("around ... before ....");
+          Object result = ____;
+          log.info("around ... after ....");
+          return ____;
+      }
+  
+      @____("pt()")
+      public void after(){ log.info("after ...."); }
+  
+      @____("pt()")
+      public void afterReturning(){ log.info("afterReturning ...."); }
+  
+      @____("pt()")
+      public void afterThrowing(){ log.info("afterThrowing ...."); }
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @Slf4j
+  @Aspect
+  @Component
+  public class MyAspect1 {
+  
+      @Pointcut("execution(* com.itheima.service.impl.*.*(..))")
+      private void pt(){}
+  
+      //前置通知 - 目标方法运行之前运行
+      @Before("pt()")
+      public void before(){
+          log.info("before ....");
+      }
+  
+      //环绕通知 - 目标方法运行之前、后运行
+      @Around("pt()")
+      public Object around(ProceedingJoinPoint pjp) throws Throwable {
+          log.info("around ... before ....");
+          Object result = pjp.proceed();
+          log.info("around ... after ....");
+          return result;
+      }
+  
+      //后置通知 - 目标方法运行之后运行, 无论是否出现异常都会执行
+      @After("pt()")
+      public void after(){
+          log.info("after ....");
+      }
+  
+      //返回后通知 - 目标方法运行之后运行, 如果出现异常不会运行
+      @AfterReturning("pt()")
+      public void afterReturning(){
+          log.info("afterReturning ....");
+      }
+  
+      //异常后通知 - 目标方法运行之后运行, 只有出现异常才会运行
+      @AfterThrowing("pt()")
+      public void afterThrowing(){
+          log.info("afterThrowing ....");
+      }
+  }
+  ```
+  回答：必须自己"让原始方法执行"的是 **`@Around` 环绕通知**——它要在 `pjp.proceed()` 那一行手动触发目标方法；返回值**必须声明为 `Object`**（用来接收原始方法的返回值，再由它交回给调用方）。其它四种通知只管"插一句话"，目标方法由框架照常执行。
+
+  :::
+
 
 - [ ] **2-2 用注解明确两个切面的先后顺序**
   需求：工程里有两个切面类 `AspectA` 和 `AspectB`，切入点都把同一批业务方法切中了，两个类里各有一个前置通知和一个后置通知。现在的要求是：**目标方法执行之前，`AspectA` 的通知先执行、`AspectB` 的后执行；目标方法执行之后，`AspectB` 的通知先执行、`AspectA` 的后执行**——而且这个顺序不能靠类名字母"碰运气"，必须显式指定。写出这两个切面类（关键注解 + 方法），并说明如果不显式指定，框架会按什么规则排。
   （练习文件 `test_86_通知类型与顺序.java` 的题目 2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：给"谁先谁后"这件事加一个带数字的注解，数字小的一方先冲进目标方法、也最后离开；两个类都要加
-  > **二级 · 方法**：切面类上加 `@Order(数字)`（和 `@Aspect`、`@Component` 并列）；前：数字小的先执行；后：数字小的后执行——所以让 `AspectA` 的数字比 `AspectB` 小
-  > **三级 · 骨架**：
-  > ```java
-  > @Slf4j
-  > @____(____)        // AspectA：数字更小
-  > @Aspect
-  > @Component
-  > public class AspectA {
-  >     @Before("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void before(){ log.info("A -> before ..."); }
-  >
-  >     @After("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void after(){ log.info("A -> after ..."); }
-  > }
-  > ```
-  > （`AspectB` 照抄，注解里的数字改成更大的那个）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @Slf4j
-  > @Order(1)                      // 数字更小 → 目标方法前先执行、目标方法后后执行
-  > @Aspect
-  > @Component
-  > public class AspectA {
-  >     @Before("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void before(){ log.info("AspectA -> before ..."); }
-  >
-  >     @After("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void after(){ log.info("AspectA -> after ..."); }
-  > }
-  > ```
-  > ```java
-  > @Slf4j
-  > @Order(2)                      // 数字更大 → 前：晚于 AspectA；后：早于 AspectA
-  > @Aspect
-  > @Component
-  > public class AspectB {
-  >     @Before("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void before(){ log.info("AspectB -> before ..."); }
-  >
-  >     @After("execution(* com.itheima.service.impl.*.*(..))")
-  >     public void after(){ log.info("AspectB -> after ..."); }
-  > }
-  > ```
-  > 实际打印顺序（对应本机实测那组 `@Order` 日志的形状）：
-  > ```text
-  > AspectA -> before ...
-  > AspectB -> before ...
-  > [目标方法]
-  > AspectB -> after ...
-  > AspectA -> after ...
-  > ```
-  > 不显式指定 `@Order` 时，框架按**切面类的类名字母排序**：目标方法前字母排名靠前的先执行，目标方法后字母排名靠前的**后**执行。（所以如果类名恰好是 `AspectA`、`AspectB`，字母序和 `@Order(1)`/`@Order(2)` 的效果一样——想把实验做出区别，得给数字换个不相邻的排法。）
+  **一级 · 思路**：给"谁先谁后"这件事加一个带数字的注解，数字小的一方先冲进目标方法、也最后离开；两个类都要加
+  **二级 · 方法**：切面类上加 `@Order(数字)`（和 `@Aspect`、`@Component` 并列）；前：数字小的先执行；后：数字小的后执行——所以让 `AspectA` 的数字比 `AspectB` 小
+  **三级 · 骨架**：
+  ```java
+  @Slf4j
+  @____(____)        // AspectA：数字更小
+  @Aspect
+  @Component
+  public class AspectA {
+      @Before("execution(* com.itheima.service.impl.*.*(..))")
+      public void before(){ log.info("A -> before ..."); }
+  
+      @After("execution(* com.itheima.service.impl.*.*(..))")
+      public void after(){ log.info("A -> after ..."); }
+  }
+  ```
+  （`AspectB` 照抄，注解里的数字改成更大的那个）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @Slf4j
+  @Order(1)                      // 数字更小 → 目标方法前先执行、目标方法后后执行
+  @Aspect
+  @Component
+  public class AspectA {
+      @Before("execution(* com.itheima.service.impl.*.*(..))")
+      public void before(){ log.info("AspectA -> before ..."); }
+  
+      @After("execution(* com.itheima.service.impl.*.*(..))")
+      public void after(){ log.info("AspectA -> after ..."); }
+  }
+  ```
+  ```java
+  @Slf4j
+  @Order(2)                      // 数字更大 → 前：晚于 AspectA；后：早于 AspectA
+  @Aspect
+  @Component
+  public class AspectB {
+      @Before("execution(* com.itheima.service.impl.*.*(..))")
+      public void before(){ log.info("AspectB -> before ..."); }
+  
+      @After("execution(* com.itheima.service.impl.*.*(..))")
+      public void after(){ log.info("AspectB -> after ..."); }
+  }
+  ```
+  实际打印顺序（对应本机实测那组 `@Order` 日志的形状）：
+  ```text
+  AspectA -> before ...
+  AspectB -> before ...
+  [目标方法]
+  AspectB -> after ...
+  AspectA -> after ...
+  ```
+  不显式指定 `@Order` 时，框架按**切面类的类名字母排序**：目标方法前字母排名靠前的先执行，目标方法后字母排名靠前的**后**执行。（所以如果类名恰好是 `AspectA`、`AspectB`，字母序和 `@Order(1)`/`@Order(2)` 的效果一样——想把实验做出区别，得给数字换个不相邻的排法。）
+
+  :::
+
 
 - [ ] **2-3 用注解"点单"，而不是靠方法名去猜**
   需求：现在的 `execution` 表达式要靠"方法名有规律"才能写出来。要求换一套思路：自定义一个只能加在方法上的注解（运行时保留），然后在切面里按"**方法上有没有贴这个注解**"来匹配，并把注解贴到两个控制器方法上（新增部门、删除部门）。写出三部分：自定义注解、切面里的表达式、控制器方法上的用法。
   （练习文件 `test_86_切入点表达式.txt` 的题目 2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：思路是"注解当标记、表达式认标记"。注解本身要能活到运行时；表达式括号里写的是**注解的全类名**（不是简单名字）
-  > **二级 · 方法**：自定义注解用 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`；表达式写 `@annotation(com.itheima.anno.LogOperation)`（放进 `@Before` / `@Around` 的括号里）；用的时候直接在控制器方法上加 `@LogOperation`
-  > **三级 · 骨架**：
-  > ```java
-  > @____(ElementType.METHOD)
-  > @____(RetentionPolicy.RUNTIME)
-  > public @interface LogOperation {
-  > }
-  > ```
-  > ```java
-  > @____("@____(com.itheima.anno.LogOperation)")
-  > public void before(){ log.info("before ..."); }
-  > ```
-  > ```java
-  > @____
-  > @PostMapping
-  > public Result save(@RequestBody Dept dept){ ... }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // 1. 自定义注解（课程代码 anno/LogOperation.java）
-  > package com.itheima.anno;
-  >
-  > import java.lang.annotation.ElementType;
-  > import java.lang.annotation.Retention;
-  > import java.lang.annotation.RetentionPolicy;
-  > import java.lang.annotation.Target;
-  >
-  > @Target(ElementType.METHOD)            // 只能加在方法上
-  > @Retention(RetentionPolicy.RUNTIME)    // 运行时保留，AOP 才读得到
-  > public @interface LogOperation {
-  > }
-  > ```
-  > ```java
-  > // 2. 切面里按注解匹配
-  > @Before("@annotation(com.itheima.anno.LogOperation)")
-  > public void before(){
-  >     log.info("MyAspect5 -> before ...");
-  > }
-  > ```
-  > ```java
-  > // 3. 控制器方法上贴注解
-  > @LogOperation
-  > @PostMapping
-  > public Result save(@RequestBody Dept dept){
-  >     deptService.save(dept);
-  >     return Result.success();
-  > }
-  >
-  > @LogOperation
-  > @DeleteMapping
-  > public Result delete(Integer id){
-  >     deptService.delete(id);
-  >     return Result.success();
-  > }
-  > ```
-  > 自查：① 表达式括号里必须是**全类名**（`com.itheima.anno.LogOperation`）——只写 `LogOperation` 找不到；② 注解的 `@Retention` 必须是 `RUNTIME`，否则运行时读不到、切面永远不生效；③ 贴上注解的 `save`/`delete` 被切中，而没贴注解的 `list` 不受影响（这就是 `@annotation` 比 `execution` "指哪打哪"的地方）。
+  **一级 · 思路**：思路是"注解当标记、表达式认标记"。注解本身要能活到运行时；表达式括号里写的是**注解的全类名**（不是简单名字）
+  **二级 · 方法**：自定义注解用 `@Target(ElementType.METHOD)` + `@Retention(RetentionPolicy.RUNTIME)`；表达式写 `@annotation(com.itheima.anno.LogOperation)`（放进 `@Before` / `@Around` 的括号里）；用的时候直接在控制器方法上加 `@LogOperation`
+  **三级 · 骨架**：
+  ```java
+  @____(ElementType.METHOD)
+  @____(RetentionPolicy.RUNTIME)
+  public @interface LogOperation {
+  }
+  ```
+  ```java
+  @____("@____(com.itheima.anno.LogOperation)")
+  public void before(){ log.info("before ..."); }
+  ```
+  ```java
+  @____
+  @PostMapping
+  public Result save(@RequestBody Dept dept){ ... }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // 1. 自定义注解（课程代码 anno/LogOperation.java）
+  package com.itheima.anno;
+  
+  import java.lang.annotation.ElementType;
+  import java.lang.annotation.Retention;
+  import java.lang.annotation.RetentionPolicy;
+  import java.lang.annotation.Target;
+  
+  @Target(ElementType.METHOD)            // 只能加在方法上
+  @Retention(RetentionPolicy.RUNTIME)    // 运行时保留，AOP 才读得到
+  public @interface LogOperation {
+  }
+  ```
+  ```java
+  // 2. 切面里按注解匹配
+  @Before("@annotation(com.itheima.anno.LogOperation)")
+  public void before(){
+      log.info("MyAspect5 -> before ...");
+  }
+  ```
+  ```java
+  // 3. 控制器方法上贴注解
+  @LogOperation
+  @PostMapping
+  public Result save(@RequestBody Dept dept){
+      deptService.save(dept);
+      return Result.success();
+  }
+  
+  @LogOperation
+  @DeleteMapping
+  public Result delete(Integer id){
+      deptService.delete(id);
+      return Result.success();
+  }
+  ```
+  自查：① 表达式括号里必须是**全类名**（`com.itheima.anno.LogOperation`）——只写 `LogOperation` 找不到；② 注解的 `@Retention` 必须是 `RUNTIME`，否则运行时读不到、切面永远不生效；③ 贴上注解的 `save`/`delete` 被切中，而没贴注解的 `list` 不受影响（这就是 `@annotation` 比 `execution` "指哪打哪"的地方）。
+
+  :::
+
 
 - [ ] **2-4 在通知里拿到"我正在通知谁"**
   需求：写一个前置通知，切住 `com.itheima.service` 包下所有方法，打印出四样东西：目标对象、目标类的全名、目标方法名、方法的参数。再写一个环绕通知，把原始方法的**返回值**也拿到手里（打印一行或直接返回）。
   写完回答：这两个通知的参数类型能不能互换？为什么？
   （练习文件 `test_86_通知类型与顺序.java` 的题目 2-4 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：连接点对象就是"当前被通知的那个方法"的载体，四种"拿信息"的方法它都有；只有环绕通知多一个"执行原始方法"的能力
-  > **二级 · 方法**：前置通知参数用 `JoinPoint`，取 `getTarget()`、`getTarget().getClass().getName()`、`getSignature().getName()`、`getArgs()`（参数是数组，可 `Arrays.toString`）；环绕通知参数用 `ProceedingJoinPoint`，用 `proceed()` 拿返回值
-  > **三级 · 骨架**：
-  > ```java
-  > @Before("execution(* com.itheima.service.*.*(..))")
-  > public void before(____ joinPoint){
-  >     log.info("获取目标对象: {}", ____);
-  >     log.info("获取目标类: {}", joinPoint.getTarget().getClass().____());
-  >     log.info("获取目标方法: {}", joinPoint.____.getName());
-  >     log.info("获取目标方法参数: {}", Arrays.toString(____.getArgs()));
-  > }
-  >
-  > @Around("execution(* com.itheima.service.*.*(..))")
-  > public Object around(____ pjp) throws Throwable {
-  >     Object result = ____;
-  >     log.info("返回值: {}", result);
-  >     return ____;
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @Before("execution(* com.itheima.service.*.*(..))")
-  > public void before(JoinPoint joinPoint){
-  >     log.info("before ....");
-  >     //1. 获取目标对象
-  >     Object target = joinPoint.getTarget();
-  >     log.info("获取目标对象: {}", target);
-  >     //2. 获取目标类
-  >     String className = joinPoint.getTarget().getClass().getName();
-  >     log.info("获取目标类: {}", className);
-  >     //3. 获取目标方法
-  >     String methodName = joinPoint.getSignature().getName();
-  >     log.info("获取目标方法: {}", methodName);
-  >     //4. 获取目标方法参数
-  >     Object[] args = joinPoint.getArgs();
-  >     log.info("获取目标方法参数: {}", Arrays.toString(args));
-  > }
-  >
-  > @Around("execution(* com.itheima.service.*.*(..))")
-  > public Object around(ProceedingJoinPoint pjp) throws Throwable {
-  >     Object result = pjp.proceed();      // 原始方法的返回值就在手里
-  >     log.info("原始方法的返回值: {}", result);
-  >     return result;
-  > }
-  > ```
-  > **本机实测**（`MyAspect6` 对 `GET /depts` 的输出）：
-  > ```text
-  > 获取目标对象: com.itheima.service.impl.DeptServiceImpl@34a8c1a4
-  > 获取目标类: com.itheima.service.impl.DeptServiceImpl
-  > 获取目标方法: list
-  > 获取目标方法参数: []
-  > ```
-  > 回答：**不能互换**。`JoinPoint` 是父类型，只负责"拿信息"；`ProceedingJoinPoint` 是它的子类型，多了一个 `proceed()`。所以环绕通知**必须**用 `ProceedingJoinPoint`（要执行原始方法），其它通知用 `JoinPoint` 就够（用 `ProceedingJoinPoint` 也能通过编译，但没必要；反过来在环绕通知里写 `JoinPoint` 就调不到 `proceed()`、原始方法不会执行）。
+  **一级 · 思路**：连接点对象就是"当前被通知的那个方法"的载体，四种"拿信息"的方法它都有；只有环绕通知多一个"执行原始方法"的能力
+  **二级 · 方法**：前置通知参数用 `JoinPoint`，取 `getTarget()`、`getTarget().getClass().getName()`、`getSignature().getName()`、`getArgs()`（参数是数组，可 `Arrays.toString`）；环绕通知参数用 `ProceedingJoinPoint`，用 `proceed()` 拿返回值
+  **三级 · 骨架**：
+  ```java
+  @Before("execution(* com.itheima.service.*.*(..))")
+  public void before(____ joinPoint){
+      log.info("获取目标对象: {}", ____);
+      log.info("获取目标类: {}", joinPoint.getTarget().getClass().____());
+      log.info("获取目标方法: {}", joinPoint.____.getName());
+      log.info("获取目标方法参数: {}", Arrays.toString(____.getArgs()));
+  }
+  
+  @Around("execution(* com.itheima.service.*.*(..))")
+  public Object around(____ pjp) throws Throwable {
+      Object result = ____;
+      log.info("返回值: {}", result);
+      return ____;
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @Before("execution(* com.itheima.service.*.*(..))")
+  public void before(JoinPoint joinPoint){
+      log.info("before ....");
+      //1. 获取目标对象
+      Object target = joinPoint.getTarget();
+      log.info("获取目标对象: {}", target);
+      //2. 获取目标类
+      String className = joinPoint.getTarget().getClass().getName();
+      log.info("获取目标类: {}", className);
+      //3. 获取目标方法
+      String methodName = joinPoint.getSignature().getName();
+      log.info("获取目标方法: {}", methodName);
+      //4. 获取目标方法参数
+      Object[] args = joinPoint.getArgs();
+      log.info("获取目标方法参数: {}", Arrays.toString(args));
+  }
+  
+  @Around("execution(* com.itheima.service.*.*(..))")
+  public Object around(ProceedingJoinPoint pjp) throws Throwable {
+      Object result = pjp.proceed();      // 原始方法的返回值就在手里
+      log.info("原始方法的返回值: {}", result);
+      return result;
+  }
+  ```
+  **本机实测**（`MyAspect6` 对 `GET /depts` 的输出）：
+  ```text
+  获取目标对象: com.itheima.service.impl.DeptServiceImpl@34a8c1a4
+  获取目标类: com.itheima.service.impl.DeptServiceImpl
+  获取目标方法: list
+  获取目标方法参数: []
+  ```
+  回答：**不能互换**。`JoinPoint` 是父类型，只负责"拿信息"；`ProceedingJoinPoint` 是它的子类型，多了一个 `proceed()`。所以环绕通知**必须**用 `ProceedingJoinPoint`（要执行原始方法），其它通知用 `JoinPoint` 就够（用 `ProceedingJoinPoint` 也能通过编译，但没必要；反过来在环绕通知里写 `JoinPoint` 就调不到 `proceed()`、原始方法不会执行）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -844,49 +876,57 @@ public void before(JoinPoint joinPoint) {
   | 连接点（PPT 27） | 第 5 步——目标对象/目标类/方法名/参数 |
   | 实验工程的切面开关（本机实测） | 全部步骤——一次只开一个切面，日志才干净 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：每一步只打开一个切面类、只改一处注释，然后"重启 → 调接口 → 看日志"，最后把日志和 PPT 的规则逐条对上
-  > **二级 · 方法**：切面开关 = 注释/取消注释类上的 `@Aspect`；异常开关 = `DeptServiceImpl` 里的 `int i = 1/0;`；接口 `GET http://localhost:8080/depts`；确认"是否执行"就看日志里那几行关键字（`before` / `after` / `afterReturning` / `afterThrowing` / `around ... after`）
-  > **三级 · 骨架**：① 日志六行的关键字按顺序是 `around ... ____` → `____` →（目标方法）→ `____ ....` → `____ ....` → `around ... ____ ....`；② 状态码 ____、异常 `java.lang.____`；③ 前：____ → ____ → ____；后：____ → ____ → ____；⑤ 四行分别是"获取目标对象/目标类/目标方法/目标方法参数"
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **本机实测**（正常 `GET /depts`，`MyAspect1`）：
-  >    ```text
-  >    around ... before ....      ← @Around 在 pjp.proceed() 之前的代码
-  >    before ....                 ← @Before
-  >    [目标方法真正执行]
-  >    afterReturning ....         ← @AfterReturning（正常返回才执行）
-  >    after ....                  ← @After（无论是否异常都执行）
-  >    around ... after ....       ← @Around 在 pjp.proceed() 之后的代码
-  >    ```
-  > 2. **本机实测**（打开 `int i = 1/0;`）：`GET /depts` 返回 **HTTP 500**，异常是 `java.lang.ArithmeticException: / by zero`，日志变成
-  >    ```text
-  >    around ... before ....
-  >    before ....
-  >    afterThrowing ....          ← 新出现的（只有异常才执行）
-  >    after ....                  ← 还在（无论是否异常都执行）
-  >    ```
-  >    **消失**的是 `afterReturning ....`（PPT：有异常不会执行）；**新出现**的是 `afterThrowing ....`；`@Around` 的后半段（`around ... after ....`）**没有执行**——异常从 `pjp.proceed()` 里抛出后，`around` 方法里 `proceed()` 之后的代码被跳过，异常一路向外抛成了 500。
-  > 3. **本机实测**（打开 `MyAspect2`/`MyAspect3`/`MyAspect4`）：
-  >    ```text
-  >    MyAspect4 -> before ...     ← @Order(3)
-  >    MyAspect3 -> before ...     ← @Order(5)
-  >    MyAspect2 -> before ...     ← @Order(8)
-  >    [目标方法]
-  >    MyAspect2 -> after ...      ← @Order(8)
-  >    MyAspect3 -> after ...      ← @Order(5)
-  >    MyAspect4 -> after ...      ← @Order(3)
-  >    ```
-  >    目标方法**之前**：数字小的先执行（`3 → 5 → 8`）；目标方法**之后**：数字小的后执行（`8 → 5 → 3`）。
-  > 4. `MyAspect5` 打开后用的表达式是 `@annotation(com.itheima.anno.LogOperation)`，所以只有**方法上贴了 `@LogOperation`** 的调用才会打印 `MyAspect5 -> before ...`（课程代码里 `DeptServiceImpl.list()` 和 `delete()` 上正好贴着这个注解）；把方法上的注解去掉再调，日志就不出现了——这说明 `@annotation` 是"按注解匹配"，跟方法属于哪个包、哪个类、叫什么名字都无关。
-  > 5. **本机实测**（`MyAspect6`）：
-  >    ```text
-  >    获取目标对象: com.itheima.service.impl.DeptServiceImpl@34a8c1a4
-  >    获取目标类: com.itheima.service.impl.DeptServiceImpl
-  >    获取目标方法: list
-  >    获取目标方法参数: []
-  >    ```
-  >    对应 `getTarget()`、`getTarget().getClass().getName()`、`getSignature().getName()`、`getArgs()`。
-  > 6. 两个回答：
-  >    ① 因为两者的触发条件不同：`@After` 是"**目标方法执行后，无论是否有异常都会执行**"（相当于 finally），所以异常时照样跑；`@AfterReturning` 是"**有异常不会执行**"——这次目标方法根本没正常返回，它的条件不成立。同理 `@AfterThrowing` 只在抛异常时才出现。
-  >    ② `execution` 好在**批量**：方法名有规律、或者"整个包都要切"时一行表达式搞定（如 `execution(* com.itheima.service.impl.*.*(..))`）；`@annotation` 好在**精确**：要切的方法零散分布、名字没规律时，用 `execution` 得靠 `||` 拼一长串还容易漏，改成"在方法上贴一个注解"就一目了然（[87 篇](/posts/编程学习/javaweb学习笔记/87-aop案例-记录操作日志/)的操作日志案例正是这么选的）。
+  **一级 · 思路**：每一步只打开一个切面类、只改一处注释，然后"重启 → 调接口 → 看日志"，最后把日志和 PPT 的规则逐条对上
+  **二级 · 方法**：切面开关 = 注释/取消注释类上的 `@Aspect`；异常开关 = `DeptServiceImpl` 里的 `int i = 1/0;`；接口 `GET http://localhost:8080/depts`；确认"是否执行"就看日志里那几行关键字（`before` / `after` / `afterReturning` / `afterThrowing` / `around ... after`）
+  **三级 · 骨架**：① 日志六行的关键字按顺序是 `around ... ____` → `____` →（目标方法）→ `____ ....` → `____ ....` → `around ... ____ ....`；② 状态码 ____、异常 `java.lang.____`；③ 前：____ → ____ → ____；后：____ → ____ → ____；⑤ 四行分别是"获取目标对象/目标类/目标方法/目标方法参数"
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **本机实测**（正常 `GET /depts`，`MyAspect1`）：
+     ```text
+     around ... before ....      ← @Around 在 pjp.proceed() 之前的代码
+     before ....                 ← @Before
+     [目标方法真正执行]
+     afterReturning ....         ← @AfterReturning（正常返回才执行）
+     after ....                  ← @After（无论是否异常都执行）
+     around ... after ....       ← @Around 在 pjp.proceed() 之后的代码
+     ```
+  2. **本机实测**（打开 `int i = 1/0;`）：`GET /depts` 返回 **HTTP 500**，异常是 `java.lang.ArithmeticException: / by zero`，日志变成
+     ```text
+     around ... before ....
+     before ....
+     afterThrowing ....          ← 新出现的（只有异常才执行）
+     after ....                  ← 还在（无论是否异常都执行）
+     ```
+     **消失**的是 `afterReturning ....`（PPT：有异常不会执行）；**新出现**的是 `afterThrowing ....`；`@Around` 的后半段（`around ... after ....`）**没有执行**——异常从 `pjp.proceed()` 里抛出后，`around` 方法里 `proceed()` 之后的代码被跳过，异常一路向外抛成了 500。
+  3. **本机实测**（打开 `MyAspect2`/`MyAspect3`/`MyAspect4`）：
+     ```text
+     MyAspect4 -> before ...     ← @Order(3)
+     MyAspect3 -> before ...     ← @Order(5)
+     MyAspect2 -> before ...     ← @Order(8)
+     [目标方法]
+     MyAspect2 -> after ...      ← @Order(8)
+     MyAspect3 -> after ...      ← @Order(5)
+     MyAspect4 -> after ...      ← @Order(3)
+     ```
+     目标方法**之前**：数字小的先执行（`3 → 5 → 8`）；目标方法**之后**：数字小的后执行（`8 → 5 → 3`）。
+  4. `MyAspect5` 打开后用的表达式是 `@annotation(com.itheima.anno.LogOperation)`，所以只有**方法上贴了 `@LogOperation`** 的调用才会打印 `MyAspect5 -> before ...`（课程代码里 `DeptServiceImpl.list()` 和 `delete()` 上正好贴着这个注解）；把方法上的注解去掉再调，日志就不出现了——这说明 `@annotation` 是"按注解匹配"，跟方法属于哪个包、哪个类、叫什么名字都无关。
+  5. **本机实测**（`MyAspect6`）：
+     ```text
+     获取目标对象: com.itheima.service.impl.DeptServiceImpl@34a8c1a4
+     获取目标类: com.itheima.service.impl.DeptServiceImpl
+     获取目标方法: list
+     获取目标方法参数: []
+     ```
+     对应 `getTarget()`、`getTarget().getClass().getName()`、`getSignature().getName()`、`getArgs()`。
+  6. 两个回答：
+     ① 因为两者的触发条件不同：`@After` 是"**目标方法执行后，无论是否有异常都会执行**"（相当于 finally），所以异常时照样跑；`@AfterReturning` 是"**有异常不会执行**"——这次目标方法根本没正常返回，它的条件不成立。同理 `@AfterThrowing` 只在抛异常时才出现。
+     ② `execution` 好在**批量**：方法名有规律、或者"整个包都要切"时一行表达式搞定（如 `execution(* com.itheima.service.impl.*.*(..))`）；`@annotation` 好在**精确**：要切的方法零散分布、名字没规律时，用 `execution` 得靠 `||` 拼一长串还容易漏，改成"在方法上贴一个注解"就一目了然（[87 篇](/posts/编程学习/javaweb学习笔记/87-aop案例-记录操作日志/)的操作日志案例正是这么选的）。
+
+  :::
+

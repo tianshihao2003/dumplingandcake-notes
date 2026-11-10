@@ -74,7 +74,7 @@ PPT 第 42 页给了一张"通用思路"流程图，分两段：
 
 为什么叫"通用思路"？因为换成阿里云的短信服务、语音服务、视频点播，甚至换成别家的云服务，走的还是这套：**先开账号、拿到秘钥、开通服务，再照着官方 SDK 写个小程序跑通，最后集成到项目里**。区别只是中间那几格换成对应的服务名。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 注意两个顺序上的讲究：
 > ① **"参照官方 SDK"排在"集成使用"前面**——先在一个干净的小程序里把第三方服务跑通，再往项目里搬，出了问题容易定位；
 > ② **密钥（AccessKey）不在代码里生成、也不写进代码**，是从阿里云控制台拿到的（下面会看到课程代码是把它放在**环境变量**里的）。
@@ -98,7 +98,7 @@ PPT 第 43 页把上一页的流程落成一张"使用步骤"图，从左到右�
 - **bucket 名**：`java-ai`（创建 bucket 时起的名字）；
 - **地域（region）与 endpoint 是对应的**：`region: cn-beijing` ↔ `endpoint: https://oss-cn-beijing.aliyuncs.com`——bucket 建在哪个地域，endpoint 里就是哪个地域的域名（建 bucket 时选的地域要记下来，后面配错就是"找不到 bucket"）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **AccessKey 等于账号的钥匙**，权限很大。别把它写进 Java 代码、别提交到 Git 仓库（写进代码的密钥会跟着代码到处跑，泄露了别人就能用你的账号）。课程的做法是**配到环境变量**里，代码里只写"从环境变量读"。
 
 ## 入门程序（PPT 第 44 页）
@@ -125,7 +125,7 @@ public class AliyunOSSOperator {
 }
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 为什么先单独写"入门程序"、不直接改项目？因为第三方服务最容易出问题的地方是**参数和密钥**（endpoint 地域不对、bucket 名写错、密钥没配）。在一个只有几十行的程序里调通，比在项目里翻日志快得多。这也是 PPT 第 42 页把"参照官方 SDK 编写入门程序"和"集成使用"分成两格的原因。
 
 ## 案例集成 OSS（PPT 第 45-47 页）
@@ -290,7 +290,7 @@ public class UploadController {
 </dependency>
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 后面三个（`jaxb-api`、`activation`、`jaxb-runtime`）是官方文档要求一起加的：JDK 9 以后 Java 不再自带 JAXB，而阿里云 SDK 内部要用到它，缺了运行时会报"找不到类"（`ClassNotFoundException` / `NoClassDefFoundError` 这一类）。本机实测这几个依赖齐全、工程能**编译通过**（见下面"实测与没实测"）。
 
 ## 问题：参数写在 Java 代码里（PPT 第 48 页）
@@ -440,12 +440,12 @@ PPT 第 52 页的问答，就是这两种方式的总结：
 | 复用 | 换个类要重抄一遍注解 | 注入属性类即可，到处复用 |
 | 适用场景 | **属性较少**时（如一个两个） | **属性较多、需要复用**时（如 OSS 这组） |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 两种方式**不是二选一**，项目里可以同时存在：零散的一两个参数用 `@Value` 更省事，成组的参数（像 `aliyun.oss` 这三项）用 `@ConfigurationProperties` 更清爽。
 
 ### 本机实测：两种方式都能注入
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：在工程里加一个绑定组件（`@ConfigurationProperties(prefix = "aliyun.oss")`）后启动，控制台输出：
 >
 > ```text
@@ -468,7 +468,7 @@ PPT 第 52 页的问答，就是这两种方式的总结：
 
 所以本篇里"OSS 上传"这部分内容是**按 PPT 步骤 + 课程代码讲清做法**（工具类怎么调 SDK、`objectName` 怎么拼、URL 怎么来、接口怎么返回），**不是**本机的运行结果。等你有了自己的阿里云账号、把前五步做完，照着本节的代码走一遍就能真正跑通。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 真要动手时，最容易卡住的三处：① **bucket 的地域和 endpoint 对不上**（`cn-beijing` ↔ `oss-cn-beijing.aliyuncs.com`）；② **环境变量没配或名字写错**（必须是 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`）；③ **bucket 的读写权限**——如果设成"私有"，上传能成功但直接访问 URL 会被拒绝，前端显示不出图片。
 
 ## 小结
@@ -528,38 +528,46 @@ PPT 第 52 页的问答，就是这两种方式的总结：
 
   （练习文件 `test_73_参数配置化.java` 与 `test_73_OSS配置.yml` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：yml 里按"层级"写（`aliyun` 下面套 `oss`，再写三项）；Java 里每个字段上面贴一行"取配置"的注解，注解里写这个配置项的**完整路径**（层级用 `.` 连接）
-  > **二级 · 方法**：yml 用 `aliyun: oss: endpoint/bucketName/region`；字段上用 `@Value("${aliyun.oss.xxx}")`
-  > **三级 · 骨架**：`@Value("${aliyun.oss.____}")` + `private String ____;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① `application.yml`：
-  > ```yaml
-  > #阿里云OSS
-  > aliyun:
-  >   oss:
-  >     endpoint: https://oss-cn-beijing.aliyuncs.com
-  >     bucketName: java-ai
-  >     region: cn-beijing
-  > ```
-  > ② 工具类（课程工程的写法）：
-  > ```java
-  > @Component
-  > public class AliyunOSSOperator {
-  >
-  >     @Value("${aliyun.oss.endpoint}")
-  >     private String endpoint;
-  >     @Value("${aliyun.oss.bucketName}")
-  >     private String bucketName;
-  >     @Value("${aliyun.oss.region}")
-  >     private String region;
-  >
-  >     // ... upload 方法不变
-  > }
-  > ```
-  > ③ 换 bucket 只改 `application.yml` 里的 `bucketName` 一行——**不用动 Java 代码、不用重新编译**（重启应用即可）。这正是"参数配置化"要解决的问题（PPT 第 48 页说的"写在 java 代码中不便维护与管理"）。
-  > 补充：`@Value` 里 `${}` 中的路径必须和 yml 的层级完全对上（`aliyun.oss.endpoint`），写错的话启动时会报"找不到占位符"。
+  **一级 · 思路**：yml 里按"层级"写（`aliyun` 下面套 `oss`，再写三项）；Java 里每个字段上面贴一行"取配置"的注解，注解里写这个配置项的**完整路径**（层级用 `.` 连接）
+  **二级 · 方法**：yml 用 `aliyun: oss: endpoint/bucketName/region`；字段上用 `@Value("${aliyun.oss.xxx}")`
+  **三级 · 骨架**：`@Value("${aliyun.oss.____}")` + `private String ____;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① `application.yml`：
+  ```yaml
+  #阿里云OSS
+  aliyun:
+    oss:
+      endpoint: https://oss-cn-beijing.aliyuncs.com
+      bucketName: java-ai
+      region: cn-beijing
+  ```
+  ② 工具类（课程工程的写法）：
+  ```java
+  @Component
+  public class AliyunOSSOperator {
+  
+      @Value("${aliyun.oss.endpoint}")
+      private String endpoint;
+      @Value("${aliyun.oss.bucketName}")
+      private String bucketName;
+      @Value("${aliyun.oss.region}")
+      private String region;
+  
+      // ... upload 方法不变
+  }
+  ```
+  ③ 换 bucket 只改 `application.yml` 里的 `bucketName` 一行——**不用动 Java 代码、不用重新编译**（重启应用即可）。这正是"参数配置化"要解决的问题（PPT 第 48 页说的"写在 java 代码中不便维护与管理"）。
+  补充：`@Value` 里 `${}` 中的路径必须和 yml 的层级完全对上（`aliyun.oss.endpoint`），写错的话启动时会报"找不到占位符"。
+
+  :::
+
 
 - [ ] **2-2 改成批量绑定方式**
   需求：接着上一题，把"逐个注入"换成"**批量绑定**"：
@@ -569,41 +577,49 @@ PPT 第 52 页的问答，就是这两种方式的总结：
 
   （练习文件 `test_73_参数配置化.java` 与 `test_73_OSS配置.yml` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"一组配置"看成"一个对象"——先定义这个对象（属性类），绑定靠类上的一个注解，绑定范围靠 `prefix` 指定；用的人注入这个对象就行
-  > **二级 · 方法**：属性类上 `@Data` + `@Component` + `@ConfigurationProperties(prefix = "aliyun.oss")`，字段名与配置项名一致；工具类里 `@Autowired private AliyunOSSProperties aliyunOSSProperties;`，取值用 `getEndpoint()` / `getBucketName()` / `getRegion()`
-  > **三级 · 骨架**：`@____ @Component @____(prefix = "____") public class AliyunOSSProperties { private String ____; … }`；工具类里 `@Autowired private ____ aliyunOSSProperties;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 属性类（课程资料 `资料/05. 阿里云OSS/AliyunOSSProperties.java`）：
-  > ```java
-  > @Data
-  > @Component
-  > @ConfigurationProperties(prefix = "aliyun.oss")
-  > public class AliyunOSSProperties {
-  >     private String endpoint;
-  >     private String bucketName;
-  >     private String region;
-  > }
-  > ```
-  > ② 工具类：
-  > ```java
-  > @Component
-  > public class AliyunOSSOperator {
-  >
-  >     @Autowired
-  >     private AliyunOSSProperties aliyunOSSProperties;
-  >
-  >     public String upload(byte[] content, String originalFilename) throws Exception {
-  >         String endpoint = aliyunOSSProperties.getEndpoint();
-  >         String bucketName = aliyunOSSProperties.getBucketName();
-  >         String region = aliyunOSSProperties.getRegion();
-  >         // ... 后面照旧
-  >     }
-  > }
-  > ```
-  > ③ **便于复用**：别的类也想要这组参数时，注入 `AliyunOSSProperties` 就行，**不用把 `@Value` 那几行再抄一遍**（PPT 第 50 页配的图就是"重复抄写"的反例）；配置项再多，也只在属性类里出现一次。**字段名不能随便起**：绑定是靠"去掉 `prefix` 后的配置项名 ↔ 字段名"对应的（`endpoint` 对 `endpoint`、`bucketName` 对 `bucketName`），名字对不上就绑不进去（值为 `null`）。另外别忘了 `@Data`——**绑定依赖 setter**，没有 setter Spring 写不进值。
-  > 小结一句：**属性少用 `@Value`，属性多、要复用就用 `@ConfigurationProperties`**（PPT 第 52 页的结论）。
+  **一级 · 思路**：把"一组配置"看成"一个对象"——先定义这个对象（属性类），绑定靠类上的一个注解，绑定范围靠 `prefix` 指定；用的人注入这个对象就行
+  **二级 · 方法**：属性类上 `@Data` + `@Component` + `@ConfigurationProperties(prefix = "aliyun.oss")`，字段名与配置项名一致；工具类里 `@Autowired private AliyunOSSProperties aliyunOSSProperties;`，取值用 `getEndpoint()` / `getBucketName()` / `getRegion()`
+  **三级 · 骨架**：`@____ @Component @____(prefix = "____") public class AliyunOSSProperties { private String ____; … }`；工具类里 `@Autowired private ____ aliyunOSSProperties;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 属性类（课程资料 `资料/05. 阿里云OSS/AliyunOSSProperties.java`）：
+  ```java
+  @Data
+  @Component
+  @ConfigurationProperties(prefix = "aliyun.oss")
+  public class AliyunOSSProperties {
+      private String endpoint;
+      private String bucketName;
+      private String region;
+  }
+  ```
+  ② 工具类：
+  ```java
+  @Component
+  public class AliyunOSSOperator {
+  
+      @Autowired
+      private AliyunOSSProperties aliyunOSSProperties;
+  
+      public String upload(byte[] content, String originalFilename) throws Exception {
+          String endpoint = aliyunOSSProperties.getEndpoint();
+          String bucketName = aliyunOSSProperties.getBucketName();
+          String region = aliyunOSSProperties.getRegion();
+          // ... 后面照旧
+      }
+  }
+  ```
+  ③ **便于复用**：别的类也想要这组参数时，注入 `AliyunOSSProperties` 就行，**不用把 `@Value` 那几行再抄一遍**（PPT 第 50 页配的图就是"重复抄写"的反例）；配置项再多，也只在属性类里出现一次。**字段名不能随便起**：绑定是靠"去掉 `prefix` 后的配置项名 ↔ 字段名"对应的（`endpoint` 对 `endpoint`、`bucketName` 对 `bucketName`），名字对不上就绑不进去（值为 `null`）。另外别忘了 `@Data`——**绑定依赖 setter**，没有 setter Spring 写不进值。
+  小结一句：**属性少用 `@Value`，属性多、要复用就用 `@ConfigurationProperties`**（PPT 第 52 页的结论）。
+
+  :::
+
 
 - [ ] **2-3 写一个"上传文件到 OSS 并返回访问地址"的接口**
   需求：工程里已经有工具类 `AliyunOSSOperator`（含 `upload(byte[] content, String originalFilename)` 方法，返回文件的访问 URL）。请写一个上传接口：
@@ -613,36 +629,44 @@ PPT 第 52 页的问答，就是这两种方式的总结：
   ④ 用日志记录"上传的文件名"和"上传后的 URL"各一条。
   （练习文件 `test_73_参数配置化.java` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：接口干三件事——接住文件、把文件转成工具类要的形式传进去、把返回的地址包进 `Result` 里给前端
-  > **二级 · 方法**：文件参数 `MultipartFile`；转字节数组用 `file.getBytes()`；原文件名用 `file.getOriginalFilename()`；注入工具类用 `@Autowired`；返回 `Result.success(url)`
-  > **三级 · 骨架**：`@PostMapping("/____") public Result upload(____ file) throws Exception { String url = aliyunOSSOperator.____(file.____(), file.____()); return Result.____(url); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @Slf4j
-  > @RestController
-  > public class UploadController {
-  >
-  >     @Autowired
-  >     private AliyunOSSOperator aliyunOSSOperator;
-  >
-  >     /**
-  >      * 文件上传
-  >      */
-  >     @PostMapping("/upload")
-  >     public Result upload(MultipartFile file) throws Exception {
-  >         log.info("文件上传: {}", file.getOriginalFilename());
-  >
-  >         //将文件交给OSS存储管理
-  >         String url = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
-  >         log.info("文件上传OSS, url: {}", url);
-  >
-  >         return Result.success(url);
-  >     }
-  > }
-  > ```
-  > 要点：① `file.getBytes()` 把上传文件转成 `byte[]`（工具类的方法要的就是字节数组）；② `file.getOriginalFilename()` 传进去是为了**取扩展名**（工具类用它拼 `UUID + 扩展名`）；③ 返回的是 `Result.success(url)`——按接口文档，响应的 `data` 就是"文件访问路径"，前端拿它去预览/存进 `emp.image`；④ 课程工程的 `UploadController` 里保留着上一篇"本地存储版"的注释代码，两版对照着看变化只有"怎么存"和"返回什么"两处。
+  **一级 · 思路**：接口干三件事——接住文件、把文件转成工具类要的形式传进去、把返回的地址包进 `Result` 里给前端
+  **二级 · 方法**：文件参数 `MultipartFile`；转字节数组用 `file.getBytes()`；原文件名用 `file.getOriginalFilename()`；注入工具类用 `@Autowired`；返回 `Result.success(url)`
+  **三级 · 骨架**：`@PostMapping("/____") public Result upload(____ file) throws Exception { String url = aliyunOSSOperator.____(file.____(), file.____()); return Result.____(url); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @Slf4j
+  @RestController
+  public class UploadController {
+  
+      @Autowired
+      private AliyunOSSOperator aliyunOSSOperator;
+  
+      /**
+       * 文件上传
+       */
+      @PostMapping("/upload")
+      public Result upload(MultipartFile file) throws Exception {
+          log.info("文件上传: {}", file.getOriginalFilename());
+  
+          //将文件交给OSS存储管理
+          String url = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
+          log.info("文件上传OSS, url: {}", url);
+  
+          return Result.success(url);
+      }
+  }
+  ```
+  要点：① `file.getBytes()` 把上传文件转成 `byte[]`（工具类的方法要的就是字节数组）；② `file.getOriginalFilename()` 传进去是为了**取扩展名**（工具类用它拼 `UUID + 扩展名`）；③ 返回的是 `Result.success(url)`——按接口文档，响应的 `data` 就是"文件访问路径"，前端拿它去预览/存进 `emp.image`；④ 课程工程的 `UploadController` 里保留着上一篇"本地存储版"的注释代码，两版对照着看变化只有"怎么存"和"返回什么"两处。
+
+  :::
+
 
 - [ ] **2-4 分析题：两种参数配置化方式怎么选**
   需求：项目里现在有这些参数要配置——`aliyun.oss` 的三个（endpoint/bucketName/region）、数据库连接的四项（url/driver-class-name/username/password）、一个"当前环境名称"。请回答：
@@ -651,18 +675,26 @@ PPT 第 52 页的问答，就是这两种方式的总结：
   ③ 用批量绑定那种方式时，有三个容易踩的坑，分别是什么？
   （练习文件 `test_73_参数配置化.java` 的题目2-4 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：判断标准只有两条——**参数个数**和**要不要被多个类复用**；再想想"改配置项名字时，哪种方式要动的地方多"
-  > **二级 · 方法**：`@Value` 逐个注入 vs `@ConfigurationProperties` 批量绑定；批量绑定要注意：类上要 `@Component`、要有 setter（`@Data`）、字段名必须与配置项名一致
-  > **三级 · 骨架**：少 → `____`；多/复用 → `@____(prefix = "____")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **`aliyun.oss` 三项**：用 **`@ConfigurationProperties(prefix = "aliyun.oss")`**——三个参数成组出现，而且工具类和别的地方都可能用到（要复用）；**数据库四项**：SpringBoot 的 `datasource` 本来就是给自动配置用的，业务代码里很少自己注入，如果非要注入，四项也算"较多"，同样适合批量绑定；**"当前环境名称"这一个**：用 **`@Value`** 就够（属性少，为它单独建个类反而啰嗦）。
-  > ② 对照：
-  > - `@Value`：**麻烦**在配置项一多就要写一堆注解、改个配置项名字要改所有引用处；**好**在简单直接、一个字段一行注解，字段名还能和配置项名不一样（路径写在注解里）。
-  > - `@ConfigurationProperties`：**麻烦**在要多写一个属性类（还得有 `@Component` 与 setter），字段名必须与配置项名严格对应；**好**在批量绑定、一处定义多处复用、不会出现"同一段注入抄两遍"。
-  > ③ 三个坑：**① 忘了 `@Component`**（属性类没进 Spring 容器，注入不到、绑定也不生效）；**② 忘了 setter**（只写 `private` 字段没有 `@Data`/setter，Spring 写不进值，字段全是 `null`）；**③ 字段名与配置项名不一致**（比如配置项叫 `bucketName`、字段写成 `bucket`，绑定不上，值还是 `null`）。另外 `prefix` 写错（如写成 `aliyun`）也会导致"一项都绑不上"。
-  > 结论一句话：**属性较少建议 `@Value`；属性较多、考虑复用建议 `@ConfigurationProperties`**（PPT 第 52 页）。
+  **一级 · 思路**：判断标准只有两条——**参数个数**和**要不要被多个类复用**；再想想"改配置项名字时，哪种方式要动的地方多"
+  **二级 · 方法**：`@Value` 逐个注入 vs `@ConfigurationProperties` 批量绑定；批量绑定要注意：类上要 `@Component`、要有 setter（`@Data`）、字段名必须与配置项名一致
+  **三级 · 骨架**：少 → `____`；多/复用 → `@____(prefix = "____")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **`aliyun.oss` 三项**：用 **`@ConfigurationProperties(prefix = "aliyun.oss")`**——三个参数成组出现，而且工具类和别的地方都可能用到（要复用）；**数据库四项**：SpringBoot 的 `datasource` 本来就是给自动配置用的，业务代码里很少自己注入，如果非要注入，四项也算"较多"，同样适合批量绑定；**"当前环境名称"这一个**：用 **`@Value`** 就够（属性少，为它单独建个类反而啰嗦）。
+  ② 对照：
+  - `@Value`：**麻烦**在配置项一多就要写一堆注解、改个配置项名字要改所有引用处；**好**在简单直接、一个字段一行注解，字段名还能和配置项名不一样（路径写在注解里）。
+  - `@ConfigurationProperties`：**麻烦**在要多写一个属性类（还得有 `@Component` 与 setter），字段名必须与配置项名严格对应；**好**在批量绑定、一处定义多处复用、不会出现"同一段注入抄两遍"。
+  ③ 三个坑：**① 忘了 `@Component`**（属性类没进 Spring 容器，注入不到、绑定也不生效）；**② 忘了 setter**（只写 `private` 字段没有 `@Data`/setter，Spring 写不进值，字段全是 `null`）；**③ 字段名与配置项名不一致**（比如配置项叫 `bucketName`、字段写成 `bucket`，绑定不上，值还是 `null`）。另外 `prefix` 写错（如写成 `aliyun`）也会导致"一项都绑不上"。
+  结论一句话：**属性较少建议 `@Value`；属性较多、考虑复用建议 `@ConfigurationProperties`**（PPT 第 52 页）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -686,48 +718,56 @@ PPT 第 52 页的问答，就是这两种方式的总结：
   | 参数配置化两种方式 | 第 4 步——`@Value` 逐个注入与 `@ConfigurationProperties` 批量绑定各跑一遍（本机实测注入成功） |
   | 验证边界 | 第 6 步——实测的写实测、没条件的如实说明（OSS 上传本身本机没跑） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这条链路的顺序不能颠倒——**先有 bucket 和密钥，才有入门程序；先跑通入门程序，才好往项目里搬**；参数配置化那一步只是把工具类里写死的三个字符串换成"从配置文件读"
-  > **二级 · 方法**：准备阶段用阿里云控制台；入门程序与工具类都用官方 SDK（`OSSClientBuilder` / `putObject`）；配置注入用 `@Value("${aliyun.oss.xxx}")` 或 `@ConfigurationProperties(prefix = "aliyun.oss")` + `@Data` + `@Component`；接口用 `MultipartFile` + `file.getBytes()` + `Result.success(url)`
-  > **三级 · 骨架**：`aliyun: oss: endpoint/bucketName/region`；`@____(prefix = "aliyun.oss") public class AliyunOSSProperties { private String ____; }`；`String url = aliyunOSSOperator.upload(file.____(), file.____());`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **1. 准备阶段的产物**（示例，填你自己的）：bucket 名 `java-ai`、地域 `cn-beijing`、endpoint `https://oss-cn-beijing.aliyuncs.com`、AccessKey 已配到环境变量 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`。
-  > **2. 为什么先写入门程序**：第三方服务最容易错的是**参数与密钥**，在几十行的小程序里调通比在项目里翻日志快；PPT 第 42 页把"参照官方 SDK 编写入门程序"和"集成使用"分成两格就是这个意思，第 44 页还特意强调"**一定要参照对应的官方文档进行开发和测试**"。
-  > **3. 工具类的两个拼法**（用自己的话写）：
-  > - `objectName`：`LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"))` 得到日期目录（如 `2026/09`），加上 `UUID.randomUUID() + 原扩展名` 得到不重复的文件名，两者用 `/` 连起来；**Object 完整路径中不能包含 Bucket 名称**；
-  > - 访问 URL：`endpoint.split("//")[0]` 是协议头（`https:`）、`endpoint.split("//")[1]` 是域名（`oss-cn-beijing.aliyuncs.com`），拼成 `协议头 + "//" + bucketName + "." + 域名 + "/" + objectName` → `https://java-ai.oss-cn-beijing.aliyuncs.com/2026/09/xxx.png`。
-  > **4. 两种配置化方式**：
-  > ```java
-  > // 方式一：@Value 逐个注入
-  > @Value("${aliyun.oss.endpoint}")
-  > private String endpoint;
-  > @Value("${aliyun.oss.bucketName}")
-  > private String bucketName;
-  > @Value("${aliyun.oss.region}")
-  > private String region;
-  >
-  > // 方式二：@ConfigurationProperties 批量绑定（属性类）
-  > @Data
-  > @Component
-  > @ConfigurationProperties(prefix = "aliyun.oss")
-  > public class AliyunOSSProperties {
-  >     private String endpoint;
-  >     private String bucketName;
-  >     private String region;
-  > }
-  > // 使用方：@Autowired private AliyunOSSProperties aliyunOSSProperties; 然后 getEndpoint() 等
-  > ```
-  > **本机实测**：批量绑定组件启动后打印 `[实测]@ConfigurationProperties 批量注入 => endpoint=https://oss-cn-beijing.aliyuncs.com , bucketName=java-ai , region=cn-beijing`；`@Value` 注入的写法工程也能正常启动（两项都取到了值）。PPT 第 52 页的问答：两种方式——`@Value` 一个属性一个属性地注入、`@ConfigurationProperties` 批量将多个属性注入到 bean 对象中；适用场景——**属性较少**建议 `@Value`，**属性较多、考虑复用**建议 `@ConfigurationProperties`。
-  > **5. 接口**：
-  > ```java
-  > @PostMapping("/upload")
-  > public Result upload(MultipartFile file) throws Exception {
-  >     log.info("文件上传: {}", file.getOriginalFilename());
-  >     String url = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
-  >     log.info("文件上传OSS, url: {}", url);
-  >     return Result.success(url);
-  > }
-  > ```
-  > **6. 验证**：有账号的同学这里应该能拿到形如 `https://<bucket>.<endpoint域名>/2026/09/<uuid>.png` 的地址并直接在浏览器打开。**本机整理笔记时没有阿里云账号与 AccessKey，所以"OSS 上传"没有实测**——本机实测过的只有：① `@Value` / `@ConfigurationProperties` 两种注入都能取到三项配置的值；② `aliyun-sdk-oss 3.17.4` + `jaxb-api` / `activation` / `jaxb-runtime` 依赖齐全、**工程能编译通过**。把这两条和你自己做到的步骤分开写，才算把"验证边界"交代清楚。
-  > **7. 收尾**：`application.yml` 里只留 `aliyun.oss` 三项配置，工具类与接口保持课程代码的写法，临时类删掉——密钥始终只存在环境变量里。
+  **一级 · 思路**：这条链路的顺序不能颠倒——**先有 bucket 和密钥，才有入门程序；先跑通入门程序，才好往项目里搬**；参数配置化那一步只是把工具类里写死的三个字符串换成"从配置文件读"
+  **二级 · 方法**：准备阶段用阿里云控制台；入门程序与工具类都用官方 SDK（`OSSClientBuilder` / `putObject`）；配置注入用 `@Value("${aliyun.oss.xxx}")` 或 `@ConfigurationProperties(prefix = "aliyun.oss")` + `@Data` + `@Component`；接口用 `MultipartFile` + `file.getBytes()` + `Result.success(url)`
+  **三级 · 骨架**：`aliyun: oss: endpoint/bucketName/region`；`@____(prefix = "aliyun.oss") public class AliyunOSSProperties { private String ____; }`；`String url = aliyunOSSOperator.upload(file.____(), file.____());`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **1. 准备阶段的产物**（示例，填你自己的）：bucket 名 `java-ai`、地域 `cn-beijing`、endpoint `https://oss-cn-beijing.aliyuncs.com`、AccessKey 已配到环境变量 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`。
+  **2. 为什么先写入门程序**：第三方服务最容易错的是**参数与密钥**，在几十行的小程序里调通比在项目里翻日志快；PPT 第 42 页把"参照官方 SDK 编写入门程序"和"集成使用"分成两格就是这个意思，第 44 页还特意强调"**一定要参照对应的官方文档进行开发和测试**"。
+  **3. 工具类的两个拼法**（用自己的话写）：
+  - `objectName`：`LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"))` 得到日期目录（如 `2026/09`），加上 `UUID.randomUUID() + 原扩展名` 得到不重复的文件名，两者用 `/` 连起来；**Object 完整路径中不能包含 Bucket 名称**；
+  - 访问 URL：`endpoint.split("//")[0]` 是协议头（`https:`）、`endpoint.split("//")[1]` 是域名（`oss-cn-beijing.aliyuncs.com`），拼成 `协议头 + "//" + bucketName + "." + 域名 + "/" + objectName` → `https://java-ai.oss-cn-beijing.aliyuncs.com/2026/09/xxx.png`。
+  **4. 两种配置化方式**：
+  ```java
+  // 方式一：@Value 逐个注入
+  @Value("${aliyun.oss.endpoint}")
+  private String endpoint;
+  @Value("${aliyun.oss.bucketName}")
+  private String bucketName;
+  @Value("${aliyun.oss.region}")
+  private String region;
+  
+  // 方式二：@ConfigurationProperties 批量绑定（属性类）
+  @Data
+  @Component
+  @ConfigurationProperties(prefix = "aliyun.oss")
+  public class AliyunOSSProperties {
+      private String endpoint;
+      private String bucketName;
+      private String region;
+  }
+  // 使用方：@Autowired private AliyunOSSProperties aliyunOSSProperties; 然后 getEndpoint() 等
+  ```
+  **本机实测**：批量绑定组件启动后打印 `[实测]@ConfigurationProperties 批量注入 => endpoint=https://oss-cn-beijing.aliyuncs.com , bucketName=java-ai , region=cn-beijing`；`@Value` 注入的写法工程也能正常启动（两项都取到了值）。PPT 第 52 页的问答：两种方式——`@Value` 一个属性一个属性地注入、`@ConfigurationProperties` 批量将多个属性注入到 bean 对象中；适用场景——**属性较少**建议 `@Value`，**属性较多、考虑复用**建议 `@ConfigurationProperties`。
+  **5. 接口**：
+  ```java
+  @PostMapping("/upload")
+  public Result upload(MultipartFile file) throws Exception {
+      log.info("文件上传: {}", file.getOriginalFilename());
+      String url = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
+      log.info("文件上传OSS, url: {}", url);
+      return Result.success(url);
+  }
+  ```
+  **6. 验证**：有账号的同学这里应该能拿到形如 `https://<bucket>.<endpoint域名>/2026/09/<uuid>.png` 的地址并直接在浏览器打开。**本机整理笔记时没有阿里云账号与 AccessKey，所以"OSS 上传"没有实测**——本机实测过的只有：① `@Value` / `@ConfigurationProperties` 两种注入都能取到三项配置的值；② `aliyun-sdk-oss 3.17.4` + `jaxb-api` / `activation` / `jaxb-runtime` 依赖齐全、**工程能编译通过**。把这两条和你自己做到的步骤分开写，才算把"验证边界"交代清楚。
+  **7. 收尾**：`application.yml` 里只留 `aliyun.oss` 三项配置，工具类与接口保持课程代码的写法，临时类删掉——密钥始终只存在环境变量里。
+
+  :::
+

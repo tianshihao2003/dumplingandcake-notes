@@ -62,7 +62,7 @@ server:
 
 三个文件里写的是**同一项配置**（`server.port`），但值各不相同——这是课程故意这么放的，为的是待会儿能一眼看出"到底哪一个生效"。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > PPT 第 4 页的**注意**：
 >
 > 虽然 SpringBoot 支持多种格式配置文件，但是在项目开发时，**推荐统一使用一种格式的配置**（**yml 是主流**）。
@@ -93,7 +93,7 @@ aliyun:
     region: cn-beijing
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 数据库连接信息沿用课程原样（`tlias` 库、`root`、`password: 1234`），动手时把 `password` 换成你自己 MySQL 的密码——[70 篇](/posts/编程学习/javaweb学习笔记/70-事务管理与spring事务/)开始就一直这么写，本机实测用的也是自己的密码。
 
 ## Java 系统属性与命令行参数（PPT 第 5～6 页）
@@ -123,7 +123,7 @@ java -Dserver.port=9000 -jar tlias-web-management-0.0.1-SNAPSHOT.jar --server.po
 1. 执行 Maven 打包指令 **`package`**（IDEA 右侧 Maven 面板 Lifecycle 里的 `package`，或命令行 `mvn package`）——产物在工程的 `target/` 目录下，形如 `tlias-web-management-0.0.1-SNAPSHOT.jar`；
 2. 执行 `java` 指令，运行 jar 包：`java -jar xxx.jar`（要改端口就在这条命令上动手，两种外置配置都能往上加）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > PPT 第 6 页的**注意**：
 >
 > SpringBoot 项目进行打包时，需要引入插件 **`spring-boot-maven-plugin`**（**基于官网骨架创建项目，会自动添加该插件**）。
@@ -189,7 +189,7 @@ o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 10010 (http) w
 2. 实验一里 **8082 和 8083 那两个端口根本没起**——`application.yml` 和 `application.yaml` 里的值被 `application.properties` 压住了，这才是"yaml（忽略）"那四个字的实际效果；
 3. 边界情况也顺手验了：**不加任何 `-D` / `--` 参数时，启动用的就是配置文件里的值**——说明"打包成 jar 之后启动参数能覆盖配置"这件事是真的（PPT 第 5～7 页），不是什么只写在文档里的规则。
 
-> [!TIP]
+> [!TIP] 提示
 > 这个实验很好复现，也不需要改代码：往 `src/main/resources` 里多扔两份配置文件（不同端口）、`package` 打包，然后按上表三种命令各启动一次，看控制台那句 `Tomcat started on port`。练习文件 `test_88_配置文件优先级.yml` 与 `test_88_配置优先级与Bean管理.java` 里按这个顺序留了写作区。
 
 ## Bean 管理之一：Bean 的作用域（PPT 第 8～10 页）
@@ -220,7 +220,7 @@ public class DeptController {
 
 这样 `DeptController` 就从"容器里只有一个"变成"每次使用都新建一个实例"。注意 PPT 的措辞是"**容器内同名称的 bean 只有一个实例**"——singleton 说的是同一个 bean 定义只产生一个对象（[85 篇](/posts/编程学习/javaweb学习笔记/85-aop基础/)讲的动态代理就是套在这么一个单例上的），不是"整个容器只有一个 bean"。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > PPT 第 10 页的两条**注意**：
 >
 > **注意 1**：默认 singleton 的 bean，**在容器启动时被创建**，可以使用 **`@Lazy`** 注解来延迟初始化（**延迟到第一次使用时**）。
@@ -272,7 +272,7 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
 | 启动类 | `@Bean` 方法直接写在引导类里 | 不推荐——启动类只有一件事（启动应用），把"造对象"的活儿塞进去会越堆越乱 |
 | 配置类 | 新建 `OSSConfig` 之类的类，类上 `@Configuration` | **推荐**——一个第三方组件一个配置类，集中分类；`OSSConfig` 管 OSS、以后 `RedisConfig` 管 Redis |
 
-> [!TIP]
+> [!TIP] 提示
 > 这里的 `AliyunOSSOperator` 和 `AliyunOSSProperties` 就是 [73 篇](/posts/编程学习/javaweb学习笔记/73-阿里云oss与参数配置化/)里接进 Tlias 的那对工具类——PPT 拿它们做演示，是**假设这个类我们不能改**（真实场景里它可能是 jar 包中的第三方类）：原来的写法是类上标 `@Component` + `@ConfigurationProperties(prefix = "aliyun.oss")` 直接交给容器，现在换一条路，用 `@Bean` 在配置类里"手工造"出来。
 
 ### `@Bean` 的两个细节（PPT 第 12 页）
@@ -337,29 +337,37 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
   ③ 现在想让自己最习惯用的那种格式里的值生效，最简单的做法是什么？
   （写作区见练习文件 `test_88_配置文件优先级.yml`。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三份文件里写的是**同一个键**，SpringBoot 不会把它们"合起来"，只会取优先级最高的那一份；想换谁生效，先看它在链条里的位置，再决定是"删掉别人"还是"用更高优先级的东西压住它"
-  > **二级 · 方法**：`server.port`；properties 是 `server.port=8081`，另外两种是 `server:` + 缩进 `port: 8082`；优先级链条：`application.yaml < application.yml < application.properties < Java 系统属性 < 命令行参数`
-  > **三级 · 骨架**：`# application.properties` → `server.port=____`；`# application.yml` → `server:` 换行两空格 `____: ____`；③ 的回答从"删掉 `application.properties` 和 `application.yaml`"或"用 `-D` / `--` 参数压住"两条路里选一条写清
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```properties
-  > # application.properties
-  > server.port=8081
-  > ```
-  > ```yaml
-  > # application.yml
-  > server:
-  >   port: 8082
-  > ```
-  > ```yaml
-  > # application.yaml
-  > server:
-  >   port: 8083
-  > ```
-  > ② 生效的是 **8081**（`application.properties`）。因为优先级是 `application.yaml < application.yml < application.properties`，同一个键只留优先级最高的那份值，另外两份**整份被忽略**（不是合并、也不是部分生效）——本机实测就是这个结果：日志里只有 `Tomcat started on port 8081 (http)`，8082 / 8083 两个端口都没起。
-  > ③ 最简单是**只留一份**：删掉 `application.properties` 和 `application.yaml`，只保留 `application.yml`（这也是 PPT 第 4 页"推荐统一使用一种格式"的落地做法）。如果不想删，就得用更高优先级的方式压住它，比如 `java -Dserver.port=8082 -jar xxx.jar` 或 `java -jar xxx.jar --server.port=8082`。
-  > 自查：把值改成自己的三个端口重跑一遍，看控制台那句 `Tomcat started on port xxx` 是不是永远等于 properties 里的值。
+  **一级 · 思路**：三份文件里写的是**同一个键**，SpringBoot 不会把它们"合起来"，只会取优先级最高的那一份；想换谁生效，先看它在链条里的位置，再决定是"删掉别人"还是"用更高优先级的东西压住它"
+  **二级 · 方法**：`server.port`；properties 是 `server.port=8081`，另外两种是 `server:` + 缩进 `port: 8082`；优先级链条：`application.yaml < application.yml < application.properties < Java 系统属性 < 命令行参数`
+  **三级 · 骨架**：`# application.properties` → `server.port=____`；`# application.yml` → `server:` 换行两空格 `____: ____`；③ 的回答从"删掉 `application.properties` 和 `application.yaml`"或"用 `-D` / `--` 参数压住"两条路里选一条写清
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```properties
+  # application.properties
+  server.port=8081
+  ```
+  ```yaml
+  # application.yml
+  server:
+    port: 8082
+  ```
+  ```yaml
+  # application.yaml
+  server:
+    port: 8083
+  ```
+  ② 生效的是 **8081**（`application.properties`）。因为优先级是 `application.yaml < application.yml < application.properties`，同一个键只留优先级最高的那份值，另外两份**整份被忽略**（不是合并、也不是部分生效）——本机实测就是这个结果：日志里只有 `Tomcat started on port 8081 (http)`，8082 / 8083 两个端口都没起。
+  ③ 最简单是**只留一份**：删掉 `application.properties` 和 `application.yaml`，只保留 `application.yml`（这也是 PPT 第 4 页"推荐统一使用一种格式"的落地做法）。如果不想删，就得用更高优先级的方式压住它，比如 `java -Dserver.port=8082 -jar xxx.jar` 或 `java -jar xxx.jar --server.port=8082`。
+  自查：把值改成自己的三个端口重跑一遍，看控制台那句 `Tomcat started on port xxx` 是不是永远等于 properties 里的值。
+
+  :::
+
 
 - [ ] **2-2 不改代码、不重新打包，让已经打好的 jar 换端口跑起来**
   需求：工程已经打好了 `tlias-web-management-0.0.1-SNAPSHOT.jar`，里面配置文件写的端口不合适。要求**不动代码、不重新 `package`**，用两种启动方式把端口改成别的值：
@@ -368,25 +376,33 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
   ③ 两种写在同一条命令里时，谁说了算？为什么？
   （写作区见练习文件 `test_88_配置文件优先级.yml`。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：配置的来源不止配置文件一个——启动 jar 时还能从命令上带参数进去，这两种外置方式的优先级都比配置文件高，所以不用改文件也能改端口
-  > **二级 · 方法**：Java 系统属性 `-Dserver.port=9000` 写在 `java` 与 `-jar` 之间（IDEA 里对应 VM options）；命令行参数 `--server.port=10010` 写在 `-jar xxx.jar` 之后（IDEA 里对应 Program arguments）
-  > **三级 · 骨架**：① `java ____ -jar tlias-web-management-0.0.1-SNAPSHOT.jar`；② `java -jar tlias-web-management-0.0.1-SNAPSHOT.jar ____`；③ 优先级链条里命令行参数在 Java 系统属性之____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① Java 系统属性（-D 开头，放在 -jar 之前）
-  > java -Dserver.port=9000 -jar tlias-web-management-0.0.1-SNAPSHOT.jar
-  >
-  > # ② 命令行参数（-- 开头，放在 jar 之后）
-  > java -jar tlias-web-management-0.0.1-SNAPSHOT.jar --server.port=10010
-  >
-  > # ③ 两种一起写（课程 PPT 第 6 页那条完整命令）
-  > java -Dserver.port=9000 -jar tlias-web-management-0.0.1-SNAPSHOT.jar --server.port=10010
-  > ```
-  > ③ 生效的是 **10010**——命令行参数。优先级链条（低 → 高）是：`application.yaml`（忽略）< `application.yml` < `application.properties` < **Java 系统属性** < **命令行参数**，所以两条一起写时命令行参数压过 Java 系统属性。
-  > 本机实测就是这么一路压上来的：8081（配置文件）→ 9000（`-D`）→ 10010（`--`）；对照时只要看日志里那句 `Tomcat started on port xxx (http)`。
-  > 自查：不加任何参数启动一次，端口回到配置文件里的值——说明这两种方式只是"覆盖"，不是"取代"。
+  **一级 · 思路**：配置的来源不止配置文件一个——启动 jar 时还能从命令上带参数进去，这两种外置方式的优先级都比配置文件高，所以不用改文件也能改端口
+  **二级 · 方法**：Java 系统属性 `-Dserver.port=9000` 写在 `java` 与 `-jar` 之间（IDEA 里对应 VM options）；命令行参数 `--server.port=10010` 写在 `-jar xxx.jar` 之后（IDEA 里对应 Program arguments）
+  **三级 · 骨架**：① `java ____ -jar tlias-web-management-0.0.1-SNAPSHOT.jar`；② `java -jar tlias-web-management-0.0.1-SNAPSHOT.jar ____`；③ 优先级链条里命令行参数在 Java 系统属性之____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① Java 系统属性（-D 开头，放在 -jar 之前）
+  java -Dserver.port=9000 -jar tlias-web-management-0.0.1-SNAPSHOT.jar
+  
+  # ② 命令行参数（-- 开头，放在 jar 之后）
+  java -jar tlias-web-management-0.0.1-SNAPSHOT.jar --server.port=10010
+  
+  # ③ 两种一起写（课程 PPT 第 6 页那条完整命令）
+  java -Dserver.port=9000 -jar tlias-web-management-0.0.1-SNAPSHOT.jar --server.port=10010
+  ```
+  ③ 生效的是 **10010**——命令行参数。优先级链条（低 → 高）是：`application.yaml`（忽略）< `application.yml` < `application.properties` < **Java 系统属性** < **命令行参数**，所以两条一起写时命令行参数压过 Java 系统属性。
+  本机实测就是这么一路压上来的：8081（配置文件）→ 9000（`-D`）→ 10010（`--`）；对照时只要看日志里那句 `Tomcat started on port xxx (http)`。
+  自查：不加任何参数启动一次，端口回到配置文件里的值——说明这两种方式只是"覆盖"，不是"取代"。
+
+  :::
+
 
 - [ ] **2-3 把一个"加不了注解"的工具类交给容器管理**
   需求：工程里有一对工具类——`AliyunOSSOperator`（构造方法接收一个 `AliyunOSSProperties`，用来上传文件）和 `AliyunOSSProperties`（三个字段：`endpoint` / `bucketName` / `region`）。现在 `AliyunOSSOperator` 的源码按"不能改"处理（就当它来自第三方 jar 包），可我们要在 Controller 里直接注入它。
@@ -397,42 +413,50 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
   ④ 回答：这样的 bean 为什么不推荐写在启动类里？
   （写作区见练习文件 `test_88_配置优先级与Bean管理.java` 的题目2-3。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：类上加不了注解 → 换到**方法**上加注解，让方法的返回值成为 bean；造对象要用的参数不用自己找，写在方法参数列表里，容器会按类型给你；这种"造 bean 的方法"建议集中放在一个专门的类里，而不是塞进启动类
-  > **二级 · 方法**：类上 `@Configuration`；方法上 `@Bean`（返回值类型是 `AliyunOSSOperator`）；改名字用 `@Bean("别名")`（`name` / `value` 属性）；形参写 `AliyunOSSProperties`，容器**按类型自动装配**；`AliyunOSSProperties` 这个参数对象自己已经由容器管理（类上有 `@Component` + `@ConfigurationProperties(prefix = "aliyun.oss")`，能从 yml 读到值）
-  > **三级 · 骨架**：
-  > ```java
-  > @____
-  > public class OSSConfig {
-  >     @____
-  >     public AliyunOSSOperator ____(AliyunOSSProperties ossProperties) {
-  >         return ____ ____(ossProperties);
-  >     }
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima.config;
-  >
-  > import com.itheima.utils.AliyunOSSOperator;
-  > import com.itheima.utils.AliyunOSSProperties;
-  > import org.springframework.context.annotation.Bean;
-  > import org.springframework.context.annotation.Configuration;
-  >
-  > @Configuration                      // 声明这是一个配置类（配置类本身就是容器里的 bean）
-  > public class OSSConfig {
-  >
-  >     @Bean                           // 方法返回值交给 IOC 容器管理，成为容器里的 bean 对象
-  >     public AliyunOSSOperator aliyunOSSOperator(AliyunOSSProperties ossProperties) {
-  >         return new AliyunOSSOperator(ossProperties);
-  >     }
-  > }
-  > ```
-  > ② 默认名字就是**方法名** `aliyunOSSOperator`；要改名写 `@Bean("ossOperator")`（`value` 与 `name` 等价），容器里就按新名字注册。
-  > ③ 形参 `AliyunOSSProperties` **由容器传进来**：这个方法不是我们调的，是容器创建 bean 时调的，它按**参数类型**在容器里找到 `AliyunOSSProperties` 这个 bean 塞进来——所以**不用也不能自己 `new`**（自己 new 出来的对象拿不到 yml 里配的 `aliyun.oss` 三个值）。
-  > ④ 不推荐写在启动类里的原因：启动类只负责"启动应用"这一件事，第三方组件的造对象代码往里堆会越来越乱、也不好分类；配一个 `OSSConfig` 就是"OSS 相关的 bean 都归它管"，以后加 `RedisConfig`、`MqConfig` 也是同样的规矩（PPT 第 12 页把配置类标成"**推荐**"）。
-  > 自查：注入的时候写 `@Autowired private AliyunOSSOperator aliyunOSSOperator;`（或按名字取 `ossOperator`），启动不报 `NoSuchBeanDefinitionException` 就说明注册成功；把配置类上的 `@Configuration` 去掉再启动，报错正好说明"是它在干活"。
+  **一级 · 思路**：类上加不了注解 → 换到**方法**上加注解，让方法的返回值成为 bean；造对象要用的参数不用自己找，写在方法参数列表里，容器会按类型给你；这种"造 bean 的方法"建议集中放在一个专门的类里，而不是塞进启动类
+  **二级 · 方法**：类上 `@Configuration`；方法上 `@Bean`（返回值类型是 `AliyunOSSOperator`）；改名字用 `@Bean("别名")`（`name` / `value` 属性）；形参写 `AliyunOSSProperties`，容器**按类型自动装配**；`AliyunOSSProperties` 这个参数对象自己已经由容器管理（类上有 `@Component` + `@ConfigurationProperties(prefix = "aliyun.oss")`，能从 yml 读到值）
+  **三级 · 骨架**：
+  ```java
+  @____
+  public class OSSConfig {
+      @____
+      public AliyunOSSOperator ____(AliyunOSSProperties ossProperties) {
+          return ____ ____(ossProperties);
+      }
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima.config;
+  
+  import com.itheima.utils.AliyunOSSOperator;
+  import com.itheima.utils.AliyunOSSProperties;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  
+  @Configuration                      // 声明这是一个配置类（配置类本身就是容器里的 bean）
+  public class OSSConfig {
+  
+      @Bean                           // 方法返回值交给 IOC 容器管理，成为容器里的 bean 对象
+      public AliyunOSSOperator aliyunOSSOperator(AliyunOSSProperties ossProperties) {
+          return new AliyunOSSOperator(ossProperties);
+      }
+  }
+  ```
+  ② 默认名字就是**方法名** `aliyunOSSOperator`；要改名写 `@Bean("ossOperator")`（`value` 与 `name` 等价），容器里就按新名字注册。
+  ③ 形参 `AliyunOSSProperties` **由容器传进来**：这个方法不是我们调的，是容器创建 bean 时调的，它按**参数类型**在容器里找到 `AliyunOSSProperties` 这个 bean 塞进来——所以**不用也不能自己 `new`**（自己 new 出来的对象拿不到 yml 里配的 `aliyun.oss` 三个值）。
+  ④ 不推荐写在启动类里的原因：启动类只负责"启动应用"这一件事，第三方组件的造对象代码往里堆会越来越乱、也不好分类；配一个 `OSSConfig` 就是"OSS 相关的 bean 都归它管"，以后加 `RedisConfig`、`MqConfig` 也是同样的规矩（PPT 第 12 页把配置类标成"**推荐**"）。
+  自查：注入的时候写 `@Autowired private AliyunOSSOperator aliyunOSSOperator;`（或按名字取 `ossOperator`），启动不报 `NoSuchBeanDefinitionException` 就说明注册成功；把配置类上的 `@Configuration` 去掉再启动，报错正好说明"是它在干活"。
+
+  :::
+
 
 - [ ] **2-4 控制一个 bean 的作用域与创建时机**
   需求：工程里有一个控制器 `DeptController`，默认情况下整个应用只有一个实例、而且启动时就创建好了。现在有两件小事要你改：
@@ -441,29 +465,37 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
   要求：写出这两处各加什么、加在哪里，并说明②改完之后应用启动时间会变短还是变长、为什么。
   （写作区见练习文件 `test_88_配置优先级与Bean管理.java` 的题目2-4。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：默认作用域是"单例"，要变多例得显式声明作用域；默认单例是"启动时就建好"，要推迟到第一次用就得让它"懒"一点
-  > **二级 · 方法**：`@Scope("prototype")`（加在类上，也可以加在 `@Bean` 方法上）；`@Lazy`（可以加在类上、`@Bean` 方法上或注入点上）；五种作用域的名称是 `singleton` / `prototype` / `request` / `session` / `application`
-  > **三级 · 骨架**：① `@____("____")` + `@RestController public class DeptController { }`；② `@____` 加在家那个 bean 的定义处
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 控制器上显式声明作用域：
-  > ```java
-  > @Scope("prototype")                 // 每次使用该 bean 时都会创建新的实例（默认是 singleton）
-  > @RestController
-  > public class DeptController {
-  > }
-  > ```
-  > ② 让那个"重"bean 延迟初始化：
-  > ```java
-  > @Lazy                               // 延迟初始化：容器启动时不创建，第一次使用时才创建
-  > @Component
-  > public class ExpensiveService {
-  > }
-  > ```
-  > 如果是用 `@Bean` 声明的第三方 bean，`@Lazy` 就加在 `@Bean` 方法上。
-  > ②的效果：应用**启动时间变短**——默认 singleton 的 bean 是在**容器启动时**就创建的（PPT 第 10 页注意 1），`@Lazy` 把它推迟到**第一次使用时**，启动阶段就少了这段耗时；代价是第一次用到这个 bean 时会有一次额外的等待。
-  > 自查：给类里加一句构造方法打印（比如 `System.out.println("DeptController 被创建")`），分别用默认 / `prototype` 启动并调两次接口，看打印几次——默认只打印一次，`prototype` 每次获取都打印。
+  **一级 · 思路**：默认作用域是"单例"，要变多例得显式声明作用域；默认单例是"启动时就建好"，要推迟到第一次用就得让它"懒"一点
+  **二级 · 方法**：`@Scope("prototype")`（加在类上，也可以加在 `@Bean` 方法上）；`@Lazy`（可以加在类上、`@Bean` 方法上或注入点上）；五种作用域的名称是 `singleton` / `prototype` / `request` / `session` / `application`
+  **三级 · 骨架**：① `@____("____")` + `@RestController public class DeptController { }`；② `@____` 加在家那个 bean 的定义处
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 控制器上显式声明作用域：
+  ```java
+  @Scope("prototype")                 // 每次使用该 bean 时都会创建新的实例（默认是 singleton）
+  @RestController
+  public class DeptController {
+  }
+  ```
+  ② 让那个"重"bean 延迟初始化：
+  ```java
+  @Lazy                               // 延迟初始化：容器启动时不创建，第一次使用时才创建
+  @Component
+  public class ExpensiveService {
+  }
+  ```
+  如果是用 `@Bean` 声明的第三方 bean，`@Lazy` 就加在 `@Bean` 方法上。
+  ②的效果：应用**启动时间变短**——默认 singleton 的 bean 是在**容器启动时**就创建的（PPT 第 10 页注意 1），`@Lazy` 把它推迟到**第一次使用时**，启动阶段就少了这段耗时；代价是第一次用到这个 bean 时会有一次额外的等待。
+  自查：给类里加一句构造方法打印（比如 `System.out.println("DeptController 被创建")`），分别用默认 / `prototype` 启动并调两次接口，看打印几次——默认只打印一次，`prototype` 每次获取都打印。
+
+  :::
+
 
 ### 三、综合题
 
@@ -490,19 +522,27 @@ PPT 给推荐版本的理由：**若要管理的第三方 bean 对象，建议�
   | 配置优先级（PPT 7） | 第 3～7 步——三次启动三个端口，链条一步步被压上来 |
   | 本机实测（第 14 章 ） | 第 3～5 步的对照答案（8081 / 9000 / 10010） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一次只改一个变量——先"只有配置文件"跑一次当基准，再依次往上加压：先加 JVM 属性，再加应用参数；每一步都只看同一句话（`Tomcat started on port xxx`）
-  > **二级 · 方法**：`mvn package`（或 IDEA Maven 面板 Lifecycle → package）；启动命令 `java ____ -jar xxx.jar ____`；配置文件名字三个：`application.properties` / `application.yml` / `application.yaml`，键都是 `server.port`
-  > **三级 · 骨架**：① properties → `server.port=____`；yml → `server:` 换行 `port: ____`；yaml → 同 yml；③ `java -jar xxx.jar`；④ `java ____ -jar xxx.jar`；⑤ `java -Dserver.port=____ -jar xxx.jar ____`；⑦ 链条：`application.yaml`（忽略）< `application.yml` < `application.properties` < ____ < ____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 三份文件见 2-1 的答案（8081 / 8082 / 8083）。
-  > 2. `package` 的产物在 `target/` 下，形如 `springboot-web-config-0.0.1-SNAPSHOT.jar`；官方骨架生成的 `pom.xml` 里 `<build><plugins>` 已经有 `spring-boot-maven-plugin`。
-  > 3. **本机实测**：`Tomcat initialized with port 8081 (http)` → `Tomcat started on port 8081 (http) with context path ''`。
-  > 4. **本机实测**（`java -Dserver.port=9000 -jar app.jar`）：端口 **9000**。
-  > 5. **本机实测**（`java -Dserver.port=9000 -jar app.jar --server.port=10010`）：端口 **10010**。
-  > 6. 换成自己的三个值后，结论一致：**谁在链条上更高谁生效**。
-  > 7. 两个回答：
-  >    ① 完整链条（低 → 高）：`application.yaml`（忽略）< `application.yml` < `application.properties` < **Java 系统属性（-Dxxx=xxx）** < **命令行参数（--xxx=xxx）**。
-  >    ② 因为这不是"**合并**"而是"**覆盖**"：三份文件里写的是同一个键 `server.port`，SpringBoot 按优先级挑出最高的那一份（`application.properties`）作为这个键的值，另外两份**整份被忽略**——所以 8082 / 8083 这两个值连"参与比较"的机会都没有，端口自然也不会起。
-  > 8. 收尾后只留一份 `application.yml`——这正是 PPT 第 4 页"推荐统一使用一种格式的配置"的效果：以后要改配置，只有一个地方可改，不会出现"改了没生效"的困惑。
+  **一级 · 思路**：一次只改一个变量——先"只有配置文件"跑一次当基准，再依次往上加压：先加 JVM 属性，再加应用参数；每一步都只看同一句话（`Tomcat started on port xxx`）
+  **二级 · 方法**：`mvn package`（或 IDEA Maven 面板 Lifecycle → package）；启动命令 `java ____ -jar xxx.jar ____`；配置文件名字三个：`application.properties` / `application.yml` / `application.yaml`，键都是 `server.port`
+  **三级 · 骨架**：① properties → `server.port=____`；yml → `server:` 换行 `port: ____`；yaml → 同 yml；③ `java -jar xxx.jar`；④ `java ____ -jar xxx.jar`；⑤ `java -Dserver.port=____ -jar xxx.jar ____`；⑦ 链条：`application.yaml`（忽略）< `application.yml` < `application.properties` < ____ < ____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 三份文件见 2-1 的答案（8081 / 8082 / 8083）。
+  2. `package` 的产物在 `target/` 下，形如 `springboot-web-config-0.0.1-SNAPSHOT.jar`；官方骨架生成的 `pom.xml` 里 `<build><plugins>` 已经有 `spring-boot-maven-plugin`。
+  3. **本机实测**：`Tomcat initialized with port 8081 (http)` → `Tomcat started on port 8081 (http) with context path ''`。
+  4. **本机实测**（`java -Dserver.port=9000 -jar app.jar`）：端口 **9000**。
+  5. **本机实测**（`java -Dserver.port=9000 -jar app.jar --server.port=10010`）：端口 **10010**。
+  6. 换成自己的三个值后，结论一致：**谁在链条上更高谁生效**。
+  7. 两个回答：
+     ① 完整链条（低 → 高）：`application.yaml`（忽略）< `application.yml` < `application.properties` < **Java 系统属性（-Dxxx=xxx）** < **命令行参数（--xxx=xxx）**。
+     ② 因为这不是"**合并**"而是"**覆盖**"：三份文件里写的是同一个键 `server.port`，SpringBoot 按优先级挑出最高的那一份（`application.properties`）作为这个键的值，另外两份**整份被忽略**——所以 8082 / 8083 这两个值连"参与比较"的机会都没有，端口自然也不会起。
+  8. 收尾后只留一份 `application.yml`——这正是 PPT 第 4 页"推荐统一使用一种格式的配置"的效果：以后要改配置，只有一个地方可改，不会出现"改了没生效"的困惑。
+
+  :::
+

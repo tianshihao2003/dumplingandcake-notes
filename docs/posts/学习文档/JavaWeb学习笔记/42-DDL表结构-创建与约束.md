@@ -60,7 +60,7 @@ create table user(
 
 这张表**能建起来，但管不住数据**：id 可以重复、用户名可以重名、姓名可以为空、性别可以乱填。问题出在"没有约束"，也正是 PPT 第 31 页要补的东西。
 
-> [!TIP]
+> [!TIP] 提示
 > 语法里的 `[ ]` 表示"可选"，**真正写 SQL 时不要敲方括号**。比如 `[comment 字段注释]` 的可选部分，写的时候就是 `comment '用户名'`。
 
 ## 约束：让数据库自己把关（PPT 第 31 页）
@@ -126,7 +126,7 @@ create table user(
 
 对照着读：`id` 是主键且自增；`username` 既不能空又不能重；`name` 不能空；`gender` 不填给"男"；`age` 什么约束都没加（可以为空，这是允许的）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **一个字段可以加多个约束**，约束之间**用空格分隔**（`username varchar(50) not null unique` 就是两个约束叠在一列上）。写的时候顺序不影响效果，习惯上把 `not null` 写在 `unique`、`primary key` 前面。
 
 ### 自增 `auto_increment`
@@ -192,7 +192,7 @@ CREATE TABLE `user` (
 | 显式插入已存在的主键 `id = 1` | `ERROR 1062 (23000): Duplicate entry '1' for key 'user.PRIMARY'` | 主键约束拦住 |
 | 删掉 id=1 再插一条 | 新行拿到 **id=3** | 自增不会把删掉的号补回来 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 还有一条建表时的常见报错（**本机实测（MySQL 9.0.1）**）：对已经存在的表再执行一次 `create table user(id int);`，会报
 > ```text
 > ERROR 1050 (42S01): Table 'user' already exists
@@ -256,34 +256,42 @@ CREATE TABLE `user` (
 
   （练习文件 `test_42_表结构创建与约束.sql` 的题目 2-1 处写作区，做完把 `desc` 的结果对照着检查一遍。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把表格里的中文要求逐条翻译成"**字段名 + 类型 + 约束 + 注释**"，再按建表语法拼起来；"唯一标识 + 不能为空 + 自动递增"这三条其实指向同一个约束组合
-  > **二级 · 方法**：整数用 `int`，不定长字符串用 `varchar(长度)`，定长 1 个字符用 `char(1)`；主键用 `primary key`（它自带非空），自增用 `auto_increment`，不能为空用 `not null`，不能重复用 `unique`，默认值用 `default`
-  > **三级 · 骨架**：`create table user( id int ＿＿ ＿＿ comment '...', username varchar(50) ＿＿ ＿＿ comment '...', name varchar(10) ＿＿ comment '...', age int comment '...', gender char(1) ＿＿ '男' comment '...' ) comment '＿＿';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > create table user(
-  >     id int primary key auto_increment comment 'ID, 唯一标识',
-  >     username varchar(50) not null unique comment '用户名',
-  >     name varchar(10) not null comment '姓名',
-  >     age int comment '年龄',
-  >     gender char(1) default '男' comment '性别'
-  > ) comment '用户信息表';
-  > ```
-  > 这就是课程 `SQL脚本.sql` 里"创建表(约束)"那一版的写法。**本机实测（MySQL 9.0.1）**用 `show create table user;` 回头看，约束落在这些地方：
-  > ```sql
-  > CREATE TABLE `user` (
-  >   `id` int NOT NULL AUTO_INCREMENT COMMENT 'ID, 唯一标识',
-  >   `username` varchar(50) NOT NULL COMMENT '用户名',
-  >   `name` varchar(10) NOT NULL COMMENT '姓名',
-  >   `age` int DEFAULT NULL COMMENT '年龄',
-  >   `gender` char(1) DEFAULT '男' COMMENT '性别',
-  >   PRIMARY KEY (`id`),
-  >   UNIQUE KEY `username` (`username`)
-  > ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户信息表'
-  > ```
-  > 会抓到的小毛病：① `name` 忘了 `not null`（`desc` 里它的 `Null` 列会显示 YES）；② 把 `unique` 写成了 `only`、`notnull`；③ 表注释写进了括号里（那会被当成字段定义，语法直接报错）；④ 最后一个字段后面多写了逗号。
+  **一级 · 思路**：把表格里的中文要求逐条翻译成"**字段名 + 类型 + 约束 + 注释**"，再按建表语法拼起来；"唯一标识 + 不能为空 + 自动递增"这三条其实指向同一个约束组合
+  **二级 · 方法**：整数用 `int`，不定长字符串用 `varchar(长度)`，定长 1 个字符用 `char(1)`；主键用 `primary key`（它自带非空），自增用 `auto_increment`，不能为空用 `not null`，不能重复用 `unique`，默认值用 `default`
+  **三级 · 骨架**：`create table user( id int ＿＿ ＿＿ comment '...', username varchar(50) ＿＿ ＿＿ comment '...', name varchar(10) ＿＿ comment '...', age int comment '...', gender char(1) ＿＿ '男' comment '...' ) comment '＿＿';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  create table user(
+      id int primary key auto_increment comment 'ID, 唯一标识',
+      username varchar(50) not null unique comment '用户名',
+      name varchar(10) not null comment '姓名',
+      age int comment '年龄',
+      gender char(1) default '男' comment '性别'
+  ) comment '用户信息表';
+  ```
+  这就是课程 `SQL脚本.sql` 里"创建表(约束)"那一版的写法。**本机实测（MySQL 9.0.1）**用 `show create table user;` 回头看，约束落在这些地方：
+  ```sql
+  CREATE TABLE `user` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'ID, 唯一标识',
+    `username` varchar(50) NOT NULL COMMENT '用户名',
+    `name` varchar(10) NOT NULL COMMENT '姓名',
+    `age` int DEFAULT NULL COMMENT '年龄',
+    `gender` char(1) DEFAULT '男' COMMENT '性别',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `username` (`username`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户信息表'
+  ```
+  会抓到的小毛病：① `name` 忘了 `not null`（`desc` 里它的 `Null` 列会显示 YES）；② 把 `unique` 写成了 `only`、`notnull`；③ 表注释写进了括号里（那会被当成字段定义，语法直接报错）；④ 最后一个字段后面多写了逗号。
+
+  :::
+
 
 - [ ] **2-2 一个字段上叠多个约束**
   再建一张简化版员工表 `emp_simple`：
@@ -300,23 +308,31 @@ CREATE TABLE `user` (
 
   做完回答一句：**同一个字段上能不能加多个约束？多个约束之间怎么写？**
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：同一列既要"必填"又要"不重复"，就是两个约束叠着写；"无符号"和"定长"要选对类型关键字
-  > **二级 · 方法**：小整数用 `tinyint`，无符号加 `unsigned`（写在类型后面）；定长字符串用 `char(11)`；自增 `auto_increment`、非空 `not null`、唯一 `unique`、默认 `default` 都是约束，能叠
-  > **三级 · 骨架**：`username varchar(20) ＿＿ ＿＿ comment '...'`、`gender tinyint ＿＿ ＿＿ comment '...'`、`phone ＿＿(11) ＿＿ ＿＿ comment '...'`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > create table emp_simple(
-  >     id int unsigned primary key auto_increment comment '工号, 主键',
-  >     username varchar(20) not null unique comment '用户名',
-  >     password varchar(32) default '123456' comment '密码',
-  >     name varchar(10) not null comment '姓名',
-  >     gender tinyint unsigned not null comment '性别, 1 男; 2 女',
-  >     phone char(11) not null unique comment '手机号'
-  > ) comment '员工表(简化版)';
-  > ```
-  > 回答：**可以**——`username` 上就叠了 `not null` + `unique`，`phone` 也一样，多个约束之间**用空格分开**（PPT 第 32 页问答页的结论）。两个细节：① `id` 用 `int unsigned`，无符号整数（类型的关键字在 43 篇会系统讲）；② `phone` 用 **`char(11)`** 而不是 `varchar(11)`——手机号长度固定，定长的 `char` 更合适。
+  **一级 · 思路**：同一列既要"必填"又要"不重复"，就是两个约束叠着写；"无符号"和"定长"要选对类型关键字
+  **二级 · 方法**：小整数用 `tinyint`，无符号加 `unsigned`（写在类型后面）；定长字符串用 `char(11)`；自增 `auto_increment`、非空 `not null`、唯一 `unique`、默认 `default` 都是约束，能叠
+  **三级 · 骨架**：`username varchar(20) ＿＿ ＿＿ comment '...'`、`gender tinyint ＿＿ ＿＿ comment '...'`、`phone ＿＿(11) ＿＿ ＿＿ comment '...'`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  create table emp_simple(
+      id int unsigned primary key auto_increment comment '工号, 主键',
+      username varchar(20) not null unique comment '用户名',
+      password varchar(32) default '123456' comment '密码',
+      name varchar(10) not null comment '姓名',
+      gender tinyint unsigned not null comment '性别, 1 男; 2 女',
+      phone char(11) not null unique comment '手机号'
+  ) comment '员工表(简化版)';
+  ```
+  回答：**可以**——`username` 上就叠了 `not null` + `unique`，`phone` 也一样，多个约束之间**用空格分开**（PPT 第 32 页问答页的结论）。两个细节：① `id` 用 `int unsigned`，无符号整数（类型的关键字在 43 篇会系统讲）；② `phone` 用 **`char(11)`** 而不是 `varchar(11)`——手机号长度固定，定长的 `char` 更合适。
+
+  :::
+
 
 - [ ] **2-3 从报错反推：是哪一类约束拦住了？**
   在 2-1 建好的 `user` 表上操作，出现了下面几种现象，请分别写出它对应**哪一类约束**，并说明"如果没有这个约束会发生什么"：
@@ -334,17 +350,25 @@ CREATE TABLE `user` (
      ERROR 1062 (23000): Duplicate entry '1' for key 'user.PRIMARY'
      ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：对着 PPT 第 31 页那张五类约束的表，把每条现象的"关键词"对上去——"自动填值"对应哪类、`cannot be null` 对应哪类、`Duplicate entry ... for key 'user.username'` 与 `for key 'user.PRIMARY'` 分别说明什么
-  > **二级 · 方法**：自动填值 → `default`；不能为 null → `not null`；值重复 → `unique`；主键重复 → `primary key`（报错里 key 的名字能看出是普通唯一键还是主键）
-  > **三级 · 骨架**：① ＿＿ 约束；② ＿＿ 约束；③ ＿＿ 约束；④ ＿＿ 约束（注意 ③④ 报错里 `key` 后面跟的名字不同）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **默认约束 `default '男'`**——不写该列就取默认值。没有它的话 `gender` 会是 `NULL`，以后统计"男/女各多少人"时就会凭空多出一批"性别未知"的数据；
-  > ② **非空约束 `not null`**——`name` 不能为空。没有它的话会出现"没有姓名的员工"，页面上那一行只能显示空白，排查时也不知道该找谁；
-  > ③ **唯一约束 `unique`**——`username` 不允许重复（报错里 `key 'user.username'` 就是那个唯一键的名字）。没有它的话两个人可能注册到同一个用户名，登录时到底登进谁的账号就说不清了；
-  > ④ **主键约束 `primary key`**——`id` 是一行数据的唯一标识。注意报错里的 key 名换成了 **`user.PRIMARY`**（主键的固定名字），和 ③ 的 `user.username` 合起来看，正好能分辨"这条报错是主键拦的、还是普通唯一键拦的"。没有主键的话，表里就可能出现两行完全一样的数据，改/删的时候没法精确定位到某一行。
-  > 补充：这四条现象都是**本机实测（MySQL 9.0.1）**的原文；另外实测还发现，把 id=1 删掉后再插一条，新数据拿到的是 **id=3**——自增**不会回填**已删除的号。
+  **一级 · 思路**：对着 PPT 第 31 页那张五类约束的表，把每条现象的"关键词"对上去——"自动填值"对应哪类、`cannot be null` 对应哪类、`Duplicate entry ... for key 'user.username'` 与 `for key 'user.PRIMARY'` 分别说明什么
+  **二级 · 方法**：自动填值 → `default`；不能为 null → `not null`；值重复 → `unique`；主键重复 → `primary key`（报错里 key 的名字能看出是普通唯一键还是主键）
+  **三级 · 骨架**：① ＿＿ 约束；② ＿＿ 约束；③ ＿＿ 约束；④ ＿＿ 约束（注意 ③④ 报错里 `key` 后面跟的名字不同）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **默认约束 `default '男'`**——不写该列就取默认值。没有它的话 `gender` 会是 `NULL`，以后统计"男/女各多少人"时就会凭空多出一批"性别未知"的数据；
+  ② **非空约束 `not null`**——`name` 不能为空。没有它的话会出现"没有姓名的员工"，页面上那一行只能显示空白，排查时也不知道该找谁；
+  ③ **唯一约束 `unique`**——`username` 不允许重复（报错里 `key 'user.username'` 就是那个唯一键的名字）。没有它的话两个人可能注册到同一个用户名，登录时到底登进谁的账号就说不清了；
+  ④ **主键约束 `primary key`**——`id` 是一行数据的唯一标识。注意报错里的 key 名换成了 **`user.PRIMARY`**（主键的固定名字），和 ③ 的 `user.username` 合起来看，正好能分辨"这条报错是主键拦的、还是普通唯一键拦的"。没有主键的话，表里就可能出现两行完全一样的数据，改/删的时候没法精确定位到某一行。
+  补充：这四条现象都是**本机实测（MySQL 9.0.1）**的原文；另外实测还发现，把 id=1 删掉后再插一条，新数据拿到的是 **id=3**——自增**不会回填**已删除的号。
+
+  :::
+
 
 ### 三、综合题
 
@@ -368,52 +392,60 @@ CREATE TABLE `user` (
   | 查看表结构 | `show create table` 与 `desc`（重点看 Null / Key / Default / Extra） |
   | 约束的作用 | 违规数据插不进去，报 1048 / 1062 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链路是"**需求一句话 → 一行字段定义 → 一条建表语句 → 回头验结构 → 故意插脏数据看报错**"；第 4、6 步是把"约束有没有生效"看明白
-  > **二级 · 方法**：建表用 `create table ... ( ... ) comment '...'`；查结构用 `show create table student;` 和 `desc student;`；违规插入用 `insert into student(...) values (...)`；自增那列插入时传 **NULL** 或者干脆不写
-  > **三级 · 骨架**：`create table student( id int ＿＿ ＿＿ comment '...', stu_no char(10) ＿＿ ＿＿ comment '...', ..., gender char(2) ＿＿ '保密' comment '...' ) comment '学生表';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 需求拆解：学号（自动发号的隐藏主键）→ 主键自增 `id`；学号字符串 → 定长且唯一；姓名 → 非空；性别 → 默认"保密"；年龄 → 可为空整数；手机号 → 定长、非空、唯一。
-  > 2. 字段定稿：
-  >    | 字段 | 类型 | 约束 |
-  >    | --- | --- | --- |
-  >    | `id` | `int unsigned` | `primary key auto_increment` |
-  >    | `stu_no` | `char(10)` | `not null unique` |
-  >    | `name` | `varchar(10)` | `not null` |
-  >    | `gender` | `char(2)` | `default '保密'` |
-  >    | `age` | `tinyint unsigned` | （无） |
-  >    | `phone` | `char(11)` | `not null unique` |
-  > 3. 建表语句：
-  >    ```sql
-  >    create table student(
-  >        id int unsigned primary key auto_increment comment 'ID, 主键',
-  >        stu_no char(10) not null unique comment '学号',
-  >        name varchar(10) not null comment '姓名',
-  >        gender char(2) default '保密' comment '性别',
-  >        age tinyint unsigned comment '年龄',
-  >        phone char(11) not null unique comment '手机号'
-  >    ) comment '学生表';
-  >    ```
-  > 4. 两条查看命令与读法（**本机实测（MySQL 9.0.1）**执行上面这条建表语句后的真实输出）：
-  >    ```text
-  >    mysql> desc student;
-  >    +--------+-------------+------+-----+---------+----------------+
-  >    | Field  | Type        | Null | Key | Default | Extra          |
-  >    +--------+-------------+------+-----+---------+----------------+
-  >    | id     | int         | NO   | PRI | NULL    | auto_increment |
-  >    | stu_no | char(10)    | NO   | UNI | NULL    |                |
-  >    | name   | varchar(10) | NO   |     | NULL    |                |
-  >    | gender | char(2)     | YES  |     | 保密    |                |
-  >    | age    | tinyint     | YES  |     | NULL    |                |
-  >    | phone  | char(11)    | NO   | UNI | NULL    |                |
-  >    +--------+-------------+------+-----+---------+----------------+
-  >    ```
-  >    `Null`：NO = 有非空约束（id、stu_no、name、phone），YES = 可以为空（gender、age）；`Key`：PRI = 主键（id），UNI = 唯一约束（stu_no、phone）；`Default`：有默认约束的列显示默认值（gender 显示"保密"）；`Extra`：`auto_increment` 出现在自增列（id）上。`show create table student;` 则会把 **`PRIMARY KEY (`id`)`**、**`UNIQUE KEY `stu_no` (`stu_no`)`**、`UNIQUE KEY `phone` (`phone`)` 单独排在字段列表下面。
-  > 5. 重复学号会报（下面就是**本机实测（MySQL 9.0.1）**的原文）：
-  >    ```text
-  >    ERROR 1062 (23000): Duplicate entry '2025001' for key 'student.stu_no'
-  >    ```
-  >    是 **唯一约束 `unique`** 拦下的——`key` 后面跟的是字段名 `stu_no`；如果报的是 `key 'student.PRIMARY'`，那就是主键拦的。
-  > 6. 自增规律（**本机实测（MySQL 9.0.1）**）：插入时 `id` 传 `null` 或不写这一列，两条数据分别拿到 **1、2**；删掉 id=1 那条后再插一条，新数据拿到的是 **3**，不是 1。原因：自增计数器**只记住"发到哪儿了"**，删除行不会把它回退——这样也能保证"历史数据的 id 不会被后插入的数据复用"（否则删掉的数据和新增的数据会撞号，关联关系就乱套了）。
-  > 7. 判断依据：页面原型上写着"**必填**"的字段 → `not null`；写着"**是否唯一：是**"或业务上天然不重复（用户名、手机号、学号、身份证号）→ `unique`；写着"**输入限制**"是固定长度（手机号 11 位、身份证 18 位）→ 用 `char(长度)`，长度可变（姓名、用户名）→ 用 `varchar(长度)`；有下拉/单选框且大多数情况取同一个值（性别、状态）→ 给 `default`；**每个表都要有个主键**（通常就是自增的 `id`）来唯一标识每一行。
+  **一级 · 思路**：整条链路是"**需求一句话 → 一行字段定义 → 一条建表语句 → 回头验结构 → 故意插脏数据看报错**"；第 4、6 步是把"约束有没有生效"看明白
+  **二级 · 方法**：建表用 `create table ... ( ... ) comment '...'`；查结构用 `show create table student;` 和 `desc student;`；违规插入用 `insert into student(...) values (...)`；自增那列插入时传 **NULL** 或者干脆不写
+  **三级 · 骨架**：`create table student( id int ＿＿ ＿＿ comment '...', stu_no char(10) ＿＿ ＿＿ comment '...', ..., gender char(2) ＿＿ '保密' comment '...' ) comment '学生表';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 需求拆解：学号（自动发号的隐藏主键）→ 主键自增 `id`；学号字符串 → 定长且唯一；姓名 → 非空；性别 → 默认"保密"；年龄 → 可为空整数；手机号 → 定长、非空、唯一。
+  2. 字段定稿：
+     | 字段 | 类型 | 约束 |
+     | --- | --- | --- |
+     | `id` | `int unsigned` | `primary key auto_increment` |
+     | `stu_no` | `char(10)` | `not null unique` |
+     | `name` | `varchar(10)` | `not null` |
+     | `gender` | `char(2)` | `default '保密'` |
+     | `age` | `tinyint unsigned` | （无） |
+     | `phone` | `char(11)` | `not null unique` |
+  3. 建表语句：
+     ```sql
+     create table student(
+         id int unsigned primary key auto_increment comment 'ID, 主键',
+         stu_no char(10) not null unique comment '学号',
+         name varchar(10) not null comment '姓名',
+         gender char(2) default '保密' comment '性别',
+         age tinyint unsigned comment '年龄',
+         phone char(11) not null unique comment '手机号'
+     ) comment '学生表';
+     ```
+  4. 两条查看命令与读法（**本机实测（MySQL 9.0.1）**执行上面这条建表语句后的真实输出）：
+     ```text
+     mysql> desc student;
+     +--------+-------------+------+-----+---------+----------------+
+     | Field  | Type        | Null | Key | Default | Extra          |
+     +--------+-------------+------+-----+---------+----------------+
+     | id     | int         | NO   | PRI | NULL    | auto_increment |
+     | stu_no | char(10)    | NO   | UNI | NULL    |                |
+     | name   | varchar(10) | NO   |     | NULL    |                |
+     | gender | char(2)     | YES  |     | 保密    |                |
+     | age    | tinyint     | YES  |     | NULL    |                |
+     | phone  | char(11)    | NO   | UNI | NULL    |                |
+     +--------+-------------+------+-----+---------+----------------+
+     ```
+     `Null`：NO = 有非空约束（id、stu_no、name、phone），YES = 可以为空（gender、age）；`Key`：PRI = 主键（id），UNI = 唯一约束（stu_no、phone）；`Default`：有默认约束的列显示默认值（gender 显示"保密"）；`Extra`：`auto_increment` 出现在自增列（id）上。`show create table student;` 则会把 **`PRIMARY KEY (`id`)`**、**`UNIQUE KEY `stu_no` (`stu_no`)`**、`UNIQUE KEY `phone` (`phone`)` 单独排在字段列表下面。
+  5. 重复学号会报（下面就是**本机实测（MySQL 9.0.1）**的原文）：
+     ```text
+     ERROR 1062 (23000): Duplicate entry '2025001' for key 'student.stu_no'
+     ```
+     是 **唯一约束 `unique`** 拦下的——`key` 后面跟的是字段名 `stu_no`；如果报的是 `key 'student.PRIMARY'`，那就是主键拦的。
+  6. 自增规律（**本机实测（MySQL 9.0.1）**）：插入时 `id` 传 `null` 或不写这一列，两条数据分别拿到 **1、2**；删掉 id=1 那条后再插一条，新数据拿到的是 **3**，不是 1。原因：自增计数器**只记住"发到哪儿了"**，删除行不会把它回退——这样也能保证"历史数据的 id 不会被后插入的数据复用"（否则删掉的数据和新增的数据会撞号，关联关系就乱套了）。
+  7. 判断依据：页面原型上写着"**必填**"的字段 → `not null`；写着"**是否唯一：是**"或业务上天然不重复（用户名、手机号、学号、身份证号）→ `unique`；写着"**输入限制**"是固定长度（手机号 11 位、身份证 18 位）→ 用 `char(长度)`，长度可变（姓名、用户名）→ 用 `varchar(长度)`；有下拉/单选框且大多数情况取同一个值（性别、状态）→ 给 `default`；**每个表都要有个主键**（通常就是自增的 `id`）来唯一标识每一行。
+
+  :::
+

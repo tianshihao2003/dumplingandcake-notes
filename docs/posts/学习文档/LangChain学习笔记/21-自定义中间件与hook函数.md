@@ -15,7 +15,7 @@ cover: false
 
 内置中间件覆盖了绝大多数常见需求，但**复杂场景下它们不一定够用**——这时可以实现 LangChain 暴露的 **hook 函数**来构建自定义中间件。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 官方建议：**尽可能使用内置中间件**。自定义中间件是"内置不够用"时的补充手段，不是首选。
 
 ## 什么是 hook 函数（钩子函数）
@@ -98,7 +98,7 @@ class MyMiddleware(AgentMiddleware):
 agent = create_agent(model=model, middleware=[MyMiddleware()])
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **两种写法其实是同一件事**：装饰器底层会**基于你写的函数构造一个 `AgentMiddleware` 子类的实例**（大致是 `type(name, (AgentMiddleware,), {"before_model": wrapped, ...})()`）。
 > 所以 LangGraph 只关心两件事：**是否继承了 AgentMiddleware？是否实现了对应的 hook 方法？**
 
@@ -152,7 +152,7 @@ def force_tool_first(state: AgentState, runtime) -> dict | None:
     ...
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **类写法要跳转，需要额外加装饰器 `@hook_config`**（装饰器写法直接在装饰器参数里写 `can_jump_to`）：
 >
 > ```python
@@ -361,7 +361,7 @@ Tool Calls:
 | 3 | 通过约定的 `overflow` 标记，模拟上下文窗口溢出，**在 `before_model` 中直接跳转至结尾，提前终止流程** |
 | 4 | 没有被干预的正常 Agent 流程，作为对照 |
 
-> [!TIP]
+> [!TIP] 提示
 > **本机假服务端实测**（同一份中间件代码，把模型换成回假响应的 `http.server`，统计每轮真正发往模型的请求数）：
 >
 > ```text
@@ -386,7 +386,7 @@ Tool Calls:
 > 2. **Case 2 有 2 次模型请求**，第 2 次的 messages 是 `['user', 'assistant', 'system']`——**跳回 model 时，上一版回答和注入的 SystemMessage 都在上下文里**，所以模型能看到自己刚说过什么
 > 3. **Case 3 的请求数是 0**——模型自始至终没被调用过，Agent 直接返回了钩子塞进去的兜底消息
 
-> [!WARNING]
+> [!WARNING] 警告
 > **跳回 `model` 必须自己防死循环**：`after_model` 里 `jump_to="model"` 会让模型重跑一遍，重跑完又会进 `after_model`——**只要判断条件一直成立，它就会一直跳**。课程的做法是"**命中一次就在历史里留痕**"，下次进来先检查痕迹（`already_injected`）再决定跳不跳。你自己写跳转时务必留一个这样的"刹车"。
 
 ## Wrap-style hooks
@@ -500,12 +500,12 @@ def create_audit_middleware(logger, threshold: int, middleware_name: str):
 {}
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：把上面的代码原样跑一遍（logger 换成假的，不发请求），输出与课程一致——`class` 风格的 `__dict__` 里躺着三个参数，`decorator` 风格的 `__dict__` 是**空字典**（参数全被关在闭包里，外面看不到）。这正是在自省/调试时"类更好用"的直接原因。
 
 **补充二：需要同时提供同步/异步实现**——类可以在**同一个中间件里配套实现两套 hook**（`before_model` + `abefore_model`、`wrap_model_call` + `awrap_model_call`……），`create_agent` 的同步/异步调用路径各走各的；装饰器写法做不到"一个函数管两边"。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：用 `dir(AgentMiddleware)` 核对，六个 hook 都有对应的异步版本——`abefore_agent`、`abefore_model`、`aafter_model`、`aafter_agent`、`awrap_model_call`、`awrap_tool_call`（函数式装饰器只暴露了同步的那六个）。
 >
 > 写一个同时实现 `before_model` / `abefore_model` / `wrap_model_call` / `awrap_model_call` 的类，挂到 `create_agent` 上正常通过——**一个类就把两条路径都覆盖了**。
@@ -540,7 +540,7 @@ wrap_*   钩子：洋葱架构（前面的包裹后面的）
 [中间件1] after_model
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > 自己写多个中间件时，**同类实例化多次会被拒绝**：
 > ```text
 > AssertionError: Please remove duplicate middleware instances.
@@ -638,7 +638,7 @@ for msg in response["messages"]:
    2. `after_model` 中间件的执行顺序**和传递顺序相反**
    3. `wrap_model_call` 中间件的执行顺序是：**先传递的包在最外层**，即洋葱架构
 
-> [!TIP]
+> [!TIP] 提示
 > **本机假服务端实测**（两个 wrap + 两个 before + 两个 after，模型换成回假响应的 `http.server`）：
 >
 > ```text
@@ -686,204 +686,224 @@ for msg in response["messages"]:
   用装饰器写两个钩子：一个在**模型调用前**打印"模型调用前，消息共 N 条"；一个在**模型调用后**打印"最后一条内容的前 30 个字"。挂到 Agent 上跑一次，观察两个钩子的触发顺序与各自的输出。
   挑战：数一数一次调用里每个钩子各执行了几次，并解释为什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：钩子里能拿到完整的 `state`，所以"看上下文"很方便
-  > **二级 · 方法**：`@before_model def f(state, runtime) -> dict | None: ...`
-  > **三级 · 骨架**：返回 `None` 就是"不改状态、继续跑"；打印消息条数用 `len(state["messages"])`
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：钩子里能拿到完整的 `state`，所以"看上下文"很方便
+  **二级 · 方法**：`@before_model def f(state, runtime) -> dict | None: ...`
+  **三级 · 骨架**：返回 `None` 就是"不改状态、继续跑"；打印消息条数用 `len(state["messages"])`
+
+  :::
+
 
 - [ ] **2-2 用类写法实现"计数中间件"**
   写一个继承中间件基类的类，在模型调用之后把自定义的一个计数加一；然后跑三轮对话，观察这个计数是不是 1、2、3 地累积。
   想想两个坑：① 自定义字段凭什么能留在 Agent 状态里（不声明会怎样）；② 状态凭什么能跨三次调用一直保留。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：返回字典 = 更新状态；但状态结构不认识这个新键的话，返回的字典会被过滤掉
-  > **二级 · 方法**：`class MyState(AgentState): count: int` + `create_agent(..., state_schema=MyState, checkpointer=InMemorySaver())`
-  > **三级 · 骨架**：`return {"count": state.get("count", 0) + 1}`；调用时带上 `config={"configurable": {"thread_id": "..."}}`，三次用同一个线程号
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：返回字典 = 更新状态；但状态结构不认识这个新键的话，返回的字典会被过滤掉
+  **二级 · 方法**：`class MyState(AgentState): count: int` + `create_agent(..., state_schema=MyState, checkpointer=InMemorySaver())`
+  **三级 · 骨架**：`return {"count": state.get("count", 0) + 1}`；调用时带上 `config={"configurable": {"thread_id": "..."}}`，三次用同一个线程号
+
+  :::
+
 
 - [ ] **2-3 一个类同时覆盖"同步 + 异步"两条路径**
   写一个中间件类，同时实现**同步和异步两套钩子**（至少覆盖"模型调用前"和"包裹模型调用"这两对），分别打印不同前缀的标记（比如"同步路径/异步路径"）。然后先用同步方式调用一次、再用异步方式调用一次，确认各自走的是对应那套钩子。
   另外：列出中间件基类上六个 hook 的异步版本名，确认它们齐全。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：装饰器写法只有同步的那一套；"一个类管两边"是类写法的补充优势
-  > **二级 · 方法**：`async def abefore_model(...)`、`async def awrap_model_call(request, handler)`；异步调用用 `asyncio.run(agent.ainvoke(...))`
-  > **三级 · 骨架**：异步版本里 `return await handler(request)`；检查齐全可以用 `hasattr(AgentMiddleware, "abefore_model")` 之类的判断
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：装饰器写法只有同步的那一套；"一个类管两边"是类写法的补充优势
+  **二级 · 方法**：`async def abefore_model(...)`、`async def awrap_model_call(request, handler)`；异步调用用 `asyncio.run(agent.ainvoke(...))`
+  **三级 · 骨架**：异步版本里 `return await handler(request)`；检查齐全可以用 `hasattr(AgentMiddleware, "abefore_model")` 之类的判断
+
+  :::
+
 
 - [ ] **2-4 包裹调用：把敏感请求挡在门外，再看洋葱顺序**
   ① 用"包裹工具调用"的钩子做一个敏感词拦截：工具参数里出现敏感词（比如"密码"）就**不执行真工具**、直接返回一条拒绝消息；用一个"查询用户资料"的工具测两种情况（正常查询 / 查"密码"），确认工具函数体的打印只在正常查询时出现。
   ② 再挂两个"包裹模型调用"的钩子，各自在请求前后插一个记号，把**模型收到的输入**和**最终回答**都打印出来，说明记号的叠放顺序（谁先动手、谁先返回）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：wrap 让你能"在调用前直接改道"——这就是风控的实现方式；两个钩子的名字必须不同
-  > **二级 · 方法**：`@wrap_tool_call def f(request, handler): ...`；`request.tool_call["args"]` 看参数、`request.tool_call["id"]` 给拒绝消息配编号
-  > **三级 · 骨架**：拒绝时返回 `ToolMessage(content="...", tool_call_id=...)`；洋葱记号写成 `request.messages[-1].content += " -> A-前 <- "` 和 `response.result[0].content += " -> A-后 <- "`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> # ========== 本篇所有答案共用的开头（模型创建） ==========
-> import os
->
-> from dotenv import load_dotenv
-> from langchain.agents import create_agent
-> from langchain.chat_models import init_chat_model
-> from langchain.messages import HumanMessage
-> from langchain.tools import tool
->
-> load_dotenv(override=True)
->
-> model = init_chat_model(
->     model="deepseek-v4-flash",
->     model_provider="openai",
->     api_key=os.getenv("DEEPSEEK_API_KEY"),
->     base_url=os.getenv("DEEPSEEK_BASE_URL"),
-> )
->
-> # ---------- 2-1 装饰器写法：一个"日志中间件" ----------
-> from typing import Any
->
-> from langchain.agents.middleware import AgentState, after_model, before_model
-> from langgraph.runtime import Runtime
->
-> @before_model
-> def log_before(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->     print(f"[日志] 模型调用前，消息共 {len(state['messages'])} 条")
->     return None        # 返回 None = 不改状态，流程继续
->
-> @after_model
-> def log_after(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->     last = state["messages"][-1]
->     print(f"[日志] 模型调用后，最后一条内容的前 30 个字：{str(last.content)[:30]}")
->     return None
->
-> agent_log = create_agent(model=model, middleware=[log_before, log_after])
-> agent_log.invoke({"messages": [HumanMessage("你好")]})
-> # 输出顺序：before 先打印，after 后打印 —— 一次模型调用的"两头"各挂了一个钩子
->
-> # ---------- 2-2 类写法：把自定义数据塞进 Agent 状态 ----------
-> from langchain.agents import AgentState
-> from langchain.agents.middleware import AgentMiddleware
-> from langgraph.checkpoint.memory import InMemorySaver
->
-> # 想往 State 里塞自定义字段，就得先声明一个"带该字段的状态结构"
-> # （不声明的话，钩子返回的 {'count': ...} 会被状态结构过滤掉，读数永远是 None）
-> class MyState(AgentState):
->     count: int
->
-> class CounterMiddleware(AgentMiddleware):
->     """三条规则：继承 AgentMiddleware、方法名固定、类名随意"""
->
->     def after_model(self, state, runtime):
->         # 返回字典 = 更新状态（这就是往 Agent 状态里塞自己数据的方式）
->         return {"count": state.get("count", 0) + 1}
->
-> agent_count = create_agent(
->     model=model,
->     middleware=[CounterMiddleware()],
->     state_schema=MyState,
->     checkpointer=InMemorySaver(),      # 短期记忆：同一个 thread_id 的 State 才会一直保留
-> )
->
-> config = {"configurable": {"thread_id": "count-demo"}}
-> for i in range(3):
->     r = agent_count.invoke({"messages": [HumanMessage(f"第 {i + 1} 轮")]}, config=config)
->     print(f"第 {i + 1} 轮之后 count = {r.get('count')}")
-> # 1 → 2 → 3：计数存在 State 里，跟着 thread_id 一路累积
->
-> # ---------- 2-3 一个类同时覆盖"同步 + 异步"两条路径 ----------
-> import asyncio
-> from typing import Any
->
-> from langchain.agents.middleware import AgentMiddleware, AgentState
-> from langgraph.runtime import Runtime
->
-> # 先确认一件事：六个 hook 都有对应的异步版本
-> ASYNC_HOOKS = [
->     "abefore_agent", "abefore_model", "aafter_model", "aafter_agent",
->     "awrap_model_call", "awrap_tool_call",
-> ]
-> print("异步版 hook 齐全:", all(hasattr(AgentMiddleware, h) for h in ASYNC_HOOKS))
->
-> class DualModeMiddleware(AgentMiddleware):
->     """同一个中间件里配套实现两套 hook：同步走 invoke，异步走 ainvoke"""
->
->     def before_model(self, state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->         print("[同步路径] before_model")
->         return None
->
->     async def abefore_model(self, state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->         print("[异步路径] abefore_model")
->         return None
->
->     def wrap_model_call(self, request, handler):
->         print("[同步路径] wrap_model_call")
->         return handler(request)
->
->     async def awrap_model_call(self, request, handler):
->         print("[异步路径] awrap_model_call")
->         return await handler(request)      # 异步 handler 要 await
->
-> agent_dual = create_agent(model=model, middleware=[DualModeMiddleware()])
->
-> print("--- 同步 invoke ---")
-> agent_dual.invoke({"messages": [HumanMessage("你好")]})
->
-> print("--- 异步 ainvoke ---")
-> asyncio.run(agent_dual.ainvoke({"messages": [HumanMessage("你好")]}))
-> # 装饰器写法做不到"一个函数管两边"，这也是"要用类"的三个补充场景之一
->
-> # ---------- 2-4 包裹工具调用：敏感请求挡在门外（顺带看洋葱顺序） ----------
-> from langchain.agents.middleware import wrap_model_call, wrap_tool_call
-> from langchain.messages import ToolMessage
->
-> @tool
-> def query_user_profile(name: str) -> str:
->     """查询用户资料
->
->     Args:
->         name: 用户姓名或查询内容
->     """
->     print("   >>> 真的执行了查询工具")
->     return f"{name} 的资料：VIP 客户，注册于 2023 年"
->
-> SENSITIVE = ["密码", "password", "身份证"]
->
-> @wrap_tool_call
-> def block_sensitive(request, handler):
->     args = request.tool_call["args"]
->     if any(word in str(args) for word in SENSITIVE):
->         print("   >>> 命中敏感词，已拦截（handler 根本没被调用）")
->         return ToolMessage(
->             content="请求被安全策略拦截：不允许查询敏感信息。",
->             tool_call_id=request.tool_call["id"],
->         )
->     return handler(request)      # 不调 handler，真实的工具调用就不会发生
->
-> agent_safe = create_agent(model=model, tools=[query_user_profile], middleware=[block_sensitive])
-> for q in ["查一下张三的资料", "帮我查一下张三的密码"]:
->     r = agent_safe.invoke({"messages": [q]})
->     print(f"【{q}】→ {r['messages'][-1].content}")
->
-> # ---- 洋葱顺序：两个 wrap_model_call 各在请求前后插记号（名字必须不同，否则报重复中间件）----
-> @wrap_model_call
-> def wrap1(request, handler):
->     request.messages[-1].content += " -> wrap1-前 <- "
->     response = handler(request)
->     response.result[0].content += " -> wrap1-后 <- "
->     return response
->
-> @wrap_model_call
-> def wrap2(request, handler):
->     request.messages[-1].content += " -> wrap2-前 <- "
->     response = handler(request)
->     response.result[0].content += " -> wrap2-后 <- "
->     return response
->
-> agent_onion = create_agent(model=model, middleware=[wrap1, wrap2])
-> resp = agent_onion.invoke({"messages": [HumanMessage("只和我打个招呼")]})
-> print("模型看到的输入:", resp["messages"][0].content)
-> print("最终回答      :", resp["messages"][-1].content)
-> # 记号是"成对贴着"的：请求上 1 在 2 前面（先传递的包在最外层），回来时 2 在 1 前面
-> ```
+  **一级 · 思路**：wrap 让你能"在调用前直接改道"——这就是风控的实现方式；两个钩子的名字必须不同
+  **二级 · 方法**：`@wrap_tool_call def f(request, handler): ...`；`request.tool_call["args"]` 看参数、`request.tool_call["id"]` 给拒绝消息配编号
+  **三级 · 骨架**：拒绝时返回 `ToolMessage(content="...", tool_call_id=...)`；洋葱记号写成 `request.messages[-1].content += " -> A-前 <- "` 和 `response.result[0].content += " -> A-后 <- "`
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+# ========== 本篇所有答案共用的开头（模型创建） ==========
+import os
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from langchain.messages import HumanMessage
+from langchain.tools import tool
+
+load_dotenv(override=True)
+
+model = init_chat_model(
+    model="deepseek-v4-flash",
+    model_provider="openai",
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url=os.getenv("DEEPSEEK_BASE_URL"),
+)
+
+# ---------- 2-1 装饰器写法：一个"日志中间件" ----------
+from typing import Any
+
+from langchain.agents.middleware import AgentState, after_model, before_model
+from langgraph.runtime import Runtime
+
+@before_model
+def log_before(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    print(f"[日志] 模型调用前，消息共 {len(state['messages'])} 条")
+    return None        # 返回 None = 不改状态，流程继续
+
+@after_model
+def log_after(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    last = state["messages"][-1]
+    print(f"[日志] 模型调用后，最后一条内容的前 30 个字：{str(last.content)[:30]}")
+    return None
+
+agent_log = create_agent(model=model, middleware=[log_before, log_after])
+agent_log.invoke({"messages": [HumanMessage("你好")]})
+# 输出顺序：before 先打印，after 后打印 —— 一次模型调用的"两头"各挂了一个钩子
+
+# ---------- 2-2 类写法：把自定义数据塞进 Agent 状态 ----------
+from langchain.agents import AgentState
+from langchain.agents.middleware import AgentMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+
+# 想往 State 里塞自定义字段，就得先声明一个"带该字段的状态结构"
+# （不声明的话，钩子返回的 {'count': ...} 会被状态结构过滤掉，读数永远是 None）
+class MyState(AgentState):
+    count: int
+
+class CounterMiddleware(AgentMiddleware):
+    """三条规则：继承 AgentMiddleware、方法名固定、类名随意"""
+
+    def after_model(self, state, runtime):
+        # 返回字典 = 更新状态（这就是往 Agent 状态里塞自己数据的方式）
+        return {"count": state.get("count", 0) + 1}
+
+agent_count = create_agent(
+    model=model,
+    middleware=[CounterMiddleware()],
+    state_schema=MyState,
+    checkpointer=InMemorySaver(),      # 短期记忆：同一个 thread_id 的 State 才会一直保留
+)
+
+config = {"configurable": {"thread_id": "count-demo"}}
+for i in range(3):
+    r = agent_count.invoke({"messages": [HumanMessage(f"第 {i + 1} 轮")]}, config=config)
+    print(f"第 {i + 1} 轮之后 count = {r.get('count')}")
+# 1 → 2 → 3：计数存在 State 里，跟着 thread_id 一路累积
+
+# ---------- 2-3 一个类同时覆盖"同步 + 异步"两条路径 ----------
+import asyncio
+from typing import Any
+
+from langchain.agents.middleware import AgentMiddleware, AgentState
+from langgraph.runtime import Runtime
+
+# 先确认一件事：六个 hook 都有对应的异步版本
+ASYNC_HOOKS = [
+    "abefore_agent", "abefore_model", "aafter_model", "aafter_agent",
+    "awrap_model_call", "awrap_tool_call",
+]
+print("异步版 hook 齐全:", all(hasattr(AgentMiddleware, h) for h in ASYNC_HOOKS))
+
+class DualModeMiddleware(AgentMiddleware):
+    """同一个中间件里配套实现两套 hook：同步走 invoke，异步走 ainvoke"""
+
+    def before_model(self, state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+        print("[同步路径] before_model")
+        return None
+
+    async def abefore_model(self, state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+        print("[异步路径] abefore_model")
+        return None
+
+    def wrap_model_call(self, request, handler):
+        print("[同步路径] wrap_model_call")
+        return handler(request)
+
+    async def awrap_model_call(self, request, handler):
+        print("[异步路径] awrap_model_call")
+        return await handler(request)      # 异步 handler 要 await
+
+agent_dual = create_agent(model=model, middleware=[DualModeMiddleware()])
+
+print("--- 同步 invoke ---")
+agent_dual.invoke({"messages": [HumanMessage("你好")]})
+
+print("--- 异步 ainvoke ---")
+asyncio.run(agent_dual.ainvoke({"messages": [HumanMessage("你好")]}))
+# 装饰器写法做不到"一个函数管两边"，这也是"要用类"的三个补充场景之一
+
+# ---------- 2-4 包裹工具调用：敏感请求挡在门外（顺带看洋葱顺序） ----------
+from langchain.agents.middleware import wrap_model_call, wrap_tool_call
+from langchain.messages import ToolMessage
+
+@tool
+def query_user_profile(name: str) -> str:
+    """查询用户资料
+
+    Args:
+        name: 用户姓名或查询内容
+    """
+    print("   >>> 真的执行了查询工具")
+    return f"{name} 的资料：VIP 客户，注册于 2023 年"
+
+SENSITIVE = ["密码", "password", "身份证"]
+
+@wrap_tool_call
+def block_sensitive(request, handler):
+    args = request.tool_call["args"]
+    if any(word in str(args) for word in SENSITIVE):
+        print("   >>> 命中敏感词，已拦截（handler 根本没被调用）")
+        return ToolMessage(
+            content="请求被安全策略拦截：不允许查询敏感信息。",
+            tool_call_id=request.tool_call["id"],
+        )
+    return handler(request)      # 不调 handler，真实的工具调用就不会发生
+
+agent_safe = create_agent(model=model, tools=[query_user_profile], middleware=[block_sensitive])
+for q in ["查一下张三的资料", "帮我查一下张三的密码"]:
+    r = agent_safe.invoke({"messages": [q]})
+    print(f"【{q}】→ {r['messages'][-1].content}")
+
+# ---- 洋葱顺序：两个 wrap_model_call 各在请求前后插记号（名字必须不同，否则报重复中间件）----
+@wrap_model_call
+def wrap1(request, handler):
+    request.messages[-1].content += " -> wrap1-前 <- "
+    response = handler(request)
+    response.result[0].content += " -> wrap1-后 <- "
+    return response
+
+@wrap_model_call
+def wrap2(request, handler):
+    request.messages[-1].content += " -> wrap2-前 <- "
+    response = handler(request)
+    response.result[0].content += " -> wrap2-后 <- "
+    return response
+
+agent_onion = create_agent(model=model, middleware=[wrap1, wrap2])
+resp = agent_onion.invoke({"messages": [HumanMessage("只和我打个招呼")]})
+print("模型看到的输入:", resp["messages"][0].content)
+print("最终回答      :", resp["messages"][-1].content)
+# 记号是"成对贴着"的：请求上 1 在 2 前面（先传递的包在最外层），回来时 2 在 1 前面
+```
+
+:::
+
 
 ### 三、综合题
 
@@ -894,105 +914,113 @@ for msg in response["messages"]:
   3. **溢出熔断**：输入里带 `overflow` 时，直接跳到结尾、模型一次都不调用，返回一条兜底消息；
   4. 跑四个输入（含一个普通问题），把每个 case 的消息流按顺序打印出来对比，并数一数每个 case 里"真正发给模型的请求次数"（提示：正常流程是几次，跳转 case 就应该少几次或多几次）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：跳转是"钩子直接改写流程走向"，所以要在装饰器上声明"我允许跳到哪"；跳回模型等于让模型重跑一遍，必须留刹车
-  > **二级 · 方法**：`@before_model(can_jump_to=["tools"])`、`@after_model(can_jump_to=["model"])`、`@before_model(can_jump_to=["end"])`；返回值里带上 `"jump_to": "tools"` 之类
-  > **三级 · 骨架**：伪造工具调用用 `AIMessage(content=..., tool_calls=[{"name": "get_news", "args": {}, "id": "call_x"}])`；刹车就是检查历史里有没有那条系统指令（`already_injected`）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> # ---------- 3-1 综合题：三种流程跳转（跳过模型 / 跳回重生成 / 提前熔断） ----------
-> import os
-> from typing import Any
->
-> from dotenv import load_dotenv
-> from langchain.agents import create_agent
-> from langchain.agents.middleware import AgentState, after_model, before_model
-> from langchain.chat_models import init_chat_model
-> from langchain.messages import AIMessage, SystemMessage
-> from langchain.tools import tool
-> from langgraph.runtime import Runtime
->
-> load_dotenv(override=True)
->
-> model = init_chat_model(
->     model="deepseek-v4-flash",
->     model_provider="openai",
->     api_key=os.getenv("DEEPSEEK_API_KEY"),
->     base_url=os.getenv("DEEPSEEK_BASE_URL"),
-> )
->
-> @tool
-> def get_news() -> str:
->     """获取当日新闻"""
->     return "美加墨世界杯今日开幕"
->
-> # ① 跳过模型，直接把控制权交给工具节点
-> @before_model(can_jump_to=["tools"])
-> def force_tool_first(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->     """用户输入里带 direct tool 时，伪造一条"模型要调工具"的消息，绕开模型的首轮思考"""
->     text = state["messages"][-1].content
->     if isinstance(text, str) and "direct tool" in text.lower():
->         print("[中间件] before_model: jump_to='tools'")
->         return {
->             "messages": [
->                 AIMessage(
->                     content="人工构造的消息",
->                     tool_calls=[{"name": "get_news", "args": {}, "id": "call_force_001"}],
->                 )
->             ],
->             "jump_to": "tools",
->         }
->     return None
->
-> # ② 模型答完之后，再把它拉回去重生成一版
-> @after_model(can_jump_to=["model"])
-> def retry_with_instruction(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->     """用户输入里带 retry model 时，追加一条系统提示并跳回模型节点"""
->     user_text = ""
->     for msg in reversed(state["messages"]):
->         if getattr(msg, "type", "") == "human":
->             user_text = getattr(msg, "content", "")
->             break
->     if isinstance(user_text, str) and "retry model" in user_text.lower():
->         # 【刹车】命中一次就在历史里留痕，下次进来先查痕迹，否则会无限跳
->         already_injected = any(
->             isinstance(getattr(msg, "content", None), str)
->             and "你必须以【二次回答】开头" in msg.content
->             for msg in state["messages"]
->         )
->         if already_injected:
->             return None
->         print("[中间件] after_model: jump_to='model'（注入指令后重新生成）")
->         return {
->             "messages": [SystemMessage("你必须以【二次回答】开头，并且只用一句话回答。")],
->             "jump_to": "model",
->         }
->     return None
->
-> # ③ 上下文溢出：直接跳结尾，模型自始至终不会被调用
-> @before_model(can_jump_to=["end"])
-> def overflow_guard(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
->     """模拟上下文窗口溢出，提前终止整个流程"""
->     if "overflow" in str(state["messages"][-1].content):
->         print("[中间件] before_model: jump_to='end'（提前熔断）")
->         return {"messages": [AIMessage("上下文窗口溢出，终止")], "jump_to": "end"}
->     return None
->
-> agent = create_agent(
->     model=model,
->     tools=[get_news],
->     middleware=[force_tool_first, retry_with_instruction, overflow_guard],
-> )
->
-> def run_once(user_input: str, label: str):
->     print(f"===== {label} | 用户输入：{user_input} =====")
->     result = agent.invoke({"messages": [{"role": "user", "content": user_input}]})
->     for msg in result["messages"]:
->         print(f"  {type(msg).__name__:15s} | {str(msg.content)[:55]}")
->
-> run_once("请帮我查今日新闻 direct tool", "Case 1 直跳工具")
-> run_once("请随便介绍一下 LangChain retry model", "Case 2 跳回模型重生成")
-> run_once("你好 overflow", "Case 3 上下文溢出熔断")
-> run_once("今日新闻摘要？", "Case 4 正常流程（对照）")
-> ```
+  **一级 · 思路**：跳转是"钩子直接改写流程走向"，所以要在装饰器上声明"我允许跳到哪"；跳回模型等于让模型重跑一遍，必须留刹车
+  **二级 · 方法**：`@before_model(can_jump_to=["tools"])`、`@after_model(can_jump_to=["model"])`、`@before_model(can_jump_to=["end"])`；返回值里带上 `"jump_to": "tools"` 之类
+  **三级 · 骨架**：伪造工具调用用 `AIMessage(content=..., tool_calls=[{"name": "get_news", "args": {}, "id": "call_x"}])`；刹车就是检查历史里有没有那条系统指令（`already_injected`）
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+# ---------- 3-1 综合题：三种流程跳转（跳过模型 / 跳回重生成 / 提前熔断） ----------
+import os
+from typing import Any
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.agents.middleware import AgentState, after_model, before_model
+from langchain.chat_models import init_chat_model
+from langchain.messages import AIMessage, SystemMessage
+from langchain.tools import tool
+from langgraph.runtime import Runtime
+
+load_dotenv(override=True)
+
+model = init_chat_model(
+    model="deepseek-v4-flash",
+    model_provider="openai",
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url=os.getenv("DEEPSEEK_BASE_URL"),
+)
+
+@tool
+def get_news() -> str:
+    """获取当日新闻"""
+    return "美加墨世界杯今日开幕"
+
+# ① 跳过模型，直接把控制权交给工具节点
+@before_model(can_jump_to=["tools"])
+def force_tool_first(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    """用户输入里带 direct tool 时，伪造一条"模型要调工具"的消息，绕开模型的首轮思考"""
+    text = state["messages"][-1].content
+    if isinstance(text, str) and "direct tool" in text.lower():
+        print("[中间件] before_model: jump_to='tools'")
+        return {
+            "messages": [
+                AIMessage(
+                    content="人工构造的消息",
+                    tool_calls=[{"name": "get_news", "args": {}, "id": "call_force_001"}],
+                )
+            ],
+            "jump_to": "tools",
+        }
+    return None
+
+# ② 模型答完之后，再把它拉回去重生成一版
+@after_model(can_jump_to=["model"])
+def retry_with_instruction(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    """用户输入里带 retry model 时，追加一条系统提示并跳回模型节点"""
+    user_text = ""
+    for msg in reversed(state["messages"]):
+        if getattr(msg, "type", "") == "human":
+            user_text = getattr(msg, "content", "")
+            break
+    if isinstance(user_text, str) and "retry model" in user_text.lower():
+        # 【刹车】命中一次就在历史里留痕，下次进来先查痕迹，否则会无限跳
+        already_injected = any(
+            isinstance(getattr(msg, "content", None), str)
+            and "你必须以【二次回答】开头" in msg.content
+            for msg in state["messages"]
+        )
+        if already_injected:
+            return None
+        print("[中间件] after_model: jump_to='model'（注入指令后重新生成）")
+        return {
+            "messages": [SystemMessage("你必须以【二次回答】开头，并且只用一句话回答。")],
+            "jump_to": "model",
+        }
+    return None
+
+# ③ 上下文溢出：直接跳结尾，模型自始至终不会被调用
+@before_model(can_jump_to=["end"])
+def overflow_guard(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    """模拟上下文窗口溢出，提前终止整个流程"""
+    if "overflow" in str(state["messages"][-1].content):
+        print("[中间件] before_model: jump_to='end'（提前熔断）")
+        return {"messages": [AIMessage("上下文窗口溢出，终止")], "jump_to": "end"}
+    return None
+
+agent = create_agent(
+    model=model,
+    tools=[get_news],
+    middleware=[force_tool_first, retry_with_instruction, overflow_guard],
+)
+
+def run_once(user_input: str, label: str):
+    print(f"===== {label} | 用户输入：{user_input} =====")
+    result = agent.invoke({"messages": [{"role": "user", "content": user_input}]})
+    for msg in result["messages"]:
+        print(f"  {type(msg).__name__:15s} | {str(msg.content)[:55]}")
+
+run_once("请帮我查今日新闻 direct tool", "Case 1 直跳工具")
+run_once("请随便介绍一下 LangChain retry model", "Case 2 跳回模型重生成")
+run_once("你好 overflow", "Case 3 上下文溢出熔断")
+run_once("今日新闻摘要？", "Case 4 正常流程（对照）")
+```
+
+:::
+

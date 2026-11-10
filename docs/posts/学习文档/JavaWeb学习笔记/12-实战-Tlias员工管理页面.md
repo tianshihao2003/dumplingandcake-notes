@@ -32,7 +32,7 @@ cover: false
 | ③ **表格数据展示区域** | 表头 + 员工数据行（含头像、操作按钮） | `<table>`、`<thead>`、`<tbody>`、`<tr>`、`<th>`、`<td>`、`<img>`、`<button>` | 边框合并、单元格内边距、表头底色、隔行变色 |
 | ④ **底部版权区域** | 公司全称 + 版权信息 | `<footer>`、`<p>` | 灰色背景、白色文字、居中、外边距 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **为什么不把整页一次性丢给 AI？**
 > 课程的做法是"**整页拆成 4 个部分，一条提示词只做一个部分**"：先要导航栏，再"接着"要搜索表单，再"接着"要表格，最后"接着"要页脚。这样做的好处：
 > 1. 每次的需求说得清（内容 + 布局 + 样式三条就够）；
@@ -111,7 +111,7 @@ cover: false
 5. **`h1` 要写 `margin: 0`**——标题标签自带上下外边距，不删导航栏会被撑高；
 6. **`.navbar h1` 这种写法叫后代选择器**（07 篇）：只改导航栏**里面**的 h1，页面别处的标题不受影响。链接的 `.navbar a` 同理。
 
-> [!TIP]
+> [!TIP] 提示
 > 提示词里只说了"加大加粗""灰色背景"，生成出来的却还有 `font-family: "楷体"`、`align-items: center` 这些细节——**AI 会补全你没说的部分**。所以生成之后要逐行读一遍：**它替你做的决定，你得认账**（不喜欢就手改，比如把楷体改回默认）。
 
 ## 区域二：搜索表单区域
@@ -304,7 +304,7 @@ cover: false
 5. **`.avatar` 控制头像尺寸**：单元格里放的是 `<img>`，用 `.avatar { width: 50px; height: 50px; }` 把它缩小成小头像；
 6. **单元格里可以放任何东西**：图片（头像）、按钮（编辑/删除）都能放进 `<td>`；`<button type="button">` 表示"只是个可点击按钮"，点了不会提交表单。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课程代码里头像用的是**网络图片地址**（`https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg`）。这类地址会过期——**现在这个链接已经打不开了**（返回 403），页面上的头像会变成碎图标。练习时把它换成自己的图片：本地图片写相对路径（`img/avatar.png`），或者用别的图床地址。（本文的截图里换成了一张本地占位头像。）
 >
 > 另外，课程代码里 `th, td` 那行的注释写的是"左对齐"，实际值是 `text-align: center`（居中）——**以代码为准，注释只能当参考**。
@@ -384,7 +384,7 @@ cover: false
 
 ## 用 AI 生成后，要"看得懂 + 会手改"
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 课程反复强调的一点：**HTML 标签和 CSS 属性都是固定的**，所以前端页面可以直接基于 AI 辅助开发、也可以查官方文档。**但 AI 生成完不算完——你得看懂它写了什么，并且能动手改。**
 
 ### 1. 三步看懂一份 AI 生成的页面
@@ -465,40 +465,48 @@ cover: false
   4. 整条导航栏是灰色背景，文字不贴着边缘
   （练习文件 `test_12_顶部导航栏.html` 里有写作区，结构已备好。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**："同一行 + 两端分开"是弹性布局的活儿，属性全部写在**父容器**上；标题自带上下外边距要先清掉
-  > **二级 · 方法**：`.navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #b5b3b3; }`；`.navbar h1 { margin: 0; color: white; font-weight: bold; font-family: "楷体"; }`；`.navbar a { color: white; text-decoration: none; }`
-  > **三级 · 骨架**：`.navbar { display: ____; justify-content: ____; align-items: ____; }` / `.navbar h1 { margin: ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <style>
-  >   .navbar {
-  >     background-color: #b5b3b3;        /* 灰色背景 */
-  >     display: flex;                    /* 一行排列 */
-  >     justify-content: space-between;   /* 两端分开 */
-  >     align-items: center;              /* 垂直居中 */
-  >     padding: 10px;                    /* 内边距 */
-  >   }
-  >   .navbar h1 {
-  >     margin: 0;                        /* 清掉标题自带的外边距 */
-  >     font-weight: bold;
-  >     color: white;
-  >     font-family: "楷体";
-  >   }
-  >   .navbar a {
-  >     color: white;
-  >     text-decoration: none;            /* 去掉下划线 */
-  >   }
-  > </style>
-  > <body>
-  >   <div class="navbar">
-  >     <h1>Tlias智能学习辅助系统</h1>
-  >     <a href="#">退出登录</a>
-  >   </div>
-  > </body>
-  > ```
-  > 对照课程 `10. Tlias案例-顶部导航栏.html`。检查点：`display: flex` 一定写在 `.navbar`（父容器）上；`space-between` 是"先两边贴边、再平分剩余空间"；`h1` 的 `margin: 0` 不写导航栏会被撑高。
+  **一级 · 思路**："同一行 + 两端分开"是弹性布局的活儿，属性全部写在**父容器**上；标题自带上下外边距要先清掉
+  **二级 · 方法**：`.navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #b5b3b3; }`；`.navbar h1 { margin: 0; color: white; font-weight: bold; font-family: "楷体"; }`；`.navbar a { color: white; text-decoration: none; }`
+  **三级 · 骨架**：`.navbar { display: ____; justify-content: ____; align-items: ____; }` / `.navbar h1 { margin: ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <style>
+    .navbar {
+      background-color: #b5b3b3;        /* 灰色背景 */
+      display: flex;                    /* 一行排列 */
+      justify-content: space-between;   /* 两端分开 */
+      align-items: center;              /* 垂直居中 */
+      padding: 10px;                    /* 内边距 */
+    }
+    .navbar h1 {
+      margin: 0;                        /* 清掉标题自带的外边距 */
+      font-weight: bold;
+      color: white;
+      font-family: "楷体";
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;            /* 去掉下划线 */
+    }
+  </style>
+  <body>
+    <div class="navbar">
+      <h1>Tlias智能学习辅助系统</h1>
+      <a href="#">退出登录</a>
+    </div>
+  </body>
+  ```
+  对照课程 `10. Tlias案例-顶部导航栏.html`。检查点：`display: flex` 一定写在 `.navbar`（父容器）上；`space-between` 是"先两边贴边、再平分剩余空间"；`h1` 的 `margin: 0` 不写导航栏会被撑高。
+
+  :::
+
 
 - [ ] **2-2 把搜索表单排成"美观大气的一行"**
   页面里已经有一个表单，里面是"姓名 + 性别下拉 + 职位下拉 + 查询/清空两个按钮"。要求：
@@ -508,31 +516,39 @@ cover: false
   4. 表单和上下内容之间留出 20px
   （练习文件 `test_12_搜索表单一行排列.html` 里有写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：还是弹性布局——不过这次是"把一堆控件排成一行"；统一间距有专门的属性，不用挨个写 `margin-right`
-  > **二级 · 方法**：`.search-form { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin: 20px 0; }`；分组选择器 `.search-form input[type="text"], .search-form select { padding: 5px; width: 300px; }`；`.search-form button { padding: 5px 15px; }`
-  > **三级 · 骨架**：`.search-form { display: ____; align-items: ____; gap: ____; margin: ____ 0; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <style>
-  >   .search-form {
-  >     display: flex;            /* 一行排列 */
-  >     flex-wrap: nowrap;        /* 不换行 */
-  >     align-items: center;      /* 垂直居中对齐 */
-  >     gap: 10px;                /* 控件之间的统一间距 */
-  >     margin: 20px 0;           /* 上下留白 20px */
-  >   }
-  >   .search-form input[type="text"], .search-form select {
-  >     padding: 5px;
-  >     width: 300px;
-  >   }
-  >   .search-form button {
-  >     padding: 5px 15px;
-  >   }
-  > </style>
-  > ```
-  > 对照课程 `14. Tlias案例-搜索表单区域.html`。检查点：`gap` 写在**父容器**上，一行就管住所有子元素的间距；`.search-form input[type="text"]` 这一串是"后代选择器 + 属性选择器"，注意中间的空格；`padding: 5px 15px` 是两值简写（上下 5px、左右 15px）。
+  **一级 · 思路**：还是弹性布局——不过这次是"把一堆控件排成一行"；统一间距有专门的属性，不用挨个写 `margin-right`
+  **二级 · 方法**：`.search-form { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin: 20px 0; }`；分组选择器 `.search-form input[type="text"], .search-form select { padding: 5px; width: 300px; }`；`.search-form button { padding: 5px 15px; }`
+  **三级 · 骨架**：`.search-form { display: ____; align-items: ____; gap: ____; margin: ____ 0; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <style>
+    .search-form {
+      display: flex;            /* 一行排列 */
+      flex-wrap: nowrap;        /* 不换行 */
+      align-items: center;      /* 垂直居中对齐 */
+      gap: 10px;                /* 控件之间的统一间距 */
+      margin: 20px 0;           /* 上下留白 20px */
+    }
+    .search-form input[type="text"], .search-form select {
+      padding: 5px;
+      width: 300px;
+    }
+    .search-form button {
+      padding: 5px 15px;
+    }
+  </style>
+  ```
+  对照课程 `14. Tlias案例-搜索表单区域.html`。检查点：`gap` 写在**父容器**上，一行就管住所有子元素的间距；`.search-form input[type="text"]` 这一串是"后代选择器 + 属性选择器"，注意中间的空格；`padding: 5px 15px` 是两值简写（上下 5px、左右 15px）。
+
+  :::
+
 
 - [ ] **2-3 员工表格的"骨架 + 边框"**
   做一个员工列表表格，要求：
@@ -542,58 +558,66 @@ cover: false
   4. 表头带浅灰底色，数据行的一行隔一行浅灰（斑马纹）
   （练习文件 `test_12_表格区域.html` 里有写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：表格是"一层套一层"——表格整体里分表头和主体，它们里面是行，行里是格子；样式上先把"双线边框"合并掉，再用"偶数行"控制隔行颜色
-  > **二级 · 方法**：`<table>` + `<thead>/<tbody>` + `<tr>` + `<th>/<td>`；`table { width: 100%; border-collapse: collapse; }`、`th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }`、`th { background-color: #f2f2f2; }`、`tr:nth-child(even) { background-color: #f2f2f2; }`；按钮 `<button type="button">`
-  > **三级 · 骨架**：`<table><thead><tr><th>____</th></tr></thead><tbody><tr><td>____</td></tr></tbody></table>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <style>
-  >   table {
-  >     width: 100%;
-  >     border-collapse: collapse;    /* 边框合并成一条 */
-  >   }
-  >   th, td {
-  >     border: 1px solid #ddd;
-  >     padding: 8px;
-  >     text-align: center;           /* 内容居中 */
-  >   }
-  >   th {
-  >     background-color: #f2f2f2;    /* 表头灰底 */
-  >   }
-  >   tr:nth-child(even) {
-  >     background-color: #f2f2f2;    /* 偶数行浅灰 */
-  >   }
-  > </style>
-  > <body>
-  >   <table>
-  >     <thead>
-  >       <tr>
-  >         <th>姓名</th>
-  >         <th>职位</th>
-  >         <th>入职日期</th>
-  >         <th>操作</th>
-  >       </tr>
-  >     </thead>
-  >     <tbody>
-  >       <tr>
-  >         <td>令狐冲</td>
-  >         <td>讲师</td>
-  >         <td>2021-06-15</td>
-  >         <td><button type="button">编辑</button> <button type="button">删除</button></td>
-  >       </tr>
-  >       <tr>
-  >         <td>任盈盈</td>
-  >         <td>咨询师</td>
-  >         <td>2021-07-20</td>
-  >         <td><button type="button">编辑</button> <button type="button">删除</button></td>
-  >       </tr>
-  >     </tbody>
-  >   </table>
-  > </body>
-  > ```
-  > 对照课程 `15. Tlias案例-表格数据展示区域.html`。检查点：表头用 `<th>`、数据用 `<td>`；**每一行的格子数要一样**（加列时表头和所有数据行一起加）；`border-collapse: collapse` 不写就会是"双线"表格；按钮 `type="button"` 才不会提交表单。
+  **一级 · 思路**：表格是"一层套一层"——表格整体里分表头和主体，它们里面是行，行里是格子；样式上先把"双线边框"合并掉，再用"偶数行"控制隔行颜色
+  **二级 · 方法**：`<table>` + `<thead>/<tbody>` + `<tr>` + `<th>/<td>`；`table { width: 100%; border-collapse: collapse; }`、`th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }`、`th { background-color: #f2f2f2; }`、`tr:nth-child(even) { background-color: #f2f2f2; }`；按钮 `<button type="button">`
+  **三级 · 骨架**：`<table><thead><tr><th>____</th></tr></thead><tbody><tr><td>____</td></tr></tbody></table>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;    /* 边框合并成一条 */
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;           /* 内容居中 */
+    }
+    th {
+      background-color: #f2f2f2;    /* 表头灰底 */
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;    /* 偶数行浅灰 */
+    }
+  </style>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>姓名</th>
+          <th>职位</th>
+          <th>入职日期</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>令狐冲</td>
+          <td>讲师</td>
+          <td>2021-06-15</td>
+          <td><button type="button">编辑</button> <button type="button">删除</button></td>
+        </tr>
+        <tr>
+          <td>任盈盈</td>
+          <td>咨询师</td>
+          <td>2021-07-20</td>
+          <td><button type="button">编辑</button> <button type="button">删除</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+  ```
+  对照课程 `15. Tlias案例-表格数据展示区域.html`。检查点：表头用 `<th>`、数据用 `<td>`；**每一行的格子数要一样**（加列时表头和所有数据行一起加）；`border-collapse: collapse` 不写就会是"双线"表格；按钮 `type="button"` 才不会提交表单。
+
+  :::
+
 
 ### 三、综合题
 
@@ -608,34 +632,42 @@ cover: false
   6. **手改四件事**：① 表格里**再加一行**你自己的数据；② 表格里**加一列"所属部门"**（表头和各行的格子都要加）；③ 把头像换成**你自己的图片**（本地相对路径）；④ 把版权信息里的年份改成今年
   7. **自查**：对照原型逐块核对——导航栏两端分开了吗？表单控件在一行吗？表格的列和原型一致吗（原型还有"所属部门"）？表单里每个控件都有 `name` 吗？拉宽窗口整页是否居中？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：第 1~4 步按"区域"推进，每块都能单独在浏览器里看效果；第 5 步是"包一层容器 + 定宽度 + 居中"；第 6 步的手改全在**结构里加东西**（多一行 `<tr>`、多一列 `<th>`/`<td>`、换个 `src`）
-  > **二级 · 方法**：提示词模板"你是一名前端开发工程师……先实现第 &lt;N> 个部分 - <区域名>，内容：… 布局：… 样式：…"；收口 `#container { width: 80%; margin: 0 auto; }`；加列 = 表头加 `<th>` + **每一行**加 `<td>`；换头像 = 改 `<img class="avatar" src="…">` 的 `src`
-  > **三级 · 骨架**：`<div ____="container"> …四个区域… </div>` / `#container { width: ____; margin: ____ auto; }` / 表格里 `<____>所属部门</____>` 加在表头、每行加一个 `<td>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 四个区域的代码就是课程这四份文件，直接对照看：
-  >
-  > - ① 导航栏：`10. Tlias案例-顶部导航栏.html`
-  > - ② 搜索表单：`14. Tlias案例-搜索表单区域.html`
-  > - ③ 表格区域：`15. Tlias案例-表格数据展示区域.html`
-  > - ④ 页脚 + 收口：`16. Tlias案例-底部版权区域.html`
-  >
-  > **手改部分的参考**（以第 6 步为例）：
-  > ```html
-  > <!-- ① 加一行数据：在 tbody 里再抄一个 tr -->
-  > <tr>
-  >   <td>张三</td>
-  >   <td>男</td>
-  >   <td><img class="avatar" src="img/avatar.png" alt="张三"></td>
-  >   <td>班主任</td>
-  >   <td>2026-09-29</td>
-  >   <td>2026-09-29 10:00</td>
-  >   <td class="action-buttons">
-  >     <button type="button">编辑</button>
-  >     <button type="button">删除</button>
-  >   </td>
-  > </tr>
-  > ```
-  > ② 加"所属部门"列：在 `<thead>` 的"头像"后面插一个 `<th>所属部门</th>`，**然后在每一个 `<tr>` 的对应位置都插一个 `<td>学工部</td>`**——只想改表头不改数据行，表格就会错位。③ 头像 `src` 换成你自己的相对路径图片（课程里的网络图片地址已经失效）。④ 年份直接改文字。
-  > 第 7 步的答案：原型的表格里**有"所属部门"列**，而课程提示词里没写这一列，所以 AI 生成的表格里没有——**"对照原型补齐"就是这一步练的东西**。
+  **一级 · 思路**：第 1~4 步按"区域"推进，每块都能单独在浏览器里看效果；第 5 步是"包一层容器 + 定宽度 + 居中"；第 6 步的手改全在**结构里加东西**（多一行 `<tr>`、多一列 `<th>`/`<td>`、换个 `src`）
+  **二级 · 方法**：提示词模板"你是一名前端开发工程师……先实现第 &lt;N> 个部分 - <区域名>，内容：… 布局：… 样式：…"；收口 `#container { width: 80%; margin: 0 auto; }`；加列 = 表头加 `<th>` + **每一行**加 `<td>`；换头像 = 改 `<img class="avatar" src="…">` 的 `src`
+  **三级 · 骨架**：`<div ____="container"> …四个区域… </div>` / `#container { width: ____; margin: ____ auto; }` / 表格里 `<____>所属部门</____>` 加在表头、每行加一个 `<td>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  四个区域的代码就是课程这四份文件，直接对照看：
+  
+  - ① 导航栏：`10. Tlias案例-顶部导航栏.html`
+  - ② 搜索表单：`14. Tlias案例-搜索表单区域.html`
+  - ③ 表格区域：`15. Tlias案例-表格数据展示区域.html`
+  - ④ 页脚 + 收口：`16. Tlias案例-底部版权区域.html`
+  
+  **手改部分的参考**（以第 6 步为例）：
+  ```html
+  <!-- ① 加一行数据：在 tbody 里再抄一个 tr -->
+  <tr>
+    <td>张三</td>
+    <td>男</td>
+    <td><img class="avatar" src="img/avatar.png" alt="张三"></td>
+    <td>班主任</td>
+    <td>2026-09-29</td>
+    <td>2026-09-29 10:00</td>
+    <td class="action-buttons">
+      <button type="button">编辑</button>
+      <button type="button">删除</button>
+    </td>
+  </tr>
+  ```
+  ② 加"所属部门"列：在 `<thead>` 的"头像"后面插一个 `<th>所属部门</th>`，**然后在每一个 `<tr>` 的对应位置都插一个 `<td>学工部</td>`**——只想改表头不改数据行，表格就会错位。③ 头像 `src` 换成你自己的相对路径图片（课程里的网络图片地址已经失效）。④ 年份直接改文字。
+  第 7 步的答案：原型的表格里**有"所属部门"列**，而课程提示词里没写这一列，所以 AI 生成的表格里没有——**"对照原型补齐"就是这一步练的东西**。
+
+  :::
+

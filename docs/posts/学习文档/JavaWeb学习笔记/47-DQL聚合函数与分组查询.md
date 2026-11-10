@@ -50,7 +50,7 @@ PPT 第 59 页给的原文定义只有一句，但很关键：
 
 五个函数在本机 `emp` 表（30 条数据）上跑出来的真实结果：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -95,7 +95,7 @@ PPT 第 59 页的第一条注意是原文：
 
 平均薪资这个数最好验算一遍：**218900 ÷ 29 = 7548.27586……**，四舍五入就是 `7548.2759`；如果用 30 当分母（错误地以为"没薪资的人按 0 算"），会得到 7296.6667——和正确答案差了 250 多。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > `NULL` 和"0"、"空字符串"是两回事：**0 会参与运算**（求和会多一个 0，`count` 会把它算进去），**`NULL` 会被所有聚合函数跳过**。所以"统计平均薪资"这类需求，一定要先在心里问一句：**这一列有没有空值？空值会不会让分母变小？**
 
 ### 注意二：统计数量的三种写法，推荐 `count(*)`（PPT 第 59 页）
@@ -134,7 +134,7 @@ select 字段列表 from 表名 [where 条件列表] group by 分组字段名 [h
 select job, count(*) from emp group by job;
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```text
@@ -158,7 +158,7 @@ select job, count(*) from emp group by job;
 
 `select` 里的字段列表可以同时放**分组字段**和**聚合函数**，一条 SQL 就能省掉两趟查询：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -197,7 +197,7 @@ PPT 第 60 页的第三条注意是原文：
 
 想要验证这句"无任何意义"，本机实测直接报错：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -227,7 +227,7 @@ PPT 第 60 页的第三条注意是原文：
 
 ### 实测：where 里用聚合函数会报错
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -266,7 +266,7 @@ PPT 第 60 页的第三条注意是原文：
 
 需求：**先只看 2000-01-01 之后入职的员工，按职位分组，找出人数大于 2 的职位**：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -287,7 +287,7 @@ PPT 第 60 页的第三条注意是原文：
 
 课程配套练习里还有一道同型题——**先查入职时间在 `2015-01-01`（含）以前的员工，按职位分组，获取员工数量大于等于 2 的职位**：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（MySQL 9.0.1，库 `db01`，表 `emp`）：
 >
 > ```sql
@@ -353,82 +353,106 @@ PPT 第 60 页的第三条注意是原文：
   统计该公司：① 员工数量；② 平均薪资；③ 最低薪资；④ 最高薪资；⑤ 薪资总额。
   （练习文件 `test_47_聚合函数.sql` 里给了题目注释和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这五问都是"把一整列当成一个整体算一个数"，用聚合函数；注意它们**不需要 `group by`**（整张表算一个值）
-  > **二级 · 方法**：`select 聚合函数(字段) from 表名;`——统计数量 `count`、平均 `avg`、最小 `min`、最大 `max`、求和 `sum`；统计数量**推荐 `count(*)`**
-  > **三级 · 骨架**：`select count(*) from emp;` / `select ____(salary) from emp;`（平均值）/ `select min(salary), ____(salary) from emp;` / `select ____(salary) from emp;`（求和）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > select count(*) as 员工数量 from emp;
-  > select avg(salary) as 平均薪资 from emp;
-  > select min(salary) as 最低薪资 from emp;
-  > select max(salary) as 最高薪资 from emp;
-  > select sum(salary) as 薪资总额 from emp;
-  > -- 一条 SQL 里全查出来也可以
-  > select count(*) as 员工数量, avg(salary) as 平均薪资, min(salary) as 最低薪资, max(salary) as 最高薪资, sum(salary) as 薪资总额 from emp;
-  > ```
-  > 本机实测结果（MySQL 9.0.1，`db01.emp`）：
-  > ```text
-  > +--------+-----------+-----------+-----------+-----------+
-  > | 员工数量 | 平均薪资  | 最低薪资  | 最高薪资  | 薪资总额  |
-  > +--------+-----------+-----------+-----------+-----------+
-  > |     30 | 7548.2759 |      4700 |     15000 |    218900 |
-  > +--------+-----------+-----------+-----------+-----------+
-  > ```
-  > **平均薪资这一格一定要会验算**：`218900 ÷ 29 = 7548.2759`——分母是 **29** 不是 30，因为李云那条数据的 `salary` 是 `NULL`，`NULL` 不参与聚合运算。想保留两位小数可以套一个四舍五入函数 `round(avg(salary), 2)`，结果是 **7548.28**。
+  **一级 · 思路**：这五问都是"把一整列当成一个整体算一个数"，用聚合函数；注意它们**不需要 `group by`**（整张表算一个值）
+  **二级 · 方法**：`select 聚合函数(字段) from 表名;`——统计数量 `count`、平均 `avg`、最小 `min`、最大 `max`、求和 `sum`；统计数量**推荐 `count(*)`**
+  **三级 · 骨架**：`select count(*) from emp;` / `select ____(salary) from emp;`（平均值）/ `select min(salary), ____(salary) from emp;` / `select ____(salary) from emp;`（求和）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  select count(*) as 员工数量 from emp;
+  select avg(salary) as 平均薪资 from emp;
+  select min(salary) as 最低薪资 from emp;
+  select max(salary) as 最高薪资 from emp;
+  select sum(salary) as 薪资总额 from emp;
+  -- 一条 SQL 里全查出来也可以
+  select count(*) as 员工数量, avg(salary) as 平均薪资, min(salary) as 最低薪资, max(salary) as 最高薪资, sum(salary) as 薪资总额 from emp;
+  ```
+  本机实测结果（MySQL 9.0.1，`db01.emp`）：
+  ```text
+  +--------+-----------+-----------+-----------+-----------+
+  | 员工数量 | 平均薪资  | 最低薪资  | 最高薪资  | 薪资总额  |
+  +--------+-----------+-----------+-----------+-----------+
+  |     30 | 7548.2759 |      4700 |     15000 |    218900 |
+  +--------+-----------+-----------+-----------+-----------+
+  ```
+  **平均薪资这一格一定要会验算**：`218900 ÷ 29 = 7548.2759`——分母是 **29** 不是 30，因为李云那条数据的 `salary` 是 `NULL`，`NULL` 不参与聚合运算。想保留两位小数可以套一个四舍五入函数 `round(avg(salary), 2)`，结果是 **7548.28**。
+
+  :::
+
 
 - [ ] **2-2 按性别分组，看人数和平均薪资**
   把员工按性别分成两组，分别统计每组的**人数**和**平均薪资**。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**："按性别分成两组"是这件事的分组依据，"每组各算一个数"是聚合——同一个 `select` 里，分组字段和聚合函数可以并排放
-  > **二级 · 方法**：`select 分组字段, 聚合函数 from 表名 group by 分组字段;`；人数用 `count(*)`，平均薪资用 `avg(salary)`
-  > **三级 · 骨架**：`select gender, count(*), ____(salary) from emp ____ ____ gender;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > select gender, count(*) from emp group by gender;
-  > select gender, avg(salary) from emp group by gender;
-  > -- 合并成一条
-  > select gender, count(*) as 人数, avg(salary) as 平均薪资 from emp group by gender;
-  > ```
-  > 本机实测：
-  > ```text
-  > +--------+-----+-----------+
-  > | gender | cnt | avg_s     |
-  > +--------+-----+-----------+
-  > |      1 |  27 | 7346.1538 |
-  > |      2 |   3 | 9300.0000 |
-  > +--------+-----+-----------+
-  > ```
-  > 两组人数 27 + 3 = 30，全员到齐；但男性组的平均薪资分母是 **26**（27 个男性里李云的薪资为 `NULL`）——`NULL` 不参与聚合，**在分组里是每组各算各的**。数据里 1 表示男、2 表示女（`emp` 表的 `gender` 是 `tinyint`，注释写的是"1:男, 2:女"），读结果时不要看反。
+  **一级 · 思路**："按性别分成两组"是这件事的分组依据，"每组各算一个数"是聚合——同一个 `select` 里，分组字段和聚合函数可以并排放
+  **二级 · 方法**：`select 分组字段, 聚合函数 from 表名 group by 分组字段;`；人数用 `count(*)`，平均薪资用 `avg(salary)`
+  **三级 · 骨架**：`select gender, count(*), ____(salary) from emp ____ ____ gender;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  select gender, count(*) from emp group by gender;
+  select gender, avg(salary) from emp group by gender;
+  -- 合并成一条
+  select gender, count(*) as 人数, avg(salary) as 平均薪资 from emp group by gender;
+  ```
+  本机实测：
+  ```text
+  +--------+-----+-----------+
+  | gender | cnt | avg_s     |
+  +--------+-----+-----------+
+  |      1 |  27 | 7346.1538 |
+  |      2 |   3 | 9300.0000 |
+  +--------+-----+-----------+
+  ```
+  两组人数 27 + 3 = 30，全员到齐；但男性组的平均薪资分母是 **26**（27 个男性里李云的薪资为 `NULL`）——`NULL` 不参与聚合，**在分组里是每组各算各的**。数据里 1 表示男、2 表示女（`emp` 表的 `gender` 是 `tinyint`，注释写的是"1:男, 2:女"），读结果时不要看反。
+
+  :::
+
 
 - [ ] **2-3 先筛、再分组、再过滤**
   查出**入职时间在 2015-01-01（含当天）以前**的员工，按**职位**分组统计人数，最后**只留下人数大于等于 2 的职位**。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一句话里藏着三段——"入职时间在……以前"是**筛行**（分组之前的事），"按职位分组统计人数"是**分组 + 聚合**，"人数大于等于 2"是**筛组**（分组之后的事）
-  > **二级 · 方法**：筛选行的条件写在 `where`（这里放入职时间，含当天用 `<=`）；分组用 `group by 分组字段`；筛组的条件写在 `having`（这里放 `count(*) >= 2`）——**`having` 后面才能用聚合函数，`where` 里用会报 1111**
-  > **三级 · 骨架**：`select job, count(*) from emp where entry_date ____ '2015-01-01' group by ____ having ____ >= 2;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > select job, count(*) from emp where entry_date <= '2015-01-01' group by job having count(*) >= 2;
-  > ```
-  > 本机实测：
-  > ```text
-  > +------+----------+
-  > | job  | count(*) |
-  > +------+----------+
-  > |    2 |       11 |
-  > |    1 |        5 |
-  > |    5 |        7 |
-  > +------+----------+
-  > ```
-  > 三段各管一段、顺序不能颠倒：`where` 先砍掉 2015 年之后入职的人（他们**连分组都不参与**），`group by` 把剩下的人按职位分成几堆，`having` 再把人数不够的组整组去掉。所以结果里的数字（11、5、7）比"全表分组"时的 12、6、9 **小**——差的就是被 `where` 先筛掉的那些人。
-  >
-  > 对照一下：如果把 `where` 和 `having` 的位置写反（拿 `count(*) >= 2` 去 `where` 里比较），会直接报 **`ERROR 1111 (HY000): Invalid use of group function`**——这就是"执行顺序"这条规则在实际写 SQL 时最常撞上的一面墙。
+  **一级 · 思路**：一句话里藏着三段——"入职时间在……以前"是**筛行**（分组之前的事），"按职位分组统计人数"是**分组 + 聚合**，"人数大于等于 2"是**筛组**（分组之后的事）
+  **二级 · 方法**：筛选行的条件写在 `where`（这里放入职时间，含当天用 `<=`）；分组用 `group by 分组字段`；筛组的条件写在 `having`（这里放 `count(*) >= 2`）——**`having` 后面才能用聚合函数，`where` 里用会报 1111**
+  **三级 · 骨架**：`select job, count(*) from emp where entry_date ____ '2015-01-01' group by ____ having ____ >= 2;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  select job, count(*) from emp where entry_date <= '2015-01-01' group by job having count(*) >= 2;
+  ```
+  本机实测：
+  ```text
+  +------+----------+
+  | job  | count(*) |
+  +------+----------+
+  |    2 |       11 |
+  |    1 |        5 |
+  |    5 |        7 |
+  +------+----------+
+  ```
+  三段各管一段、顺序不能颠倒：`where` 先砍掉 2015 年之后入职的人（他们**连分组都不参与**），`group by` 把剩下的人按职位分成几堆，`having` 再把人数不够的组整组去掉。所以结果里的数字（11、5、7）比"全表分组"时的 12、6、9 **小**——差的就是被 `where` 先筛掉的那些人。
+  
+  对照一下：如果把 `where` 和 `having` 的位置写反（拿 `count(*) >= 2` 去 `where` 里比较），会直接报 **`ERROR 1111 (HY000): Invalid use of group function`**——这就是"执行顺序"这条规则在实际写 SQL 时最常撞上的一面墙。
+
+  :::
+
 
 - [ ] **2-4 排错：这两条 SQL 为什么跑不了**
   （1）下面是"找出人数超过 3 人的职位"，为什么报错？改成正确的写法。
@@ -442,35 +466,43 @@ PPT 第 60 页的第三条注意是原文：
   select job, name, count(*) from emp group by job;
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：两条都撞在"**谁能用聚合函数、什么时候能用**"这条规则上——第 1 条错在"过滤条件的位置"，第 2 条错在"`select` 里写了不该写的字段"
-  > **二级 · 方法**：聚合函数只能出现在 `having` 或 `select` 的字段列表里，**不能出现在 `where`**；分组之后 `select` 里只能写**分组字段**和**聚合函数**
-  > **三级 · 骨架**：`... group by job ____ count(*) > 3;`（第 1 条把条件搬到后面那一段）/ 第 2 条要么删掉 `name`，要么别分组、改用 `where` 把某一组的人列出来
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **（1）** 报错原文（本机实测）：
-  > ```text
-  > ERROR 1111 (HY000): Invalid use of group function
-  > ```
-  > 原因：`where` 在**分组之前**执行，那时 `count(*)` 还没算出来，没法拿来比较——所以"对聚合结果做判断"必须用 `having`（它在分组、聚合之后才执行）。正确写法：
-  > ```sql
-  > select job, count(*) as cnt from emp group by job having count(*) > 3;
-  > ```
-  > 本机实测得到三组：讲师 12、班主任 6、咨询师 9（`having cnt > 3` 用 `select` 里的别名也一样能跑）。
-  >
-  > **（2）** 报错原文（本机实测）：
-  > ```text
-  > ERROR 1055 (42000): Expression #2 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'db01.emp.name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
-  > ```
-  > 原因：按职位分组后，"讲师"这一组有 12 个人，`count(*)` 是确定的，但 `name` 该显示哪一个完全说不清——所以严格模式下直接报 1055。两条改法：
-  > ```sql
-  > -- 思路一：分组只留分组字段 + 聚合函数
-  > select job, count(*) from emp group by job;
-  >
-  > -- 思路二：不分组，把某一组的人用 where 列出来
-  > select name from emp where job = 2;
-  > ```
-  > 结论一句话记牢：**`group by` 之后，`select` 里写的要么是分组字段、要么是聚合函数。**
+  **一级 · 思路**：两条都撞在"**谁能用聚合函数、什么时候能用**"这条规则上——第 1 条错在"过滤条件的位置"，第 2 条错在"`select` 里写了不该写的字段"
+  **二级 · 方法**：聚合函数只能出现在 `having` 或 `select` 的字段列表里，**不能出现在 `where`**；分组之后 `select` 里只能写**分组字段**和**聚合函数**
+  **三级 · 骨架**：`... group by job ____ count(*) > 3;`（第 1 条把条件搬到后面那一段）/ 第 2 条要么删掉 `name`，要么别分组、改用 `where` 把某一组的人列出来
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **（1）** 报错原文（本机实测）：
+  ```text
+  ERROR 1111 (HY000): Invalid use of group function
+  ```
+  原因：`where` 在**分组之前**执行，那时 `count(*)` 还没算出来，没法拿来比较——所以"对聚合结果做判断"必须用 `having`（它在分组、聚合之后才执行）。正确写法：
+  ```sql
+  select job, count(*) as cnt from emp group by job having count(*) > 3;
+  ```
+  本机实测得到三组：讲师 12、班主任 6、咨询师 9（`having cnt > 3` 用 `select` 里的别名也一样能跑）。
+  
+  **（2）** 报错原文（本机实测）：
+  ```text
+  ERROR 1055 (42000): Expression #2 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'db01.emp.name' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+  ```
+  原因：按职位分组后，"讲师"这一组有 12 个人，`count(*)` 是确定的，但 `name` 该显示哪一个完全说不清——所以严格模式下直接报 1055。两条改法：
+  ```sql
+  -- 思路一：分组只留分组字段 + 聚合函数
+  select job, count(*) from emp group by job;
+  
+  -- 思路二：不分组，把某一组的人用 where 列出来
+  select name from emp where job = 2;
+  ```
+  结论一句话记牢：**`group by` 之后，`select` 里写的要么是分组字段、要么是聚合函数。**
+
+  :::
+
 
 ### 三、综合题
 
@@ -493,59 +525,67 @@ PPT 第 60 页的第三条注意是原文：
   | where 与 having | 第 5 步——先 `where` 筛行，再 `group by`，最后 `having` 筛组 |
   | 分组后的字段限制 | 第 6 步——只能在 `select` 里写分组字段和聚合函数 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整题就是"聚合 → 分组 → 先筛后分再滤"三层递进；第 1、2 步重点是把 `NULL` 的影响看清楚，第 3、5 步是分组的常规用法
-  > **二级 · 方法**：聚合函数 `count(*)`、`count(job)`、`avg(salary)`、`max`/`min`/`sum`；分组 `group by 字段`；三段式 `where ... group by ... having ...`；`NULL` 的两种表现（不进聚合、自成一 组）
-  > **三级 · 骨架**：第 1 步 `select count(*), count(job) from emp;`（再用 `where job is null` 找出那个人）/ 第 5 步 `select job, count(*) from emp where entry_date <= '____' group by job ____ count(*) >= 2;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- 1. 总数与"有职位的人数"
-  > select count(*) as 员工总数, count(job) as 有职位人数 from emp;
-  > select id, name, job from emp where job is null;
-  >
-  > -- 2. 薪资总览
-  > select avg(salary) as 平均薪资, max(salary) as 最高薪资, min(salary) as 最低薪资, sum(salary) as 薪资总额 from emp;
-  > select round(avg(salary), 2) from emp;
-  >
-  > -- 3. 按性别分组
-  > select gender, count(*) as 人数, avg(salary) as 平均薪资 from emp group by gender;
-  >
-  > -- 4. 按职位分组
-  > select job, count(*) as 人数 from emp group by job;
-  >
-  > -- 5. 先筛、再分组、再过滤
-  > select job, count(*) as 人数 from emp where entry_date <= '2015-01-01' group by job having count(*) >= 2;
-  >
-  > -- 6. 复现报错
-  > select job, name, count(*) from emp group by job;
-  > ```
-  > 本机实测结果（MySQL 9.0.1，`db01.emp`）：
-  > 1. `count(*)` = **30**，`count(job)` = **29**——差的是**李云**（`where job is null` 查出来只有他一条）；他没填职位，`NULL` 不参与聚合，所以没被 `count(job)` 数到；
-  > 2. 平均薪资 **7548.2759**、最高 **15000**（施耐庵）、最低 **4700**（柴进）、总额 **218900**；验算：**218900 ÷ 29 = 7548.2759**——分母是 29 而不是 30，因为李云**既没有薪资、也不算进平均**（他和第 1 步里的"差的那 1 条"是同一个人，两处现象一个原因）；
-  > 3. 性别分组：
-  >    ```text
-  >    +--------+-----+-----------+
-  >    | gender | 人数 | 平均薪资   |
-  >    +--------+-----+-----------+
-  >    |      1 |  27 | 7346.1538 |
-  >    |      2 |   3 | 9300.0000 |
-  >    +--------+-----+-----------+
-  >    ```
-  >    男性组 27 人的平均薪资分母是 **26**（李云又"缺席"了一次），这正是 `avg` 在分组内同样会跳过 `NULL` 的证据；
-  > 4. 职位分组：
-  >    ```text
-  >    +------+------+
-  >    | job  | 人数 |
-  >    +------+------+
-  >    |    4 |    1 |
-  >    |    2 |   12 |
-  >    |    3 |    1 |
-  >    |    1 |    6 |
-  >    |    5 |    9 |
-  >    | NULL |    1 |
-  >    +------+------+
-  >    ```
-  >    6 组一共 30 人；`NULL` 一组只有李云一个人——分组时 `NULL` 是"一类值"，而聚合时它被跳过，这两个表现并不矛盾；
-  > 5. 结果为 **2 → 11 人、1 → 5 人、5 → 7 人**（比第 4 步的 12、6、9 少，差的就是 2015 年之后入职、被 `where` 提前筛掉的人）；
-  > 6. 第 6 步会报 **`ERROR 1055 (42000)`**，关键信息是 `contains nonaggregated column 'db01.emp.name'` 和 `sql_mode=only_full_group_by`——按职位分组后，"讲师"这一组有 12 个人，`name` 显示谁都不对，所以严格模式下直接拦下。分组查询里 `select` 能写的只有**分组字段 + 聚合函数**。
+  **一级 · 思路**：整题就是"聚合 → 分组 → 先筛后分再滤"三层递进；第 1、2 步重点是把 `NULL` 的影响看清楚，第 3、5 步是分组的常规用法
+  **二级 · 方法**：聚合函数 `count(*)`、`count(job)`、`avg(salary)`、`max`/`min`/`sum`；分组 `group by 字段`；三段式 `where ... group by ... having ...`；`NULL` 的两种表现（不进聚合、自成一 组）
+  **三级 · 骨架**：第 1 步 `select count(*), count(job) from emp;`（再用 `where job is null` 找出那个人）/ 第 5 步 `select job, count(*) from emp where entry_date <= '____' group by job ____ count(*) >= 2;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- 1. 总数与"有职位的人数"
+  select count(*) as 员工总数, count(job) as 有职位人数 from emp;
+  select id, name, job from emp where job is null;
+  
+  -- 2. 薪资总览
+  select avg(salary) as 平均薪资, max(salary) as 最高薪资, min(salary) as 最低薪资, sum(salary) as 薪资总额 from emp;
+  select round(avg(salary), 2) from emp;
+  
+  -- 3. 按性别分组
+  select gender, count(*) as 人数, avg(salary) as 平均薪资 from emp group by gender;
+  
+  -- 4. 按职位分组
+  select job, count(*) as 人数 from emp group by job;
+  
+  -- 5. 先筛、再分组、再过滤
+  select job, count(*) as 人数 from emp where entry_date <= '2015-01-01' group by job having count(*) >= 2;
+  
+  -- 6. 复现报错
+  select job, name, count(*) from emp group by job;
+  ```
+  本机实测结果（MySQL 9.0.1，`db01.emp`）：
+  1. `count(*)` = **30**，`count(job)` = **29**——差的是**李云**（`where job is null` 查出来只有他一条）；他没填职位，`NULL` 不参与聚合，所以没被 `count(job)` 数到；
+  2. 平均薪资 **7548.2759**、最高 **15000**（施耐庵）、最低 **4700**（柴进）、总额 **218900**；验算：**218900 ÷ 29 = 7548.2759**——分母是 29 而不是 30，因为李云**既没有薪资、也不算进平均**（他和第 1 步里的"差的那 1 条"是同一个人，两处现象一个原因）；
+  3. 性别分组：
+     ```text
+     +--------+-----+-----------+
+     | gender | 人数 | 平均薪资   |
+     +--------+-----+-----------+
+     |      1 |  27 | 7346.1538 |
+     |      2 |   3 | 9300.0000 |
+     +--------+-----+-----------+
+     ```
+     男性组 27 人的平均薪资分母是 **26**（李云又"缺席"了一次），这正是 `avg` 在分组内同样会跳过 `NULL` 的证据；
+  4. 职位分组：
+     ```text
+     +------+------+
+     | job  | 人数 |
+     +------+------+
+     |    4 |    1 |
+     |    2 |   12 |
+     |    3 |    1 |
+     |    1 |    6 |
+     |    5 |    9 |
+     | NULL |    1 |
+     +------+------+
+     ```
+     6 组一共 30 人；`NULL` 一组只有李云一个人——分组时 `NULL` 是"一类值"，而聚合时它被跳过，这两个表现并不矛盾；
+  5. 结果为 **2 → 11 人、1 → 5 人、5 → 7 人**（比第 4 步的 12、6、9 少，差的就是 2015 年之后入职、被 `where` 提前筛掉的人）；
+  6. 第 6 步会报 **`ERROR 1055 (42000)`**，关键信息是 `contains nonaggregated column 'db01.emp.name'` 和 `sql_mode=only_full_group_by`——按职位分组后，"讲师"这一组有 12 个人，`name` 显示谁都不对，所以严格模式下直接拦下。分组查询里 `select` 能写的只有**分组字段 + 聚合函数**。
+
+  :::
+

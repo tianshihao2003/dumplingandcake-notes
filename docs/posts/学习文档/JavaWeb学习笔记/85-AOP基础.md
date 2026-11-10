@@ -113,7 +113,7 @@ PPT 第 3 页在"优势"下面补了一条提示：
 
 也就是说：AOP 不是某个类、某个注解，它是"把公共逻辑横向切进指定方法"这套想法；**Spring 把它实现成了注解 + 动态代理**，所以后面敲的 `@Aspect`、`@Around`、`execution(...)` 都是 **Spring AOP（底层是 AspectJ 的表达式与注解）** 这套具体的东西。笔记里再说"AOP"，指的都是 Spring AOP。
 
-> [!TIP]
+> [!TIP] 提示
 > 这个"面向特定方法编程"的位置感很重要：以前写代码是**纵向**的（Controller → Service → Mapper，一层一层往下走），AOP 是**横向**切进来（在某一批方法的前 / 后插一段逻辑）。所以它叫"切面（Aspect）"而不是"切层"。
 
 ## AOP 快速入门（PPT 第 6～8 页）
@@ -189,7 +189,7 @@ public class RecordTimeAspect {
 
 跑起来的效果：访问 `GET /depts`，控制台会多出一行 `方法 void com.itheima.service.impl.DeptServiceImpl.list() 执行耗时: xx ms` 这样的日志（方法名由 `pjp.getSignature()` 打印，耗时随着每一次调用变化）——**`DeptServiceImpl` 里一个字都没改**。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 快速入门的两步可以背成一句话：**"加依赖 + 写切面"**。依赖解决"Spring 会不会认这些注解"，切面类解决"公共逻辑写在哪、管哪些方法"。
 
 ### 必答问答（PPT 第 8 页）
@@ -319,7 +319,7 @@ public class DeptController {
 4. Controller 里 `@Autowired private DeptService deptService;` 注入进来的**其实是那个代理对象**，不是 `DeptServiceImpl` 本身（Spring 容器里放的就是代理）；
 5. 所以调用链是：`Controller.list()` →（代理对象 `list()`：先跑公共逻辑，中间 `proceed()`）→ `DeptServiceImpl.list()` 真正的业务代码。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这条执行流程解释了三个"为什么"：
 >
 > - **为什么业务代码不用改**（代码无侵入）——公共逻辑加在**代理**里，目标对象只是被"包"了一层；
@@ -408,75 +408,83 @@ around ... after ....       ← @Around 在 pjp.proceed() 之后的代码
   现状：`DeptServiceImpl` 的每个方法里都手写了四行重复代码——取开始时间、调原始方法、取结束时间、打日志（`list`、`delete`、`getById` 一个不落）。要求：把这些计时逻辑挪到**一个独立的类**里，让 `service.impl` 包下**所有**业务方法都被统计到耗时；业务类里那四行代码要**全部删掉**。另外说清楚：要让这个新类能生效，工程还需要补什么（写出来）。
   （练习文件 `test_85_AOP快速入门.java` 的题目 2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分两步——① 工程得先有"AOP 的能力"，也就是引入对应的起步依赖；② 写一个类，把那段公共逻辑收进去，再用一个表达式声明"管哪些方法"；计时逻辑里"调原始方法"和"拿返回值"由参数和方法返回值来完成
-  > **二级 · 方法**：依赖用 `spring-boot-starter-aop`；类上 `@Aspect` + `@Component`（可配 `@Slf4j` 打日志）；通知方法上 `@Around("execution(* com.itheima.service.impl.*.*(..))")`；方法参数是 `ProceedingJoinPoint pjp`，用 `pjp.proceed()` 执行原始方法并接住结果，返回值类型必须是 `Object`，最后 `return` 出去；签名要 `throws Throwable`
-  > **三级 · 骨架**：
-  > ```java
-  > @____
-  > @____
-  > public class RecordTimeAspect {
-  >     @____("execution(* com.itheima.service.impl.*.*(..))")
-  >     public Object recordTime(____ pjp) throws Throwable {
-  >         long begin = System.currentTimeMillis();
-  >         Object result = ____;              // 执行原始方法
-  >         long end = System.currentTimeMillis();
-  >         log.info("方法 {} 执行耗时 {}ms", pjp.getSignature(), end - begin);
-  >         return ____;                       // 把原始方法的返回值交回去
-  >     }
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <!-- pom.xml -->
-  > <dependency>
-  >     <groupId>org.springframework.boot</groupId>
-  >     <artifactId>spring-boot-starter-aop</artifactId>
-  > </dependency>
-  > ```
-  > ```java
-  > @Slf4j
-  > @Aspect                       // 标识当前是一个 AOP 类
-  > @Component                    // 交给 Spring 管理
-  > public class RecordTimeAspect {
-  >
-  >     @Around("execution(* com.itheima.service.impl.*.*(..))")
-  >     public Object recordTime(ProceedingJoinPoint pjp) throws Throwable {
-  >         //1. 记录方法运行的开始时间
-  >         long begin = System.currentTimeMillis();
-  >
-  >         //2. 执行原始的方法
-  >         Object result = pjp.proceed();
-  >
-  >         //3. 记录方法运行的结束时间, 记录耗时
-  >         long end = System.currentTimeMillis();
-  >         log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin);
-  >         return result;
-  >     }
-  > }
-  > ```
-  > 业务层改造后（那四行全没了，和课程代码一致）：
-  > ```java
-  > @Slf4j
-  > @Service
-  > public class DeptServiceImpl implements DeptService {
-  >     @Autowired
-  >     private DeptMapper deptMapper;
-  >
-  >     @Override
-  >     public List<Dept> list() {
-  >         List<Dept> deptList = deptMapper.list();
-  >         return deptList;
-  >     }
-  >
-  >     @Override
-  >     public void delete(Integer id) {
-  >         deptMapper.delete(id);
-  >     }
-  > }
-  > ```
-  > 自查：① 切面类要放在 Spring 能扫描到的包下（和启动类同级或更下层），**`@Aspect` 千万别忘**——课程代码里它默认就是被注释掉的；② `@Around` 方法如果忘了 `return result`，接口返回的数据会变成 `null`；③ 启动后调一次 `GET /depts`，控制台应能看到 `方法 ...list() 执行耗时: xx ms`。
+  **一级 · 思路**：分两步——① 工程得先有"AOP 的能力"，也就是引入对应的起步依赖；② 写一个类，把那段公共逻辑收进去，再用一个表达式声明"管哪些方法"；计时逻辑里"调原始方法"和"拿返回值"由参数和方法返回值来完成
+  **二级 · 方法**：依赖用 `spring-boot-starter-aop`；类上 `@Aspect` + `@Component`（可配 `@Slf4j` 打日志）；通知方法上 `@Around("execution(* com.itheima.service.impl.*.*(..))")`；方法参数是 `ProceedingJoinPoint pjp`，用 `pjp.proceed()` 执行原始方法并接住结果，返回值类型必须是 `Object`，最后 `return` 出去；签名要 `throws Throwable`
+  **三级 · 骨架**：
+  ```java
+  @____
+  @____
+  public class RecordTimeAspect {
+      @____("execution(* com.itheima.service.impl.*.*(..))")
+      public Object recordTime(____ pjp) throws Throwable {
+          long begin = System.currentTimeMillis();
+          Object result = ____;              // 执行原始方法
+          long end = System.currentTimeMillis();
+          log.info("方法 {} 执行耗时 {}ms", pjp.getSignature(), end - begin);
+          return ____;                       // 把原始方法的返回值交回去
+      }
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <!-- pom.xml -->
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+  </dependency>
+  ```
+  ```java
+  @Slf4j
+  @Aspect                       // 标识当前是一个 AOP 类
+  @Component                    // 交给 Spring 管理
+  public class RecordTimeAspect {
+  
+      @Around("execution(* com.itheima.service.impl.*.*(..))")
+      public Object recordTime(ProceedingJoinPoint pjp) throws Throwable {
+          //1. 记录方法运行的开始时间
+          long begin = System.currentTimeMillis();
+  
+          //2. 执行原始的方法
+          Object result = pjp.proceed();
+  
+          //3. 记录方法运行的结束时间, 记录耗时
+          long end = System.currentTimeMillis();
+          log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin);
+          return result;
+      }
+  }
+  ```
+  业务层改造后（那四行全没了，和课程代码一致）：
+  ```java
+  @Slf4j
+  @Service
+  public class DeptServiceImpl implements DeptService {
+      @Autowired
+      private DeptMapper deptMapper;
+  
+      @Override
+      public List<Dept> list() {
+          List<Dept> deptList = deptMapper.list();
+          return deptList;
+      }
+  
+      @Override
+      public void delete(Integer id) {
+          deptMapper.delete(id);
+      }
+  }
+  ```
+  自查：① 切面类要放在 Spring 能扫描到的包下（和启动类同级或更下层），**`@Aspect` 千万别忘**——课程代码里它默认就是被注释掉的；② `@Around` 方法如果忘了 `return result`，接口返回的数据会变成 `null`；③ 启动后调一次 `GET /depts`，控制台应能看到 `方法 ...list() 执行耗时: xx ms`。
+
+  :::
+
 
 - [ ] **2-2 把五个核心概念对上号**
   切面类已经把 `DeptServiceImpl` 所有方法的耗时统计接管了。请指出下面这些东西分别对应 AOP 的哪个概念，并各用一句自己的话说清它的定义：
@@ -488,85 +496,109 @@ around ... after ....       ← @Around 在 pjp.proceed() 之后的代码
   最后再用一句话说清 ③ 和 ② 的关系（谁是全集、谁负责筛）。
   （练习文件 `test_85_AOP快速入门.java` 的题目 2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：口诀是"**目标对象**是我要通知谁、**连接点**是能被控制的那个方法、**切入点**是一张筛选单、**通知**是那段公共逻辑、**切面**是单子和逻辑的绑定"
-  > **二级 · 方法**：五个词——目标对象 Target / 连接点 JoinPoint / 切入点 PointCut / 通知 Advice / 切面 Aspect
-  > **三级 · 骨架**：① 目标是 ____ 对象 → ____；② 方法是 ____ → ____；③ 表达式是 ____ → ____；④ 那段逻辑是 ____ → ____；⑤ 那个类是 ____ → ____；关系：____ 是所有"可以被控制的方法"（全集），____ 是用来筛选的条件，只有匹配上的连接点才会执行通知
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > | | 对应概念 | 定义 |
-  > | --- | --- | --- |
-  > | ① `DeptServiceImpl` 对象 | **目标对象（Target）** | 通知所应用的对象 |
-  > | ② `DeptServiceImpl.list()` 方法 | **连接点（JoinPoint）** | 可以被 AOP 控制的方法（暗含方法执行时的相关信息） |
-  > | ③ `execution(...)` 表达式 | **切入点（PointCut）** | 匹配连接点的条件，通知仅会在切入点方法执行时被应用 |
-  > | ④ 计时代码那段逻辑 | **通知（Advice）** | 那些重复的逻辑，也就是共性功能（最终体现为一个方法） |
-  > | ⑤ `RecordTimeAspect` 类 | **切面（Aspect）** | 描述通知与切入点的对应关系（通知 + 切入点） |
-  >
-  > ③ 与 ② 的关系：**所有"可以被 AOP 控制的方法"都是连接点（全集）**，而**切入点是一个筛选条件**——它匹配到哪些连接点，那些方法才会被加上通知。所以切入点变了，受害的方法就变了（把 `*.*(..)` 改成 `list(..)`，就只有 `list` 被统计）。
+  **一级 · 思路**：口诀是"**目标对象**是我要通知谁、**连接点**是能被控制的那个方法、**切入点**是一张筛选单、**通知**是那段公共逻辑、**切面**是单子和逻辑的绑定"
+  **二级 · 方法**：五个词——目标对象 Target / 连接点 JoinPoint / 切入点 PointCut / 通知 Advice / 切面 Aspect
+  **三级 · 骨架**：① 目标是 ____ 对象 → ____；② 方法是 ____ → ____；③ 表达式是 ____ → ____；④ 那段逻辑是 ____ → ____；⑤ 那个类是 ____ → ____；关系：____ 是所有"可以被控制的方法"（全集），____ 是用来筛选的条件，只有匹配上的连接点才会执行通知
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  | | 对应概念 | 定义 |
+  | --- | --- | --- |
+  | ① `DeptServiceImpl` 对象 | **目标对象（Target）** | 通知所应用的对象 |
+  | ② `DeptServiceImpl.list()` 方法 | **连接点（JoinPoint）** | 可以被 AOP 控制的方法（暗含方法执行时的相关信息） |
+  | ③ `execution(...)` 表达式 | **切入点（PointCut）** | 匹配连接点的条件，通知仅会在切入点方法执行时被应用 |
+  | ④ 计时代码那段逻辑 | **通知（Advice）** | 那些重复的逻辑，也就是共性功能（最终体现为一个方法） |
+  | ⑤ `RecordTimeAspect` 类 | **切面（Aspect）** | 描述通知与切入点的对应关系（通知 + 切入点） |
+  
+  ③ 与 ② 的关系：**所有"可以被 AOP 控制的方法"都是连接点（全集）**，而**切入点是一个筛选条件**——它匹配到哪些连接点，那些方法才会被加上通知。所以切入点变了，受害的方法就变了（把 `*.*(..)` 改成 `list(..)`，就只有 `list` 被统计）。
+
+  :::
+
 
 - [ ] **2-3 手写一个代理类，把 AOP 的执行流程讲清楚**
   要求：不用任何 AOP 注解，手动写一个"替身"类来说明 Spring 干的事——这个类与 `DeptServiceImpl` 实现**同一个接口**，内部持有一个真正的 `DeptServiceImpl` 对象；调用它的 `list()` 时，先在控制台打一行 `开始`，再去调真正的 `list()`，拿到结果后打一行 `结束`，最后把结果返回。
   写完再回答：Controller 里 `@Autowired private DeptService deptService;` 注入进来的到底是**原始对象**还是**代理对象**？为什么声明成接口类型就能装得下它？
   （练习文件 `test_85_AOP快速入门.java` 的题目 2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：代理类和目标对象**实现同一个接口**（所以"看起来一样"），代理内部留一份目标对象的引用，方法里"加点料"之后再手动调目标对象的方法
-  > **二级 · 方法**：`implements DeptService`；成员变量 `private DeptService target = new DeptServiceImpl();`（或直接写 `DeptServiceImpl`）；方法上 `@Override`；最后 `return target.list();`
-  > **三级 · 骨架**：
-  > ```java
-  > public class DeptServiceProxy implements ____ {
-  >     private ____ target = new ____();
-  >
-  >     @Override
-  >     public List<Dept> list() {
-  >         System.out.println("开始");
-  >         List<Dept> result = ____;        // 调真正的业务方法
-  >         System.out.println("结束");
-  >         return ____;
-  >     }
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // 手写的"代理对象"：和 DeptServiceImpl 实现同一个接口，看起来一模一样
-  > public class DeptServiceProxy implements DeptService {
-  >
-  >     // 内部持有真正的目标对象
-  >     private DeptService target = new DeptServiceImpl();
-  >
-  >     @Override
-  >     public List<Dept> list() {
-  >         System.out.println("开始");                 // 目标方法之前的公共逻辑
-  >         List<Dept> result = target.list();          // 调用真正的业务方法
-  >         System.out.println("结束");                 // 目标方法之后的公共逻辑
-  >         return result;                              // 把结果原样交回调用方
-  >     }
-  >
-  >     // 其它方法同理：delete/save/getById/update 都要"包一层"
-  >     @Override
-  >     public void delete(Integer id) {
-  >         System.out.println("开始");
-  >         target.delete(id);
-  >         System.out.println("结束");
-  >     }
-  > }
-  > ```
-  > 回答：注入进来的是**代理对象**。Spring 启动时发现 `DeptServiceImpl` 被切面匹配，就用**动态代理**在运行时生成了一个"实现同一个接口"的代理对象（并把它放进容器）；Controller 声明的是**接口** `DeptService`，代理对象和目标对象都实现了这个接口，所以注入不会出问题——而真正跑起来时执行的是代理，代理里才有通知逻辑。这也正是"**代码无侵入**"的原因：业务类没被改一个字，只是被包了一层。
+  **一级 · 思路**：代理类和目标对象**实现同一个接口**（所以"看起来一样"），代理内部留一份目标对象的引用，方法里"加点料"之后再手动调目标对象的方法
+  **二级 · 方法**：`implements DeptService`；成员变量 `private DeptService target = new DeptServiceImpl();`（或直接写 `DeptServiceImpl`）；方法上 `@Override`；最后 `return target.list();`
+  **三级 · 骨架**：
+  ```java
+  public class DeptServiceProxy implements ____ {
+      private ____ target = new ____();
+  
+      @Override
+      public List<Dept> list() {
+          System.out.println("开始");
+          List<Dept> result = ____;        // 调真正的业务方法
+          System.out.println("结束");
+          return ____;
+      }
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // 手写的"代理对象"：和 DeptServiceImpl 实现同一个接口，看起来一模一样
+  public class DeptServiceProxy implements DeptService {
+  
+      // 内部持有真正的目标对象
+      private DeptService target = new DeptServiceImpl();
+  
+      @Override
+      public List<Dept> list() {
+          System.out.println("开始");                 // 目标方法之前的公共逻辑
+          List<Dept> result = target.list();          // 调用真正的业务方法
+          System.out.println("结束");                 // 目标方法之后的公共逻辑
+          return result;                              // 把结果原样交回调用方
+      }
+  
+      // 其它方法同理：delete/save/getById/update 都要"包一层"
+      @Override
+      public void delete(Integer id) {
+          System.out.println("开始");
+          target.delete(id);
+          System.out.println("结束");
+      }
+  }
+  ```
+  回答：注入进来的是**代理对象**。Spring 启动时发现 `DeptServiceImpl` 被切面匹配，就用**动态代理**在运行时生成了一个"实现同一个接口"的代理对象（并把它放进容器）；Controller 声明的是**接口** `DeptService`，代理对象和目标对象都实现了这个接口，所以注入不会出问题——而真正跑起来时执行的是代理，代理里才有通知逻辑。这也正是"**代码无侵入**"的原因：业务类没被改一个字，只是被包了一层。
+
+  :::
+
 
 - [ ] **2-4 环绕通知忘了返回原始方法的结果，会怎样？**
   小王写的切面里，环绕通知只写了一半：取了开始时间、调了 `pjp.proceed()`，但**没有接住返回值、也没有 return**。他还说"反正原始方法已经执行过了，数据库也改了，能有什么影响"。请判断：① 前端收到的数据会变成什么？② 数据库里的改动会怎么样？③ 分别说明原因。
   （练习文件 `test_85_AOP快速入门.java` 的题目 2-4 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：想一想"调用方拿到的到底是哪个方法的返回值"——Controller 调的是代理对象，代理返回什么，调用方就得到什么；再想一想 `proceed()` 有没有"回滚"的功能
-  > **二级 · 方法**：环绕通知方法如果中途没有 `return`（或返回 `null`），代理就只能把 `null` 交回去；`proceed()` 只负责**执行**原始方法，执行过的数据库操作不会因为它没被返回而撤销
-  > **三级 · 骨架**：① 前端拿到的是 ____（值为 ____）；② 数据库改动 ____（插入/删除/修改____）；③ 因为代理对象的返回值 = ____ 的返回值，而 ____ 只负责执行、不负责回滚
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 前端收到的数据变成 **`null`**：Controller 调的 `deptService.list()` 落到**代理对象**身上，代理把这个环绕通知方法的返回值原样交回；方法里没有 `return`（或 `return null`），调用方就只能拿到 `null`（`Result.success(null)` 里的 `data` 是空的）。
-  > ② 数据库的改动**照常生效、不会回滚**：`pjp.proceed()` 已经把 `deptMapper` 的 SQL 执行完了，"数据的修改"这件事已经发生；环绕通知只是没有把方法的返回值往外传，它并**不具备**[70 篇](/posts/编程学习/javaweb学习笔记/70-事务管理与spring事务/)那种事务回滚的能力。
-  > ③ 原因就是 PPT 第 15 页那条注意：**`@Around` 环绕通知方法的返回值必须指定为 `Object`，用来接收原始方法的返回值**——所以标准写法是 `Object result = pjp.proceed(); … return result;`。这也说明"方法被执行了"和"结果被返回了"是两件事，写切面时不能只做前者。
+  **一级 · 思路**：想一想"调用方拿到的到底是哪个方法的返回值"——Controller 调的是代理对象，代理返回什么，调用方就得到什么；再想一想 `proceed()` 有没有"回滚"的功能
+  **二级 · 方法**：环绕通知方法如果中途没有 `return`（或返回 `null`），代理就只能把 `null` 交回去；`proceed()` 只负责**执行**原始方法，执行过的数据库操作不会因为它没被返回而撤销
+  **三级 · 骨架**：① 前端拿到的是 ____（值为 ____）；② 数据库改动 ____（插入/删除/修改____）；③ 因为代理对象的返回值 = ____ 的返回值，而 ____ 只负责执行、不负责回滚
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 前端收到的数据变成 **`null`**：Controller 调的 `deptService.list()` 落到**代理对象**身上，代理把这个环绕通知方法的返回值原样交回；方法里没有 `return`（或 `return null`），调用方就只能拿到 `null`（`Result.success(null)` 里的 `data` 是空的）。
+  ② 数据库的改动**照常生效、不会回滚**：`pjp.proceed()` 已经把 `deptMapper` 的 SQL 执行完了，"数据的修改"这件事已经发生；环绕通知只是没有把方法的返回值往外传，它并**不具备**[70 篇](/posts/编程学习/javaweb学习笔记/70-事务管理与spring事务/)那种事务回滚的能力。
+  ③ 原因就是 PPT 第 15 页那条注意：**`@Around` 环绕通知方法的返回值必须指定为 `Object`，用来接收原始方法的返回值**——所以标准写法是 `Object result = pjp.proceed(); … return result;`。这也说明"方法被执行了"和"结果被返回了"是两件事，写切面时不能只做前者。
+
+  :::
+
 
 ### 三、综合题
 
@@ -595,21 +627,29 @@ around ... after ....       ← @Around 在 pjp.proceed() 之后的代码
   | 执行流程/动态代理（PPT 11） | 第 5、6 步——日志证明代理在目标方法前后插了代码 |
   | 切入点表达式（PPT 22） | 第 7 步问题 ② |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把最小可跑的工程立起来（依赖 + 数据源 + 部门管理那几个类），再让切面"显形"——用 `@Aspect` 的开关做一次对照实验，最后把代码和概念一一点名
-  > **二级 · 方法**：依赖是 `spring-boot-starter-aop`；切面类用 `@Aspect` + `@Component` + `@Around("execution(* com.itheima.service.impl.*.*(..))")`；耗时日志用 `log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin)`；接口地址 `GET http://localhost:8080/depts`；只切 `list` 就把表达式写成 `execution(* com.itheima.service.impl.DeptServiceImpl.list(..))`
-  > **三级 · 骨架**：① `<artifactId>spring-boot-____-aop</artifactId>`；② yml 的 `spring.datasource.password: ____`；③ `@____ @____ public class RecordTimeAspect { @____("execution(* com.itheima.service.impl.*.*(..))") … }`；⑤ 日志关键字：`方法 ` + `执行耗时:`；⑥ 把上面那行 `@Aspect` 前面加 `//`；⑦ ② `execution(* com.itheima.service.impl.DeptServiceImpl.____(..))`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1～3. 依赖、`application.yml`、切面类见题目 2-1 的答案（切面类就是课程代码 `aop/RecordTimeAspect.java` 打开 `@Aspect` 的样子）。
-  > 4～5. 三个接口都调得通；每调一次，控制台就会多出一条耗时日志，形状由切面里的 `log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin)` 决定：
-  >    ```text
-  >    方法 void com.itheima.service.impl.DeptServiceImpl.list() 执行耗时: xx ms
-  >    方法 void com.itheima.service.impl.DeptServiceImpl.delete(Integer) 执行耗时: xx ms
-  >    方法 void com.itheima.service.impl.DeptServiceImpl.save(Dept) 执行耗时: xx ms
-  >    ```
-  >    （方法名、参数、耗时逐次不同；`pjp.getSignature()` 打出来的就是"当前被通知的是哪个连接点"。）注意这三个方法的**业务代码里一行计时语句都没有**——日志却照样出现，说明逻辑是从代理那一层插进去的；三个方法能被**同一个切面**统计到，也正说明表达式匹配的是"一个包"，而不是某一个方法。
-  > 6. 把 `@Aspect` 注释掉重新构建启动后，再调 `GET /depts` 接口**照常返回数据，但控制台里不会再有耗时日志**。原因：`@Aspect` 是"这个类是切面类"的标识，没有它，Spring 就把它当普通 Bean 处理，不会为 `DeptServiceImpl` 生成带通知逻辑的代理——课程代码正是靠"注释/打开 `@Aspect`"来当实验开关（**本机实测**就是逐个打开这些切面类做实验的）。
-  > 7. 两个回答：
-  >    ① **连接点**：`DeptServiceImpl` 里的 `list()` / `delete()` / `save()` / `getById()` / `update()` 每一个都是连接点；**切入点**：`execution(* com.itheima.service.impl.*.*(..))` 这个表达式；**通知**：`recordTime()` 方法里那段计时代码；**切面**：`RecordTimeAspect` 类（通知 + 切入点）；**目标对象**：`DeptServiceImpl` 那个对象——它被包在 Spring 生成的**代理对象**里，Controller 注入的 `DeptService` 实际拿到的是代理。
-  >    ② 把表达式改成 `execution(* com.itheima.service.impl.DeptServiceImpl.list(..))`（对应 PPT 第 12 页那张图），只有 `list` 会被统计——调 `delete` 时控制台不再有耗时日志，这说明**切入点是"筛选条件"**、连接点是"全集"。
+  **一级 · 思路**：先把最小可跑的工程立起来（依赖 + 数据源 + 部门管理那几个类），再让切面"显形"——用 `@Aspect` 的开关做一次对照实验，最后把代码和概念一一点名
+  **二级 · 方法**：依赖是 `spring-boot-starter-aop`；切面类用 `@Aspect` + `@Component` + `@Around("execution(* com.itheima.service.impl.*.*(..))")`；耗时日志用 `log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin)`；接口地址 `GET http://localhost:8080/depts`；只切 `list` 就把表达式写成 `execution(* com.itheima.service.impl.DeptServiceImpl.list(..))`
+  **三级 · 骨架**：① `<artifactId>spring-boot-____-aop</artifactId>`；② yml 的 `spring.datasource.password: ____`；③ `@____ @____ public class RecordTimeAspect { @____("execution(* com.itheima.service.impl.*.*(..))") … }`；⑤ 日志关键字：`方法 ` + `执行耗时:`；⑥ 把上面那行 `@Aspect` 前面加 `//`；⑦ ② `execution(* com.itheima.service.impl.DeptServiceImpl.____(..))`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1～3. 依赖、`application.yml`、切面类见题目 2-1 的答案（切面类就是课程代码 `aop/RecordTimeAspect.java` 打开 `@Aspect` 的样子）。
+  4～5. 三个接口都调得通；每调一次，控制台就会多出一条耗时日志，形状由切面里的 `log.info("方法 {} 执行耗时: {}ms", pjp.getSignature(), end - begin)` 决定：
+     ```text
+     方法 void com.itheima.service.impl.DeptServiceImpl.list() 执行耗时: xx ms
+     方法 void com.itheima.service.impl.DeptServiceImpl.delete(Integer) 执行耗时: xx ms
+     方法 void com.itheima.service.impl.DeptServiceImpl.save(Dept) 执行耗时: xx ms
+     ```
+     （方法名、参数、耗时逐次不同；`pjp.getSignature()` 打出来的就是"当前被通知的是哪个连接点"。）注意这三个方法的**业务代码里一行计时语句都没有**——日志却照样出现，说明逻辑是从代理那一层插进去的；三个方法能被**同一个切面**统计到，也正说明表达式匹配的是"一个包"，而不是某一个方法。
+  6. 把 `@Aspect` 注释掉重新构建启动后，再调 `GET /depts` 接口**照常返回数据，但控制台里不会再有耗时日志**。原因：`@Aspect` 是"这个类是切面类"的标识，没有它，Spring 就把它当普通 Bean 处理，不会为 `DeptServiceImpl` 生成带通知逻辑的代理——课程代码正是靠"注释/打开 `@Aspect`"来当实验开关（**本机实测**就是逐个打开这些切面类做实验的）。
+  7. 两个回答：
+     ① **连接点**：`DeptServiceImpl` 里的 `list()` / `delete()` / `save()` / `getById()` / `update()` 每一个都是连接点；**切入点**：`execution(* com.itheima.service.impl.*.*(..))` 这个表达式；**通知**：`recordTime()` 方法里那段计时代码；**切面**：`RecordTimeAspect` 类（通知 + 切入点）；**目标对象**：`DeptServiceImpl` 那个对象——它被包在 Spring 生成的**代理对象**里，Controller 注入的 `DeptService` 实际拿到的是代理。
+     ② 把表达式改成 `execution(* com.itheima.service.impl.DeptServiceImpl.list(..))`（对应 PPT 第 12 页那张图），只有 `list` 会被统计——调 `delete` 时控制台不再有耗时日志，这说明**切入点是"筛选条件"**、连接点是"全集"。
+
+  :::
+

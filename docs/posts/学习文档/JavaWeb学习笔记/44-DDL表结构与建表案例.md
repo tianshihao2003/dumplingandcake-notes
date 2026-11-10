@@ -76,7 +76,7 @@ PPT 第 36 页把做法压成了四步：
 | image | `varchar(255)` | 可空 | 头像：选填、图片上传、不能超过 2M → 数据库里**存的是图片的路径**（不是图片本身），长度不固定 → `varchar(255)` |
 | create_time / update_time | `datetime` | 可空 | 见第 4 步 |
 
-> [!TIP]
+> [!TIP] 提示
 > 两个"先不做"的地方，留个印象即可：原型上的**"所属部门"**要先有"部门表"才能关联（属于后面"多表设计"的内容）；原型上的**"工作经历"**（时间、公司、职位）是**一个员工对应多条**的数据，不适合塞进同一张表，也要等到多表设计时再拆出去。所以这个案例里的 `emp` 表里没有这两个东西。
 
 ### 第 3 步：创建表结构
@@ -129,7 +129,7 @@ PPT 第 36 页专门点了这三个字段：**`id`、`create_time`、`update_tim
 
 ### 实测：表真的建出来了
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：建表成功后，用 `desc emp;` 看结构——
 >
 > ```text
@@ -155,7 +155,7 @@ PPT 第 36 页专门点了这三个字段：**`id`、`create_time`、`update_tim
 
 **表名重复会怎样？** 一个库里表名不能重名，重复创建直接报错：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：
 >
 > ```text
@@ -182,7 +182,7 @@ alter table 表名 rename to 新表名;                                -- 修改
 drop table [if exists] 表名;                            -- 删除表
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 38 页的注意原文：**在删除表时，表中的全部数据也会被删除。** 表和数据是"容器和内容"的关系——`drop table` 把容器一起端走了。
 
 ### 三条查询语句
@@ -234,7 +234,7 @@ CREATE TABLE `emp` (
 
 表建好之后字段要变，用 `alter table`。课程案例里给 `emp` 表**加一个"QQ 号码"字段**，然后一路演完四种修改，下面在本机的一张演示表上把同样的动作跑一遍：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：先建一张只有两个字段的小表（`id` 主键自增、`username` 非空），然后——
 >
 > ```sql
@@ -269,7 +269,7 @@ CREATE TABLE `emp` (
 | 修改字段名 | 同一个字段**换名字**（类型可一起改） | `alter table 表名 change 旧名 新名 类型(长度) ...` | `change` 后面是**旧名 + 新名**两个字段名 |
 | 删除字段 | 表里**少一列** | `alter table 表名 drop column 字段名` | 连这一列的数据一起没了 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`modify` 与 `change` 只差一个词，但含义完全不同**：`modify` 是"我只要改类型"，字段名不动；`change` 是"旧名 → 新名"（顺便能改类型）。写 `change` 的时候**旧名和新名都要写**，这也是它比 `modify` 多一个参数的原因。
 
 ### 改名与删表
@@ -279,7 +279,7 @@ alter table emp rename to employee;   -- 修改表名
 drop table [if exists]  employee;     -- 删除表
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：`alter table zcode_alter_demo rename to zcode_alter_demo2;` 之后 `show tables` 里只剩新名字 `zcode_alter_demo2`；再 `drop table` 之后表就彻底没了。
 >
 > 删表会把数据一起带走，用一个小表演示：
@@ -346,33 +346,41 @@ drop table [if exists]  employee;     -- 删除表
 
   要求：写出完整的建表语句，**每个字段都加 `comment`**，并把"哪个要求对应哪个约束"记在练习文件里。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先给每一列挑**类型**（长度固定还是不定、数值范围大不大），再看每一列需要什么**约束**（必填 / 不允许重复 / 唯一标识 / 有默认值）——约束一共有五类，这题用得上四类
-  > **二级 · 方法**：整数且不为负用 `int unsigned`；长度不固定的字符串用 `varchar(n)`、只有 1 个字符用 `char(1)`；约束关键字是 `primary key`（主键）、`auto_increment`（自增）、`not null`（非空）、`unique`（唯一）、`default`（默认）；字段注释写 `comment '...'`
-  > **三级 · 骨架**：`create table user( id int unsigned ____ primary key ____ comment 'ID, 唯一标识', username ____(50) ____ ____ comment '用户名', name ____(10) ____ comment '姓名', age ____ comment '年龄', gender ____(1) ____ '男' comment '性别' ) ____ '用户信息表';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > create table user(
-  >     id int unsigned primary key auto_increment comment 'ID, 唯一标识',
-  >     username varchar(50) not null unique comment '用户名',
-  >     name varchar(10) not null comment '姓名',
-  >     age int comment '年龄',
-  >     gender char(1) default '男' comment '性别'
-  > ) comment '用户信息表';
-  > ```
-  > 对应关系：**唯一标识 + 自动发号** → `primary key auto_increment`；**用户名必填** → `not null`、**不能重复** → `unique`；**姓名必填** → `not null`；**性别只有 1 个字符、不填默认"男"** → `char(1) default '男'`；两个字符串字段长度不固定 → `varchar`。
-  >
-  > 建完可以用 `desc user;` 自查，实测（本机 MySQL 9.0.1）这份表结构长这样：
-  > ```text
-  > | Field    | Type        | Null | Key | Default | Extra          |
-  > | id       | int         | NO   | PRI | NULL    | auto_increment |
-  > | username | varchar(50) | NO   | UNI | NULL    |                |
-  > | name     | varchar(10) | NO   |     | NULL    |                |
-  > | age      | int         | YES  |     | NULL    |                |
-  > | gender   | char(1)     | YES  |     | 男      |                |
-  > ```
-  > 对照着看：`Null` 列 `NO` 的三个就是加了 `not null` 的；`Key` 列 `PRI`/`UNI` 分别是主键和唯一约束；`Extra` 列的 `auto_increment` 说明 id 会自动发号。
+  **一级 · 思路**：先给每一列挑**类型**（长度固定还是不定、数值范围大不大），再看每一列需要什么**约束**（必填 / 不允许重复 / 唯一标识 / 有默认值）——约束一共有五类，这题用得上四类
+  **二级 · 方法**：整数且不为负用 `int unsigned`；长度不固定的字符串用 `varchar(n)`、只有 1 个字符用 `char(1)`；约束关键字是 `primary key`（主键）、`auto_increment`（自增）、`not null`（非空）、`unique`（唯一）、`default`（默认）；字段注释写 `comment '...'`
+  **三级 · 骨架**：`create table user( id int unsigned ____ primary key ____ comment 'ID, 唯一标识', username ____(50) ____ ____ comment '用户名', name ____(10) ____ comment '姓名', age ____ comment '年龄', gender ____(1) ____ '男' comment '性别' ) ____ '用户信息表';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  create table user(
+      id int unsigned primary key auto_increment comment 'ID, 唯一标识',
+      username varchar(50) not null unique comment '用户名',
+      name varchar(10) not null comment '姓名',
+      age int comment '年龄',
+      gender char(1) default '男' comment '性别'
+  ) comment '用户信息表';
+  ```
+  对应关系：**唯一标识 + 自动发号** → `primary key auto_increment`；**用户名必填** → `not null`、**不能重复** → `unique`；**姓名必填** → `not null`；**性别只有 1 个字符、不填默认"男"** → `char(1) default '男'`；两个字符串字段长度不固定 → `varchar`。
+  
+  建完可以用 `desc user;` 自查，实测（本机 MySQL 9.0.1）这份表结构长这样：
+  ```text
+  | Field    | Type        | Null | Key | Default | Extra          |
+  | id       | int         | NO   | PRI | NULL    | auto_increment |
+  | username | varchar(50) | NO   | UNI | NULL    |                |
+  | name     | varchar(10) | NO   |     | NULL    |                |
+  | age      | int         | YES  |     | NULL    |                |
+  | gender   | char(1)     | YES  |     | 男      |                |
+  ```
+  对照着看：`Null` 列 `NO` 的三个就是加了 `not null` 的；`Key` 列 `PRI`/`UNI` 分别是主键和唯一约束；`Extra` 列的 `auto_increment` 说明 id 会自动发号。
+
+  :::
+
 
 - [ ] **2-2 给表加一个字段、再改它**
   在上一题的 `user` 表上依次做三件事（做完每一步都用 `desc user;` 看一眼效果）：
@@ -383,23 +391,31 @@ drop table [if exists]  employee;     -- 删除表
 
   做完回答：第 2 步和第 3 步用的关键字分别是什么？它们的区别是什么？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三步分别是"加一列、改这一列的类型、改这一列的名字"，对应 `alter table` 的三个不同动作；注意"改类型"和"改名字"是两个关键字，别用混
-  > **二级 · 方法**：加字段 `alter table 表名 add 字段名 类型(长度) comment '...'`；改类型 `alter table 表名 modify 字段名 新类型(长度)`；改名字 `alter table 表名 change 旧名 新名 类型(长度) comment '...'`
-  > **三级 · 骨架**：`alter table user ____ qq varchar(13) comment 'QQ号码';` / `alter table user ____ qq ____(15);` / `alter table user ____ qq ____ varchar(15) comment 'QQ号码';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- ① 添加字段
-  > alter table user add qq varchar(13) comment 'QQ号码';
-  >
-  > -- ② 修改字段类型
-  > alter table user modify qq varchar(15) comment 'QQ号码';
-  >
-  > -- ③ 修改字段名与字段类型
-  > alter table user change qq qq_num varchar(15) comment 'QQ号码';
-  > ```
-  > 第 2 步用的是 **`modify`（只改字段类型**，后面只写一个字段名）；第 3 步用的是 **`change`（改字段名，可以连带改类型**，后面要写"旧字段名 + 新字段名 + 类型"）。本机实测（MySQL 9.0.1）跑完第 3 步后 `desc` 里出现的是新名字 `qq_num varchar(15)`，且这一列是选填（`Null = YES`）——因为 `add` 新加的列默认就允许为空。
+  **一级 · 思路**：三步分别是"加一列、改这一列的类型、改这一列的名字"，对应 `alter table` 的三个不同动作；注意"改类型"和"改名字"是两个关键字，别用混
+  **二级 · 方法**：加字段 `alter table 表名 add 字段名 类型(长度) comment '...'`；改类型 `alter table 表名 modify 字段名 新类型(长度)`；改名字 `alter table 表名 change 旧名 新名 类型(长度) comment '...'`
+  **三级 · 骨架**：`alter table user ____ qq varchar(13) comment 'QQ号码';` / `alter table user ____ qq ____(15);` / `alter table user ____ qq ____ varchar(15) comment 'QQ号码';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- ① 添加字段
+  alter table user add qq varchar(13) comment 'QQ号码';
+  
+  -- ② 修改字段类型
+  alter table user modify qq varchar(15) comment 'QQ号码';
+  
+  -- ③ 修改字段名与字段类型
+  alter table user change qq qq_num varchar(15) comment 'QQ号码';
+  ```
+  第 2 步用的是 **`modify`（只改字段类型**，后面只写一个字段名）；第 3 步用的是 **`change`（改字段名，可以连带改类型**，后面要写"旧字段名 + 新字段名 + 类型"）。本机实测（MySQL 9.0.1）跑完第 3 步后 `desc` 里出现的是新名字 `qq_num varchar(15)`，且这一列是选填（`Null = YES`）——因为 `add` 新加的列默认就允许为空。
+
+  :::
+
 
 - [ ] **2-3 读一份 `desc` 的结果**
   下面的表结构输出是 `desc emp;` 的结果（节选），请回答四个问题：
@@ -422,16 +438,24 @@ drop table [if exists]  employee;     -- 删除表
   3. `username` 这一行的 `UNI` 说明当初建表时写了什么？
   4. 为什么 `job` 这一行是 `YES`？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这份输出的每一列都在"翻译"建表语句里的某一个约束——**Null 列对应非空约束，Key 列对应主键/唯一，Extra 对应自增**
-  > **二级 · 方法**：`Null = NO` ↔ `not null`；`Key = PRI` ↔ `primary key`、`Key = UNI` ↔ `unique`；`Extra = auto_increment` ↔ `auto_increment`；`Null = YES` 表示这一列允许 `NULL`（建表时没写 `not null`）
-  > **三级 · 骨架**：看某一列有没有约束，就盯那一行的 `____` 列和 `____` 列
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. `id`、`username`、`password`、`name` **四个字段**加了非空约束——看 **`Null` 列显示 `NO`**（`job`、`entry_date` 显示 `YES`，表示允许为空）。
-  > 2. `PRI` 说明 `id` 是**主键**（`primary key`，非空且唯一，是一行数据的唯一标识）；`auto_increment` 说明它**可以自动发号**（插入时不写 id，MySQL 会自己给一个没被用过的值）。
-  > 3. `UNI` 说明建表时在 `username` 上写了 **`unique` 唯一约束**（用户名不能重复）。
-  > 4. 因为建表时 `job` **没有写 `not null`**（职位是选填的），所以这一列允许为 `NULL`，`Null` 列就显示 `YES`。
+  **一级 · 思路**：这份输出的每一列都在"翻译"建表语句里的某一个约束——**Null 列对应非空约束，Key 列对应主键/唯一，Extra 对应自增**
+  **二级 · 方法**：`Null = NO` ↔ `not null`；`Key = PRI` ↔ `primary key`、`Key = UNI` ↔ `unique`；`Extra = auto_increment` ↔ `auto_increment`；`Null = YES` 表示这一列允许 `NULL`（建表时没写 `not null`）
+  **三级 · 骨架**：看某一列有没有约束，就盯那一行的 `____` 列和 `____` 列
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. `id`、`username`、`password`、`name` **四个字段**加了非空约束——看 **`Null` 列显示 `NO`**（`job`、`entry_date` 显示 `YES`，表示允许为空）。
+  2. `PRI` 说明 `id` 是**主键**（`primary key`，非空且唯一，是一行数据的唯一标识）；`auto_increment` 说明它**可以自动发号**（插入时不写 id，MySQL 会自己给一个没被用过的值）。
+  3. `UNI` 说明建表时在 `username` 上写了 **`unique` 唯一约束**（用户名不能重复）。
+  4. 因为建表时 `job` **没有写 `not null`**（职位是选填的），所以这一列允许为 `NULL`，`Null` 列就显示 `YES`。
+
+  :::
+
 
 - [ ] **2-4 改表名与删表**
   需求：把上面练手用的 `user` 表改名为 `sys_user`，确认改完之后，再把它删掉。做完回答：
@@ -440,22 +464,30 @@ drop table [if exists]  employee;     -- 删除表
   2. 删表之前先看一眼表里有多少条数据（用 `select count(*) from 表名;`），删完之后这张表还在吗？数据还在吗？
   3. 如果删一个**根本不存在**的表，会报错；想要"不存在也不报错"该怎么写？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：改表名属于"改表结构"里的动作，用 `alter table`；删表是一个独立的语句。第 3 问要在删表语句里加一个"存在性判断"的修饰词
-  > **二级 · 方法**：改表名 `alter table 表名 rename to 新表名;`；删表 `drop table 表名;`；加了"存在才删"的写法是 `drop table if exists 表名;`；数数据量用 `select count(*) from 表名;`
-  > **三级 · 骨架**：`alter table user ____ ____ sys_user;` / `drop table ____ ____ sys_user;`（或 `drop table sys_user;`）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 改表名 `alter table user rename to sys_user;`；删表 `drop table sys_user;`。
-  > 2. 删完之后**表和学生数据都没了**——PPT 第 38 页的注意原文就是"**在删除表时，表中的全部数据也会被删除**"。本机实测（MySQL 9.0.1）用一个装了 3 行数据的小表演示过：删前 `select count(*)` 是 **3**，`drop table` 之后这张表在 `show tables` 里直接消失（结构 + 数据一起没）。
-  > 3. 写成 **`drop table if exists sys_user;`**——表存在就删掉，不存在也不报错（写"重建测试数据"的脚本时常用）。
+  **一级 · 思路**：改表名属于"改表结构"里的动作，用 `alter table`；删表是一个独立的语句。第 3 问要在删表语句里加一个"存在性判断"的修饰词
+  **二级 · 方法**：改表名 `alter table 表名 rename to 新表名;`；删表 `drop table 表名;`；加了"存在才删"的写法是 `drop table if exists 表名;`；数数据量用 `select count(*) from 表名;`
+  **三级 · 骨架**：`alter table user ____ ____ sys_user;` / `drop table ____ ____ sys_user;`（或 `drop table sys_user;`）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 改表名 `alter table user rename to sys_user;`；删表 `drop table sys_user;`。
+  2. 删完之后**表和学生数据都没了**——PPT 第 38 页的注意原文就是"**在删除表时，表中的全部数据也会被删除**"。本机实测（MySQL 9.0.1）用一个装了 3 行数据的小表演示过：删前 `select count(*)` 是 **3**，`drop table` 之后这张表在 `show tables` 里直接消失（结构 + 数据一起没）。
+  3. 写成 **`drop table if exists sys_user;`**——表存在就删掉，不存在也不报错（写"重建测试数据"的脚本时常用）。
+
+  :::
+
 
 ### 三、综合题
 
 - [ ] **3-1 照着课程案例设计员工表，再把表结构维护一遍**
   这就是 PPT 第 35-38 页的案例本身，请完整走一遍（练习文件 `test_44_设计员工表.sql`）：
 
-  > [!WARNING]
+  > [!WARNING] 警告
   > 练习时表名用 **`emp_design`**（别用 `emp`）：你库里的 `emp` 是课程那份 30 条测试数据所在的表，第 6 步要"改名 + 删表"，用 `emp` 会把这些数据一起删掉——后面的 DQL 练习还要用它。SQL 本身和课程案例完全一样，只是换个表名。
 
   1. **读原型**：打开 `assets/44-DDL表结构与建表案例/35-员工管理页面原型.jpg`，把页面上显示的每一列信息列出来（姓名、性别、头像、所属部门、职位、入职日期、最后操作时间……），并写出"哪几条是员工表里的字段、哪几条属于其他表"；
@@ -477,45 +509,53 @@ drop table [if exists]  employee;     -- 删除表
   | 表结构修改 | `alter table` 的 `add`、`modify`、`change`、`drop column` |
   | 表名修改与删表 | `rename to`、`drop table`（连数据一起删） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链路是"**看原型定字段 → 看限制说明定类型和约束 → 建表 → 自查 → 用 `alter table` 维护**"。第 5 步的四个动作严格对应四个关键字：加字段、改类型、改名字（还能顺带改类型）、删字段
-  > **二级 · 方法**：建表 `create table 表名( 字段名 类型 [约束] [comment '注释'] ... ) comment '表注释';`；自查 `show tables;` / `desc 表名;` / `show create table 表名;`；维护 `alter table 表名 add|modify|change|drop column ...`；收尾 `alter table 表名 rename to 新表名;` / `drop table [if exists] 表名;`
-  > **三级 · 骨架**：`create table emp_design( id int unsigned ____ ____ auto_increment comment 'ID, 主键', username ____(20) not null ____ comment '用户名', phone ____(11) not null ____ comment '手机号', ... ) comment '员工表';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 原型上能看到的信息里——**属于员工表的**：姓名、性别、头像、职位、入职日期、最后操作时间（对应 `name`、`gender`、`image`、`job`、`entry_date`、`update_time`），另外"新增员工"页面的限制说明里还有用户名、密码、手机号、薪资；**属于其他表的**：所属部门（要先有部门表，属于多表设计）；"工作经历"是一个员工对应多条的数据，同样等后面再拆成单独的表。
-  > 2. 字段清单见正文第 2 步的表格，关键几条：**用户名必填 + 唯一 + 长度不固定 → `varchar(20) not null unique`**；**手机号必填 + 唯一 + 长度固定 11 位 → `char(11) not null unique`**；**性别必填 + 只能选男/女 → `tinyint unsigned not null`**（1 男 2 女）；**薪资选填 + 数字 → `int unsigned`**；**入职日期选填 + 只要日期 → `date`**；**头像选填 + 存路径 → `varchar(255)`**。
-  > 3. 建表语句（课程案例里表名是 `emp`，练习时按前面 WARNING 换成 `emp_design`，SQL 完全一样）：
-  >    ```sql
-  >    create table emp_design (
-  >        id int unsigned primary key auto_increment comment 'ID, 主键',
-  >        username varchar(20) not null unique comment '用户名',
-  >        password varchar(32) default '123456' comment '密码',
-  >        name varchar(10) not null comment '姓名',
-  >        gender tinyint unsigned not null comment '性别, 1 男; 2 女',
-  >        phone char(11) not null unique comment '手机号',
-  >        job tinyint unsigned comment '职位, 1 班主任; 2 讲师; 3 学工主管; 4 教研主管; 5 咨询师',
-  >        salary int unsigned comment '薪资',
-  >        entry_date date comment '入职日期',
-  >        image varchar(255) comment '图像',
-  >        create_time datetime comment '创建时间',
-  >        update_time datetime comment '修改时间'
-  >    ) comment '员工表';
-  >    ```
-  > 4. `desc emp_design;` 的实测结果里（本机实测用的是课程那份 `emp`，结构一模一样）——**`Null` 列**：`id`/`username`/`password`/`name`/`gender`/`phone` 是 `NO`（都加了 `not null`），`job`/`salary`/`image`/`entry_date`/`create_time`/`update_time` 是 `YES`（选填）；**`Key` 列**：`id` 是 `PRI`（主键）、`username` 和 `phone` 是 `UNI`（唯一约束）；**`Extra` 列**：`id` 是 `auto_increment`（自增）。用 `show create table 表名;` 还能看到约束被单独列在最后：`PRIMARY KEY (\`id\`)`、`UNIQUE KEY \`username\` (\`username\`)`、`UNIQUE KEY \`phone\` (\`phone\`)`。
-  > 5. 维护四步：
-  >    ```sql
-  >    alter table emp_design add qq varchar(13) comment 'QQ号码';
-  >    alter table emp_design modify qq varchar(15) comment 'QQ号码';
-  >    alter table emp_design change qq qq_num varchar(15) comment 'QQ号码';
-  >    alter table emp_design drop column qq_num;
-  >    ```
-  >    `add` 之后 `desc` 里多出一列 `qq varchar(13)`（`Null = YES`）；`modify` 之后变成 `varchar(15)`；`change` 之后列名变成 `qq_num`；`drop column` 之后这一列消失。本机实测（MySQL 9.0.1）在一张演示表上跑通了同样的四步，核心输出：
-  >    ```text
-  >    | Field    | Type         | Null | Key | Default | Extra          |
-  >    | id       | int unsigned | NO   | PRI | NULL    | auto_increment |
-  >    | username | varchar(20)  | NO   |     | NULL    |                |
-  >    | qq_num   | varchar(15)  | YES  |     | NULL    |                |
-  >    ```
-  > 6. 收尾：`alter table emp_design rename to employee;` 之后用 `show tables;` 能看到表名已经变成 `employee`；再 `drop table employee;` 这张表就没了——**表里的数据也一起没了**（表结构和数据一起被删）。本机实测的对照：一张装了 3 行数据的小表，`drop table` 之前 `select count(*)` 是 3，删除之后连表带数据一起消失。
-  > 7. 因为**表的字段是由页面（需求）决定的**：原型决定了"要存哪些信息、要显示什么"，限制说明决定了"每个字段允许多长、必填还是选填、能不能重复"——这些正是类型和约束的依据。反过来先写 `create table` 再改，就会出现"手机号写成了 `varchar(50)`""忘了给用户名加唯一约束"这类返工，甚至等数据进库了才发现改不动。
+  **一级 · 思路**：整条链路是"**看原型定字段 → 看限制说明定类型和约束 → 建表 → 自查 → 用 `alter table` 维护**"。第 5 步的四个动作严格对应四个关键字：加字段、改类型、改名字（还能顺带改类型）、删字段
+  **二级 · 方法**：建表 `create table 表名( 字段名 类型 [约束] [comment '注释'] ... ) comment '表注释';`；自查 `show tables;` / `desc 表名;` / `show create table 表名;`；维护 `alter table 表名 add|modify|change|drop column ...`；收尾 `alter table 表名 rename to 新表名;` / `drop table [if exists] 表名;`
+  **三级 · 骨架**：`create table emp_design( id int unsigned ____ ____ auto_increment comment 'ID, 主键', username ____(20) not null ____ comment '用户名', phone ____(11) not null ____ comment '手机号', ... ) comment '员工表';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 原型上能看到的信息里——**属于员工表的**：姓名、性别、头像、职位、入职日期、最后操作时间（对应 `name`、`gender`、`image`、`job`、`entry_date`、`update_time`），另外"新增员工"页面的限制说明里还有用户名、密码、手机号、薪资；**属于其他表的**：所属部门（要先有部门表，属于多表设计）；"工作经历"是一个员工对应多条的数据，同样等后面再拆成单独的表。
+  2. 字段清单见正文第 2 步的表格，关键几条：**用户名必填 + 唯一 + 长度不固定 → `varchar(20) not null unique`**；**手机号必填 + 唯一 + 长度固定 11 位 → `char(11) not null unique`**；**性别必填 + 只能选男/女 → `tinyint unsigned not null`**（1 男 2 女）；**薪资选填 + 数字 → `int unsigned`**；**入职日期选填 + 只要日期 → `date`**；**头像选填 + 存路径 → `varchar(255)`**。
+  3. 建表语句（课程案例里表名是 `emp`，练习时按前面 WARNING 换成 `emp_design`，SQL 完全一样）：
+     ```sql
+     create table emp_design (
+         id int unsigned primary key auto_increment comment 'ID, 主键',
+         username varchar(20) not null unique comment '用户名',
+         password varchar(32) default '123456' comment '密码',
+         name varchar(10) not null comment '姓名',
+         gender tinyint unsigned not null comment '性别, 1 男; 2 女',
+         phone char(11) not null unique comment '手机号',
+         job tinyint unsigned comment '职位, 1 班主任; 2 讲师; 3 学工主管; 4 教研主管; 5 咨询师',
+         salary int unsigned comment '薪资',
+         entry_date date comment '入职日期',
+         image varchar(255) comment '图像',
+         create_time datetime comment '创建时间',
+         update_time datetime comment '修改时间'
+     ) comment '员工表';
+     ```
+  4. `desc emp_design;` 的实测结果里（本机实测用的是课程那份 `emp`，结构一模一样）——**`Null` 列**：`id`/`username`/`password`/`name`/`gender`/`phone` 是 `NO`（都加了 `not null`），`job`/`salary`/`image`/`entry_date`/`create_time`/`update_time` 是 `YES`（选填）；**`Key` 列**：`id` 是 `PRI`（主键）、`username` 和 `phone` 是 `UNI`（唯一约束）；**`Extra` 列**：`id` 是 `auto_increment`（自增）。用 `show create table 表名;` 还能看到约束被单独列在最后：`PRIMARY KEY (\`id\`)`、`UNIQUE KEY \`username\` (\`username\`)`、`UNIQUE KEY \`phone\` (\`phone\`)`。
+  5. 维护四步：
+     ```sql
+     alter table emp_design add qq varchar(13) comment 'QQ号码';
+     alter table emp_design modify qq varchar(15) comment 'QQ号码';
+     alter table emp_design change qq qq_num varchar(15) comment 'QQ号码';
+     alter table emp_design drop column qq_num;
+     ```
+     `add` 之后 `desc` 里多出一列 `qq varchar(13)`（`Null = YES`）；`modify` 之后变成 `varchar(15)`；`change` 之后列名变成 `qq_num`；`drop column` 之后这一列消失。本机实测（MySQL 9.0.1）在一张演示表上跑通了同样的四步，核心输出：
+     ```text
+     | Field    | Type         | Null | Key | Default | Extra          |
+     | id       | int unsigned | NO   | PRI | NULL    | auto_increment |
+     | username | varchar(20)  | NO   |     | NULL    |                |
+     | qq_num   | varchar(15)  | YES  |     | NULL    |                |
+     ```
+  6. 收尾：`alter table emp_design rename to employee;` 之后用 `show tables;` 能看到表名已经变成 `employee`；再 `drop table employee;` 这张表就没了——**表里的数据也一起没了**（表结构和数据一起被删）。本机实测的对照：一张装了 3 行数据的小表，`drop table` 之前 `select count(*)` 是 3，删除之后连表带数据一起消失。
+  7. 因为**表的字段是由页面（需求）决定的**：原型决定了"要存哪些信息、要显示什么"，限制说明决定了"每个字段允许多长、必填还是选填、能不能重复"——这些正是类型和约束的依据。反过来先写 `create table` 再改，就会出现"手机号写成了 `varchar(50)`""忘了给用户名加唯一约束"这类返工，甚至等数据进库了才发现改不动。
+
+  :::
+

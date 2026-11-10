@@ -43,7 +43,7 @@ PPT 第 2 页给的 **JDBC 定义**（原文）：
 
 拆开读这条定义，四个信息点：**Java 语言**（不是别的语言）、**关系型数据库**（MySQL、Oracle 这些）、**一套 API**（有一套现成的类和方法给你调）、**规范**（是"标准"，不是"实现"）。最后这个词才是重点——下一页专门讲它。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这一章的技术全景要记成一条链：**JDBC 是地基（底层 API），MyBatis 是在它上面的框架（简化它），MyBatisPlus 是在 MyBatis 上的再简化**。学习顺序反过来走：先 JDBC、再 MyBatis——把 JDBC 的"五步"和"预编译"搞懂了，MyBatis 那一篇才知道它在替你省掉什么。
 
 ## JDBC 的本质：一套接口 + 各家厂商的驱动（PPT 第 6 页）
@@ -77,7 +77,7 @@ PPT 第 6 页把**本质**写成三句话：
 
 这么设计的好处是"**换数据库不用改代码**"：面向 Oracle 写的那套调用（`DriverManager.getConnection` → `Connection` → `Statement` → 执行 SQL），换到 MySQL 上只是换一个驱动 jar 和一行 URL，方法一个都不用改。这个思路和 [38 篇](/posts/编程学习/javaweb学习笔记/38-分层解耦与ioc-di入门/)、[39 篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)里"面向接口编程、实现类可替换"是同一个道理，只不过这里"提供实现类的人"从我们自己变成了数据库厂商。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（用户本机 MySQL 9.0.1，课程 `jdbc-demo` 工程）——代码里拿到的 `Connection` 是**接口**类型，可它运行时的真身是驱动 jar 里的实现类，打印一下类名就能看见：
 >
 > ```text
@@ -120,7 +120,7 @@ PPT 第 7 页给的需求一句话：
 - `mysql-connector-j` —— 驱动 jar 的名字（MySQL 8.x 的驱动即 **Connector/J**）；
 - `8.0.33` —— 课件用的版本。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：本机装的是 MySQL **9.0.1**，用的还是课程这个 **8.0.33** 的驱动（课件工程 `jdbc-demo` 的 pom 里就是它），连接、执行 SQL 全部正常——驱动能兼容比自己新的 MySQL 服务端，不用因为版本号不一样就慌。
 
 ### 准备二：数据库表 user
@@ -151,7 +151,7 @@ insert into user(id, username, password, name, age) values (1, 'daqiao', '123456
 | `name` | `varchar(10)` | 姓名 |
 | `age` | `tinyint unsigned` | 年龄 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这张表建在哪个库？**`web01`**（第 5 章的 SQL 练习用的是 `db01`，这一章课程另开了一个库）。表的建法、5 条数据的来源都在上面这段 SQL 里——后面所有 JDBC 代码的 URL 都要指到这个库（`jdbc:mysql://localhost:3306/web01`）。
 
 ### 准备三：程序写在哪里
@@ -244,7 +244,7 @@ URL 就一串字符串，逐段拆开看：
 | `3306` | **端口**（MySQL 的默认端口） |
 | `web01` | **数据库名**——不写它，后面的 SQL 就要把表写成 `web01.user` |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课件示例里的用户名密码是 `root` / `"1234"`，**这只是课程的示例值**——动手时把 `password` 换成**你自己 MySQL 的密码**（用户名不一样同理）。本机实测那几条输出，就是先把密码换成本机 MySQL 的密码才跑出来的。
 
 ### 第 3 步：获取 SQL 语句执行对象
@@ -265,7 +265,7 @@ int i = statement.executeUpdate("update user set age = 25 where id = 1");//DML
 - 条件没命中（比如 id 写成了表里没有的 100）→ 返回 **0**（**不报错**，只是没改到任何行）；
 - 一次改到多行（比如 `where age > 20`）→ 返回命中的行数。
 
-> [!TIP]
+> [!TIP] 提示
 > `executeUpdate` 的返回值不是"成功/失败"，而是"**影响了几行**"——0 也是一个正常结果。所以排查"数据怎么没变"这类问题时，第一件事就是看这个数字：是 0（条件没命中）还是 1（改了但你看错了地方）。
 
 ### 第 5 步：释放资源
@@ -281,7 +281,7 @@ connection.close();
 
 ## 实测：五步跑通的样子
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（用户本机 MySQL 9.0.1，库 `web01`、表 `user`，工程为课程 `jdbc-demo`，用 `mvn test` 跑 JUnit 测试）——`testUpdate` 执行 `update user set age = 25 where id = 1` 后控制台输出：
 >
 > ```text
@@ -343,101 +343,117 @@ connection.close();
   要求：按"连接数据库要做的五个动作"的顺序写，**每一步用一行中文注释标出来**；跑完把控制台输出抄到练习文件末尾的空位里，并回答两个问题：① 打印出来的这个数字代表什么？② 如果把条件里的 id 换成 100（表里没有这个 id），这个数字会变成多少、会不会报错？
   （练习文件 `test_49_JDBC五步.java` 里给了题目注释、pom 依赖片段、表结构、运行方式和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五个动作是固定顺序——把驱动"叫醒"、拿到连接、拿到一个能发 SQL 的东西、把 SQL 发出去接住返回值、最后把用过的都关掉
-  > **二级 · 方法**：`Class.forName("com.mysql.cj.jdbc.Driver")` → `DriverManager.getConnection(url, username, password)` → `connection.createStatement()` → `statement.executeUpdate(sql)` → `statement.close()` + `connection.close()`；方法上用 JUnit 的 `@Test` 标注，方便单独跑
-  > **三级 · 骨架**：`Class.forName("____"); Connection conn = ____.____("jdbc:mysql://localhost:3306/web01", "root", "你自己的密码"); Statement st = conn.____(); int i = st.____("update user set age = 25 where id = 1"); System.out.println("____" + i); st.close(); conn.close();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.Connection;
-  > import java.sql.DriverManager;
-  > import java.sql.Statement;
-  >
-  > public class JdbcUpdateTest {
-  >
-  >     @Test
-  >     public void testUpdate() throws Exception {
-  >         //1. 注册驱动
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >
-  >         //2. 获取数据库连接
-  >         String url = "jdbc:mysql://localhost:3306/web01";
-  >         String username = "root";
-  >         String password = "1234";   // 换成你自己 MySQL 的密码
-  >         Connection connection = DriverManager.getConnection(url, username, password);
-  >
-  >         //3. 获取SQL语句执行对象
-  >         Statement statement = connection.createStatement();
-  >
-  >         //4. 执行SQL（DML）
-  >         int i = statement.executeUpdate("update user set age = 25 where id = 1");
-  >         System.out.println("SQL执行完毕影响的记录数为: " + i);
-  >
-  >         //5. 释放资源（后开先关）
-  >         statement.close();
-  >         connection.close();
-  >     }
-  > }
-  > ```
-  > 本机实测输出：`SQL执行完毕影响的记录数为: 1`。
-  > 两问两答：① 这个数字是 **`executeUpdate` 的返回值——这条 SQL 影响的记录数**，1 表示 `id = 1` 那一行被改动了（`count` 表示"改动了几行"，不是"成功还是失败"）；② 换成 `id = 100` 会输出 **0**，**而且不会报错**——条件没命中任何一行，SQL 本身执行成功了，只是没有数据被改。所以看到 0 时先怀疑"条件写错了/数据不在了"，而不是"程序坏了"。
-  > 顺便提醒：这条语句真的会改数据，跑完想恢复，用课程资料的 `user.txt` 重新导入一遍。
+  **一级 · 思路**：五个动作是固定顺序——把驱动"叫醒"、拿到连接、拿到一个能发 SQL 的东西、把 SQL 发出去接住返回值、最后把用过的都关掉
+  **二级 · 方法**：`Class.forName("com.mysql.cj.jdbc.Driver")` → `DriverManager.getConnection(url, username, password)` → `connection.createStatement()` → `statement.executeUpdate(sql)` → `statement.close()` + `connection.close()`；方法上用 JUnit 的 `@Test` 标注，方便单独跑
+  **三级 · 骨架**：`Class.forName("____"); Connection conn = ____.____("jdbc:mysql://localhost:3306/web01", "root", "你自己的密码"); Statement st = conn.____(); int i = st.____("update user set age = 25 where id = 1"); System.out.println("____" + i); st.close(); conn.close();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.Connection;
+  import java.sql.DriverManager;
+  import java.sql.Statement;
+  
+  public class JdbcUpdateTest {
+  
+      @Test
+      public void testUpdate() throws Exception {
+          //1. 注册驱动
+          Class.forName("com.mysql.cj.jdbc.Driver");
+  
+          //2. 获取数据库连接
+          String url = "jdbc:mysql://localhost:3306/web01";
+          String username = "root";
+          String password = "1234";   // 换成你自己 MySQL 的密码
+          Connection connection = DriverManager.getConnection(url, username, password);
+  
+          //3. 获取SQL语句执行对象
+          Statement statement = connection.createStatement();
+  
+          //4. 执行SQL（DML）
+          int i = statement.executeUpdate("update user set age = 25 where id = 1");
+          System.out.println("SQL执行完毕影响的记录数为: " + i);
+  
+          //5. 释放资源（后开先关）
+          statement.close();
+          connection.close();
+      }
+  }
+  ```
+  本机实测输出：`SQL执行完毕影响的记录数为: 1`。
+  两问两答：① 这个数字是 **`executeUpdate` 的返回值——这条 SQL 影响的记录数**，1 表示 `id = 1` 那一行被改动了（`count` 表示"改动了几行"，不是"成功还是失败"）；② 换成 `id = 100` 会输出 **0**，**而且不会报错**——条件没命中任何一行，SQL 本身执行成功了，只是没有数据被改。所以看到 0 时先怀疑"条件写错了/数据不在了"，而不是"程序坏了"。
+  顺便提醒：这条语句真的会改数据，跑完想恢复，用课程资料的 `user.txt` 重新导入一遍。
+
+  :::
+
 
 - [ ] **2-2 往 user 表里新增一个用户**
   需求：还是"五个动作"，这次执行一条**新增**语句，往 `user` 表里插一条记录——用户名 `zhouyu`、密码 `123456`、姓名 `周瑜`、年龄 `20`（id 是自增主键，不用管它）。
   要求：把影响行数打印出来；跑完去客户端（DataGrip / 命令行）里 `select` 一下，确认这行真的进去了；然后回答三个问题：① 这条记录最终分到的 **id 是多少**？② 为什么**不需要自己写 id**？③ 这条语句的**影响行数**应该是多少？
   （练习文件 `test_49_新增用户.java` 里给了题目注释和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五个动作一个都不变，唯一要换的是"第 4 步那句 SQL"——insert 和 update 一样都是 DML，还是用同一个执行方法
-  > **二级 · 方法**：SQL 写成 `insert into user(username, password, name, age) values('zhouyu', '123456', '周瑜', 20)`，还是 `statement.executeUpdate(sql)`；字段名后面的括号里只写要赋值的列
-  > **三级 · 骨架**：`int i = st.____("insert into user(username, password, name, age) values('____', '____', '____', ____)"); System.out.println("____" + i);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.Connection;
-  > import java.sql.DriverManager;
-  > import java.sql.Statement;
-  >
-  > public class JdbcInsertTest {
-  >
-  >     @Test
-  >     public void testInsert() throws Exception {
-  >         //1. 注册驱动
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >
-  >         //2. 获取连接
-  >         Connection connection = DriverManager.getConnection(
-  >                 "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
-  >
-  >         //3. 获取SQL语句执行对象
-  >         Statement statement = connection.createStatement();
-  >
-  >         //4. 执行SQL（insert 也是 DML，还是用 executeUpdate）
-  >         int i = statement.executeUpdate(
-  >                 "insert into user(username, password, name, age) values('zhouyu', '123456', '周瑜', 20)");
-  >         System.out.println("SQL执行完毕影响的记录数为: " + i);
-  >
-  >         //5. 释放资源
-  >         statement.close();
-  >         connection.close();
-  >     }
-  > }
-  > ```
-  > 输出：`SQL执行完毕影响的记录数为: 1`。三问三答：
-  > ① （第 1 问是"确认这行进去了"，`select * from user where username = 'zhouyu';` 能查到就对了）；
-  > ② **因为 `id` 是 `auto_increment`（自增主键）**——插入时不写它，数据库会自动分配一个（本机这张表原来的数据是 1~5，新插入的一般就是 6，具体以你查到的那一行为准）；insert 语句里也**不能**把自增列硬写成一个已经存在的 id（会撞主键）；
-  > ③ 插入一条记录，影响行数就是 **1**——insert 的返回值同样是"影响了几行"。
-  > 跑完记得清场：`delete from user where username = 'zhouyu';`（或者用 `user.txt` 重新导入把表恢复原样）。
+  **一级 · 思路**：五个动作一个都不变，唯一要换的是"第 4 步那句 SQL"——insert 和 update 一样都是 DML，还是用同一个执行方法
+  **二级 · 方法**：SQL 写成 `insert into user(username, password, name, age) values('zhouyu', '123456', '周瑜', 20)`，还是 `statement.executeUpdate(sql)`；字段名后面的括号里只写要赋值的列
+  **三级 · 骨架**：`int i = st.____("insert into user(username, password, name, age) values('____', '____', '____', ____)"); System.out.println("____" + i);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.Connection;
+  import java.sql.DriverManager;
+  import java.sql.Statement;
+  
+  public class JdbcInsertTest {
+  
+      @Test
+      public void testInsert() throws Exception {
+          //1. 注册驱动
+          Class.forName("com.mysql.cj.jdbc.Driver");
+  
+          //2. 获取连接
+          Connection connection = DriverManager.getConnection(
+                  "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
+  
+          //3. 获取SQL语句执行对象
+          Statement statement = connection.createStatement();
+  
+          //4. 执行SQL（insert 也是 DML，还是用 executeUpdate）
+          int i = statement.executeUpdate(
+                  "insert into user(username, password, name, age) values('zhouyu', '123456', '周瑜', 20)");
+          System.out.println("SQL执行完毕影响的记录数为: " + i);
+  
+          //5. 释放资源
+          statement.close();
+          connection.close();
+      }
+  }
+  ```
+  输出：`SQL执行完毕影响的记录数为: 1`。三问三答：
+  ① （第 1 问是"确认这行进去了"，`select * from user where username = 'zhouyu';` 能查到就对了）；
+  ② **因为 `id` 是 `auto_increment`（自增主键）**——插入时不写它，数据库会自动分配一个（本机这张表原来的数据是 1~5，新插入的一般就是 6，具体以你查到的那一行为准）；insert 语句里也**不能**把自增列硬写成一个已经存在的 id（会撞主键）；
+  ③ 插入一条记录，影响行数就是 **1**——insert 的返回值同样是"影响了几行"。
+  跑完记得清场：`delete from user where username = 'zhouyu';`（或者用 `user.txt` 重新导入把表恢复原样）。
+
+  :::
+
 
 - [ ] **2-3 找错：这段 JDBC 代码有 5 处问题**
   下面是同学交上来的代码，编译能过、跑起来却连不上也改不动。请指出**每一处**问题，并把它改写成能跑通的版本：
@@ -460,46 +476,54 @@ connection.close();
   要求：把 5 处问题按行号/顺序写清"哪里错、错了会怎样"，再写出改好的完整方法。
   （练习文件 `test_49_找错.java` 里给了题目注释和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五处问题正好分布在"五个动作"里——注册驱动的类名、URL、拿执行对象的方法、执行 DML 的方法、最后的收尾
-  > **二级 · 方法**：8.x 的驱动类是 `com.mysql.cj.jdbc.Driver`；URL 要带上库名 `web01`；拿普通执行对象用 `connection.createStatement()`（`prepareStatement` 是[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的预编译用法）；DML 用 `executeUpdate`（没有结果集可拿）；`Connection` 也要关
-  > **三级 · 骨架**：`Class.forName("com.mysql.____.jdbc.Driver"); String url = "jdbc:mysql://localhost:3306/____"; Statement statement = connection.____(); int i = statement.____("update user set age = 25 where id = 1"); statement.close(); connection.____();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 五处问题：
-  > 1. **驱动类名是 5.x 的老名字**：`com.mysql.jdbc.Driver` 在 MySQL 8.x 的驱动里已经没有了（8.x 是 `com.mysql.cj.jdbc.Driver`），运行时会报 `ClassNotFoundException`；
-  > 2. **URL 少写了数据库名**：`jdbc:mysql://localhost:3306` 只连到 MySQL 服务器、没指定库，后面的 SQL 里写 `user` 表就会报"表不存在"（要写 `jdbc:mysql://localhost:3306/web01`）；
-  > 3. **第 3 步拿错了工具**：`connection.prepareStatement(...)` 是**预编译**用的创建方式（SQL 要在创建时交进去、之后靠 `setXxx` 填参数），它返回的是 `PreparedStatement`；这里要的是"普通执行对象"，应该用 **`connection.createStatement()`**——两种对象是给两种写法配套的（预编译那一套在[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)）；
-  > 4. **第 4 步用错了方法**：update 是 **DML**，要用 **`statement.executeUpdate(sql)`**（返回值是影响行数）；`executeQuery` 是给查询用的（返回结果集），**DML 不该用它**；
-  > 5. **第 5 步漏了 `connection.close()`**：`Statement` 关了、连接没关，连接就漏掉了（后开先关，两个都要关）。
-  > 
-  > 改好的版本：
-  > ```java
-  > public class JdbcBrokenTest {
-  >
-  >     @Test
-  >     public void testUpdate() throws Exception {
-  >         //1. 注册驱动（8.x 的类名带 cj）
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >
-  >         //2. 获取连接（URL 末尾要带库名 web01）
-  >         String url = "jdbc:mysql://localhost:3306/web01";
-  >         Connection connection = DriverManager.getConnection(url, "root", "1234"); // 密码换成你自己的
-  >
-  >         //3. 获取SQL语句执行对象（普通执行对象用 createStatement）
-  >         Statement statement = connection.createStatement();
-  >
-  >         //4. 执行SQL（DML 用 executeUpdate，接住影响行数）
-  >         int i = statement.executeUpdate("update user set age = 25 where id = 1");
-  >         System.out.println("SQL执行完毕影响的记录数为: " + i);
-  >
-  >         //5. 释放资源（后开先关，两个都要关）
-  >         statement.close();
-  >         connection.close();
-  >     }
-  > }
-  > ```
-  > 一句话总结这五处：**驱动类名要对（`cj`）、URL 要带库名、普通执行对象用 `createStatement`（不是 `prepareStatement`）、DML 用 `executeUpdate`、连接一定要关**。
+  **一级 · 思路**：五处问题正好分布在"五个动作"里——注册驱动的类名、URL、拿执行对象的方法、执行 DML 的方法、最后的收尾
+  **二级 · 方法**：8.x 的驱动类是 `com.mysql.cj.jdbc.Driver`；URL 要带上库名 `web01`；拿普通执行对象用 `connection.createStatement()`（`prepareStatement` 是[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的预编译用法）；DML 用 `executeUpdate`（没有结果集可拿）；`Connection` 也要关
+  **三级 · 骨架**：`Class.forName("com.mysql.____.jdbc.Driver"); String url = "jdbc:mysql://localhost:3306/____"; Statement statement = connection.____(); int i = statement.____("update user set age = 25 where id = 1"); statement.close(); connection.____();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  五处问题：
+  1. **驱动类名是 5.x 的老名字**：`com.mysql.jdbc.Driver` 在 MySQL 8.x 的驱动里已经没有了（8.x 是 `com.mysql.cj.jdbc.Driver`），运行时会报 `ClassNotFoundException`；
+  2. **URL 少写了数据库名**：`jdbc:mysql://localhost:3306` 只连到 MySQL 服务器、没指定库，后面的 SQL 里写 `user` 表就会报"表不存在"（要写 `jdbc:mysql://localhost:3306/web01`）；
+  3. **第 3 步拿错了工具**：`connection.prepareStatement(...)` 是**预编译**用的创建方式（SQL 要在创建时交进去、之后靠 `setXxx` 填参数），它返回的是 `PreparedStatement`；这里要的是"普通执行对象"，应该用 **`connection.createStatement()`**——两种对象是给两种写法配套的（预编译那一套在[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)）；
+  4. **第 4 步用错了方法**：update 是 **DML**，要用 **`statement.executeUpdate(sql)`**（返回值是影响行数）；`executeQuery` 是给查询用的（返回结果集），**DML 不该用它**；
+  5. **第 5 步漏了 `connection.close()`**：`Statement` 关了、连接没关，连接就漏掉了（后开先关，两个都要关）。
+  
+  改好的版本：
+  ```java
+  public class JdbcBrokenTest {
+  
+      @Test
+      public void testUpdate() throws Exception {
+          //1. 注册驱动（8.x 的类名带 cj）
+          Class.forName("com.mysql.cj.jdbc.Driver");
+  
+          //2. 获取连接（URL 末尾要带库名 web01）
+          String url = "jdbc:mysql://localhost:3306/web01";
+          Connection connection = DriverManager.getConnection(url, "root", "1234"); // 密码换成你自己的
+  
+          //3. 获取SQL语句执行对象（普通执行对象用 createStatement）
+          Statement statement = connection.createStatement();
+  
+          //4. 执行SQL（DML 用 executeUpdate，接住影响行数）
+          int i = statement.executeUpdate("update user set age = 25 where id = 1");
+          System.out.println("SQL执行完毕影响的记录数为: " + i);
+  
+          //5. 释放资源（后开先关，两个都要关）
+          statement.close();
+          connection.close();
+      }
+  }
+  ```
+  一句话总结这五处：**驱动类名要对（`cj`）、URL 要带库名、普通执行对象用 `createStatement`（不是 `prepareStatement`）、DML 用 `executeUpdate`、连接一定要关**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -527,70 +551,78 @@ connection.close();
   | 数据验证 | 第 7 步——用 `select` 回头确认改动的结果 |
   | DML 与 DQL 的区别 | 第 8 步——DML 用 `executeUpdate`，DQL 要换成 `executeQuery`（下一篇） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题就是把"准备工作两件 + 代码五步"照顺序落地；第 6 步和第 7 步是"自己给自己找证据"——同一个程序跑两次、再去库里看一眼，比只看控制台更有说服力
-  > **二级 · 方法**：pom 里写 `mysql-connector-j` 8.0.33；测试方法用 `@Test`；五步用 `Class.forName` / `DriverManager.getConnection` / `createStatement` / `executeUpdate` / `close`；验证用 `select * from user where id = 1;`
-  > **三级 · 骨架**：第 4 步 `int i = statement.____("update user set age = ____ where id = 1");`；第 6 步把 `id = 1` 改成 `id = ____`；第 7 步 `select * from ____ where id = 1;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **1~4 步** 的成品（工程坐标、pom 依赖、建表语句见上面正文里贴过的课程原文）：
-  > ```xml
-  > <!-- pom.xml 里要加的依赖 -->
-  > <dependency>
-  >     <groupId>com.mysql</groupId>
-  >     <artifactId>mysql-connector-j</artifactId>
-  >     <version>8.0.33</version>
-  > </dependency>
-  > ```
-  > ```java
-  > // User 实体类（课程用 lombok 的 @Data 自动生成 getter/setter/toString）
-  > package com.itheima.pojo;
-  >
-  > import lombok.AllArgsConstructor;
-  > import lombok.Data;
-  > import lombok.NoArgsConstructor;
-  >
-  > @Data
-  > @AllArgsConstructor
-  > @NoArgsConstructor
-  > public class User {
-  >     private Integer id;
-  >     private String username;
-  >     private String password;
-  >     private String name;
-  >     private Integer age;
-  > }
-  > ```
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.Connection;
-  > import java.sql.DriverManager;
-  > import java.sql.Statement;
-  >
-  > public class JdbcLabTest {
-  >
-  >     @Test
-  >     public void testUpdate() throws Exception {
-  >         //1. 注册驱动
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         //2. 获取连接
-  >         Connection connection = DriverManager.getConnection(
-  >                 "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
-  >         //3. 获取SQL语句执行对象
-  >         Statement statement = connection.createStatement();
-  >         //4. 执行SQL
-  >         int i = statement.executeUpdate("update user set age = 25 where id = 1");
-  >         System.out.println("SQL执行完毕影响的记录数为: " + i);
-  >         //5. 释放资源
-  >         statement.close();
-  >         connection.close();
-  >     }
-  > }
-  > ```
-  > 5. 本机实测第 5 步的输出：`SQL执行完毕影响的记录数为: 1`；
-  > 6. 把条件换成 `where id = 100` 之后输出 **`SQL执行完毕影响的记录数为: 0`**——**没有报错**。因为这条 SQL 本身是合法且执行成功的，只是表里没有 `id = 100` 这行，一行都没被改动，所以影响行数是 0。**0 是"条件没命中"，不是"程序出错"**，这正是排查"数据怎么没变"时的第一线索；
-  > 7. `select * from user where id = 1;` 查到的这一行应该是 `1, daqiao, 123456, 大乔, 25`——年龄从 22 变成了 25，说明改动真的落到库里了（想恢复就重新导入 `user.txt`）；
-  > 8. 五步里**第 4 步（`statement.executeUpdate`）**才是把 SQL 送到数据库去执行的那一步：第 1 步是把驱动加载进来（让 `DriverManager` 认识 MySQL 驱动），第 2 步是建立连接（连到哪个库、用哪个账号），第 3 步是拿到一个"能发 SQL 的东西"，第 5 步是把用掉的资源还回去。如果做的是**查询（DQL）**，第 4 步要换成 **`executeQuery`**——它返回的不是影响行数，而是一个**结果集对象**，还得把里面的数据一行行取出来，这就是[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)要干的事。
+  **一级 · 思路**：这一题就是把"准备工作两件 + 代码五步"照顺序落地；第 6 步和第 7 步是"自己给自己找证据"——同一个程序跑两次、再去库里看一眼，比只看控制台更有说服力
+  **二级 · 方法**：pom 里写 `mysql-connector-j` 8.0.33；测试方法用 `@Test`；五步用 `Class.forName` / `DriverManager.getConnection` / `createStatement` / `executeUpdate` / `close`；验证用 `select * from user where id = 1;`
+  **三级 · 骨架**：第 4 步 `int i = statement.____("update user set age = ____ where id = 1");`；第 6 步把 `id = 1` 改成 `id = ____`；第 7 步 `select * from ____ where id = 1;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **1~4 步** 的成品（工程坐标、pom 依赖、建表语句见上面正文里贴过的课程原文）：
+  ```xml
+  <!-- pom.xml 里要加的依赖 -->
+  <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>8.0.33</version>
+  </dependency>
+  ```
+  ```java
+  // User 实体类（课程用 lombok 的 @Data 自动生成 getter/setter/toString）
+  package com.itheima.pojo;
+  
+  import lombok.AllArgsConstructor;
+  import lombok.Data;
+  import lombok.NoArgsConstructor;
+  
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public class User {
+      private Integer id;
+      private String username;
+      private String password;
+      private String name;
+      private Integer age;
+  }
+  ```
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.Connection;
+  import java.sql.DriverManager;
+  import java.sql.Statement;
+  
+  public class JdbcLabTest {
+  
+      @Test
+      public void testUpdate() throws Exception {
+          //1. 注册驱动
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          //2. 获取连接
+          Connection connection = DriverManager.getConnection(
+                  "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
+          //3. 获取SQL语句执行对象
+          Statement statement = connection.createStatement();
+          //4. 执行SQL
+          int i = statement.executeUpdate("update user set age = 25 where id = 1");
+          System.out.println("SQL执行完毕影响的记录数为: " + i);
+          //5. 释放资源
+          statement.close();
+          connection.close();
+      }
+  }
+  ```
+  5. 本机实测第 5 步的输出：`SQL执行完毕影响的记录数为: 1`；
+  6. 把条件换成 `where id = 100` 之后输出 **`SQL执行完毕影响的记录数为: 0`**——**没有报错**。因为这条 SQL 本身是合法且执行成功的，只是表里没有 `id = 100` 这行，一行都没被改动，所以影响行数是 0。**0 是"条件没命中"，不是"程序出错"**，这正是排查"数据怎么没变"时的第一线索；
+  7. `select * from user where id = 1;` 查到的这一行应该是 `1, daqiao, 123456, 大乔, 25`——年龄从 22 变成了 25，说明改动真的落到库里了（想恢复就重新导入 `user.txt`）；
+  8. 五步里**第 4 步（`statement.executeUpdate`）**才是把 SQL 送到数据库去执行的那一步：第 1 步是把驱动加载进来（让 `DriverManager` 认识 MySQL 驱动），第 2 步是建立连接（连到哪个库、用哪个账号），第 3 步是拿到一个"能发 SQL 的东西"，第 5 步是把用掉的资源还回去。如果做的是**查询（DQL）**，第 4 步要换成 **`executeQuery`**——它返回的不是影响行数，而是一个**结果集对象**，还得把里面的数据一行行取出来，这就是[下一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)要干的事。
+
+  :::
+

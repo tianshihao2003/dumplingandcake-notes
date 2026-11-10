@@ -86,7 +86,7 @@ XML 那份文件的内容（课程 `UserMapper.xml` 全文）：
 
 前两行 `<?xml …?>` 和 `<!DOCTYPE mapper …>` 是 **XML 的声明与约束（DTD）**，MyBatis 官方文档里给了现成的，照着复制过来就行，别手打。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **`resultType` 写的是"单条记录"封装的类型**：接口返回 `List<User>`，XML 里写的还是 `com.itheima.pojo.User`（课程源码的注释原话是「查询返回的单条记录所封装的类型」）。这是最容易写错的一处——不要因为接口返回 List 就把 `resultType` 写成 `java.util.List`。
 
 PPT 第 39 页还给了一份**错误的对照**，用来把三条规则钉死：
@@ -101,7 +101,7 @@ PPT 第 39 页还给了一份**错误的对照**，用来把三条规则钉死�
 
 接口上没有 SQL 了，那条 SQL 在 XML 里，跑起来是什么样？本机把工程里的查询测试跑了一遍：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（`springboot-mybatis-quickstart`，`findAll` 的 SQL 在 XML 里）——日志与结果：
 >
 > ```text
@@ -165,7 +165,7 @@ mybatis.mapper-locations=classpath:mapper/*.xml
 | 要不要配 `mapper-locations` | **不用**（MyBatis 按接口名默认去找） | **必须配**（本课程用的是 `classpath:mapper/*.xml`） |
 | 对应 PPT | 第 39 页的三条默认规则 | 第 42 页的辅助配置 |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 本机实测跑的是**方式二**：课程 `springboot-mybatis-quickstart` 把 XML 放在 `resources/mapper/` 下，并在 yml 里配了 `mybatis.mapper-locations: classpath:mapper/*.xml`；PPT 第 39 页演示的是**方式一**（同包同名、零配置）。选哪种都行，但一个工程里最好统一，别混着放——否则"为什么这条 XML 生效、那条不生效"会很难查。
 
 课程工程完整的那份配置（`application.yml`，这里顺带把上一节的日志配置也放一起看）：
@@ -252,57 +252,73 @@ XML 和接口分在两个文件里，来回跳转很烦，PPT 第 42 页推荐�
   需求：`UserMapper` 接口里有一个查全部用户的方法；现在**把 SQL 挪出接口**，写进一个**独立的 XML 映射文件**里，位置让 MyBatis 默认就能找到（不用改任何配置），保证项目启动后调用这个方法仍能查出 5 条数据。
   （练习文件 `test_55_XML映射文件.xml` 的题目2-1 里给了写作区；接口方法签名与实体类位置作为素材已写在素材区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先决定 XML 放哪、叫什么名字（默认规则）；文件里从官方文档抄声明与约束头，再写一个 `mapper` 根标签，把"接口全限定名"和"这条 SQL 的 id/返回类型"分别填对
-  > **二级 · 方法**：文件放 `resources/com/itheima/mapper/UserMapper.xml`；根标签用 `<mapper namespace="…">`；查询语句用 `<select id="…" resultType="…">`
-  > **三级 · 骨架**：`<?xml version="1.0" encoding="UTF-8" ?>` + `<!DOCTYPE mapper …>` + `<mapper namespace="____"> <select id="____" resultType="____"> select … from user </select> </mapper>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 文件：`src/main/resources/com/itheima/mapper/UserMapper.xml`
-  > ```xml
-  > <?xml version="1.0" encoding="UTF-8" ?>
-  > <!DOCTYPE mapper
-  >         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  >         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  > <mapper namespace="com.itheima.mapper.UserMapper">
-  >
-  >     <!--resultType: 查询返回的单条记录所封装的类型-->
-  >     <select id="findAll" resultType="com.itheima.pojo.User">
-  >         select id, username, password, name, age from user
-  >     </select>
-  >
-  > </mapper>
-  > ```
-  > 接口那边只留方法签名（原来方法上的 `@Select` 要注释/删掉，否则会冲突或让人看混）：
-  > ```java
-  > @Mapper
-  > public interface UserMapper {
-  >     public List<User> findAll();
-  > }
-  > ```
-  > 检查三处是否对上：**文件名与位置**（`resources/com/itheima/mapper/UserMapper.xml`）、**namespace**（`com.itheima.mapper.UserMapper`）、**id 与 resultType**（`findAll` / `com.itheima.pojo.User`）。本机工程（放的是 `resources/mapper/`）里 `findAll` 走 XML 的实测日志是 `Preparing: select id, username, password, name, age from user`、`Parameters:`（空）、`Total: 5`——XML 放在上面哪种位置，跑起来这条日志都一样。
+  **一级 · 思路**：先决定 XML 放哪、叫什么名字（默认规则）；文件里从官方文档抄声明与约束头，再写一个 `mapper` 根标签，把"接口全限定名"和"这条 SQL 的 id/返回类型"分别填对
+  **二级 · 方法**：文件放 `resources/com/itheima/mapper/UserMapper.xml`；根标签用 `<mapper namespace="…">`；查询语句用 `<select id="…" resultType="…">`
+  **三级 · 骨架**：`<?xml version="1.0" encoding="UTF-8" ?>` + `<!DOCTYPE mapper …>` + `<mapper namespace="____"> <select id="____" resultType="____"> select … from user </select> </mapper>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  文件：`src/main/resources/com/itheima/mapper/UserMapper.xml`
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.itheima.mapper.UserMapper">
+  
+      <!--resultType: 查询返回的单条记录所封装的类型-->
+      <select id="findAll" resultType="com.itheima.pojo.User">
+          select id, username, password, name, age from user
+      </select>
+  
+  </mapper>
+  ```
+  接口那边只留方法签名（原来方法上的 `@Select` 要注释/删掉，否则会冲突或让人看混）：
+  ```java
+  @Mapper
+  public interface UserMapper {
+      public List<User> findAll();
+  }
+  ```
+  检查三处是否对上：**文件名与位置**（`resources/com/itheima/mapper/UserMapper.xml`）、**namespace**（`com.itheima.mapper.UserMapper`）、**id 与 resultType**（`findAll` / `com.itheima.pojo.User`）。本机工程（放的是 `resources/mapper/`）里 `findAll` 走 XML 的实测日志是 `Preparing: select id, username, password, name, age from user`、`Parameters:`（空）、`Total: 5`——XML 放在上面哪种位置，跑起来这条日志都一样。
+
+  :::
+
 
 - [ ] **2-2 在同一个 XML 里再加一条"按 id 查询用户"**
   需求：接口里新增一个方法——**按用户 id 查一条**用户记录并返回；SQL 也写在同一个 XML 文件里（不要用注解）。写完后调用它查 id 为 1 的用户，确认能拿到"大乔"那条数据。
   （练习文件 `test_55_XML映射文件.xml` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：接口加方法签名，XML 加一条语句；语句的 id 必须等于新方法名，返回类型还是单条记录的类型；参数照样用 `#{}`
-  > **二级 · 方法**：新建的语句用 `<select id="findById" resultType="…">`；SQL 里用 `where id = #{id}`；接口方法叫 `User findById(Integer id);`
-  > **三级 · 骨架**：接口 `public ____ findById(____ id);` / XML `<select id="____" resultType="____"> select id, username, password, name, age from user where id = ____ </select>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 接口新增：
-  > ```java
-  > public User findById(Integer id);
-  > ```
-  > 同一个 XML 文件里新增一条语句：
-  > ```xml
-  >     <select id="findById" resultType="com.itheima.pojo.User">
-  >         select id, username, password, name, age from user where id = #{id}
-  >     </select>
-  > ```
-  > 要点：**一条方法对应一条语句**，`id` 和方法名一一对应；XML 里 `#{id}` 取的就是接口方法的形参（单个参数，名字随意但建议一致）。查 id=1 得到的就是 `User(id=1, username=daqiao, password=123456, name=大乔, age=22)` 这一条（该行数据见[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)实测里的 `findAll` 输出）。
+  **一级 · 思路**：接口加方法签名，XML 加一条语句；语句的 id 必须等于新方法名，返回类型还是单条记录的类型；参数照样用 `#{}`
+  **二级 · 方法**：新建的语句用 `<select id="findById" resultType="…">`；SQL 里用 `where id = #{id}`；接口方法叫 `User findById(Integer id);`
+  **三级 · 骨架**：接口 `public ____ findById(____ id);` / XML `<select id="____" resultType="____"> select id, username, password, name, age from user where id = ____ </select>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  接口新增：
+  ```java
+  public User findById(Integer id);
+  ```
+  同一个 XML 文件里新增一条语句：
+  ```xml
+      <select id="findById" resultType="com.itheima.pojo.User">
+          select id, username, password, name, age from user where id = #{id}
+      </select>
+  ```
+  要点：**一条方法对应一条语句**，`id` 和方法名一一对应；XML 里 `#{id}` 取的就是接口方法的形参（单个参数，名字随意但建议一致）。查 id=1 得到的就是 `User(id=1, username=daqiao, password=123456, name=大乔, age=22)` 这一条（该行数据见[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)实测里的 `findAll` 输出）。
+
+  :::
+
 
 - [ ] **2-3 找错：这份 XML 为什么会让项目起不来**
   背景：有同学把 XML 写成了下面这样，启动项目时报错说找不到方法对应的 SQL 语句：
@@ -318,26 +334,34 @@ XML 和接口分在两个文件里，来回跳转很烦，PPT 第 42 页推荐�
   完成：① 指出这份 XML 违反了三条默认规则里的哪两条；② 把它们改成正确的值；③ 再回答：如果 XML 不放在"同包同名"的位置，还需要在哪份配置里加一行什么，才能让 MyBatis 找到它？
   （练习文件 `test_55_XML映射文件.xml` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：对照三条规则一行行看——根标签的属性对不对？语句的 id 对不对？再想想"换目录"时那条配置
-  > **二级 · 方法**：根标签的 `namespace` 要写接口全限定名；语句 `id` 要写接口里的方法名；位置自由靠 `mybatis.mapper-locations`
-  > **三级 · 骨架**：`<mapper namespace="____.____.____">` / `<select id="____" …>` / `mybatis.mapper-locations=classpath:____/*.xml`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 违反了两条：**`namespace` 不是接口全限定名**（写成 `itheima`）、**语句 `id` 不是接口方法名**（写成 `abc`）——这两处对不上，MyBatis 就建立不起"接口方法 → SQL 语句"的映射关系，启动即报错。第三条规则（同包同名）这份代码没体现，它决定"能不能被默认找到"。
-  > ② 改成：
-  > ```xml
-  > <mapper namespace="com.itheima.mapper.UserMapper">
-  >     <select id="findAll" resultType="com.itheima.pojo.User">
-  >         select id, username, password, name, age from user
-  >     </select>
-  > </mapper>
-  > ```
-  > ③ 如果 XML 不放在"同包同名"的位置（比如统一放到 `resources/mapper/` 下），要在配置文件（`application.properties` 或 `application.yml`）里加：
-  > ```properties
-  > mybatis.mapper-locations=classpath:mapper/*.xml
-  > ```
-  > 注意：这行只解决"**去哪儿找文件**"；`namespace` 和 `id` 那两条规则**任何方式下都要遵守**。这也是课程 `springboot-mybatis-quickstart` 的实际做法（XML 在 `resources/mapper/`，配置里有这一行）。
+  **一级 · 思路**：对照三条规则一行行看——根标签的属性对不对？语句的 id 对不对？再想想"换目录"时那条配置
+  **二级 · 方法**：根标签的 `namespace` 要写接口全限定名；语句 `id` 要写接口里的方法名；位置自由靠 `mybatis.mapper-locations`
+  **三级 · 骨架**：`<mapper namespace="____.____.____">` / `<select id="____" …>` / `mybatis.mapper-locations=classpath:____/*.xml`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 违反了两条：**`namespace` 不是接口全限定名**（写成 `itheima`）、**语句 `id` 不是接口方法名**（写成 `abc`）——这两处对不上，MyBatis 就建立不起"接口方法 → SQL 语句"的映射关系，启动即报错。第三条规则（同包同名）这份代码没体现，它决定"能不能被默认找到"。
+  ② 改成：
+  ```xml
+  <mapper namespace="com.itheima.mapper.UserMapper">
+      <select id="findAll" resultType="com.itheima.pojo.User">
+          select id, username, password, name, age from user
+      </select>
+  </mapper>
+  ```
+  ③ 如果 XML 不放在"同包同名"的位置（比如统一放到 `resources/mapper/` 下），要在配置文件（`application.properties` 或 `application.yml`）里加：
+  ```properties
+  mybatis.mapper-locations=classpath:mapper/*.xml
+  ```
+  注意：这行只解决"**去哪儿找文件**"；`namespace` 和 `id` 那两条规则**任何方式下都要遵守**。这也是课程 `springboot-mybatis-quickstart` 的实际做法（XML 在 `resources/mapper/`，配置里有这一行）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -361,58 +385,66 @@ XML 和接口分在两个文件里，来回跳转很烦，PPT 第 42 页推荐�
   | `#{}` 预编译 | 第 4、5 步——XML 里同样生成 `?` + `Parameters` |
   | 注解与 XML 的选择 | 第 6 步——简单增删改查 vs 复杂 SQL |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)四条注解里的 SQL 原样抄进 XML 的四个标签里，接口只留方法签名；测完拿日志对照
-  > **二级 · 方法**：XML 里查询用 `<select>`、新增 `<insert>`、修改 `<update>`、删除 `<delete>`，每个都带 `id`；参数照旧 `#{}`；换个目录就在配置里写 `mybatis.mapper-locations`
-  > **三级 · 骨架**：`<select id="findAll" resultType="____">…</select>` / `<delete id="deleteById">delete from user where id = ____</delete>` / `<insert id="insert">insert into user(____) values(____)</insert>` / `<update id="update">…</update>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1**
-  > 1~3. 接口（只留签名）与 XML（放在 `resources/mapper/UserMapper.xml`，并在配置里加 `mybatis.mapper-locations=classpath:mapper/*.xml`）：
-  >    ```java
-  >    @Mapper
-  >    public interface UserMapper {
-  >        public List<User> findAll();
-  >        public Integer deleteById(Integer id);
-  >        public void insert(User user);
-  >        public void update(User user);
-  >        public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
-  >    }
-  >    ```
-  >    ```xml
-  >    <?xml version="1.0" encoding="UTF-8" ?>
-  >    <!DOCTYPE mapper
-  >            PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  >            "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  >    <mapper namespace="com.itheima.mapper.UserMapper">
-  >
-  >        <select id="findAll" resultType="com.itheima.pojo.User">
-  >            select id, username, password, name, age from user
-  >        </select>
-  >
-  >        <delete id="deleteById">
-  >            delete from user where id = #{id}
-  >        </delete>
-  >
-  >        <insert id="insert">
-  >            insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})
-  >        </insert>
-  >
-  >        <update id="update">
-  >            update user set username = #{username}, password = #{password}, name = #{name}, age = #{age} where id = #{id}
-  >        </update>
-  >
-  >        <select id="findByUsernameAndPassword" resultType="com.itheima.pojo.User">
-  >            select * from user where username = #{username} and password = #{password}
-  >        </select>
-  >
-  >    </mapper>
-  >    ```
-  > 4~5. 本机实测里 `findAll` 走 XML 的日志是：
-  >    ```text
-  >    ==>  Preparing: select id, username, password, name, age from user
-  >    ==> Parameters:
-  >    <==      Total: 5
-  >    ```
-  >    而 [54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)里那几条**走注解**的实测日志形如 `Preparing: delete from user where id = ?` + `Parameters: 4(Integer)`。**两边都生成了预编译 SQL**——`Preparing` 行是最终发给数据库的语句模板，注解或 XML 只是"SQL 写在哪儿"的区别，`#{}` 的机制完全一样（这就是[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)那条"`#{…}` 会变成 `?`"的结论在两处都成立的原因）。
-  > 6. 按 PPT 第 40 页的标准：这五个方法都是**简单的增删改查**（每条一句话、条件固定），**用注解更合适**；只有出现多表连接、条件个数不定（需要 `<if>`/`<where>`）、SQL 很长需要单独维护时，才把它们搬到 XML 里。所以真实项目里常见"**注解为主、XML 兜底**"的混用方式——本机课程的两个工程正好各占一边。
+  **一级 · 思路**：把[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)四条注解里的 SQL 原样抄进 XML 的四个标签里，接口只留方法签名；测完拿日志对照
+  **二级 · 方法**：XML 里查询用 `<select>`、新增 `<insert>`、修改 `<update>`、删除 `<delete>`，每个都带 `id`；参数照旧 `#{}`；换个目录就在配置里写 `mybatis.mapper-locations`
+  **三级 · 骨架**：`<select id="findAll" resultType="____">…</select>` / `<delete id="deleteById">delete from user where id = ____</delete>` / `<insert id="insert">insert into user(____) values(____)</insert>` / `<update id="update">…</update>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1**
+  1~3. 接口（只留签名）与 XML（放在 `resources/mapper/UserMapper.xml`，并在配置里加 `mybatis.mapper-locations=classpath:mapper/*.xml`）：
+     ```java
+     @Mapper
+     public interface UserMapper {
+         public List<User> findAll();
+         public Integer deleteById(Integer id);
+         public void insert(User user);
+         public void update(User user);
+         public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
+     }
+     ```
+     ```xml
+     <?xml version="1.0" encoding="UTF-8" ?>
+     <!DOCTYPE mapper
+             PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+             "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     <mapper namespace="com.itheima.mapper.UserMapper">
+  
+         <select id="findAll" resultType="com.itheima.pojo.User">
+             select id, username, password, name, age from user
+         </select>
+  
+         <delete id="deleteById">
+             delete from user where id = #{id}
+         </delete>
+  
+         <insert id="insert">
+             insert into user(username, password, name, age) values (#{username}, #{password}, #{name}, #{age})
+         </insert>
+  
+         <update id="update">
+             update user set username = #{username}, password = #{password}, name = #{name}, age = #{age} where id = #{id}
+         </update>
+  
+         <select id="findByUsernameAndPassword" resultType="com.itheima.pojo.User">
+             select * from user where username = #{username} and password = #{password}
+         </select>
+  
+     </mapper>
+     ```
+  4~5. 本机实测里 `findAll` 走 XML 的日志是：
+     ```text
+     ==>  Preparing: select id, username, password, name, age from user
+     ==> Parameters:
+     <==      Total: 5
+     ```
+     而 [54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)里那几条**走注解**的实测日志形如 `Preparing: delete from user where id = ?` + `Parameters: 4(Integer)`。**两边都生成了预编译 SQL**——`Preparing` 行是最终发给数据库的语句模板，注解或 XML 只是"SQL 写在哪儿"的区别，`#{}` 的机制完全一样（这就是[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)那条"`#{…}` 会变成 `?`"的结论在两处都成立的原因）。
+  6. 按 PPT 第 40 页的标准：这五个方法都是**简单的增删改查**（每条一句话、条件固定），**用注解更合适**；只有出现多表连接、条件个数不定（需要 `<if>`/`<where>`）、SQL 很长需要单独维护时，才把它们搬到 XML 里。所以真实项目里常见"**注解为主、XML 兜底**"的混用方式——本机课程的两个工程正好各占一边。
+
+  :::
+

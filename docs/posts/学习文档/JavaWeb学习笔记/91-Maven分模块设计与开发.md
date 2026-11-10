@@ -42,7 +42,7 @@ PPT 第 4 页先描述了一个所有项目都会遇到的局面：一个**商�
 
 于是 PPT 第 5 页给出解法：**把大项目拆分成若干个子模块，再多加一个"通用组件"模块装公共代码**；这一页的定义后面总结页还会再问一遍，先记住它：
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **分模块设计**：将一个大项目拆分成若干个子模块，方便项目的**管理维护、扩展**，也方便**模块间的相互引用，资源共享**。（PPT 第 5 页）
 
 注意最后半句"模块间的相互引用，资源共享"—— 这才是分模块真正的价值点：**公共代码只留一份，谁要用谁依赖它**，不再是复制粘贴。
@@ -93,7 +93,7 @@ mall-order-service     订单的业务层
 
 粒度最细，模块数量也最多。
 
-> [!TIP]
+> [!TIP] 提示
 > 课程里的 Tlias 走的是"**按模块 + 按层**"的混合路子，看模块名就能看出来：`tlias-pojo`（实体类，属于"按层"）、`tlias-utils`（工具类，属于"公共组件"）、`tlias-web-management`（按功能拆出来的一个业务模块）。课程后面还会继续拆出 `tlias-web-system`、`tlias-web-report` 这样的**按功能**模块 —— 在 PPT 第 15 页的工程结构截图里已经能看到这五个子模块和父工程并列在一起了（那张图在 [92 篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)里）。
 
 三条策略没有"谁对谁错"，只有**适不适合当前项目**：业务模块之间耦合松就按功能拆；想强制分层规范就按层拆；规模再大就两个一起用。
@@ -133,12 +133,12 @@ PPT 第 8 页把实战任务说得很短，就两句话：
 </dependency>
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 搬家之后 `tlias-web-management` 里的 `import com.itheima.pojo.Emp;`、`import com.itheima.utils.JwtUtils;` **不用改**：包名（`com.itheima.pojo` / `com.itheima.utils`）和模块名是两回事，两个新模块里的包名原样保留，所以编译时只要 classpath 上有这两个模块就行 —— 上面那两个 `<dependency>` 干的就是这件事。
 
 **第 5 步：检查包的"搬家痕迹"。** 拆完之后，`tlias-web-management` 的 `com.itheima` 包下只剩**业务相关**的包（`anno`、`aop`、`config`、`controller`、`exception`、`filter`、`interceptor`、`mapper`、`service`、`service.impl`），`pojo` 和 `utils` 两个包彻底从它里面消失 —— 这就是"拆干净了"的标志。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 模块之间的依赖是**单向**的：`tlias-web-management → tlias-pojo / tlias-utils` 可以，反过来让 `tlias-pojo` 依赖 `tlias-web-management` 就会出现**循环依赖**，Maven 直接报错。设计模块时"谁依赖谁"要先想清楚，这也是下面那条注意事项的由来。
 
 ## 四、注意：先设计再编码（PPT 第 8 页）
@@ -161,7 +161,7 @@ PPT 第 7-8 页的配图其实就是在演示这个顺序：先看到"拆分之�
 mvn clean install -DskipTests
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）—— 一条命令，四个模块全构建，输出里的模块顺序和结果如下：
 >
 > ```text
@@ -228,17 +228,25 @@ PPT 第 9 页是这一节的总结页，三个问题都是"要背下来"的：
   2. 结合这个项目说一句：这个项目更适合哪条策略，为什么。
   （练习文件 `test_91_分模块设计.txt` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先问"拆的切分线画在哪里"——画在业务功能上、画在技术分层上，还是两刀都画
-  > **二级 · 方法**：三条策略分别是按功能模块拆、按层拆、按功能模块 + 层拆；模块名一般用 `项目前缀-功能名` / `项目前缀-层名`
-  > **三级 · 骨架**：策略一 → `mall-____`（公共组件）+ 各业务模块；策略二 → `mall-____`（实体类/控制层/业务层/数据访问层各一个）；策略三 → `mall-商品-____` / `mall-订单-____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 三条策略与模块名：
-  >    - **策略一：按功能模块拆分** —— `mall-common`（公共组件）、`mall-goods`（商品）、`mall-search`（搜索）、`mall-cart`（购物车）、`mall-order`（订单）；
-  >    - **策略二：按层拆分** —— `mall-common`（公共组件）、`mall-pojo`（实体类）、`mall-controller`（控制层）、`mall-service`（业务层）、`mall-mapper`（数据访问层）；
-  >    - **策略三：按功能模块 + 层拆分** —— `mall-common`、`mall-goods-controller`、`mall-goods-service`、`mall-order-controller`、`mall-order-service`。
-  > 2. 这个项目的业务功能边界清晰（商品/搜索/购物车/订单各自独立、都有各自的数据和接口），**按功能模块拆（策略一）**最贴合；如果团队还想在工程结构上强制"Controller / Service / Mapper 不许互相串"，就在每个功能模块里再按层切一刀，也就是策略三。三条策略没有对错，只有粒度适不适合。
+  **一级 · 思路**：先问"拆的切分线画在哪里"——画在业务功能上、画在技术分层上，还是两刀都画
+  **二级 · 方法**：三条策略分别是按功能模块拆、按层拆、按功能模块 + 层拆；模块名一般用 `项目前缀-功能名` / `项目前缀-层名`
+  **三级 · 骨架**：策略一 → `mall-____`（公共组件）+ 各业务模块；策略二 → `mall-____`（实体类/控制层/业务层/数据访问层各一个）；策略三 → `mall-商品-____` / `mall-订单-____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 三条策略与模块名：
+     - **策略一：按功能模块拆分** —— `mall-common`（公共组件）、`mall-goods`（商品）、`mall-search`（搜索）、`mall-cart`（购物车）、`mall-order`（订单）；
+     - **策略二：按层拆分** —— `mall-common`（公共组件）、`mall-pojo`（实体类）、`mall-controller`（控制层）、`mall-service`（业务层）、`mall-mapper`（数据访问层）；
+     - **策略三：按功能模块 + 层拆分** —— `mall-common`、`mall-goods-controller`、`mall-goods-service`、`mall-order-controller`、`mall-order-service`。
+  2. 这个项目的业务功能边界清晰（商品/搜索/购物车/订单各自独立、都有各自的数据和接口），**按功能模块拆（策略一）**最贴合；如果团队还想在工程结构上强制"Controller / Service / Mapper 不许互相串"，就在每个功能模块里再按层切一刀，也就是策略三。三条策略没有对错，只有粒度适不适合。
+
+  :::
+
 
 - [ ] **2-2 给 tlias 写一份拆分设计**
   课程里的 tlias 工程现在所有代码都堆在一个模块里：`com.itheima` 下面有 `pojo`（实体类）、`utils`（工具类）、`controller`、`service`、`mapper`、`anno`、`aop`、`config`、`exception`、`filter`、`interceptor`。请写出一份拆分设计：
@@ -247,32 +255,48 @@ PPT 第 9 页是这一节的总结页，三个问题都是"要背下来"的：
   3. 说明这些模块之间"谁依赖谁"（画一个箭头关系即可），并说明箭头**不能反过来**的原因。
   （练习文件 `test_91_分模块设计.txt` 里已经给了写作区，拆分前的包结构就在题面里。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这次的切分线画在"是不是每个业务都要用"上——实体类和工具类是全项目共用的，业务代码才是某个模块专用的
-  > **二级 · 方法**：两个新模块分别叫 `tlias-pojo`（放实体类）、`tlias-utils`（放工具类）；原来的模块保留业务代码，通过在 pom 里加依赖的方式用上它们
-  > **三级 · 骨架**：`tlias-web-management → tlias-pojo`、`tlias-web-management → tlias-utils`；模块之间不能互相指回去
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 新建 **两个模块**：`tlias-pojo`、`tlias-utils`（原来的 `tlias-web-management` 保留，它变成"使用者"）。
-  > 2. 分工：
-  >    - `tlias-pojo`：`pojo` 包（`Emp`、`Dept`、`Student`、`Clazz`、`Result`、`PageResult`、`EmpQueryParam`…… 本机实验工程里共 13 个类）；
-  >    - `tlias-utils`：`utils` 包（`AliyunOSSOperator`、`AliyunOSSProperties`、`CurrentHolder`、`JwtUtils`）；
-  >    - `tlias-web-management`：剩下的 `controller`、`service`、`mapper`、`anno`、`aop`、`config`、`exception`、`filter`、`interceptor`（业务代码都留在这里）。
-  > 3. 依赖方向：`tlias-web-management → tlias-pojo`、`tlias-web-management → tlias-utils`（两个新模块之间没有依赖）。箭头**不能反过来**：`tlias-pojo` 如果依赖 `tlias-web-management`，而后者又依赖前者，就形成**循环依赖**，Maven 无法确定构建顺序、直接报错；而且实体类/工具类本来是**全项目通用**的，让它们依赖某个具体业务模块，将来别的模块想复用时就被绑死了。
+  **一级 · 思路**：这次的切分线画在"是不是每个业务都要用"上——实体类和工具类是全项目共用的，业务代码才是某个模块专用的
+  **二级 · 方法**：两个新模块分别叫 `tlias-pojo`（放实体类）、`tlias-utils`（放工具类）；原来的模块保留业务代码，通过在 pom 里加依赖的方式用上它们
+  **三级 · 骨架**：`tlias-web-management → tlias-pojo`、`tlias-web-management → tlias-utils`；模块之间不能互相指回去
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 新建 **两个模块**：`tlias-pojo`、`tlias-utils`（原来的 `tlias-web-management` 保留，它变成"使用者"）。
+  2. 分工：
+     - `tlias-pojo`：`pojo` 包（`Emp`、`Dept`、`Student`、`Clazz`、`Result`、`PageResult`、`EmpQueryParam`…… 本机实验工程里共 13 个类）；
+     - `tlias-utils`：`utils` 包（`AliyunOSSOperator`、`AliyunOSSProperties`、`CurrentHolder`、`JwtUtils`）；
+     - `tlias-web-management`：剩下的 `controller`、`service`、`mapper`、`anno`、`aop`、`config`、`exception`、`filter`、`interceptor`（业务代码都留在这里）。
+  3. 依赖方向：`tlias-web-management → tlias-pojo`、`tlias-web-management → tlias-utils`（两个新模块之间没有依赖）。箭头**不能反过来**：`tlias-pojo` 如果依赖 `tlias-web-management`，而后者又依赖前者，就形成**循环依赖**，Maven 无法确定构建顺序、直接报错；而且实体类/工具类本来是**全项目通用**的，让它们依赖某个具体业务模块，将来别的模块想复用时就被绑死了。
+
+  :::
+
 
 - [ ] **2-3 说出"为什么不能先把工程写完再拆"**
   有人提议："先按老办法把所有代码写在一个工程里，能跑通了，再花半天把包挪到不同模块里去。"请从**设计**和**代价**两个角度说明 PPT 为什么明确反对这种做法（PPT 第 8 页的"注意"）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：模块划分属于"设计"，设计要在编码之前定；而且事后拆分要动的东西远比"挪包"多
-  > **二级 · 方法**：从"模块边界/依赖方向要先想清楚"和"事后再拆要改依赖、改配置、重新验证"两方面各说一条
-  > **三级 · 骨架**：① 设计角度：拆分线 = 模块职责与依赖方向，写完再定就要回头大改；② 代价角度：挪完包还要补依赖、通编译、重测全流程
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > PPT 第 8 页的原话是"**分模块开发需要先针对模块功能进行设计，再进行编码。不会先将工程开发完毕，然后进行拆分。**"理由是：
-  > ① **设计角度**：拆模块的本质是决定"系统分成哪几块、每块负责什么、谁依赖谁"。这些是**架构决策**，编码前定下来，写代码时就知道每个类该放哪个模块、该 import 谁；写完之后再定，就会出现"这个类算 pojo 还是算业务"的扯皮，模块边界也容易切歪。
-  > ② **代价角度**：事后拆分不是"挪包"那么简单 —— 实体类、工具类搬出去之后要**补依赖**（每个使用者模块都得加依赖坐标）、要保证**编译通过**、原来的三层调用关系与配置（扫描路径、mapper 映射文件位置等）都可能要跟着改，最后**整个项目要重新测一遍**。本机实验工程里，光是把实体类和工具类搬出去，`tlias-web-management` 就多了两条依赖、少了两个包。
-  > 所以正确顺序是：**先做模块设计（画模块和依赖关系）→ 再建空模块 → 再往里写代码**。
+  **一级 · 思路**：模块划分属于"设计"，设计要在编码之前定；而且事后拆分要动的东西远比"挪包"多
+  **二级 · 方法**：从"模块边界/依赖方向要先想清楚"和"事后再拆要改依赖、改配置、重新验证"两方面各说一条
+  **三级 · 骨架**：① 设计角度：拆分线 = 模块职责与依赖方向，写完再定就要回头大改；② 代价角度：挪完包还要补依赖、通编译、重测全流程
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  PPT 第 8 页的原话是"**分模块开发需要先针对模块功能进行设计，再进行编码。不会先将工程开发完毕，然后进行拆分。**"理由是：
+  ① **设计角度**：拆模块的本质是决定"系统分成哪几块、每块负责什么、谁依赖谁"。这些是**架构决策**，编码前定下来，写代码时就知道每个类该放哪个模块、该 import 谁；写完之后再定，就会出现"这个类算 pojo 还是算业务"的扯皮，模块边界也容易切歪。
+  ② **代价角度**：事后拆分不是"挪包"那么简单 —— 实体类、工具类搬出去之后要**补依赖**（每个使用者模块都得加依赖坐标）、要保证**编译通过**、原来的三层调用关系与配置（扫描路径、mapper 映射文件位置等）都可能要跟着改，最后**整个项目要重新测一遍**。本机实验工程里，光是把实体类和工具类搬出去，`tlias-web-management` 就多了两条依赖、少了两个包。
+  所以正确顺序是：**先做模块设计（画模块和依赖关系）→ 再建空模块 → 再往里写代码**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -286,30 +310,38 @@ PPT 第 9 页是这一节的总结页，三个问题都是"要背下来"的：
   6. 在文件末尾回答：为什么这条命令能一次性构建四个模块？（一句话，想到什么写什么，下一篇会对答案。）
   （练习文件 `test_91_分模块设计.txt` 里按这 6 步给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整题的顺序就是 PPT 强调的顺序 —— **先设计（模块 + 依赖方向）→ 再建模块 → 再搬代码 → 最后补依赖并构建**
-  > **二级 · 方法**：建模块用 IDEA 的 "New Module → Maven"；补依赖就是在 pom 里写一组 `<dependency>`（自己项目的模块也照样是依赖）；构建用 `mvn clean install -DskipTests`（`install` 会把模块装进本地仓库，后面别的模块才能引用到）；顺序要按"被依赖的先构建"来预测
-  > **三级 · 骨架**：依赖坐标 `<groupId>com.itheima</groupId> <artifactId>tlias-____</artifactId> <version>1.0-SNAPSHOT</version>`；命令 `mvn ____ install -DskipTests`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **设计**：`tlias-pojo`（实体类，全项目共用）→ 被 `tlias-web-management` 依赖；`tlias-utils`（工具类，全项目共用）→ 被 `tlias-web-management` 依赖；`tlias-web-management`（业务代码）依赖上面两个。依赖方向是**单向**的，两个公共模块不依赖任何业务模块。
-  > 2. **建模块**：`File → New → Module`，选 Maven，模块名 `tlias-pojo`；同样再建 `tlias-utils`。建好后结构是"一个 `pom.xml` + `src/main`、`src/test`"，此时还没有任何业务代码。
-  > 3. **搬代码**：实体类 → `tlias-pojo/src/main/java/com/itheima/pojo/`（本机实验工程里 13 个）；工具类 → `tlias-utils/src/main/java/com/itheima/utils/`（4 个：`AliyunOSSOperator`、`AliyunOSSProperties`、`CurrentHolder`、`JwtUtils`）。包名原样保留，所以 `tlias-web-management` 里的 `import` 不用改。
-  > 4. **补依赖**（课程代码 `tlias-web-management/pom.xml` 原文）：
-  >    ```xml
-  >    <!--Tlias-Pojo实体类-->
-  >    <dependency>
-  >        <groupId>com.itheima</groupId>
-  >        <artifactId>tlias-pojo</artifactId>
-  >        <version>1.0-SNAPSHOT</version>
-  >    </dependency>
-  >
-  >    <dependency>
-  >        <groupId>com.itheima</groupId>
-  >        <artifactId>tlias-utils</artifactId>
-  >        <version>1.0-SNAPSHOT</version>
-  >    </dependency>
-  >    ```
-  >    另外，实体类要写 `@Data`、工具类要用到 OSS/JWT 等库，所以这两个模块自己的 `pom.xml` 里也要把 lombok、OSS、JJWT 这些依赖写上 —— 每个模块都重复写一遍太麻烦，这正是[下一篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)要解决的问题。
-  > 5. **验证**：命令是 `mvn clean install -DskipTests`（在父工程/聚合工程上执行）。预测顺序：`tlias-parent → tlias-pojo → tlias-utils → tlias-web-management`。
-  > 6. 因为它是一个**聚合**工程：父工程的 `<modules>` 把几个模块都列了进来，`mvn` 在它上面执行时会依次构建这些模块，**构建顺序由 Maven 按模块间的依赖关系自动决定**，不用手动一个个构建。本机实测（Maven 3.9.14 / JDK 17）的输出就是 `Building tlias-parent [1/4] → tlias-pojo [2/4] → tlias-utils [3/4] → tlias-web-management [4/4]`，最后 `BUILD SUCCESS`。
+  **一级 · 思路**：整题的顺序就是 PPT 强调的顺序 —— **先设计（模块 + 依赖方向）→ 再建模块 → 再搬代码 → 最后补依赖并构建**
+  **二级 · 方法**：建模块用 IDEA 的 "New Module → Maven"；补依赖就是在 pom 里写一组 `<dependency>`（自己项目的模块也照样是依赖）；构建用 `mvn clean install -DskipTests`（`install` 会把模块装进本地仓库，后面别的模块才能引用到）；顺序要按"被依赖的先构建"来预测
+  **三级 · 骨架**：依赖坐标 `<groupId>com.itheima</groupId> <artifactId>tlias-____</artifactId> <version>1.0-SNAPSHOT</version>`；命令 `mvn ____ install -DskipTests`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **设计**：`tlias-pojo`（实体类，全项目共用）→ 被 `tlias-web-management` 依赖；`tlias-utils`（工具类，全项目共用）→ 被 `tlias-web-management` 依赖；`tlias-web-management`（业务代码）依赖上面两个。依赖方向是**单向**的，两个公共模块不依赖任何业务模块。
+  2. **建模块**：`File → New → Module`，选 Maven，模块名 `tlias-pojo`；同样再建 `tlias-utils`。建好后结构是"一个 `pom.xml` + `src/main`、`src/test`"，此时还没有任何业务代码。
+  3. **搬代码**：实体类 → `tlias-pojo/src/main/java/com/itheima/pojo/`（本机实验工程里 13 个）；工具类 → `tlias-utils/src/main/java/com/itheima/utils/`（4 个：`AliyunOSSOperator`、`AliyunOSSProperties`、`CurrentHolder`、`JwtUtils`）。包名原样保留，所以 `tlias-web-management` 里的 `import` 不用改。
+  4. **补依赖**（课程代码 `tlias-web-management/pom.xml` 原文）：
+     ```xml
+     <!--Tlias-Pojo实体类-->
+     <dependency>
+         <groupId>com.itheima</groupId>
+         <artifactId>tlias-pojo</artifactId>
+         <version>1.0-SNAPSHOT</version>
+     </dependency>
+  
+     <dependency>
+         <groupId>com.itheima</groupId>
+         <artifactId>tlias-utils</artifactId>
+         <version>1.0-SNAPSHOT</version>
+     </dependency>
+     ```
+     另外，实体类要写 `@Data`、工具类要用到 OSS/JWT 等库，所以这两个模块自己的 `pom.xml` 里也要把 lombok、OSS、JJWT 这些依赖写上 —— 每个模块都重复写一遍太麻烦，这正是[下一篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)要解决的问题。
+  5. **验证**：命令是 `mvn clean install -DskipTests`（在父工程/聚合工程上执行）。预测顺序：`tlias-parent → tlias-pojo → tlias-utils → tlias-web-management`。
+  6. 因为它是一个**聚合**工程：父工程的 `<modules>` 把几个模块都列了进来，`mvn` 在它上面执行时会依次构建这些模块，**构建顺序由 Maven 按模块间的依赖关系自动决定**，不用手动一个个构建。本机实测（Maven 3.9.14 / JDK 17）的输出就是 `Building tlias-parent [1/4] → tlias-pojo [2/4] → tlias-utils [3/4] → tlias-web-management [4/4]`，最后 `BUILD SUCCESS`。
+
+  :::
+

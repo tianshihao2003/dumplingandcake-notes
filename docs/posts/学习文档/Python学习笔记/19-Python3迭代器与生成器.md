@@ -284,56 +284,72 @@ while True:
   - 用 `next()` 逐个获取元素
   - 用 `for` 循环遍历剩余元素
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把列表变成"逐个别取"的迭代器，取走几个之后再用循环把剩下的取完——取过的不会重复出现
-  > **二级 · 方法**：`it = iter(lst)` 创建迭代器；`next(it)` 取下一个；剩下的交给 `for x in it:`
-  > **三级 · 骨架**：`it = ____(lst)` / `print(____(it))` / `for x in ____:`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > lst = [1, 2, 3, 4, 5]
-  > it = iter(lst)
-  >
-  > print(next(it))  # 1
-  > print(next(it))  # 2
-  > print(next(it))  # 3
-  >
-  > for x in it:
-  >     print(x, end=" ")  # 4 5
-  > print()
-  > ```
+  **一级 · 思路**：先把列表变成"逐个别取"的迭代器，取走几个之后再用循环把剩下的取完——取过的不会重复出现
+  **二级 · 方法**：`it = iter(lst)` 创建迭代器；`next(it)` 取下一个；剩下的交给 `for x in it:`
+  **三级 · 骨架**：`it = ____(lst)` / `print(____(it))` / `for x in ____:`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  lst = [1, 2, 3, 4, 5]
+  it = iter(lst)
+  
+  print(next(it))  # 1
+  print(next(it))  # 2
+  print(next(it))  # 3
+  
+  for x in it:
+      print(x, end=" ")  # 4 5
+  print()
+  ```
+
+  :::
+
 
 - [ ] **2-2 自定义迭代器类**
   创建文件 `test_class.py`，完成以下操作：
   - 创建一个迭代器类，生成 1-10 的数字
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：写一个"会自己数数"的类：每次别人来要值就吐出一个、内部计数加一，数到 10 以后发出"结束"信号
-  > **二级 · 方法**：实现迭代器协议的两个方法——`__iter__()`（初始化迭代器，返回 `self`）、`__next__()`（每次返回下一个值，没有值时 `raise StopIteration` 异常）——这就是 Python 的迭代器协议，实现了这两个方法的类就是迭代器
-  > **三级 · 骨架**：`class MyNumbers:` / `    def ____(self):` / `        self.a = 1` / `        return ____` / `    def ____(self):` / `        if self.a <= 10: ... else: raise ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > class MyNumbers:
-  >     def __iter__(self):
-  >         self.a = 1      # 初始化计数器
-  >         return self     # 返回迭代器对象
-  >
-  >     def __next__(self):
-  >         if self.a <= 10:
-  >             x = self.a
-  >             self.a += 1
-  >             return x
-  >         else:
-  >             raise StopIteration  # 没有更多值时抛出异常
-  >
-  > myclass = MyNumbers()
-  > for x in myclass:
-  >     print(x, end=" ")
-  > print()
-  > ```
+  **一级 · 思路**：写一个"会自己数数"的类：每次别人来要值就吐出一个、内部计数加一，数到 10 以后发出"结束"信号
+  **二级 · 方法**：实现迭代器协议的两个方法——`__iter__()`（初始化迭代器，返回 `self`）、`__next__()`（每次返回下一个值，没有值时 `raise StopIteration` 异常）——这就是 Python 的迭代器协议，实现了这两个方法的类就是迭代器
+  **三级 · 骨架**：`class MyNumbers:` / `    def ____(self):` / `        self.a = 1` / `        return ____` / `    def ____(self):` / `        if self.a <= 10: ... else: raise ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  class MyNumbers:
+      def __iter__(self):
+          self.a = 1      # 初始化计数器
+          return self     # 返回迭代器对象
+  
+      def __next__(self):
+          if self.a <= 10:
+              x = self.a
+              self.a += 1
+              return x
+          else:
+              raise StopIteration  # 没有更多值时抛出异常
+  
+  myclass = MyNumbers()
+  for x in myclass:
+      print(x, end=" ")
+  print()
+  ```
+
+  :::
+
 
 - [x] **2-3 生成器函数**
   创建文件 `test_generator.py`，完成以下操作：
@@ -341,27 +357,35 @@ while True:
 
   > **批改（2026-09-28）**：✅ 正确（`next()` 取到 1、4 后 `for` 取完剩下 9~100，1-10 的平方数全部输出）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"算平方"放进循环里，每算出一个就交出去一个并暂停，等下次被要值时继续算下一个
-  > **二级 · 方法**：`yield` 关键字暂停函数执行并返回一个值，下次调用时从暂停处继续；含 `yield` 的函数就是生成器函数，调用后返回生成器对象；可以用 `next()` 或 `for` 循环逐步获取值
-  > **三级 · 骨架**：`def squares(n):` / `    for i in range(1, n + 1):` / `        ____ i ** 2` / `gen = squares(10)` / `print(____(gen))`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > def squares(n):
-  >     for i in range(1, n + 1):
-  >         yield i ** 2  # 暂停并返回平方数
-  >
-  > gen = squares(10)  # 调用生成器函数，返回生成器对象
-  > print(next(gen))  # 1
-  > print(next(gen))  # 4
-  > print(next(gen))  # 9
-  >
-  > for x in gen:
-  >     print(x, end=" ")  # 16 25 36 49 64 81 100
-  > print()
-  > ```
+  **一级 · 思路**：把"算平方"放进循环里，每算出一个就交出去一个并暂停，等下次被要值时继续算下一个
+  **二级 · 方法**：`yield` 关键字暂停函数执行并返回一个值，下次调用时从暂停处继续；含 `yield` 的函数就是生成器函数，调用后返回生成器对象；可以用 `next()` 或 `for` 循环逐步获取值
+  **三级 · 骨架**：`def squares(n):` / `    for i in range(1, n + 1):` / `        ____ i ** 2` / `gen = squares(10)` / `print(____(gen))`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  def squares(n):
+      for i in range(1, n + 1):
+          yield i ** 2  # 暂停并返回平方数
+  
+  gen = squares(10)  # 调用生成器函数，返回生成器对象
+  print(next(gen))  # 1
+  print(next(gen))  # 4
+  print(next(gen))  # 9
+  
+  for x in gen:
+      print(x, end=" ")  # 16 25 36 49 64 81 100
+  print()
+  ```
+
+  :::
+
 
 - [x] **2-4 斐波那契生成器**
   创建文件 `test_fibonacci.py`，完成以下操作：
@@ -369,22 +393,30 @@ while True:
 
   > **批改（2026-09-28）**：✅ 正确（`range(20)` 输出 0、1、1、2、3、5、8、13 … 4181，与斐波那契数列一致）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：斐波那契数列是 0, 1, 1, 2, 3, 5, 8, 13 ...（每个数是前两个数之和）；每轮先把当前值交出去，再让两个变量一起往前挪一位
-  > **二级 · 方法**：`yield a` 返回当前值；`a, b = b, a + b` 是**同时赋值**（先算右边，再同时赋给左边）
-  > **三级 · 骨架**：`def fibonacci():` / `    a, b = 0, 1` / `    while True:` / `        ____ a` / `        a, b = b, ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-4
-  > def fibonacci():
-  >     a, b = 0, 1
-  >     while True:
-  >         yield a      # 返回当前斐波那契数
-  >         a, b = b, a + b  # 计算下一个数
-  >
-  > fib = fibonacci()
-  > for _ in range(20):
-  >     print(next(fib), end=" ")
-  > print()
-  > ```
+  **一级 · 思路**：斐波那契数列是 0, 1, 1, 2, 3, 5, 8, 13 ...（每个数是前两个数之和）；每轮先把当前值交出去，再让两个变量一起往前挪一位
+  **二级 · 方法**：`yield a` 返回当前值；`a, b = b, a + b` 是**同时赋值**（先算右边，再同时赋给左边）
+  **三级 · 骨架**：`def fibonacci():` / `    a, b = 0, 1` / `    while True:` / `        ____ a` / `        a, b = b, ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-4
+  def fibonacci():
+      a, b = 0, 1
+      while True:
+          yield a      # 返回当前斐波那契数
+          a, b = b, a + b  # 计算下一个数
+  
+  fib = fibonacci()
+  for _ in range(20):
+      print(next(fib), end=" ")
+  print()
+  ```
+
+  :::
+

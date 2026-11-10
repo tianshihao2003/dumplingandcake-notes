@@ -112,7 +112,7 @@ PPT 第 24 页就是把第 23 页的 JDBC 代码拿掉，只留这两段——**
 | `executeQuery()` + `while` + 一堆 `getXxx` + `new User(...)` | **MyBatis 自动把每一行封装成 `User` 对象**，直接给你 `List<User>` |
 | `resultSet.close()`、`ps.close()`、`connection.close()` | **框架 + 连接池接管**（连接还回池里，不是真的关掉） |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 换来的不是"少写代码"这一点，而是**关注点的转移**：JDBC 里我们要盯的是"流程"（怎么连、怎么执行、怎么关），MyBatis 里我们只需要盯"**要什么数据**"（SQL 怎么写、返回什么类型）。剩下的流程性工作被框架接走了——这也正是 [51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/) PPT 第 15 页那句"用于**简化 JDBC** 的开发"的实际含义。
 
 ## JDBC 的四个痛点（PPT 第 23 页）
@@ -141,7 +141,7 @@ PPT 第 23 页把 JDBC 的问题浓缩成四个词，逐个拆开看，每一条
 
 换技术不是为了"结果更好看"，是为了"过程更省事"。所以最该盯的是**输出**有没有差别：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（同一台机器、同一个 `web01.user`，5 条数据）：
 >
 > - **JDBC 版**（课程 `jdbc-demo` 的 `JdbcTest#testSelect`，当时的查询需求是[50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的"按用户名和密码查一条"）：
@@ -207,18 +207,26 @@ PPT 第 23 页把 JDBC 的问题浓缩成四个词，逐个拆开看，每一条
   不看笔记，把 PPT 第 23 页那四个词写出来，并且每个词后面补一句"在代码里它是哪一行/哪种现象"，最后写出各自被什么解决。
   （本篇不出练习文件，答案写在你的笔记里。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：从"代码里写死了什么""要写多少步""连接怎么来的""SQL 每次怎么执行"四个角度各想一遍
-  > **二级 · 方法**：四个词分别是**硬编码**、**繁琐**、**资源浪费**、**性能降低**；对照解法是**配置化**、**一行注解**、**连接池**、**预编译**
-  > **三级 · 骨架**：硬编码 → 代码里的 `____`、`____`、`____` 三个变量；繁琐 → 从 `Class.forName(...)` 到 `____.close()` 那一整串；资源浪费 → 每次都 `____.getConnection()`；性能降低 → SQL 每次都要重新 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > | 痛点 | 一句证据 | 解法 |
-  > | --- | --- | --- |
-  > | **硬编码** | `String url = "jdbc:mysql://localhost:3306/web01"; String username = "root"; String password = "1234";` 三行写死在 Java 里 | 搬进 `application.properties`（**配置化**） |
-  > | **繁琐** | 注册驱动、拿连接、拿执行对象、写 SQL、`while` 解析、逐个 `close()`——二十来行才完成一次查询 | MyBatis 的**一行注解** `@Select("select * from user")` |
-  > | **资源浪费** | 每次操作都 `DriverManager.getConnection(...)` 新建一条连接，用完 `connection.close()` 丢掉，下次再来一遍 | **数据库连接池**（复用连接，[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)） |
-  > | **性能降低** | SQL 每次执行都要重新编译解析 | **预编译 SQL**（[50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的 `?` + 编译缓存；MyBatis 的 `#{}` 默认走这条） |
+  **一级 · 思路**：从"代码里写死了什么""要写多少步""连接怎么来的""SQL 每次怎么执行"四个角度各想一遍
+  **二级 · 方法**：四个词分别是**硬编码**、**繁琐**、**资源浪费**、**性能降低**；对照解法是**配置化**、**一行注解**、**连接池**、**预编译**
+  **三级 · 骨架**：硬编码 → 代码里的 `____`、`____`、`____` 三个变量；繁琐 → 从 `Class.forName(...)` 到 `____.close()` 那一整串；资源浪费 → 每次都 `____.getConnection()`；性能降低 → SQL 每次都要重新 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  | 痛点 | 一句证据 | 解法 |
+  | --- | --- | --- |
+  | **硬编码** | `String url = "jdbc:mysql://localhost:3306/web01"; String username = "root"; String password = "1234";` 三行写死在 Java 里 | 搬进 `application.properties`（**配置化**） |
+  | **繁琐** | 注册驱动、拿连接、拿执行对象、写 SQL、`while` 解析、逐个 `close()`——二十来行才完成一次查询 | MyBatis 的**一行注解** `@Select("select * from user")` |
+  | **资源浪费** | 每次操作都 `DriverManager.getConnection(...)` 新建一条连接，用完 `connection.close()` 丢掉，下次再来一遍 | **数据库连接池**（复用连接，[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)） |
+  | **性能降低** | SQL 每次执行都要重新编译解析 | **预编译 SQL**（[50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的 `?` + 编译缓存；MyBatis 的 `#{}` 默认走这条） |
+
+  :::
+
 
 - [ ] **2-2 同一段 JDBC 代码，找出"哪些能被自动化"**
   把下面的操作逐个归类：**必须自己写**还是**框架可以代劳**？
@@ -229,55 +237,79 @@ PPT 第 23 页把 JDBC 的问题浓缩成四个词，逐个拆开看，每一条
   ⑤ 关闭 `resultSet`/`ps`/`connection`
   ⑥ 决定"要查哪张表、返回什么类型"
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：判断标准是"这件事是不是**每次都一样**的机械动作"——每次都一样的可以自动化，跟业务有关的不行
-  > **二级 · 方法**：MyBatis 干掉的正是"每次都一样"的部分（驱动、连接、结果封装、资源释放）；留下的是"这次要查什么"（SQL 与返回类型）
-  > **三级 · 骨架**：自动化的是 ①③④⑤（其中 ③⑤ 还牵出**连接池**）；必须自己写的是 ②⑥
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > | 操作 | 归类 | 谁来做 |
-  > | --- | --- | --- |
-  > | ① 注册驱动 | **框架可代劳** | MyBatis/SpringBoot 读 `driver-class-name` 自动注册 |
-  > | ② 写 SQL 语句 | **必须自己写** | 写在注解或 XML 里（MyBatis 不会替你写一句 SQL） |
-  > | ③ 获取数据库连接 | **框架可代劳** | 连接池 + 数据源自动配置（[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)） |
-  > | ④ 装配 `User` 对象 | **框架可代劳** | MyBatis 按"列名 ↔ 属性名"自动封装成 `List<User>` |
-  > | ⑤ 关闭三个资源 | **框架可代劳** | 框架负责关闭/归还；连接池则把连接**还回池子**而不是真的关掉 |
-  > | ⑥ 决定查哪张表、返回什么类型 | **必须自己写** | 方法签名与 SQL——这是业务信息，框架猜不出来 |
-  > 一句话概括：**MyBatis 把"每次都一样"的机械动作收走了，只留下"这次要什么数据"。** 这也是为什么 MyBatis 版最终只剩"配置 4 行 + 接口 3 行"。
+  **一级 · 思路**：判断标准是"这件事是不是**每次都一样**的机械动作"——每次都一样的可以自动化，跟业务有关的不行
+  **二级 · 方法**：MyBatis 干掉的正是"每次都一样"的部分（驱动、连接、结果封装、资源释放）；留下的是"这次要查什么"（SQL 与返回类型）
+  **三级 · 骨架**：自动化的是 ①③④⑤（其中 ③⑤ 还牵出**连接池**）；必须自己写的是 ②⑥
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  | 操作 | 归类 | 谁来做 |
+  | --- | --- | --- |
+  | ① 注册驱动 | **框架可代劳** | MyBatis/SpringBoot 读 `driver-class-name` 自动注册 |
+  | ② 写 SQL 语句 | **必须自己写** | 写在注解或 XML 里（MyBatis 不会替你写一句 SQL） |
+  | ③ 获取数据库连接 | **框架可代劳** | 连接池 + 数据源自动配置（[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)） |
+  | ④ 装配 `User` 对象 | **框架可代劳** | MyBatis 按"列名 ↔ 属性名"自动封装成 `List<User>` |
+  | ⑤ 关闭三个资源 | **框架可代劳** | 框架负责关闭/归还；连接池则把连接**还回池子**而不是真的关掉 |
+  | ⑥ 决定查哪张表、返回什么类型 | **必须自己写** | 方法签名与 SQL——这是业务信息，框架猜不出来 |
+  一句话概括：**MyBatis 把"每次都一样"的机械动作收走了，只留下"这次要什么数据"。** 这也是为什么 MyBatis 版最终只剩"配置 4 行 + 接口 3 行"。
+
+  :::
+
 
 - [ ] **2-3 换技术以后，结果会变吗**
   有人说"用了 MyBatis，查询结果的格式就和 JDBC 不一样了"。请用本机实测的两段输出判断这句话对不对，并解释为什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：想想"装数据的容器"是什么——两种写法最后都往哪里装？打出来的字符串是谁生成的？
-  > **二级 · 方法**：JDBC 是手工 `new User(...)` 装进 `List`；MyBatis 是按列名自动封装成同样的对象。打印都是 Lombok 的 `toString()`
-  > **三级 · 骨架**：结论是"格式**一样**"，因为两边用的是同一个实体类 `____`，输出由它的 `____()` 决定（`@Data` 生成）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 这句话**不对**。本机实测两边打出来的是同一种格式：
-  > ```text
-  > User(id=1, username=daqiao, password=123456, name=大乔, age=22)   ← JDBC 版（jdbc-demo 实测）
-  > User(id=1, username=daqiao, password=123456, name=大乔, age=22)   ← MyBatis 版（springboot-mybatis-quickstart 实测）
-  > ```
-  > 原因：**数据最终都装进同一个实体类 `User`**——JDBC 版是我们手工 `new User(id, username, password, name, age)` 装进去的；MyBatis 版是按"列名 ↔ 属性名"的对应关系**自动**封装成同样的对象。两边的打印都来自 `User` 上 `@Data` 生成的 `toString()`，所以长得一模一样。
-  > 换句话说：**换的是"干活的方式"，不是"数据的形状"**——这也是为什么换成 MyBatis 之后，上层 Service、Controller 的代码基本不用动。
+  **一级 · 思路**：想想"装数据的容器"是什么——两种写法最后都往哪里装？打出来的字符串是谁生成的？
+  **二级 · 方法**：JDBC 是手工 `new User(...)` 装进 `List`；MyBatis 是按列名自动封装成同样的对象。打印都是 Lombok 的 `toString()`
+  **三级 · 骨架**：结论是"格式**一样**"，因为两边用的是同一个实体类 `____`，输出由它的 `____()` 决定（`@Data` 生成）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  这句话**不对**。本机实测两边打出来的是同一种格式：
+  ```text
+  User(id=1, username=daqiao, password=123456, name=大乔, age=22)   ← JDBC 版（jdbc-demo 实测）
+  User(id=1, username=daqiao, password=123456, name=大乔, age=22)   ← MyBatis 版（springboot-mybatis-quickstart 实测）
+  ```
+  原因：**数据最终都装进同一个实体类 `User`**——JDBC 版是我们手工 `new User(id, username, password, name, age)` 装进去的；MyBatis 版是按"列名 ↔ 属性名"的对应关系**自动**封装成同样的对象。两边的打印都来自 `User` 上 `@Data` 生成的 `toString()`，所以长得一模一样。
+  换句话说：**换的是"干活的方式"，不是"数据的形状"**——这也是为什么换成 MyBatis 之后，上层 Service、Controller 的代码基本不用动。
+
+  :::
+
 
 - [ ] **2-4 给四个痛点配药**
   现在有三个"药方"：**A 配置文件（配置化）**、**B 一行注解（`@Select`）**、**C 数据库连接池**、**D 预编译 SQL**。请把四个痛点与四剂药一一对上，并说明为什么"JDBC VS MyBatis"这一节后面紧跟着讲连接池。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个痛点配一味药；"代码层面"的两个归 MyBatis，**"资源与性能层面"的两个需要连接池和预编译**——它们不是 MyBatis 独有的，JDBC 也能用
-  > **二级 · 方法**：硬编码 ↔ 配置化；繁琐 ↔ 注解/XML；资源浪费 ↔ 连接池；性能降低 ↔ 预编译
-  > **三级 · 骨架**：PPT 第 23 页右侧两个箭头——**SpringBoot+Mybatis** 管 ____、____；**数据库连接池** 管 ____、____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > | 痛点 | 药 |
-  > | --- | --- |
-  > | 硬编码 | **A 配置化**——连接信息搬到 `application.properties`（[51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/) 1.3） |
-  > | 繁琐 | **B 一行注解**——`@Select("select * from user")` 顶掉一整段流程代码 |
-  > | 资源浪费 | **C 数据库连接池**——连接用完还回池子复用 |
-  > | 性能降低 | **D 预编译 SQL**——`?` 占位符 + 编译缓存（`#{}` 默认就是它） |
-  > 为什么紧接着讲连接池？因为 PPT 第 23 页只把"硬编码、繁琐"这两条挂给了 **SpringBoot+Mybatis**，而"资源浪费、性能降低"这两条挂给了 **数据库连接池**——**MyBatis 一个人治不完 JDBC 的病**。[51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)也提醒过：MyBatis 底层还是 JDBC 那一套，所以连接怎么管、SQL 怎么预编译，仍然要单独学（这才是 [53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)存在的理由）。
+  **一级 · 思路**：一个痛点配一味药；"代码层面"的两个归 MyBatis，**"资源与性能层面"的两个需要连接池和预编译**——它们不是 MyBatis 独有的，JDBC 也能用
+  **二级 · 方法**：硬编码 ↔ 配置化；繁琐 ↔ 注解/XML；资源浪费 ↔ 连接池；性能降低 ↔ 预编译
+  **三级 · 骨架**：PPT 第 23 页右侧两个箭头——**SpringBoot+Mybatis** 管 ____、____；**数据库连接池** 管 ____、____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  | 痛点 | 药 |
+  | --- | --- |
+  | 硬编码 | **A 配置化**——连接信息搬到 `application.properties`（[51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/) 1.3） |
+  | 繁琐 | **B 一行注解**——`@Select("select * from user")` 顶掉一整段流程代码 |
+  | 资源浪费 | **C 数据库连接池**——连接用完还回池子复用 |
+  | 性能降低 | **D 预编译 SQL**——`?` 占位符 + 编译缓存（`#{}` 默认就是它） |
+  为什么紧接着讲连接池？因为 PPT 第 23 页只把"硬编码、繁琐"这两条挂给了 **SpringBoot+Mybatis**，而"资源浪费、性能降低"这两条挂给了 **数据库连接池**——**MyBatis 一个人治不完 JDBC 的病**。[51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)也提醒过：MyBatis 底层还是 JDBC 那一套，所以连接怎么管、SQL 怎么预编译，仍然要单独学（这才是 [53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)存在的理由）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -302,64 +334,72 @@ PPT 第 23 页把 JDBC 的问题浓缩成四个词，逐个拆开看，每一条
   | 资源与连接池 | 第 2 步——`connection.close()` 在 MyBatis 里由框架/连接池接管（[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)） |
   | 预编译 | 两边都是 `?` 占位符（[50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：改造的本质是"把每次都要写的机械动作删掉，只保留业务信息"；验证的本质是"输出必须不变"
-  > **二级 · 方法**：MyBatis 版 = `application.properties` 四行 + `@Mapper` 接口 + `@Select` 方法 + `@SpringBootTest` 测试方法；输出对照时注意"JDBC 打印的是同一个实体类的 `toString`"
-  > **三级 · 骨架**：第 6 步三问的答案方向——少写的是 `____`、`____`、`____`、`____`；没少的是"____ 与 ____"；改密码时 JDBC 要改**代码里的常量**，MyBatis 只改**配置文件里的那一行**
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1~2. 分段与归属：
-  > | JDBC 的段落 | 具体代码 | MyBatis 里谁负责 |
-  > | --- | --- | --- |
-  > | 准备工作·注册驱动 | `Class.forName("com.mysql.cj.jdbc.Driver")` | **框架代劳**（配了 `driver-class-name` 后自动注册） |
-  > | 准备工作·获取连接 | `DriverManager.getConnection(url, username, password)` | **框架 + 连接池代劳**（`spring.datasource.*` 四行配置，连接由池子给） |
-  > | 准备工作·获取执行对象 | `connection.prepareStatement("select * from user")` | **框架代劳**（`@Select` 里的 SQL 由 MyBatis 编译成预编译语句） |
-  > | 执行与解析 | `executeQuery()` + `while` + 5 行 `getXxx` + `new User(...)` + `add` | **框架代劳**（自动封装成 `List<User>`） |
-  > | 释放资源 | `resultSet.close(); ps.close(); connection.close();` | **框架 + 连接池代劳**（连接还回池里） |
-  > 3. 改造后的 MyBatis 版：
-  > ```properties
-  > # application.properties
-  > spring.datasource.url=jdbc:mysql://localhost:3306/web01
-  > spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-  > spring.datasource.username=root
-  > spring.datasource.password=1234
-  > ```
-  > ```java
-  > @Mapper
-  > public interface UserMapper {
-  >     @Select("select * from user")
-  >     public List<User> findAll();
-  > }
-  > ```
-  > ```java
-  > @SpringBootTest
-  > class MybatisTests {
-  >     @Autowired
-  >     private UserMapper userMapper;
-  >
-  >     @Test
-  >     public void testFindAll(){
-  >         userMapper.findAll().forEach(System.out::println);
-  >     }
-  > }
-  > ```
-  > 4~5. 输出对照（**本机实测**）：
-  > ```text
-  > -- JDBC 版（jdbc-demo，需求是"按用户名密码查一条"）
-  > User(id=1, username=daqiao, password=123456, name=大乔, age=22)
-  >
-  > -- MyBatis 版（springboot-mybatis-quickstart，需求是"查所有"）
-  > ==>  Preparing: select id, username, password, name, age from user
-  > ==> Parameters:
-  > <==      Total: 5
-  > User(id=1, username=daqiao, password=123456, name=大乔, age=22)
-  > User(id=2, username=xiaoqiao, password=123456, name=小乔, age=18)
-  > User(id=3, username=diaochan, password=123456, name=貂蝉, age=24)
-  > User(id=4, username=lvbu, password=123456, name=吕布, age=28)
-  > User(id=5, username=zhaoyun, password=12345678, name=赵云, age=27)
-  > ```
-  > `User` 的格式**完全一致**（同一个实体类 + 同一个 `toString()`）；MyBatis 版**多出三行日志**（`Preparing` / `Parameters` / `Total`），那是 MyBatis 的日志功能，不是结果本身；行数差别来自需求不同（一个是按条件查、一个是查所有）。
-  > 6. 三个回答：
-  > ① 少写的是——**注册驱动、获取连接、获取执行对象、`while` 解析结果集、逐个关闭资源**这一整套；以及"连接信息写在 Java 里"这件事本身。
-  > ② 一行也没少的是——**SQL 还得自己写**（框架不会替你决定查什么）、**返回类型还得自己定**（`List<User>`）、**数据源四行还得自己配**（地址、驱动、用户名、密码）。框架能替你做机械动作，替不了你表达需求。
-  > ③ 改密码：**JDBC 版要改代码里那个 `String password = "1234";`（然后重新编译打包）**，MyBatis 版只改 **`application.properties` 里的 `spring.datasource.password` 一行**（不改代码、不用重编译逻辑代码）。这就是"硬编码 → 配置化"最直观的收益。
+  **一级 · 思路**：改造的本质是"把每次都要写的机械动作删掉，只保留业务信息"；验证的本质是"输出必须不变"
+  **二级 · 方法**：MyBatis 版 = `application.properties` 四行 + `@Mapper` 接口 + `@Select` 方法 + `@SpringBootTest` 测试方法；输出对照时注意"JDBC 打印的是同一个实体类的 `toString`"
+  **三级 · 骨架**：第 6 步三问的答案方向——少写的是 `____`、`____`、`____`、`____`；没少的是"____ 与 ____"；改密码时 JDBC 要改**代码里的常量**，MyBatis 只改**配置文件里的那一行**
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1~2. 分段与归属：
+  | JDBC 的段落 | 具体代码 | MyBatis 里谁负责 |
+  | --- | --- | --- |
+  | 准备工作·注册驱动 | `Class.forName("com.mysql.cj.jdbc.Driver")` | **框架代劳**（配了 `driver-class-name` 后自动注册） |
+  | 准备工作·获取连接 | `DriverManager.getConnection(url, username, password)` | **框架 + 连接池代劳**（`spring.datasource.*` 四行配置，连接由池子给） |
+  | 准备工作·获取执行对象 | `connection.prepareStatement("select * from user")` | **框架代劳**（`@Select` 里的 SQL 由 MyBatis 编译成预编译语句） |
+  | 执行与解析 | `executeQuery()` + `while` + 5 行 `getXxx` + `new User(...)` + `add` | **框架代劳**（自动封装成 `List<User>`） |
+  | 释放资源 | `resultSet.close(); ps.close(); connection.close();` | **框架 + 连接池代劳**（连接还回池里） |
+  3. 改造后的 MyBatis 版：
+  ```properties
+  # application.properties
+  spring.datasource.url=jdbc:mysql://localhost:3306/web01
+  spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+  spring.datasource.username=root
+  spring.datasource.password=1234
+  ```
+  ```java
+  @Mapper
+  public interface UserMapper {
+      @Select("select * from user")
+      public List<User> findAll();
+  }
+  ```
+  ```java
+  @SpringBootTest
+  class MybatisTests {
+      @Autowired
+      private UserMapper userMapper;
+  
+      @Test
+      public void testFindAll(){
+          userMapper.findAll().forEach(System.out::println);
+      }
+  }
+  ```
+  4~5. 输出对照（**本机实测**）：
+  ```text
+  -- JDBC 版（jdbc-demo，需求是"按用户名密码查一条"）
+  User(id=1, username=daqiao, password=123456, name=大乔, age=22)
+  
+  -- MyBatis 版（springboot-mybatis-quickstart，需求是"查所有"）
+  ==>  Preparing: select id, username, password, name, age from user
+  ==> Parameters:
+  <==      Total: 5
+  User(id=1, username=daqiao, password=123456, name=大乔, age=22)
+  User(id=2, username=xiaoqiao, password=123456, name=小乔, age=18)
+  User(id=3, username=diaochan, password=123456, name=貂蝉, age=24)
+  User(id=4, username=lvbu, password=123456, name=吕布, age=28)
+  User(id=5, username=zhaoyun, password=12345678, name=赵云, age=27)
+  ```
+  `User` 的格式**完全一致**（同一个实体类 + 同一个 `toString()`）；MyBatis 版**多出三行日志**（`Preparing` / `Parameters` / `Total`），那是 MyBatis 的日志功能，不是结果本身；行数差别来自需求不同（一个是按条件查、一个是查所有）。
+  6. 三个回答：
+  ① 少写的是——**注册驱动、获取连接、获取执行对象、`while` 解析结果集、逐个关闭资源**这一整套；以及"连接信息写在 Java 里"这件事本身。
+  ② 一行也没少的是——**SQL 还得自己写**（框架不会替你决定查什么）、**返回类型还得自己定**（`List<User>`）、**数据源四行还得自己配**（地址、驱动、用户名、密码）。框架能替你做机械动作，替不了你表达需求。
+  ③ 改密码：**JDBC 版要改代码里那个 `String password = "1234";`（然后重新编译打包）**，MyBatis 版只改 **`application.properties` 里的 `spring.datasource.password` 一行**（不改代码、不用重编译逻辑代码）。这就是"硬编码 → 配置化"最直观的收益。
+
+  :::
+

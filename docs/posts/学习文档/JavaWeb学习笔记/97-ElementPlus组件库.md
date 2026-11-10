@@ -40,7 +40,7 @@ PPT 第 33 页用两张图对比了"自己写控件"和"用组件库"的样子�
 ![ElementPlus 的表单组件](https://img.tsh520.cn/file/blog/article/21-ElementPlus表单组件.jpg)
 *图：同一组表单项换成 ElementPlus 的组件——边框、圆角、间距、占位文字、下拉箭头都是配好的，还自动带交互状态（悬停、聚焦）。**这就是组件库的价值：把"好看的控件 + 交互细节"做成现成的部件，拿来就用***
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 组件库正好落实 [95 篇](/posts/编程学习/javaweb学习笔记/95-前端工程化与vue项目/)讲的工程化关键词"**组件化**"（页面部件封装成组件、提高复用）。回想 [12 篇](/posts/编程学习/javaweb学习笔记/12-实战-tlias员工管理页面/)手写 Tlias 页面时，一个表格要写 `<table>` + `<tr>` + `<td>` 加一堆 CSS 对齐——用组件库就是**一行 `<el-table>`** 的事。
 
 ## 快速入门三步（PPT 第 34~36 页）
@@ -79,7 +79,7 @@ createApp(App).use(ElementPlus).mount('#app')
 | `import 'element-plus/dist/index.css'` | 引入**组件库的样式文件**（少了这行，组件会"裸奔"，只剩默认标签的丑样子） |
 | `.use(ElementPlus)` | 把组件库**注册到应用上**——注册完之后，任何组件的模板里都能直接用 `el-` 开头的标签，不用一个个 import |
 
-> [!NOTE]
+> [!NOTE] 注意
 > `.use(ElementPlus)` 这种叫**全局注册（全量引入）**：整个组件库的组件都注册进来。好处是省事，代价是**打包体积大**——本机实测这个工程 `npm run build` 出来的 js 是 **877.21 KiB（gzip 290.77 KiB）**，命令行还给了 `chunks are larger than 500 KiB` 的警告，主要就是它。ElementPlus 官方文档里还有一种"**按需引入**"的方案（只引入用到的组件，体积能小很多），课程没讲，知道有这么个方向就行。
 
 ### 必答问答（PPT 第 36 页）
@@ -93,7 +93,7 @@ PPT 第 36 页把"ElementPlus 的使用步骤"总结成三句，必须能脱口�
 | 怎么引入？ | 在 `main.js` 中引入（参照官方文档）：引入组件库 + 引入样式 + `.use(ElementPlus)` |
 | 组件怎么用？ | 访问官方文档，**复制组件代码，调整成我们需要的样子** |
 
-> [!TIP]
+> [!TIP] 提示
 > 第 4 步"复制代码再调整"是这一节最实用的工作方式：**不用背组件怎么写**——去官网找到想要的组件，把示例代码拷进模板，再把里面的数据/属性换成自己的（官方文档的示例很多是 TypeScript 版本，拷进来把 `lang="ts"` 去掉、`const tableData = [...]` 这种写法照抄即可）。这也解释了为什么前面要学"数据驱动"：**组件只管显示，数据由我们给**。
 
 ## 让组件显示中文（PPT 第 42 页）
@@ -339,10 +339,10 @@ PPT 第 50 页给的任务是两句话：
 - 两个真实观察（和 96 篇一样）：**头像那列是裂图**（课程数据里的 OSS 链接已经访问不了），**"更新时间"是后端原样返回的完整时间串**（没有格式化）；
 - 演示页统计（`ElementDemo.vue`）：**按钮 12 个**（六种样式各两套）、**表格 1 个**（4 行静态数据）、**分页条 1 个**、**输入框 5 个**（表单里 3 个 + 分页条里"每页条数"下拉和"跳页"输入框）、**对话框 1 个**（点按钮才出现）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机实测还踩到一个坑：这个案例的接口 `https://web-server.itheima.net/emps/list` 会**按 User-Agent 拦截无头浏览器**——用 Playwright 那种无头 Chromium 访问会拿到 **405**，表格一片空白；换普通 Chrome / Edge 打开就一切正常。**代码没问题**（接口本身也支持跨域，不需要配代理），详细排查过程在 [96 篇](/posts/编程学习/javaweb学习笔记/96-vue项目开发流程与组合式api/)。
 
-> [!TIP]
+> [!TIP] 提示
 > 打包体积的那条实测也放这儿收个尾：本机实测 `npm run build` 打出的 js 是 **877.21 KiB（gzip 290.77 KiB）**，警告"chunks are larger than 500 KiB"，原因就是**全量引入 ElementPlus**（`.use(ElementPlus)` 把整个组件库都注册进来了）。真实项目里普遍用"**按需引入**"（只打包用到的组件）来瘦身——课程没讲，知道方向即可。
 
 ## 小结
@@ -385,32 +385,40 @@ PPT 第 50 页给的任务是两句话：
 - [ ] **2-1 用按钮组件做出两个按钮**
   要求：页面上有两个按钮——一个是**主色调的实心按钮**，文字"查询"；一个是**次要样式的按钮**，文字"清空"。两个按钮都要能在点击时在控制台打印出一句话，证明点击事件真的绑上了。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按钮用组件库的按钮组件；颜色/样式靠"类型"属性区分；点击事件还是 Vue 的 `@click`，处理函数写在 `<script setup>` 里
-  > **二级 · 方法**：`<el-button>`；主色调用 `type="primary"`、次要样式用 `type="info"`；点击处理函数写成普通函数即可（组合式 API 里没有 `this`）
-  > **三级 · 骨架**：`<el-button type="____" @click="____">查询</el-button>` / `<el-button type="____" @click="____">清空</el-button>` / `function search(){ console.log('____') }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <!-- 参照 ElementDemo.vue 顶部那两行按钮的写法 -->
-  > <script setup>
-  > function search(){
-  >   console.log('点击了查询');
-  > }
-  > function clear(){
-  >   console.log('点击了清空');
-  > }
-  > </script>
-  >
-  > <template>
-  >   <el-button type="primary" @click="search">查询</el-button>
-  >   <el-button type="info" @click="clear">清空</el-button>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：① 两个按钮长得不一样（一个蓝底白字、一个灰底）；② 点一下控制台出现对应的那句话。工程里 `EmpList.vue` 的查询/清空按钮就是 `type="primary"` 和 `type="info"` 这一对。
+  **一级 · 思路**：按钮用组件库的按钮组件；颜色/样式靠"类型"属性区分；点击事件还是 Vue 的 `@click`，处理函数写在 `<script setup>` 里
+  **二级 · 方法**：`<el-button>`；主色调用 `type="primary"`、次要样式用 `type="info"`；点击处理函数写成普通函数即可（组合式 API 里没有 `this`）
+  **三级 · 骨架**：`<el-button type="____" @click="____">查询</el-button>` / `<el-button type="____" @click="____">清空</el-button>` / `function search(){ console.log('____') }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <!-- 参照 ElementDemo.vue 顶部那两行按钮的写法 -->
+  <script setup>
+  function search(){
+    console.log('点击了查询');
+  }
+  function clear(){
+    console.log('点击了清空');
+  }
+  </script>
+  
+  <template>
+    <el-button type="primary" @click="search">查询</el-button>
+    <el-button type="info" @click="clear">清空</el-button>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：① 两个按钮长得不一样（一个蓝底白字、一个灰底）；② 点一下控制台出现对应的那句话。工程里 `EmpList.vue` 的查询/清空按钮就是 `type="primary"` 和 `type="info"` 这一对。
+
+  :::
+
 
 - [ ] **2-2 用表格组件把一份数组渲染成表格**
   素材（把它当作接口返回的数据）：
@@ -426,117 +434,141 @@ PPT 第 50 页给的任务是两句话：
 
   要求：页面上有一张带边框的表格，表头分别是"生日 / 姓名 / 住址"，三列分别显示上面每行对象的三个属性（生日列宽 260、姓名列宽 260、住址列自适应，内容居中对齐）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：表格组件要两样东西——"数据"（一份数组）和"每一列显示哪个字段"（一列一行声明）
-  > **二级 · 方法**：`<el-table :data="tableData" border>`；每列用 `<el-table-column prop="..." label="..." width="..." align="center"/>`；**`prop` 写的是对象里的属性名**，`label` 才是表头文字
-  > **三级 · 骨架**：`<el-table :____="tableData" border>` / `<el-table-column ____="date" label="生日" width="260" align="center"/>` / 后两列同理（`prop="name"`、`prop="address"`）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <!-- 这就是 ElementDemo.vue 里表格部分的写法 -->
-  > <script setup>
-  > const tableData = [
-  >   {date: '2016-05-03', name: 'Tom1', address: 'No. 189, Grove St, Los Angeles'},
-  >   {date: '2016-05-02', name: 'Tom2', address: 'No. 189, Grove St, Los Angeles'},
-  >   {date: '2016-05-04', name: 'Tom3', address: 'No. 189, Grove St, Los Angeles'},
-  >   {date: '2016-05-01', name: 'Tom4', address: 'No. 189, Grove St, Los Angeles'},
-  > ]
-  > </script>
-  >
-  > <template>
-  >   <el-table :data="tableData" border style="width: 100%">
-  >     <el-table-column prop="date" label="生日" width="260" align="center"/>
-  >     <el-table-column prop="name" label="姓名" width="260" align="center"/>
-  >     <el-table-column prop="address" label="住址" align="center"/>
-  >   </el-table>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：① 表头是中文的"生日 / 姓名 / 住址"（`label` 生效）；② 每行数据取的是对的字段（`prop` 生效）；③ 把 `:data` 的冒号去掉试试——冒号没了就变成"把 `tableData` 这五个字母当字符串传进去"，表格自然渲染不出数据（`:data` 是 [20 篇](/posts/编程学习/javaweb学习笔记/20-vue3常用指令/)讲的 `v-bind`，表示"里面是一个表达式/变量"）。
+  **一级 · 思路**：表格组件要两样东西——"数据"（一份数组）和"每一列显示哪个字段"（一列一行声明）
+  **二级 · 方法**：`<el-table :data="tableData" border>`；每列用 `<el-table-column prop="..." label="..." width="..." align="center"/>`；**`prop` 写的是对象里的属性名**，`label` 才是表头文字
+  **三级 · 骨架**：`<el-table :____="tableData" border>` / `<el-table-column ____="date" label="生日" width="260" align="center"/>` / 后两列同理（`prop="name"`、`prop="address"`）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <!-- 这就是 ElementDemo.vue 里表格部分的写法 -->
+  <script setup>
+  const tableData = [
+    {date: '2016-05-03', name: 'Tom1', address: 'No. 189, Grove St, Los Angeles'},
+    {date: '2016-05-02', name: 'Tom2', address: 'No. 189, Grove St, Los Angeles'},
+    {date: '2016-05-04', name: 'Tom3', address: 'No. 189, Grove St, Los Angeles'},
+    {date: '2016-05-01', name: 'Tom4', address: 'No. 189, Grove St, Los Angeles'},
+  ]
+  </script>
+  
+  <template>
+    <el-table :data="tableData" border style="width: 100%">
+      <el-table-column prop="date" label="生日" width="260" align="center"/>
+      <el-table-column prop="name" label="姓名" width="260" align="center"/>
+      <el-table-column prop="address" label="住址" align="center"/>
+    </el-table>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：① 表头是中文的"生日 / 姓名 / 住址"（`label` 生效）；② 每行数据取的是对的字段（`prop` 生效）；③ 把 `:data` 的冒号去掉试试——冒号没了就变成"把 `tableData` 这五个字母当字符串传进去"，表格自然渲染不出数据（`:data` 是 [20 篇](/posts/编程学习/javaweb学习笔记/20-vue3常用指令/)讲的 `v-bind`，表示"里面是一个表达式/变量"）。
+
+  :::
+
 
 - [ ] **2-3 做一个"点按钮弹出对话框"的效果**
   要求：页面上有一个"打开Dialog对话框"按钮；点它弹出一个标题为"收货地址"的对话框（宽度 800），**里面放一段文字**（内容随意）；点对话框右上角的关闭图标能关掉，页面上其它内容始终不变。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：对话框是"显示/隐藏"由数据控制的东西——先准备一个表示"藏还是显"的变量，再让按钮去改它
-  > **二级 · 方法**：`<el-dialog v-model="dialogVisible" title="收货地址" width="800">`；变量用 `ref(false)`；按钮 `@click="dialogVisible = true"`
-  > **三级 · 骨架**：`const dialogVisible = ref(____)` / `<el-button @click="dialogVisible = ____">打开Dialog对话框</el-button>` / `<el-dialog ____="dialogVisible" title="收货地址" width="800"> 内容 </el-dialog>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <script setup>
-  > import { ref } from 'vue';
-  >
-  > //false = 藏起来，true = 显示出来
-  > const dialogVisible = ref(false);
-  > </script>
-  >
-  > <template>
-  >   <el-button plain @click="dialogVisible = true">打开Dialog对话框</el-button>
-  >
-  >   <el-dialog v-model="dialogVisible" title="收货地址" width="800">
-  >     <p>这里是对话框里的内容，可以放表格、表单等任何东西。</p>
-  >   </el-dialog>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：① 一进页面看不到对话框（`false`）；② 点按钮弹出来（`true`）；③ 点右上角 × 关掉，**再点按钮还能弹出来**——说明 `v-model` 把关闭动作也同步回了变量（`v-model` 是双向绑定）。
-  > 课程工程里对话框里装的是一张表格（`<el-dialog v-model="dialogTableVisible" ...>` + `<el-table :data="tableData">`），原理一模一样。
+  **一级 · 思路**：对话框是"显示/隐藏"由数据控制的东西——先准备一个表示"藏还是显"的变量，再让按钮去改它
+  **二级 · 方法**：`<el-dialog v-model="dialogVisible" title="收货地址" width="800">`；变量用 `ref(false)`；按钮 `@click="dialogVisible = true"`
+  **三级 · 骨架**：`const dialogVisible = ref(____)` / `<el-button @click="dialogVisible = ____">打开Dialog对话框</el-button>` / `<el-dialog ____="dialogVisible" title="收货地址" width="800"> 内容 </el-dialog>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <script setup>
+  import { ref } from 'vue';
+  
+  //false = 藏起来，true = 显示出来
+  const dialogVisible = ref(false);
+  </script>
+  
+  <template>
+    <el-button plain @click="dialogVisible = true">打开Dialog对话框</el-button>
+  
+    <el-dialog v-model="dialogVisible" title="收货地址" width="800">
+      <p>这里是对话框里的内容，可以放表格、表单等任何东西。</p>
+    </el-dialog>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：① 一进页面看不到对话框（`false`）；② 点按钮弹出来（`true`）；③ 点右上角 × 关掉，**再点按钮还能弹出来**——说明 `v-model` 把关闭动作也同步回了变量（`v-model` 是双向绑定）。
+  课程工程里对话框里装的是一张表格（`<el-dialog v-model="dialogTableVisible" ...>` + `<el-table :data="tableData">`），原理一模一样。
+
+  :::
+
 
 - [ ] **2-4 用表单项采集数据并打印出来**
   要求：页面上有一个表单，包含"姓名"（输入框）和"性别"（下拉框，男/女）两项，加一个"提交"按钮；用户在页面上填完，点提交时**把采集到的数据打印到控制台**（形如 `{name: ..., gender: ...}`）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：组合式 API 里要"一个新的对象装表单数据"（用响应式的），每个控件都绑到它的某个字段上；提交就是把按钮的点击事件绑到一个函数，函数里把整个对象打印出来
-  > **二级 · 方法**：`const user = ref({name: '', gender: ''})`；`<el-form :model="user">` 里每一行用 `<el-form-item label="...">`；输入框 `<el-input v-model="user.name">`、下拉 `<el-select v-model="user.gender">` 里放 `<el-option label="男" value="1"/>`；按钮 `@click="onSubmit"`，函数里 `console.log(user.value)`
-  > **三级 · 骨架**：`const user = ref({name: ____, gender: ____})` / `<el-input v-model="user.____">` / `<el-select v-model="user.____">` / `const onSubmit = () => { console.log(user.____) }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <!-- 参照 ElementDemo.vue 底部的表单写法 -->
-  > <script setup>
-  > import { ref } from 'vue';
-  >
-  > //一个对象装所有表单项的值
-  > const user = ref({
-  >   name: '',
-  >   gender: ''
-  > })
-  >
-  > //提交：事件绑定的处理函数，在这里拿到用户填的数据
-  > const onSubmit = () => {
-  >   console.log(user.value);
-  > }
-  > </script>
-  >
-  > <template>
-  >   <el-form :inline="true" :model="user" class="demo-form-inline">
-  >     <el-form-item label="姓名">
-  >       <el-input v-model="user.name" placeholder="请输入姓名" />
-  >     </el-form-item>
-  >
-  >     <el-form-item label="性别">
-  >       <el-select v-model="user.gender" placeholder="请选择">
-  >         <el-option label="男" value="1" />
-  >         <el-option label="女" value="2" />
-  >       </el-select>
-  >     </el-form-item>
-  >
-  >     <el-form-item>
-  >       <el-button type="primary" @click="onSubmit">提交</el-button>
-  >     </el-form-item>
-  >   </el-form>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：① 输入框里打字、下拉选一项，然后点提交——控制台打印出的对象里就是**你刚填的内容**（比如 `{name: '张三', gender: '1'}`）；② 什么都不填直接提交，打印的是两个空字符串（说明 `v-model` 一直在同步，不是"点了才去读"）。
-  > 三点连起来看：**`v-model` 负责采集（问题 2-4）、`:data` 负责展示（问题 2-2）、`v-model` 的 boolean 负责显隐（问题 2-3）**——课程案例页面就是这么拼出来的。
+  **一级 · 思路**：组合式 API 里要"一个新的对象装表单数据"（用响应式的），每个控件都绑到它的某个字段上；提交就是把按钮的点击事件绑到一个函数，函数里把整个对象打印出来
+  **二级 · 方法**：`const user = ref({name: '', gender: ''})`；`<el-form :model="user">` 里每一行用 `<el-form-item label="...">`；输入框 `<el-input v-model="user.name">`、下拉 `<el-select v-model="user.gender">` 里放 `<el-option label="男" value="1"/>`；按钮 `@click="onSubmit"`，函数里 `console.log(user.value)`
+  **三级 · 骨架**：`const user = ref({name: ____, gender: ____})` / `<el-input v-model="user.____">` / `<el-select v-model="user.____">` / `const onSubmit = () => { console.log(user.____) }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <!-- 参照 ElementDemo.vue 底部的表单写法 -->
+  <script setup>
+  import { ref } from 'vue';
+  
+  //一个对象装所有表单项的值
+  const user = ref({
+    name: '',
+    gender: ''
+  })
+  
+  //提交：事件绑定的处理函数，在这里拿到用户填的数据
+  const onSubmit = () => {
+    console.log(user.value);
+  }
+  </script>
+  
+  <template>
+    <el-form :inline="true" :model="user" class="demo-form-inline">
+      <el-form-item label="姓名">
+        <el-input v-model="user.name" placeholder="请输入姓名" />
+      </el-form-item>
+  
+      <el-form-item label="性别">
+        <el-select v-model="user.gender" placeholder="请选择">
+          <el-option label="男" value="1" />
+          <el-option label="女" value="2" />
+        </el-select>
+      </el-form-item>
+  
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">提交</el-button>
+      </el-form-item>
+    </el-form>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：① 输入框里打字、下拉选一项，然后点提交——控制台打印出的对象里就是**你刚填的内容**（比如 `{name: '张三', gender: '1'}`）；② 什么都不填直接提交，打印的是两个空字符串（说明 `v-model` 一直在同步，不是"点了才去读"）。
+  三点连起来看：**`v-model` 负责采集（问题 2-4）、`:data` 负责展示（问题 2-2）、`v-model` 的 boolean 负责显隐（问题 2-3）**——课程案例页面就是这么拼出来的。
+
+  :::
+
 
 ### 三、综合题
 
@@ -550,141 +582,149 @@ PPT 第 50 页给的任务是两句话：
   6. **接交互**：查询按钮触发一次重新请求；清空按钮先把条件恢复成空、再请求一次
   7. 打开浏览器（**用普通 Chrome/Edge**）验证：表格里有 4 行数据；在姓名框里输入一个字点查询，表格只剩匹配的行；点清空又恢复 4 行
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题 = 96 篇的数据逻辑 + 这一篇的组件布局。先把"数据"和"布局"两条线分开做，再接起来
-  > **二级 · 方法**：安装 `npm install element-plus@2.4.4 --save`；`main.js` 里 `import ElementPlus` + `import 'element-plus/dist/index.css'` + `.use(ElementPlus, { locale: zhCn })`；条件对象 `ref({name:'', gender:'', job:''})`；`el-form :model` + `el-input v-model` / `el-select v-model` + `el-option`；表格 `el-table :data="empList"` + 七列 `el-table-column`（加工列用 `<template #default="scope">`，行数据在 `scope.row`）；`onMounted` + `axios.get` + `empList.value = result.data.data`
-  > **三级 · 骨架**：`<el-form :inline="true" :____="emp">` / `<el-input v-model="emp.____">` / `<el-select v-model="emp.____">` / `<el-table :data="____" border>` / `<el-table-column prop="____" label="姓名">` / `<template #default="scope">&#123;&#123; scope.row.____ == 1 ? '男' : '女' }}</template>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```js
-  > // main.js —— 引入组件库 + 样式 + 中文语言
-  > import { createApp } from 'vue'
-  >
-  > import ElementPlus from 'element-plus'
-  > import 'element-plus/dist/index.css'
-  > import zhCn from 'element-plus/es/locale/lang/zh-cn'
-  >
-  > import App from './App.vue'
-  >
-  > createApp(App).use(ElementPlus, {locale: zhCn}).mount('#app')
-  > ```
-  >
-  > ```vue
-  > <!-- src/views/EmpList.vue（数据部分照 96 篇，模板换成组件库的写法） -->
-  > <script setup>
-  > import { ref, onMounted } from 'vue';
-  > import axios from 'axios';
-  >
-  > //表单（查询条件）
-  > const emp = ref({name: '', gender: '', job: ''})
-  >
-  > //员工列表（先给空数组）
-  > const empList = ref([]);
-  >
-  > //查询：把条件拼进地址，发请求，把数组交给 empList
-  > const search = async () => {
-  >   const result = await axios.get(`https://web-server.itheima.net/emps/list?name=${emp.value.name}&gender=${emp.value.gender}&job=${emp.value.job}`);
-  >   empList.value = result.data.data;
-  > }
-  >
-  > //清空：条件恢复成空，再查一次
-  > const clear = () => {
-  >   emp.value = {name: '', gender: '', job: ''};
-  >   search();
-  > }
-  >
-  > //页面加载完毕后自动查一次
-  > onMounted(() => {
-  >   search();
-  > })
-  > </script>
-  >
-  > <template>
-  >   <div id="container">
-  >     <!-- 搜索表单 -->
-  >     <el-form :inline="true" :model="emp" class="demo-form-inline">
-  >       <el-form-item label="姓名">
-  >         <el-input v-model="emp.name" placeholder="请输入姓名" />
-  >       </el-form-item>
-  >
-  >       <el-form-item label="性别">
-  >         <el-select v-model="emp.gender" placeholder="请选择">
-  >           <el-option label="男" value="1" />
-  >           <el-option label="女" value="2" />
-  >         </el-select>
-  >       </el-form-item>
-  >
-  >       <el-form-item label="职位">
-  >         <el-select v-model="emp.job" placeholder="请选择">
-  >           <el-option label="班主任" value="1" />
-  >           <el-option label="讲师" value="2" />
-  >           <el-option label="学工主管" value="3" />
-  >           <el-option label="教研主管" value="4" />
-  >           <el-option label="咨询师" value="5" />
-  >         </el-select>
-  >       </el-form-item>
-  >
-  >       <el-form-item>
-  >         <el-button type="primary" @click="search">查询</el-button>
-  >         <el-button type="info" @click="clear">清空</el-button>
-  >       </el-form-item>
-  >     </el-form>
-  >
-  >     <!-- 表格 -->
-  >     <el-table :data="empList" border style="width: 100%">
-  >       <el-table-column prop="id" label="ID" width="100" align="center"/>
-  >       <el-table-column prop="name" label="姓名" width="120" align="center"/>
-  >       <el-table-column label="头像" width="180" align="center">
-  >         <template #default="scope">
-  >           <img :src="scope.row.image" height="40px">
-  >         </template>
-  >       </el-table-column>
-  >       <el-table-column label="性别" width="180" align="center">
-  >         <template #default="scope">
-  >           &#123;&#123; scope.row.gender == 1 ? '男' : '女'}}
-  >         </template>
-  >       </el-table-column>
-  >       <el-table-column label="职位" width="180" align="center">
-  >         <template #default="scope">
-  >           <span v-if="scope.row.job == 1">班主任</span>
-  >           <span v-else-if="scope.row.job == 2">讲师</span>
-  >           <span v-else-if="scope.row.job == 3">学工主管</span>
-  >           <span v-else-if="scope.row.job == 4">教研主管</span>
-  >           <span v-else-if="scope.row.job == 5">咨询师</span>
-  >           <span v-else>其他</span>
-  >         </template>
-  >       </el-table-column>
-  >       <el-table-column prop="entrydate" label="入职日期" width="180" align="center"/>
-  >       <el-table-column prop="updatetime" label="更新时间" align="center"/>
-  >     </el-table>
-  >   </div>
-  > </template>
-  >
-  > <style scoped>
-  > #container {
-  >   width: 70%;
-  >   margin-left: 15%;
-  >   margin-right: 15%;
-  > }
-  > </style>
-  > ```
-  >
-  > ```vue
-  > <!-- src/App.vue：根组件里显示这个页面 -->
-  > <script setup>
-  > import EmpList from './views/EmpList.vue'
-  > </script>
-  >
-  > <template>
-  >   <EmpList></EmpList>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：
-  > 1. 页面上表格有 **4 行数据**（谢逊 / 韦一笑 / 黛绮丝 / 殷天正），性别列显示"男 / 女"、职位列显示中文（说明自定义列加工成功）；
-  > 2. 输入姓名点"查询"，表格只剩匹配的行；点"清空"恢复 4 行（条件被清空后重新查了一次）；
-  > 3. 一定要用**普通浏览器**验证：本机实测带 `HeadlessChrome` 的 User-Agent 会被接口拦成 405（普通浏览器一切正常，接口支持跨域、不用配代理）；
-  > 4. 头像列可能是裂图（本机实测课程数据里的 OSS 链接已失效），这不影响案例——关注数据链路是否打通即可；
-  > 5. 想进一步练手：把分页条组件接到表格下面（用 96 篇的接口数据先做静态的 `:total`），或者给表格加一个"新增员工"按钮 + 对话框（组合问题 2-3、2-4 的做法）。
+  **一级 · 思路**：这一题 = 96 篇的数据逻辑 + 这一篇的组件布局。先把"数据"和"布局"两条线分开做，再接起来
+  **二级 · 方法**：安装 `npm install element-plus@2.4.4 --save`；`main.js` 里 `import ElementPlus` + `import 'element-plus/dist/index.css'` + `.use(ElementPlus, { locale: zhCn })`；条件对象 `ref({name:'', gender:'', job:''})`；`el-form :model` + `el-input v-model` / `el-select v-model` + `el-option`；表格 `el-table :data="empList"` + 七列 `el-table-column`（加工列用 `<template #default="scope">`，行数据在 `scope.row`）；`onMounted` + `axios.get` + `empList.value = result.data.data`
+  **三级 · 骨架**：`<el-form :inline="true" :____="emp">` / `<el-input v-model="emp.____">` / `<el-select v-model="emp.____">` / `<el-table :data="____" border>` / `<el-table-column prop="____" label="姓名">` / `<template #default="scope">&#123;&#123; scope.row.____ == 1 ? '男' : '女' }}</template>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```js
+  // main.js —— 引入组件库 + 样式 + 中文语言
+  import { createApp } from 'vue'
+  
+  import ElementPlus from 'element-plus'
+  import 'element-plus/dist/index.css'
+  import zhCn from 'element-plus/es/locale/lang/zh-cn'
+  
+  import App from './App.vue'
+  
+  createApp(App).use(ElementPlus, {locale: zhCn}).mount('#app')
+  ```
+  
+  ```vue
+  <!-- src/views/EmpList.vue（数据部分照 96 篇，模板换成组件库的写法） -->
+  <script setup>
+  import { ref, onMounted } from 'vue';
+  import axios from 'axios';
+  
+  //表单（查询条件）
+  const emp = ref({name: '', gender: '', job: ''})
+  
+  //员工列表（先给空数组）
+  const empList = ref([]);
+  
+  //查询：把条件拼进地址，发请求，把数组交给 empList
+  const search = async () => {
+    const result = await axios.get(`https://web-server.itheima.net/emps/list?name=${emp.value.name}&gender=${emp.value.gender}&job=${emp.value.job}`);
+    empList.value = result.data.data;
+  }
+  
+  //清空：条件恢复成空，再查一次
+  const clear = () => {
+    emp.value = {name: '', gender: '', job: ''};
+    search();
+  }
+  
+  //页面加载完毕后自动查一次
+  onMounted(() => {
+    search();
+  })
+  </script>
+  
+  <template>
+    <div id="container">
+      <!-- 搜索表单 -->
+      <el-form :inline="true" :model="emp" class="demo-form-inline">
+        <el-form-item label="姓名">
+          <el-input v-model="emp.name" placeholder="请输入姓名" />
+        </el-form-item>
+  
+        <el-form-item label="性别">
+          <el-select v-model="emp.gender" placeholder="请选择">
+            <el-option label="男" value="1" />
+            <el-option label="女" value="2" />
+          </el-select>
+        </el-form-item>
+  
+        <el-form-item label="职位">
+          <el-select v-model="emp.job" placeholder="请选择">
+            <el-option label="班主任" value="1" />
+            <el-option label="讲师" value="2" />
+            <el-option label="学工主管" value="3" />
+            <el-option label="教研主管" value="4" />
+            <el-option label="咨询师" value="5" />
+          </el-select>
+        </el-form-item>
+  
+        <el-form-item>
+          <el-button type="primary" @click="search">查询</el-button>
+          <el-button type="info" @click="clear">清空</el-button>
+        </el-form-item>
+      </el-form>
+  
+      <!-- 表格 -->
+      <el-table :data="empList" border style="width: 100%">
+        <el-table-column prop="id" label="ID" width="100" align="center"/>
+        <el-table-column prop="name" label="姓名" width="120" align="center"/>
+        <el-table-column label="头像" width="180" align="center">
+          <template #default="scope">
+            <img :src="scope.row.image" height="40px">
+          </template>
+        </el-table-column>
+        <el-table-column label="性别" width="180" align="center">
+          <template #default="scope">
+            &#123;&#123; scope.row.gender == 1 ? '男' : '女'}}
+          </template>
+        </el-table-column>
+        <el-table-column label="职位" width="180" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.job == 1">班主任</span>
+            <span v-else-if="scope.row.job == 2">讲师</span>
+            <span v-else-if="scope.row.job == 3">学工主管</span>
+            <span v-else-if="scope.row.job == 4">教研主管</span>
+            <span v-else-if="scope.row.job == 5">咨询师</span>
+            <span v-else>其他</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="entrydate" label="入职日期" width="180" align="center"/>
+        <el-table-column prop="updatetime" label="更新时间" align="center"/>
+      </el-table>
+    </div>
+  </template>
+  
+  <style scoped>
+  #container {
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+  }
+  </style>
+  ```
+  
+  ```vue
+  <!-- src/App.vue：根组件里显示这个页面 -->
+  <script setup>
+  import EmpList from './views/EmpList.vue'
+  </script>
+  
+  <template>
+    <EmpList></EmpList>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：
+  1. 页面上表格有 **4 行数据**（谢逊 / 韦一笑 / 黛绮丝 / 殷天正），性别列显示"男 / 女"、职位列显示中文（说明自定义列加工成功）；
+  2. 输入姓名点"查询"，表格只剩匹配的行；点"清空"恢复 4 行（条件被清空后重新查了一次）；
+  3. 一定要用**普通浏览器**验证：本机实测带 `HeadlessChrome` 的 User-Agent 会被接口拦成 405（普通浏览器一切正常，接口支持跨域、不用配代理）；
+  4. 头像列可能是裂图（本机实测课程数据里的 OSS 链接已失效），这不影响案例——关注数据链路是否打通即可；
+  5. 想进一步练手：把分页条组件接到表格下面（用 96 篇的接口数据先做静态的 `:total`），或者给表格加一个"新增员工"按钮 + 对话框（组合问题 2-3、2-4 的做法）。
+
+  :::
+

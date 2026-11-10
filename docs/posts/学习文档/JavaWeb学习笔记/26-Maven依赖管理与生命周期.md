@@ -68,7 +68,7 @@ PPT 第 39 页给了一条现成的出路：
 
 第 4 步"点击刷新按钮"很容易被跳过，但**跳过就会看到"依赖明明写了、代码还是报红"**。刷新按钮就是右侧 **Maven 面板左上角那个循环箭头**（鼠标悬停显示 Reload All Maven Projects）；pom.xml 改完以后 IDEA 往往也会在编辑区右上角弹一个小图标提示加载，点它一样。刷新的动作本质就是：**让 Maven 按新的 pom.xml 重新解析依赖、去仓库把缺的 jar 下下来、再挂到项目的 classpath 上**。
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）：命令行里没有"刷新按钮"，执行任意构建阶段时 Maven 每次都会重新读 pom、自动把缺的依赖下下来。实测加一个本地仓库里没有的依赖（PPT 坐标示例里那个 `cn.hutool:hutool-all:5.8.27`）后跑 `mvn package`，输出里会多出下载过程：
 >
 > ```text
@@ -141,7 +141,7 @@ PPT 第 40 页给的正是 `maven-project01` 排除 `spring-context` 里 `microm
 | **依赖配置的方式** | `<dependencies>` → `<dependency>...</dependency>` → `</dependencies>` |
 | **如何排除依赖** | 在 `<dependency>` 里加 `<exclusions>...</exclusions>`（里面放 `<exclusion>`） |
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）：加 `<exclusions>` 前后各跑一次 `mvn dependency:tree`，一眼就能看出排除生效了。
 >
 > **排除前**——树里能看到 `micrometer-observation`（还带着它自己的 `micrometer-commons`）：
@@ -186,7 +186,7 @@ PPT 第 41 页："依赖配置"这节末尾专门列了两条注意，都是实�
 | **依赖配置变更后要重新加载** | pom.xml 里加了依赖、代码里 `import` 还是报红；或者删了一个依赖，代码却还能引用它（IDE 用的是旧的 classpath） | IDEA 里点 Maven 面板的**刷新按钮**（Reload All Maven Projects）；命令行里随便跑一个阶段（如 `mvn compile`）就相当于重新读了 pom |
 | **本地仓库没有的依赖要联网** | 第一次引入某个依赖时，如果不通网/网络不稳，依赖下载不下来，构建停在 "Could not resolve dependencies" | 确认能上网（已配阿里云镜像），重新刷新/构建；下载失败留下的 `xxx.lastUpdated` 文件会挡住重试，需要删掉再重新加载（见[上一篇](/posts/编程学习/javaweb学习笔记/24-maven的安装与配置/)提到的 `del.bat`，这一章后面"常见问题"也会专门讲） |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机实测（Maven 3.9.14 / JDK 17）：把 Maven 切到**离线模式**（`mvn -o`，参数含义是"只用本地仓库，绝不联网"）并引入一个本地仓库里没有的依赖（课程用的 `junit-jupiter:5.9.1`），构建会直接失败，报错原文是——
 >
 > ```text
@@ -248,7 +248,7 @@ PPT 第 45 页给了常用阶段的含义表，第 48 页又把它们列了一�
 | **package** | **将编译后的文件打包**，如：jar、war等 | 生成 `target/xxx.jar`（这个项目 pom 里默认是 jar） |
 | **install** | **安装项目到本地仓库** | 把打好的包**装进本地仓库**，别的项目就能用坐标引用它了 |
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测（Maven 3.9.14 / JDK 17）——把课程 `maven-project01`（spring-context + 排除依赖）照原样跑一遍，各阶段的真实输出：
 >
 > **`mvn clean`**：只清理，输出里能看到它删了哪个目录
@@ -347,7 +347,7 @@ PPT 第 46 页给的截图就是命令行执行 `mvn compile` 的真实结果—
 | 能看到什么 | 精简的进度与结果 | 完整日志：每个阶段、下载了哪些 jar、报错原文 |
 | 多个阶段 | 挨个双击 | 一条命令连着写：`mvn clean package` |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 判断构建有没有成功看最后一行就行：**`BUILD SUCCESS` = 成功**，**`BUILD FAILURE` = 失败**（失败时往上看第一条 `[ERROR]`，它通常就写着原因，比如坐标找不到、测试没通过）。另外，`package` 阶段只要项目里有测试代码就会去跑测试（surefire 插件），测试失败会**直接让构建失败**、拿不到 jar——这也是下一节 JUnit 单元测试要讲的内容。
 
 ## 小结
@@ -395,30 +395,38 @@ PPT 第 46 页给的截图就是命令行执行 `mvn compile` 的真实结果—
   两个依赖都要写在同一个标签里（想一想这个"装依赖的容器"叫什么）；每个 `<dependency>` 里按顺序写三行，并用中文注释标出哪行是组织名、哪行是模块名、哪行是版本号。
   （练习文件 `test_26_依赖配置.xml` 里已经给了 pom 骨架和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：所有依赖装在一个"容器标签"里，每个依赖是容器里的一个"条目"；每个条目的三行和项目坐标是同样的三个名字
-  > **二级 · 方法**：容器标签是 `<dependencies>`，条目是 `<dependency>`；三行是 `<groupId>` / `<artifactId>` / `<version>`
-  > **三级 · 骨架**：`<dependencies><dependency><groupId>____</groupId><artifactId>____</artifactId><version>____</version></dependency>…</dependencies>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <dependencies>
-  >     <!-- 依赖①：commons-io -->
-  >     <dependency>
-  >         <groupId>commons-io</groupId>        <!-- 组织名 -->
-  >         <artifactId>commons-io</artifactId>  <!-- 模块名 -->
-  >         <version>2.11.0</version>            <!-- 版本号 -->
-  >     </dependency>
-  >
-  >     <!-- 依赖②：hutool 工具库 -->
-  >     <dependency>
-  >         <groupId>cn.hutool</groupId>
-  >         <artifactId>hutool-all</artifactId>
-  >         <version>5.8.27</version>
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > 检查点：① `<dependencies>` 是 `<project>` 的**直接子标签**（和 `<modelVersion>`、`<properties>` 平级）；② 两个 `<dependency>` 都写全了三行坐标——**少一行 Maven 就定位不到 jar**；③ 写完记得在 IDEA 里**点刷新按钮**（命令行则跑一次 `mvn compile`），否则 classpath 上不会有这两个 jar。本机实测加上 `hutool-all:5.8.27` 后跑 `mvn package`，日志里会出现 `Downloaded from aliyunmaven: .../cn/hutool/hutool-all/5.8.27/hutool-all-5.8.27.jar (2.5 MB …)`。
+  **一级 · 思路**：所有依赖装在一个"容器标签"里，每个依赖是容器里的一个"条目"；每个条目的三行和项目坐标是同样的三个名字
+  **二级 · 方法**：容器标签是 `<dependencies>`，条目是 `<dependency>`；三行是 `<groupId>` / `<artifactId>` / `<version>`
+  **三级 · 骨架**：`<dependencies><dependency><groupId>____</groupId><artifactId>____</artifactId><version>____</version></dependency>…</dependencies>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <dependencies>
+      <!-- 依赖①：commons-io -->
+      <dependency>
+          <groupId>commons-io</groupId>        <!-- 组织名 -->
+          <artifactId>commons-io</artifactId>  <!-- 模块名 -->
+          <version>2.11.0</version>            <!-- 版本号 -->
+      </dependency>
+  
+      <!-- 依赖②：hutool 工具库 -->
+      <dependency>
+          <groupId>cn.hutool</groupId>
+          <artifactId>hutool-all</artifactId>
+          <version>5.8.27</version>
+      </dependency>
+  </dependencies>
+  ```
+  检查点：① `<dependencies>` 是 `<project>` 的**直接子标签**（和 `<modelVersion>`、`<properties>` 平级）；② 两个 `<dependency>` 都写全了三行坐标——**少一行 Maven 就定位不到 jar**；③ 写完记得在 IDEA 里**点刷新按钮**（命令行则跑一次 `mvn compile`），否则 classpath 上不会有这两个 jar。本机实测加上 `hutool-all:5.8.27` 后跑 `mvn package`，日志里会出现 `Downloaded from aliyunmaven: .../cn/hutool/hutool-all/5.8.27/hutool-all-5.8.27.jar (2.5 MB …)`。
+
+  :::
+
 
 - [ ] **2-2 排除一个"依赖的依赖"**
   项目里引入了 `spring-context`（组织 `org.springframework`，版本 **6.1.4**），但它顺带带进来了 `io.micrometer:micrometer-observation`，现在不想要它。在练习文件的 pom 骨架里：
@@ -427,33 +435,41 @@ PPT 第 46 页给的截图就是命令行执行 `mvn compile` 的真实结果—
   3. 在文件末尾的注释里回答：为什么排除的时候**不用写版本号**？排除生效了怎么验证？
   （练习文件 `test_26_排除依赖.xml` 里已经给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：排除是写在"引入它的那个依赖"里面的——即"我不想要你带进来的这一样东西"；被排掉的东西只需要能**认出它是谁**
-  > **二级 · 方法**：外层用 `<exclusions>` 包住一个 `<exclusion>`；`<exclusion>` 里写 `<groupId>` 和 `<artifactId>`；**不写 `<version>`**（PPT 第 40 页明确"被排除的资源无需指定版本"）
-  > **三级 · 骨架**：`<dependency><groupId>org.springframework</groupId><artifactId>spring-context</artifactId><version>6.1.4</version><exclusions><exclusion><groupId>____</groupId><artifactId>____</artifactId></exclusion></exclusions></dependency>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <dependencies>
-  >     <dependency>
-  >         <groupId>org.springframework</groupId>
-  >         <artifactId>spring-context</artifactId>
-  >         <version>6.1.4</version>
-  >
-  >         <!-- 排除依赖：断开 spring-context 带进来的 micrometer-observation -->
-  >         <exclusions>
-  >             <exclusion>
-  >                 <groupId>io.micrometer</groupId>
-  >                 <artifactId>micrometer-observation</artifactId>
-  >                 <!-- 这里不写 <version>：被排除的资源无需指定版本 -->
-  >             </exclusion>
-  >         </exclusions>
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > 两个问题的答案：
-  > 1. **不用写版本号**是因为版本是"把它带进来的那个依赖"决定的（这里由 `spring-context` 决定），**排除的动作要表达的是"这个 jar 我不要"，只要能认出"哪个组织下的哪个模块"就够了**，写版本反而容易写错——PPT 第 40 页的原话是"被排除的资源无需指定版本"。
-  > 2. **验证办法**：跑一次 `mvn dependency:tree` 看依赖树（或 IDEA 里刷新后看 External Libraries 列表）——排除前树里能看到 `io.micrometer:micrometer-observation:jar:1.12.3`（它下面还挂着 `micrometer-commons`），加了 `<exclusions>` 之后这两行都消失，其余依赖不受影响。本机实测的两次输出就在正文的 TIP 块里，可以对照。
+  **一级 · 思路**：排除是写在"引入它的那个依赖"里面的——即"我不想要你带进来的这一样东西"；被排掉的东西只需要能**认出它是谁**
+  **二级 · 方法**：外层用 `<exclusions>` 包住一个 `<exclusion>`；`<exclusion>` 里写 `<groupId>` 和 `<artifactId>`；**不写 `<version>`**（PPT 第 40 页明确"被排除的资源无需指定版本"）
+  **三级 · 骨架**：`<dependency><groupId>org.springframework</groupId><artifactId>spring-context</artifactId><version>6.1.4</version><exclusions><exclusion><groupId>____</groupId><artifactId>____</artifactId></exclusion></exclusions></dependency>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <dependencies>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-context</artifactId>
+          <version>6.1.4</version>
+  
+          <!-- 排除依赖：断开 spring-context 带进来的 micrometer-observation -->
+          <exclusions>
+              <exclusion>
+                  <groupId>io.micrometer</groupId>
+                  <artifactId>micrometer-observation</artifactId>
+                  <!-- 这里不写 <version>：被排除的资源无需指定版本 -->
+              </exclusion>
+          </exclusions>
+      </dependency>
+  </dependencies>
+  ```
+  两个问题的答案：
+  1. **不用写版本号**是因为版本是"把它带进来的那个依赖"决定的（这里由 `spring-context` 决定），**排除的动作要表达的是"这个 jar 我不要"，只要能认出"哪个组织下的哪个模块"就够了**，写版本反而容易写错——PPT 第 40 页的原话是"被排除的资源无需指定版本"。
+  2. **验证办法**：跑一次 `mvn dependency:tree` 看依赖树（或 IDEA 里刷新后看 External Libraries 列表）——排除前树里能看到 `io.micrometer:micrometer-observation:jar:1.12.3`（它下面还挂着 `micrometer-commons`），加了 `<exclusions>` 之后这两行都消失，其余依赖不受影响。本机实测的两次输出就在正文的 TIP 块里，可以对照。
+
+  :::
+
 
 - [ ] **2-3 说清生命周期：阶段、顺序与执行方式**
   不用写代码，用文字（可以在练习文件里直接用中文回答）说清这几件事：
@@ -463,26 +479,34 @@ PPT 第 46 页给的截图就是命令行执行 `mvn compile` 的真实结果—
   4. 写出**两种**执行生命周期的方式（IDEA 里怎么点、命令行怎么敲），并写出"先清理再打包"的一条命令。
   （练习文件 `test_26_生命周期阶段与执行方式.txt` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：默认那套（default）里的阶段像排队的工序，站到队伍后面就会把前面的人都带上；clean 和 site 是另外两支队伍
-  > **二级 · 方法**：三套是 `clean` / `default` / `site`；常用阶段含义见正文表格；执行方式是"IDEA 面板双击"和"命令行 `mvn 阶段名`"；多阶段可以连写，用空格隔开
-  > **三级 · 骨架**：`mvn ____ ____`（先清理再打包）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **2-3**
-  > 1. 三套**相互独立**的生命周期：**clean**（清理工作）、**default**（核心工作——编译、测试、打包、安装、部署等）、**site**（生成报告、发布站点等）。"相互独立"指**执行一套里的阶段不会触发另一套里的阶段**：`mvn clean` 只做清理，不会编译；`mvn package` 也不会顺手清理（想"先清理再打包"要写成 `mvn clean package`）。
-  > 2. 五个常用阶段：
-  >    - **clean**：移除上一次构建生成的文件——删掉 **`target` 目录**；
-  >    - **compile**：编译项目源代码——生成 **`target/classes` 下的 `.class`**；
-  >    - **test**：用单元测试框架（junit）运行测试——`src/test/java` 里的测试跑一遍；
-  >    - **package**：把编译后的文件打包——生成 **`target/maven-project01-1.0-SNAPSHOT.jar`**；
-  >    - **install**：安装项目到**本地仓库**——`mvn_repo\com\itheima\maven-project01\1.0-SNAPSHOT\` 下多出 `.jar` 和 `.pom`。
-  > 3. 因为规则是"**在同一套生命周期中，当运行后面的阶段时，前面的阶段都会运行**"，而 compile、test、package 都在 **default** 这套里按顺序排着，所以 `mvn package` 会把 compile、test 一起做掉；`mvn clean` 的 clean 阶段属于 **clean** 那套生命周期，**不会**触发 default 里的编译。
-  > 4. 两种执行方式：**① IDEA 右侧 Maven 工具栏（Maven 面板）里，展开项目的 Lifecycle，选中对应的阶段双击执行**；**② 命令行在项目目录下敲 `mvn 阶段名`**。"先清理再打包"的命令是：
-  >    ```bash
-  >    mvn clean package
-  >    ```
-  >    （本机实测这条命令的输出：先 `clean:3.2.0:clean`，再依次 `resources → compiler:compile → testResources → testCompile → surefire:test → jar:jar`，最后 `BUILD SUCCESS`。）
+  **一级 · 思路**：默认那套（default）里的阶段像排队的工序，站到队伍后面就会把前面的人都带上；clean 和 site 是另外两支队伍
+  **二级 · 方法**：三套是 `clean` / `default` / `site`；常用阶段含义见正文表格；执行方式是"IDEA 面板双击"和"命令行 `mvn 阶段名`"；多阶段可以连写，用空格隔开
+  **三级 · 骨架**：`mvn ____ ____`（先清理再打包）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **2-3**
+  1. 三套**相互独立**的生命周期：**clean**（清理工作）、**default**（核心工作——编译、测试、打包、安装、部署等）、**site**（生成报告、发布站点等）。"相互独立"指**执行一套里的阶段不会触发另一套里的阶段**：`mvn clean` 只做清理，不会编译；`mvn package` 也不会顺手清理（想"先清理再打包"要写成 `mvn clean package`）。
+  2. 五个常用阶段：
+     - **clean**：移除上一次构建生成的文件——删掉 **`target` 目录**；
+     - **compile**：编译项目源代码——生成 **`target/classes` 下的 `.class`**；
+     - **test**：用单元测试框架（junit）运行测试——`src/test/java` 里的测试跑一遍；
+     - **package**：把编译后的文件打包——生成 **`target/maven-project01-1.0-SNAPSHOT.jar`**；
+     - **install**：安装项目到**本地仓库**——`mvn_repo\com\itheima\maven-project01\1.0-SNAPSHOT\` 下多出 `.jar` 和 `.pom`。
+  3. 因为规则是"**在同一套生命周期中，当运行后面的阶段时，前面的阶段都会运行**"，而 compile、test、package 都在 **default** 这套里按顺序排着，所以 `mvn package` 会把 compile、test 一起做掉；`mvn clean` 的 clean 阶段属于 **clean** 那套生命周期，**不会**触发 default 里的编译。
+  4. 两种执行方式：**① IDEA 右侧 Maven 工具栏（Maven 面板）里，展开项目的 Lifecycle，选中对应的阶段双击执行**；**② 命令行在项目目录下敲 `mvn 阶段名`**。"先清理再打包"的命令是：
+     ```bash
+     mvn clean package
+     ```
+     （本机实测这条命令的输出：先 `clean:3.2.0:clean`，再依次 `resources → compiler:compile → testResources → testCompile → surefire:test → jar:jar`，最后 `BUILD SUCCESS`。）
+
+  :::
+
 
 ### 三、综合题
 
@@ -506,54 +530,62 @@ PPT 第 46 页给的截图就是命令行执行 `mvn compile` 的真实结果—
   | 生命周期与阶段 | `clean` 与 `package` 分属两套生命周期，可连写 |
   | 常用阶段 | compile 编译、test 跑测试、package 打包、install 装进本地仓库 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这是"改 pom → 重新加载 → 跑构建 → 看产物 → 验证"的一条流水线，每一步都有可观察的结果（目录变化、日志行、文件路径）
-  > **二级 · 方法**：排除写在 `<dependency>` 里，用 `<exclusions>` 包 `<exclusion>`（只写 groupId + artifactId）；构建用 IDEA 面板双击 `clean`、`package`，或命令行 `mvn clean package`；看树的命令是 `mvn dependency:tree`；产物在 **`target`** 目录下
-  > **三级 · 骨架**：`mvn ____ ____`（两个阶段）→ 日志里找 `--- jar:3.5.0:jar` 和 `Building jar: ____` 这两行
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **3-1** 一份对照过程（课程环境 + 本机实测的值）：
-  > 1. **先清理**：`mvn clean` → 日志里 `clean:3.2.0:clean` + `Deleting ...\maven-project01\target`，跑完 `target` 目录**不见了**（`BUILD SUCCESS`）。
-  > 2. **pom.xml 里的依赖段**：
-  >    ```xml
-  >    <dependencies>
-  >        <dependency>
-  >            <groupId>org.springframework</groupId>
-  >            <artifactId>spring-context</artifactId>
-  >            <version>6.1.4</version>
-  >
-  >            <!-- 排除依赖：被排除的资源无需指定版本 -->
-  >            <exclusions>
-  >                <exclusion>
-  >                    <groupId>io.micrometer</groupId>
-  >                    <artifactId>micrometer-observation</artifactId>
-  >                </exclusion>
-  >            </exclusions>
-  >        </dependency>
-  >    </dependencies>
-  >    ```
-  > 3. **先清理再打包**：`mvn clean package`（IDEA 里就是先双击 `clean` 再双击 `package`）。能证明"前面的阶段也跑了"的那几行**就是每个阶段一行的 `--- 插件:版本:目标 (阶段) @ 项目名 ---`**：
-  >    ```text
-  >    [INFO] --- clean:3.2.0:clean (default-clean) @ maven-project01 ---
-  >    [INFO] --- resources:3.4.0:resources (default-resources) @ maven-project01 ---
-  >    [INFO] --- compiler:3.15.0:compile (default-compile) @ maven-project01 ---
-  >    [INFO] Compiling 1 source file with javac [debug target 17] to target\classes
-  >    [INFO] --- resources:3.4.0:testResources (default-testResources) @ maven-project01 ---
-  >    [INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ maven-project01 ---
-  >    [INFO] --- surefire:3.5.4:test (default-test) @ maven-project01 ---
-  >    [INFO] --- jar:3.5.0:jar (default-jar) @ maven-project01 ---
-  >    [INFO] Building jar: ...\maven-project01\target\maven-project01-1.0-SNAPSHOT.jar
-  >    [INFO] BUILD SUCCESS
-  >    ```
-  >    只敲了 `package` 一个阶段，但 compile、test 都跑了——这就是"后面的阶段会触发前面的阶段"。
-  > 4. **产物路径**：`...\maven-project01\target\maven-project01-1.0-SNAPSHOT.jar`。它在 `target` 下，因为 **`target` 就是 Maven 的构建产物目录**（编译输出 `classes`、打包结果都在这里），标准结构里它由 Maven 生成、可以被 `clean` 删掉。jar 的文件名由 **artifactId + version** 拼成，这也正好复习了上一篇的坐标。
-  > 5. **验证排除**：`mvn dependency:tree`，排除生效时输出里**没有** `io.micrometer:micrometer-observation` 这一行（它原来挂在 `spring-context` 下面，自己还带一个 `micrometer-commons`）：
-  >    ```text
-  >    [INFO] +- org.springframework:spring-context:jar:6.1.4:compile
-  >    [INFO] |  +- org.springframework:spring-aop:jar:6.1.4:compile
-  >    [INFO] |  +- org.springframework:spring-beans:jar:6.1.4:compile
-  >    [INFO] |  +- org.springframework:spring-core:jar:6.1.4:compile
-  >    [INFO] |  |  \- org.springframework:spring-jcl:jar:6.1.4:compile
-  >    [INFO] |  \- org.springframework:spring-expression:jar:6.1.4:compile
-  >    ```
-  > 6. **IDEA 里依赖报红的排查顺序**（任答两条即可）：① **点 Maven 面板的刷新按钮重新加载**（改了 pom 必须重新加载，这是 PPT 第 41 页的第一条注意事项）；② 看**网通不通**——本地仓库里没有这个依赖时是要联网下载的（第二条注意事项），网络不稳时先删掉仓库里对应的 `xxx.lastUpdated` 再重新加载；③ **核对坐标**：group、artifact、version 三行有没有拼错（写错就是 `Could not find artifact ...`）；④ 检查**全局 Maven 配置**（安装目录、settings.xml、本地仓库三个路径）有没有指错，指错的话下载进了"另一个仓库"，IDEA 自然找不到；⑤ 还不行就 `File → Invalidate Caches / Restart` 重启 IDEA 再加载一次。
+  **一级 · 思路**：这是"改 pom → 重新加载 → 跑构建 → 看产物 → 验证"的一条流水线，每一步都有可观察的结果（目录变化、日志行、文件路径）
+  **二级 · 方法**：排除写在 `<dependency>` 里，用 `<exclusions>` 包 `<exclusion>`（只写 groupId + artifactId）；构建用 IDEA 面板双击 `clean`、`package`，或命令行 `mvn clean package`；看树的命令是 `mvn dependency:tree`；产物在 **`target`** 目录下
+  **三级 · 骨架**：`mvn ____ ____`（两个阶段）→ 日志里找 `--- jar:3.5.0:jar` 和 `Building jar: ____` 这两行
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **3-1** 一份对照过程（课程环境 + 本机实测的值）：
+  1. **先清理**：`mvn clean` → 日志里 `clean:3.2.0:clean` + `Deleting ...\maven-project01\target`，跑完 `target` 目录**不见了**（`BUILD SUCCESS`）。
+  2. **pom.xml 里的依赖段**：
+     ```xml
+     <dependencies>
+         <dependency>
+             <groupId>org.springframework</groupId>
+             <artifactId>spring-context</artifactId>
+             <version>6.1.4</version>
+  
+             <!-- 排除依赖：被排除的资源无需指定版本 -->
+             <exclusions>
+                 <exclusion>
+                     <groupId>io.micrometer</groupId>
+                     <artifactId>micrometer-observation</artifactId>
+                 </exclusion>
+             </exclusions>
+         </dependency>
+     </dependencies>
+     ```
+  3. **先清理再打包**：`mvn clean package`（IDEA 里就是先双击 `clean` 再双击 `package`）。能证明"前面的阶段也跑了"的那几行**就是每个阶段一行的 `--- 插件:版本:目标 (阶段) @ 项目名 ---`**：
+     ```text
+     [INFO] --- clean:3.2.0:clean (default-clean) @ maven-project01 ---
+     [INFO] --- resources:3.4.0:resources (default-resources) @ maven-project01 ---
+     [INFO] --- compiler:3.15.0:compile (default-compile) @ maven-project01 ---
+     [INFO] Compiling 1 source file with javac [debug target 17] to target\classes
+     [INFO] --- resources:3.4.0:testResources (default-testResources) @ maven-project01 ---
+     [INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ maven-project01 ---
+     [INFO] --- surefire:3.5.4:test (default-test) @ maven-project01 ---
+     [INFO] --- jar:3.5.0:jar (default-jar) @ maven-project01 ---
+     [INFO] Building jar: ...\maven-project01\target\maven-project01-1.0-SNAPSHOT.jar
+     [INFO] BUILD SUCCESS
+     ```
+     只敲了 `package` 一个阶段，但 compile、test 都跑了——这就是"后面的阶段会触发前面的阶段"。
+  4. **产物路径**：`...\maven-project01\target\maven-project01-1.0-SNAPSHOT.jar`。它在 `target` 下，因为 **`target` 就是 Maven 的构建产物目录**（编译输出 `classes`、打包结果都在这里），标准结构里它由 Maven 生成、可以被 `clean` 删掉。jar 的文件名由 **artifactId + version** 拼成，这也正好复习了上一篇的坐标。
+  5. **验证排除**：`mvn dependency:tree`，排除生效时输出里**没有** `io.micrometer:micrometer-observation` 这一行（它原来挂在 `spring-context` 下面，自己还带一个 `micrometer-commons`）：
+     ```text
+     [INFO] +- org.springframework:spring-context:jar:6.1.4:compile
+     [INFO] |  +- org.springframework:spring-aop:jar:6.1.4:compile
+     [INFO] |  +- org.springframework:spring-beans:jar:6.1.4:compile
+     [INFO] |  +- org.springframework:spring-core:jar:6.1.4:compile
+     [INFO] |  |  \- org.springframework:spring-jcl:jar:6.1.4:compile
+     [INFO] |  \- org.springframework:spring-expression:jar:6.1.4:compile
+     ```
+  6. **IDEA 里依赖报红的排查顺序**（任答两条即可）：① **点 Maven 面板的刷新按钮重新加载**（改了 pom 必须重新加载，这是 PPT 第 41 页的第一条注意事项）；② 看**网通不通**——本地仓库里没有这个依赖时是要联网下载的（第二条注意事项），网络不稳时先删掉仓库里对应的 `xxx.lastUpdated` 再重新加载；③ **核对坐标**：group、artifact、version 三行有没有拼错（写错就是 `Could not find artifact ...`）；④ 检查**全局 Maven 配置**（安装目录、settings.xml、本地仓库三个路径）有没有指错，指错的话下载进了"另一个仓库"，IDEA 自然找不到；⑤ 还不行就 `File → Invalidate Caches / Restart` 重启 IDEA 再加载一次。
+
+  :::
+

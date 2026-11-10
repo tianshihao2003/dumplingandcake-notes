@@ -53,7 +53,7 @@ df.to_csv('data/sales_01.csv', index=False)
 | `index=False` | **不写入索引列**（最常用，否则文件里会多出一列行号） |
 | `encoding='utf-8'` | 指定编码 |
 
-> [!TIP]
+> [!TIP] 提示
 > `df['新列名'] = 表达式` 是 Pandas 里新增列的标准写法：右边是**整列**的运算（`df['销售数量'] * df['单价']` 会把每一行对应相乘），不需要写循环。
 
 ## 相关
@@ -77,49 +77,73 @@ df.to_csv('data/sales_01.csv', index=False)
 - [ ] **2-1 读取指定列**
   读取 `data/sales.csv`，只要"订单号、产品类别、销售数量、单价"四列，打印前 5 行。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：读文件时就把不需要的列过滤掉，省内存
-  > **二级 · 方法**：`pd.read_csv(路径, usecols=[...])`
-  > **三级 · 骨架**：`df.____(5)` 看前 5 行
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > import pandas as pd
-  >
-  > df = pd.read_csv('data/sales.csv', usecols=['订单号', '产品类别', '销售数量', '单价'])
-  > print(df.head(5))
-  > ```
+  **一级 · 思路**：读文件时就把不需要的列过滤掉，省内存
+  **二级 · 方法**：`pd.read_csv(路径, usecols=[...])`
+  **三级 · 骨架**：`df.____(5)` 看前 5 行
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  import pandas as pd
+  
+  df = pd.read_csv('data/sales.csv', usecols=['订单号', '产品类别', '销售数量', '单价'])
+  print(df.head(5))
+  ```
+
+  :::
+
 
 - [ ] **2-2 计算新列并写回文件**
   在上面基础上新增"销售金额"列（销售数量 × 单价），写出到 `sales_out.csv`（不要索引列）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：新增列 → 写出
-  > **二级 · 方法**：`df['销售金额'] = df['销售数量'] * df['单价']` / `df.to_csv(..., index=False)`
-  > **三级 · 骨架**：右边是整列相乘，不用写循环
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > df['销售金额'] = df['销售数量'] * df['单价']
-  > df.to_csv('sales_out.csv', index=False)
-  > print(df.head(3))
-  > ```
+  **一级 · 思路**：新增列 → 写出
+  **二级 · 方法**：`df['销售金额'] = df['销售数量'] * df['单价']` / `df.to_csv(..., index=False)`
+  **三级 · 骨架**：右边是整列相乘，不用写循环
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  df['销售金额'] = df['销售数量'] * df['单价']
+  df.to_csv('sales_out.csv', index=False)
+  print(df.head(3))
+  ```
+
+  :::
+
 
 - [ ] **2-3 用订单号当行索引**
   重新读取 `data/sales.csv`，把"订单号"设为行索引，然后打印索引的前 3 个值。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：读的时候直接指定索引列
-  > **二级 · 方法**：`pd.read_csv(路径, index_col='订单号')`
-  > **三级 · 骨架**：`print(df.index[:3].tolist())`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > import pandas as pd
-  >
-  > df2 = pd.read_csv('data/sales.csv', index_col='订单号')
-  > print(df2.index[:3].tolist())
-  > ```
+  **一级 · 思路**：读的时候直接指定索引列
+  **二级 · 方法**：`pd.read_csv(路径, index_col='订单号')`
+  **三级 · 骨架**：`print(df.index[:3].tolist())`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  import pandas as pd
+  
+  df2 = pd.read_csv('data/sales.csv', index_col='订单号')
+  print(df2.index[:3].tolist())
+  ```
+
+  :::
+

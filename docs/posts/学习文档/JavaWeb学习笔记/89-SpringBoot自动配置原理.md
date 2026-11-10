@@ -272,7 +272,7 @@ META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
 ![imports 文件里的自动配置类](https://img.tsh520.cn/file/blog/article/30-imports文件里的自动配置类.jpg)
 *图：打开这个 `.imports` 文件，一行一个自动配置类的**全类名**——`data.jpa.JpaRepositoriesAutoConfiguration`、`data.ldap.LdapRepositoriesAutoConfiguration`、`data.mongo.*`、`data.neo4j.*`、`data.r2dbc.*`、`data.redis.*`……名单长得能翻好几屏*
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **版本差异（PPT 第 30 页的"注意"）**：
 >
 > 在**低版本（2.7.0 以前）**的 SpringBoot 中，自动配置类（`XxxAutoConfiguration`）是定义在 **`spring.factories`** 文件中的；**2.7 之后**改成了上面这个 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件。
@@ -427,52 +427,60 @@ INFO  ... : Started SpringbootAutoconfigurationTestApplication in 2.084 seconds 
   ④ 回答：为什么第三方包里标了"交给容器管理"注解的类会失效？
   （写作区见练习文件 `test_89_自动配置原理.txt` 的题目2-1。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先想"类是怎么进容器的"——要么被**扫描**到，要么被**明确导入**；扫描的默认范围是引导类所在包及其子包，所以打破僵局只有"把范围撑大"或"点名导入"两条路
-  > **二级 · 方法**：方案一 `@ComponentScan({"包名1","包名2"})`（加在引导类上，注意它会**覆盖**默认扫描范围，所以要带上自己项目的包名）；方案二 `@Import({A.class, B.class})`，四种形式是**普通类 / 配置类 / `ImportSelector` 实现类 / `@EnableXxx` 注解**；自定义注解的写法照 `@Retention(RUNTIME)` + `@Target(TYPE)` + `@Import(...)` 三件事
-  > **三级 · 骨架**：① `@____({"com.example","com.itheima"})` + `@SpringBootApplication`；② `@____({TokenParser.class, HeaderConfig.class})`；自定义注解 `public @interface EnableHeaderConfig { }` 头上写 `@____(MyImportSelector.class)`；③ `public class MyImportSelector implements ____ { public String[] ____(AnnotationMetadata m) { return new String[]{"____"}; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 扩大扫描范围（方案一）：
-  > ```java
-  > @ComponentScan({"com.example","com.itheima"})   // 第三方包 + 自己项目的包都要写上
-  > @SpringBootApplication
-  > public class SpringbootWebConfigApplication {
-  >     //...
-  > }
-  > ```
-  > 两个缺点：**性能低**（扫描范围越大，启动时要检查的类越多）、**使用繁琐**（每引入一个第三方包都得往数组里补一个包名，而且未必知道要注册的类在哪个包）。
-  > ② 点名导入（方案二）：
-  > ```java
-  > // 写法一：直接把类和配置类导入
-  > @Import({TokenParser.class, HeaderConfig.class})
-  > @SpringBootApplication
-  > public class SpringbootWebConfig2Application {
-  >     //...
-  > }
-  >
-  > // 写法二：自定义注解把导入包起来（使用方只贴一个注解）
-  > @Retention(RetentionPolicy.RUNTIME)
-  > @Target(ElementType.TYPE)
-  > @Import(MyImportSelector.class)
-  > public @interface EnableHeaderConfig {
-  > }
-  >
-  > // 使用：
-  > @EnableHeaderConfig
-  > @SpringBootApplication
-  > public class SpringbootWebConfig2Application { }
-  > ```
-  > ③ 那个类实现的是 **`ImportSelector`** 接口，方法名是 `selectImports`，返回 **`String[]`**（要导入的类的**全类名数组**）：
-  > ```java
-  > public class MyImportSelector implements ImportSelector {
-  >     public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-  >         return new String[]{"com.example.HeaderConfig"};
-  >     }
-  > }
-  > ```
-  > ④ 因为"交给容器管理"这个注解（`@Component` 及其衍生注解）**只在被组件扫描扫到时才生效**；默认扫描范围是引导类所在包及其子包，`com.example` 不在其中，所以那个类虽然标了注解，容器里却没有它。
-  > 自查：三种写法随便留一种、启动一次，注入不再报错就说明生效了；把导入全删掉，报错的是 `NoSuchBeanDefinitionException` 之类的"找不到 bean"。
+  **一级 · 思路**：先想"类是怎么进容器的"——要么被**扫描**到，要么被**明确导入**；扫描的默认范围是引导类所在包及其子包，所以打破僵局只有"把范围撑大"或"点名导入"两条路
+  **二级 · 方法**：方案一 `@ComponentScan({"包名1","包名2"})`（加在引导类上，注意它会**覆盖**默认扫描范围，所以要带上自己项目的包名）；方案二 `@Import({A.class, B.class})`，四种形式是**普通类 / 配置类 / `ImportSelector` 实现类 / `@EnableXxx` 注解**；自定义注解的写法照 `@Retention(RUNTIME)` + `@Target(TYPE)` + `@Import(...)` 三件事
+  **三级 · 骨架**：① `@____({"com.example","com.itheima"})` + `@SpringBootApplication`；② `@____({TokenParser.class, HeaderConfig.class})`；自定义注解 `public @interface EnableHeaderConfig { }` 头上写 `@____(MyImportSelector.class)`；③ `public class MyImportSelector implements ____ { public String[] ____(AnnotationMetadata m) { return new String[]{"____"}; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 扩大扫描范围（方案一）：
+  ```java
+  @ComponentScan({"com.example","com.itheima"})   // 第三方包 + 自己项目的包都要写上
+  @SpringBootApplication
+  public class SpringbootWebConfigApplication {
+      //...
+  }
+  ```
+  两个缺点：**性能低**（扫描范围越大，启动时要检查的类越多）、**使用繁琐**（每引入一个第三方包都得往数组里补一个包名，而且未必知道要注册的类在哪个包）。
+  ② 点名导入（方案二）：
+  ```java
+  // 写法一：直接把类和配置类导入
+  @Import({TokenParser.class, HeaderConfig.class})
+  @SpringBootApplication
+  public class SpringbootWebConfig2Application {
+      //...
+  }
+  
+  // 写法二：自定义注解把导入包起来（使用方只贴一个注解）
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.TYPE)
+  @Import(MyImportSelector.class)
+  public @interface EnableHeaderConfig {
+  }
+  
+  // 使用：
+  @EnableHeaderConfig
+  @SpringBootApplication
+  public class SpringbootWebConfig2Application { }
+  ```
+  ③ 那个类实现的是 **`ImportSelector`** 接口，方法名是 `selectImports`，返回 **`String[]`**（要导入的类的**全类名数组**）：
+  ```java
+  public class MyImportSelector implements ImportSelector {
+      public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+          return new String[]{"com.example.HeaderConfig"};
+      }
+  }
+  ```
+  ④ 因为"交给容器管理"这个注解（`@Component` 及其衍生注解）**只在被组件扫描扫到时才生效**；默认扫描范围是引导类所在包及其子包，`com.example` 不在其中，所以那个类虽然标了注解，容器里却没有它。
+  自查：三种写法随便留一种、启动一次，注入不再报错就说明生效了；把导入全删掉，报错的是 `NoSuchBeanDefinitionException` 之类的"找不到 bean"。
+
+  :::
+
 
 - [ ] **2-2 手写一个自动配置类，并让它被 SpringBoot 认出来**
   需求：你做了一个公共组件，想让别的工程"引了依赖就能直接用"。要求：
@@ -482,55 +490,63 @@ INFO  ... : Started SpringbootAutoconfigurationTestApplication in 2.084 seconds 
   ④ 回答：如果自动配置类里不写"尊重使用方"那个注解会怎样？
   （写作区见练习文件 `test_89_自动配置原理.txt` 的题目2-2。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：自动配置类本身就是"配置类"，所以它有 `@Configuration` 和 `@Bean`；参数对象一般是"绑定某个前缀的配置项"的类，需要用专门的注解把**参数类**启用成 bean（而不是给它加 `@Component`）；"尊重使用方"就是条件装配里的那一个；②③ 是本节最需要背下来的那条路径与文件
-  > **二级 · 方法**：类上 `@Configuration` + `@EnableConfigurationProperties(XxxProperties.class)`；方法上 `@Bean` + `@ConditionalOnMissingBean`；文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（注意是 `META-INF/spring/`，不是 `META-INF/`）；文件内容 = 一行**自动配置类的全类名**；老版本（2.7 之前）这个名单写在 `META-INF/spring.factories` 里
-  > **三级 · 骨架**：
-  > ```java
-  > @____(OssProperties.class)
-  > @____
-  > public class OssAutoConfiguration {
-  >     @____
-  >     @____
-  >     public OssOperator ossOperator(OssProperties props) {
-  >         return new OssOperator(props);
-  >     }
-  > }
-  > ```
-  > ② 的路径：`src/main/resources/____/____/org.springframework.boot.autoconfigure.____.imports`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 自动配置类：
-  > ```java
-  > package com.example.oss;
-  >
-  > import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-  > import org.springframework.boot.context.properties.EnableConfigurationProperties;
-  > import org.springframework.context.annotation.Bean;
-  > import org.springframework.context.annotation.Configuration;
-  >
-  > @EnableConfigurationProperties(OssProperties.class)   // 让参数类成为 bean，并绑定配置文件里的值
-  > @Configuration                                          // 自动配置类本身也是配置类
-  > public class OssAutoConfiguration {
-  >
-  >     @Bean
-  >     @ConditionalOnMissingBean                           // 使用方自己定义了就不要再补
-  >     public OssOperator ossOperator(OssProperties props) {
-  >         return new OssOperator(props);
-  >     }
-  > }
-  > ```
-  > ② 文件放在 `src/main/resources/META-INF/spring/` 目录下，文件名固定为 **`org.springframework.boot.autoconfigure.AutoConfiguration.imports`**，完整路径就是：
-  > ```text
-  > src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-  > ```
-  > ③ 内容只有一行——自动配置类的**全类名**：
-  > ```text
-  > com.example.oss.OssAutoConfiguration
-  > ```
-  > ④ 不写 `@ConditionalOnMissingBean` 的话，使用方只要自己定义过一个同类型的 bean，容器里就会**出现两个同类型 bean**：注入时报 `NoUniqueBeanDefinitionException`（"同类型 bean 有多个，我该注入哪个"）——自动配置从"兜底"变成了"抢活"。本机实测的反面就是这个：加上它之后，自定义 bean 创建了、自动配置的那个方法没执行、应用正常启动。
-  > 自查：写好后把工程打成 jar / 装进本地仓库，在另一个工程里引进来启动——不用写任何 `@Configuration` 就能注入 `OssOperator`，就说明这条链路通了（[90 篇](/posts/编程学习/javaweb学习笔记/90-自定义starter/)会完整做一遍）。
-  > 老版本对照：2.7.0 之前这份名单写在 `META-INF/spring.factories` 里（按 `org.springframework.boot.autoconfigure.EnableAutoConfiguration=` 的键写），现在读的是 `.imports`。
+  **一级 · 思路**：自动配置类本身就是"配置类"，所以它有 `@Configuration` 和 `@Bean`；参数对象一般是"绑定某个前缀的配置项"的类，需要用专门的注解把**参数类**启用成 bean（而不是给它加 `@Component`）；"尊重使用方"就是条件装配里的那一个；②③ 是本节最需要背下来的那条路径与文件
+  **二级 · 方法**：类上 `@Configuration` + `@EnableConfigurationProperties(XxxProperties.class)`；方法上 `@Bean` + `@ConditionalOnMissingBean`；文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（注意是 `META-INF/spring/`，不是 `META-INF/`）；文件内容 = 一行**自动配置类的全类名**；老版本（2.7 之前）这个名单写在 `META-INF/spring.factories` 里
+  **三级 · 骨架**：
+  ```java
+  @____(OssProperties.class)
+  @____
+  public class OssAutoConfiguration {
+      @____
+      @____
+      public OssOperator ossOperator(OssProperties props) {
+          return new OssOperator(props);
+      }
+  }
+  ```
+  ② 的路径：`src/main/resources/____/____/org.springframework.boot.autoconfigure.____.imports`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 自动配置类：
+  ```java
+  package com.example.oss;
+  
+  import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+  import org.springframework.boot.context.properties.EnableConfigurationProperties;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  
+  @EnableConfigurationProperties(OssProperties.class)   // 让参数类成为 bean，并绑定配置文件里的值
+  @Configuration                                          // 自动配置类本身也是配置类
+  public class OssAutoConfiguration {
+  
+      @Bean
+      @ConditionalOnMissingBean                           // 使用方自己定义了就不要再补
+      public OssOperator ossOperator(OssProperties props) {
+          return new OssOperator(props);
+      }
+  }
+  ```
+  ② 文件放在 `src/main/resources/META-INF/spring/` 目录下，文件名固定为 **`org.springframework.boot.autoconfigure.AutoConfiguration.imports`**，完整路径就是：
+  ```text
+  src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+  ```
+  ③ 内容只有一行——自动配置类的**全类名**：
+  ```text
+  com.example.oss.OssAutoConfiguration
+  ```
+  ④ 不写 `@ConditionalOnMissingBean` 的话，使用方只要自己定义过一个同类型的 bean，容器里就会**出现两个同类型 bean**：注入时报 `NoUniqueBeanDefinitionException`（"同类型 bean 有多个，我该注入哪个"）——自动配置从"兜底"变成了"抢活"。本机实测的反面就是这个：加上它之后，自定义 bean 创建了、自动配置的那个方法没执行、应用正常启动。
+  自查：写好后把工程打成 jar / 装进本地仓库，在另一个工程里引进来启动——不用写任何 `@Configuration` 就能注入 `OssOperator`，就说明这条链路通了（[90 篇](/posts/编程学习/javaweb学习笔记/90-自定义starter/)会完整做一遍）。
+  老版本对照：2.7.0 之前这份名单写在 `META-INF/spring.factories` 里（按 `org.springframework.boot.autoconfigure.EnableAutoConfiguration=` 的键写），现在读的是 `.imports`。
+
+  :::
+
 
 - [ ] **2-3 把自动配置这条链路讲给别人听**
   需求：面试官问："SpringBoot 的自动配置是怎么实现的？"请按**启动顺序**把链路讲一遍，讲到"为什么名单里的类不会全部注册"为止。
@@ -542,21 +558,29 @@ INFO  ... : Started SpringbootAutoconfigurationTestApplication in 2.084 seconds 
   ⑤ 用一句话说明自动配置和"用户自己定义的 bean"是什么关系。
   （写作区见练习文件 `test_89_自动配置原理.txt` 的题目2-3。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"入口注解 → 导入选择器 → 读名单文件 → 条件筛选 → 注册"五步走，每步只讲一个关键词；⑤ 的答案藏在 `@ConditionalOnMissingBean` 的名字里
-  > **二级 · 方法**：关键词——`@SpringBootConfiguration` / `@ComponentScan` / `@EnableAutoConfiguration`；`AutoConfigurationImportSelector`（`ImportSelector` 实现类）；`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（老版本 `spring.factories`）；`@Conditional` 家族（`@ConditionalOnClass` / `@ConditionalOnMissingBean` / `@ConditionalOnProperty`）
-  > **三级 · 骨架**：① `@SpringBootApplication` = `@____`（配置类）+ `@____`（组件扫描，默认扫引导类所在包及子包）+ `@____`（自动配置核心）；② `@EnableAutoConfiguration` 里 `@Import(____.class)`；③ 路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；④ 靠 `@____` 条件装配；⑤ 自动配置是"____"，用户自己定义了就让位
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① `@SpringBootApplication` 由三部分组成：`@SpringBootConfiguration`（与 `@Configuration` 作用相同，声明引导类本身也是配置类）、`@ComponentScan`（组件扫描，**默认扫描引导类所在包及其子包**）、`@EnableAutoConfiguration`（**自动配置的核心注解**）。
-  > ② 从 `@EnableAutoConfiguration` 开始：它里面写着 `@Import(AutoConfigurationImportSelector.class)`——被导入的是一个 **`ImportSelector` 的实现类**，也就是 `@Import` 四种形式里的第三种；真正干活的是它的 `selectImports(...)` 方法（返回 `String[]`）。
-  > ③ 名单文件的确切路径与文件名：
-  > ```text
-  > META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-  > ```
-  > 它在 `spring-boot-autoconfigure` 这个 jar 包里，一行一个 `XxxAutoConfiguration` 全类名。**2.7.0 之前**这些自动配置类定义在 **`spring.factories`** 里，属于历史写法（本机 Spring Boot 3.2.x 走的是 `.imports`）。
-  > ④ 不能照单全收：名单里躺着上百个自动配置类（JPA、MongoDB、Redis、Neo4j、LDAP……），**工程里根本没引这些依赖**，全注册要么启动报错要么塞一堆没用的 bean。真正决定注册与否的是 **`@Conditional` 及其衍生注解**（条件装配）：`@ConditionalOnClass`（环境里有对应字节码才注册，常加在类上）、`@ConditionalOnMissingBean`（没有对应 bean 才注册，常加在方法上）、`@ConditionalOnProperty`（配置文件里有对应属性和值才注册）。满足条件的才注册进 IOC 容器。
-  > ⑤ 自动配置是"**兜底**"，不是"抢活"：容器里已经有同类型的 bean（用户自己用 `@Component` / `@Bean` 声明的）时，带 `@ConditionalOnMissingBean` 的自动配置方法就不执行——用户说了算。本机实测过这一幕：自定义的 `AliyunOSSOperator` 被创建、自动配置的那个 `@Bean` 没执行、应用正常启动且能正常注入。
+  **一级 · 思路**：按"入口注解 → 导入选择器 → 读名单文件 → 条件筛选 → 注册"五步走，每步只讲一个关键词；⑤ 的答案藏在 `@ConditionalOnMissingBean` 的名字里
+  **二级 · 方法**：关键词——`@SpringBootConfiguration` / `@ComponentScan` / `@EnableAutoConfiguration`；`AutoConfigurationImportSelector`（`ImportSelector` 实现类）；`META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（老版本 `spring.factories`）；`@Conditional` 家族（`@ConditionalOnClass` / `@ConditionalOnMissingBean` / `@ConditionalOnProperty`）
+  **三级 · 骨架**：① `@SpringBootApplication` = `@____`（配置类）+ `@____`（组件扫描，默认扫引导类所在包及子包）+ `@____`（自动配置核心）；② `@EnableAutoConfiguration` 里 `@Import(____.class)`；③ 路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；④ 靠 `@____` 条件装配；⑤ 自动配置是"____"，用户自己定义了就让位
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① `@SpringBootApplication` 由三部分组成：`@SpringBootConfiguration`（与 `@Configuration` 作用相同，声明引导类本身也是配置类）、`@ComponentScan`（组件扫描，**默认扫描引导类所在包及其子包**）、`@EnableAutoConfiguration`（**自动配置的核心注解**）。
+  ② 从 `@EnableAutoConfiguration` 开始：它里面写着 `@Import(AutoConfigurationImportSelector.class)`——被导入的是一个 **`ImportSelector` 的实现类**，也就是 `@Import` 四种形式里的第三种；真正干活的是它的 `selectImports(...)` 方法（返回 `String[]`）。
+  ③ 名单文件的确切路径与文件名：
+  ```text
+  META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+  ```
+  它在 `spring-boot-autoconfigure` 这个 jar 包里，一行一个 `XxxAutoConfiguration` 全类名。**2.7.0 之前**这些自动配置类定义在 **`spring.factories`** 里，属于历史写法（本机 Spring Boot 3.2.x 走的是 `.imports`）。
+  ④ 不能照单全收：名单里躺着上百个自动配置类（JPA、MongoDB、Redis、Neo4j、LDAP……），**工程里根本没引这些依赖**，全注册要么启动报错要么塞一堆没用的 bean。真正决定注册与否的是 **`@Conditional` 及其衍生注解**（条件装配）：`@ConditionalOnClass`（环境里有对应字节码才注册，常加在类上）、`@ConditionalOnMissingBean`（没有对应 bean 才注册，常加在方法上）、`@ConditionalOnProperty`（配置文件里有对应属性和值才注册）。满足条件的才注册进 IOC 容器。
+  ⑤ 自动配置是"**兜底**"，不是"抢活"：容器里已经有同类型的 bean（用户自己用 `@Component` / `@Bean` 声明的）时，带 `@ConditionalOnMissingBean` 的自动配置方法就不执行——用户说了算。本机实测过这一幕：自定义的 `AliyunOSSOperator` 被创建、自动配置的那个 `@Bean` 没执行、应用正常启动且能正常注入。
+
+  :::
+
 
 ### 三、综合题
 
@@ -583,29 +607,37 @@ INFO  ... : Started SpringbootAutoconfigurationTestApplication in 2.084 seconds 
   | `@Conditional` 三兄弟（PPT 31） | 第 4、8 步——类上用 Class 判断、方法上用 MissingBean 判断 |
   | 本机实测 | 第 5～7 步——自定义 bean 创建了、自动配置的没执行、应用正常启动 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先"读"再"跑"——前四步都只是读源码和 jar 里的文件（不许背），第 5 步才动手；动手时只加一个自己造的同类 bean，观察"自动配置让不让位"
-  > **二级 · 方法**：三部分注解 `@SpringBootConfiguration` / `@ComponentScan` / `@EnableAutoConfiguration`；被导入的类是 `AutoConfigurationImportSelector`；读名单的方法是 `getCandidateConfigurations(...)`，用的是 `ImportCandidates.load(...)`；jar 里两个文件是 `spring.factories` 与 `org.springframework.boot.autoconfigure.AutoConfiguration.imports`；同类型 bean 用 `@Bean` 在 `@Configuration` 类里声明；注入报错关键词 `NoUniqueBeanDefinitionException`
-  > **三级 · 骨架**：① `@SpringBootApplication` = `@____` + `@____` + `@____`；② `@Import(____.class)`；③ 文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；⑤ `@____ public class MyConfig { @____ public 同类型 xxx() { System.out.println("我定义的被创建了"); return ...; } }`；⑧ ①本机是 ____ 版本 → 读 ____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 三部分：`@SpringBootConfiguration`（声明引导类也是配置类）、`@ComponentScan`（组件扫描，默认扫引导类所在包及其子包）、`@EnableAutoConfiguration`（自动配置核心）。源码里还能看到 `@ComponentScan` 带了两个排除过滤器（`TypeExcludeFilter`、`AutoConfigurationExcludeFilter`），课上不展开。
-  > 2. `@Import(AutoConfigurationImportSelector.class)`；`selectImports(...)` 里先判断是否启用，再调 `getAutoConfigurationEntry(...)`，真正的名单来自 `getCandidateConfigurations(...)`——它用 `ImportCandidates.load(AutoConfiguration.class, getBeanClassLoader()).getCandidates()` 从约定文件里读，并有 `Assert.notEmpty(...)` 兜底（报错信息里直接写着那个文件路径）。
-  > 3. `META-INF/spring/` 下能看到 **`org.springframework.boot.autoconfigure.AutoConfiguration.imports`** 和 **`spring.factories`**（后者是历史遗留）；`.imports` 文件一行一个全类名，例如 `org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration`、`...data.redis.RedisAutoConfiguration`、`...data.mongodb.MongoDataAutoConfiguration` 等等（抄自己看到的即可）。
-  > 4. 例如 `GsonAutoConfiguration`：**类上**是 `@ConditionalOnClass(Gson.class)`（环境里有 Gson 的字节码才处理这个自动配置类），**`@Bean` 方法上**是 `@ConditionalOnMissingBean`（容器里没有 Gson 才补一个）。这正好解释"为什么引了依赖就能直接注入 Gson"。
-  > 5. 实验代码（本机实测用的就是这个形状）：
-  > ```java
-  > @Configuration
-  > public class MyConfig {
-  >     @Bean
-  >     public AliyunOSSOperator aliyunOSSOperator() {
-  >         System.out.println("[实验] 自定义的 AliyunOSSOperator bean 被创建");
-  >         return new AliyunOSSOperator(null);
-  >     }
-  > }
-  > ```
-  > 6. **本机实测**：控制台出现了 `[实验] 自定义的 AliyunOSSOperator bean 被创建`；应用正常启动（`Tomcat started on port 8080`、`Started SpringbootAutoconfigurationTestApplication in 2.084 seconds`）；`/check` 依然能注入；**没有** `NoUniqueBeanDefinitionException`。
-  > 7. 删掉/注释掉自己那个配置类后，注入的 bean 换成自动配置提供的那个（本机 `/check` 返回 `AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee`）——第 6 步的现象说明**自动配置类里带 `@ConditionalOnMissingBean` 的 `@Bean` 方法没有执行**，让位给了用户自己定义的 bean。
-  > 8. 两个回答：
-  >    ① 本机是 **Spring Boot 3.2.x**（启动日志里是 `:: Spring Boot ::  (v3.2.10)`），读的是 **`.imports`**；**2.7.0 之前**才是 `spring.factories`，那是历史写法。
-  >    ② 不会生效。挡它的是 **`@ConditionalOnClass`** 这类条件注解——工程里没引那个库，字节码文件不存在，条件不满足，那个自动配置类整体就不处理；即使类条件满足，方法上还有 `@ConditionalOnMissingBean` / `@ConditionalOnProperty` 把关。所以名单里有几百个自动配置类，真正注册进容器的只有当前工程用得上的那一小批。
+  **一级 · 思路**：先"读"再"跑"——前四步都只是读源码和 jar 里的文件（不许背），第 5 步才动手；动手时只加一个自己造的同类 bean，观察"自动配置让不让位"
+  **二级 · 方法**：三部分注解 `@SpringBootConfiguration` / `@ComponentScan` / `@EnableAutoConfiguration`；被导入的类是 `AutoConfigurationImportSelector`；读名单的方法是 `getCandidateConfigurations(...)`，用的是 `ImportCandidates.load(...)`；jar 里两个文件是 `spring.factories` 与 `org.springframework.boot.autoconfigure.AutoConfiguration.imports`；同类型 bean 用 `@Bean` 在 `@Configuration` 类里声明；注入报错关键词 `NoUniqueBeanDefinitionException`
+  **三级 · 骨架**：① `@SpringBootApplication` = `@____` + `@____` + `@____`；② `@Import(____.class)`；③ 文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；⑤ `@____ public class MyConfig { @____ public 同类型 xxx() { System.out.println("我定义的被创建了"); return ...; } }`；⑧ ①本机是 ____ 版本 → 读 ____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 三部分：`@SpringBootConfiguration`（声明引导类也是配置类）、`@ComponentScan`（组件扫描，默认扫引导类所在包及其子包）、`@EnableAutoConfiguration`（自动配置核心）。源码里还能看到 `@ComponentScan` 带了两个排除过滤器（`TypeExcludeFilter`、`AutoConfigurationExcludeFilter`），课上不展开。
+  2. `@Import(AutoConfigurationImportSelector.class)`；`selectImports(...)` 里先判断是否启用，再调 `getAutoConfigurationEntry(...)`，真正的名单来自 `getCandidateConfigurations(...)`——它用 `ImportCandidates.load(AutoConfiguration.class, getBeanClassLoader()).getCandidates()` 从约定文件里读，并有 `Assert.notEmpty(...)` 兜底（报错信息里直接写着那个文件路径）。
+  3. `META-INF/spring/` 下能看到 **`org.springframework.boot.autoconfigure.AutoConfiguration.imports`** 和 **`spring.factories`**（后者是历史遗留）；`.imports` 文件一行一个全类名，例如 `org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration`、`...data.redis.RedisAutoConfiguration`、`...data.mongodb.MongoDataAutoConfiguration` 等等（抄自己看到的即可）。
+  4. 例如 `GsonAutoConfiguration`：**类上**是 `@ConditionalOnClass(Gson.class)`（环境里有 Gson 的字节码才处理这个自动配置类），**`@Bean` 方法上**是 `@ConditionalOnMissingBean`（容器里没有 Gson 才补一个）。这正好解释"为什么引了依赖就能直接注入 Gson"。
+  5. 实验代码（本机实测用的就是这个形状）：
+  ```java
+  @Configuration
+  public class MyConfig {
+      @Bean
+      public AliyunOSSOperator aliyunOSSOperator() {
+          System.out.println("[实验] 自定义的 AliyunOSSOperator bean 被创建");
+          return new AliyunOSSOperator(null);
+      }
+  }
+  ```
+  6. **本机实测**：控制台出现了 `[实验] 自定义的 AliyunOSSOperator bean 被创建`；应用正常启动（`Tomcat started on port 8080`、`Started SpringbootAutoconfigurationTestApplication in 2.084 seconds`）；`/check` 依然能注入；**没有** `NoUniqueBeanDefinitionException`。
+  7. 删掉/注释掉自己那个配置类后，注入的 bean 换成自动配置提供的那个（本机 `/check` 返回 `AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee`）——第 6 步的现象说明**自动配置类里带 `@ConditionalOnMissingBean` 的 `@Bean` 方法没有执行**，让位给了用户自己定义的 bean。
+  8. 两个回答：
+     ① 本机是 **Spring Boot 3.2.x**（启动日志里是 `:: Spring Boot ::  (v3.2.10)`），读的是 **`.imports`**；**2.7.0 之前**才是 `spring.factories`，那是历史写法。
+     ② 不会生效。挡它的是 **`@ConditionalOnClass`** 这类条件注解——工程里没引那个库，字节码文件不存在，条件不满足，那个自动配置类整体就不处理；即使类条件满足，方法上还有 `@ConditionalOnMissingBean` / `@ConditionalOnProperty` 把关。所以名单里有几百个自动配置类，真正注册进容器的只有当前工程用得上的那一小批。
+
+  :::
+

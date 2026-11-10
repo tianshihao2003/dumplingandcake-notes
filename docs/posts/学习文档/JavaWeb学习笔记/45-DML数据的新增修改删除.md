@@ -80,7 +80,7 @@ insert into emp(username, password, name, gender, phone) values
 
 ### 实测：四种写法真的能插进去
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：用上面四种写法在一张与 `emp` 结构基本一致的演示表上依次执行，四条全部成功，查出来的结果是——
 >
 > ```text
@@ -111,7 +111,7 @@ PPT 第 42 页在语法下面列了三条：
 
 **第二条**容易被当成"硬性语法"，实测一下就知道它的分寸：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：把**不加引号**的值插进字符串和日期字段——
 >
 > ```sql
@@ -133,7 +133,7 @@ PPT 第 42 页在语法下面列了三条：
 
 **第三条**是"约束和类型替你把关"，插入了不合规的值会直接报错，比如：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：往 `phone`（`char(11) not null unique`）里插一个已经存在的手机号——
 >
 > ```text
@@ -171,7 +171,7 @@ PPT 第 44 页的注意原文：
 
 第 2 条演示就是一次**故意**的全表修改——它在课上是为了讲"条件可以省略"，在真实开发里却是个事故。本机把同样的动作跑一遍：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：先往演示表里插了 6 行数据（含上面那条不加引号的），然后执行不带条件的 `update zcode_dml_demo set entry_date = '2010-01-01';`，查一下"入职日期是 2010-01-01 的人"——
 >
 > ```text
@@ -197,7 +197,7 @@ PPT 第 44 页的注意原文：
 > +----+-----------+------------+
 > ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > `update` **忘写 where = 改全表**，这是新手最容易造成的"数据事故"之一（本机实测上表里 6 行数据无一幸免）。养成两个习惯：① 改之前先写一条同条件的 `select` 看看**命中了哪些行**；② 写完 `update` 立刻看一眼影响的行数/再 `select` 核对结果。
 
 ## 删除数据 delete（PPT 第 45-46 页）
@@ -225,7 +225,7 @@ PPT 第 46 页的注意原文：
 
 > **DELETE 语句的条件可以有，也可以没有，如果没有条件，则会删除整张表的所有数据。**
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：
 >
 > ```sql
@@ -269,7 +269,7 @@ PPT 第 46 页的注意原文：
 
 `delete` 删的是**一整行**，语法里根本没有"删哪个字段"的位置。硬要写会怎样？实测：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 MySQL 9.0.1）：
 >
 > ```sql
@@ -354,22 +354,30 @@ PPT 第 46 页的注意原文：
 
   要求：只插入这 5 个字段，**其余字段不动**；插完用一条查询把这个员工查出来核对（看看 id 是多少、其他字段是什么值）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：题面只给了 5 个字段的值，所以用"指定字段"的写法——字段名写几个、值就给几个，**顺序要一一对应**；没写的字段（职位、薪资、入职日期等）会保持"没有值"的状态，id 交给自增发号
-  > **二级 · 方法**：`insert into 表名(字段1, 字段2, ...) values (值1, 值2, ...);`；字符串类（用户名、密码、姓名、手机号）要加**单引号**，数字（性别 1）不用加；查出来核对用 `select ... from emp where ...`
-  > **三级 · 骨架**：`insert into emp(____, password, name, ____, phone) values ('yanqing', '12345678', '燕青', ____, '13311110001');`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > insert into emp(username, password, name, gender, phone) values ('yanqing','12345678','燕青',1,'13311110001');
-  > ```
-  > 核对：
-  > ```sql
-  > select id, username, name, gender, phone, job, salary, entry_date from emp where username = 'yanqing';
-  > ```
-  > 会看到 `id` 是**自增发出来的号**（插到 30 条数据后面就是 31，具体是多少取决于你表里已有的数据），而没写的 `job`、`salary`、`entry_date` 都是 **`NULL`**。这条语句和课程里"为 emp 表的 username, password, name, gender, phone 字段插入值"的演示是同一个写法。
-  >
-  > 提示：练习做完记得把这条数据删掉（`delete from emp where username = 'yanqing';`），让表回到原来的样子。
+  **一级 · 思路**：题面只给了 5 个字段的值，所以用"指定字段"的写法——字段名写几个、值就给几个，**顺序要一一对应**；没写的字段（职位、薪资、入职日期等）会保持"没有值"的状态，id 交给自增发号
+  **二级 · 方法**：`insert into 表名(字段1, 字段2, ...) values (值1, 值2, ...);`；字符串类（用户名、密码、姓名、手机号）要加**单引号**，数字（性别 1）不用加；查出来核对用 `select ... from emp where ...`
+  **三级 · 骨架**：`insert into emp(____, password, name, ____, phone) values ('yanqing', '12345678', '燕青', ____, '13311110001');`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  insert into emp(username, password, name, gender, phone) values ('yanqing','12345678','燕青',1,'13311110001');
+  ```
+  核对：
+  ```sql
+  select id, username, name, gender, phone, job, salary, entry_date from emp where username = 'yanqing';
+  ```
+  会看到 `id` 是**自增发出来的号**（插到 30 条数据后面就是 31，具体是多少取决于你表里已有的数据），而没写的 `job`、`salary`、`entry_date` 都是 **`NULL`**。这条语句和课程里"为 emp 表的 username, password, name, gender, phone 字段插入值"的演示是同一个写法。
+  
+  提示：练习做完记得把这条数据删掉（`delete from emp where username = 'yanqing';`），让表回到原来的样子。
+
+  :::
+
 
 - [ ] **2-2 全部字段插入 + 批量插入**
   接着上一题，用**两种不同的写法**各插一条数据（还是插到 `emp` 表，全部字段都要给值）：
@@ -379,25 +387,33 @@ PPT 第 46 页的注意原文：
 
   写完回答：第 2 条"不写字段名"的写法，值必须按什么顺序给？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：① 第一条是"全部字段 + 写字段名"（12 个字段的值一个不少，顺序随意但要和值对上）；② 第二条是"全部字段 + 不写字段名"，此时值的顺序**必须和建表时的字段顺序完全一致**，一个都不能漏、也不能多；③ id 位置写 `null` 让它自增，两个时间用取当前时间的函数
-  > **二级 · 方法**：`insert into emp(字段1, ..., 字段12) values (值1, ..., 值12);` 与 `insert into emp values (值1, ..., 值12);`；日期写 `'2014-06-01'`（加引号）；当前时间用 `now()`
-  > **三级 · 骨架**：`insert into emp values (null, 'huarong', '12345678', '花荣', ____, '13311110003', ____, 8800, '2016-03-15', 'huarong.jpg', ____, ____);`——这 12 个位置对应的字段顺序，去 `desc emp;` 里从上往下数。
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- 第一条：全部字段（写字段名的写法）
-  > insert into emp(id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time)
-  >           values(null, 'shixiu','12345678','石秀',1,'13311110002',2,9000,'2014-06-01','shixiu.jpg',now(),now());
-  >
-  > -- 第二条：全部字段（不写字段名的写法）
-  > insert into emp values (null, 'huarong','12345678','花荣',1,'13311110003',5,8800,'2016-03-15','huarong.jpg',now(),now());
-  > ```
-  > 回答：不写字段名时，**值的顺序必须严格按建表时字段的顺序**（`id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time`），个数也要一个不差——用 `desc emp;` 从上往下数一遍就是顺序。第一条写字段名的写法不挑顺序，但字段名和值仍要**一一对应**。
-  >
-  > 这两条就是课程里的"方式 1"和"方式 2"。本机实测（MySQL 9.0.1）两种写法都能插入成功，插完 `id` 由自增发号、`create_time`/`update_time` 是真实当前时间。
-  >
-  > 练习做完同样记得清场（`delete from emp where username in ('shixiu','huarong');`）。
+  **一级 · 思路**：① 第一条是"全部字段 + 写字段名"（12 个字段的值一个不少，顺序随意但要和值对上）；② 第二条是"全部字段 + 不写字段名"，此时值的顺序**必须和建表时的字段顺序完全一致**，一个都不能漏、也不能多；③ id 位置写 `null` 让它自增，两个时间用取当前时间的函数
+  **二级 · 方法**：`insert into emp(字段1, ..., 字段12) values (值1, ..., 值12);` 与 `insert into emp values (值1, ..., 值12);`；日期写 `'2014-06-01'`（加引号）；当前时间用 `now()`
+  **三级 · 骨架**：`insert into emp values (null, 'huarong', '12345678', '花荣', ____, '13311110003', ____, 8800, '2016-03-15', 'huarong.jpg', ____, ____);`——这 12 个位置对应的字段顺序，去 `desc emp;` 里从上往下数。
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- 第一条：全部字段（写字段名的写法）
+  insert into emp(id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time)
+            values(null, 'shixiu','12345678','石秀',1,'13311110002',2,9000,'2014-06-01','shixiu.jpg',now(),now());
+  
+  -- 第二条：全部字段（不写字段名的写法）
+  insert into emp values (null, 'huarong','12345678','花荣',1,'13311110003',5,8800,'2016-03-15','huarong.jpg',now(),now());
+  ```
+  回答：不写字段名时，**值的顺序必须严格按建表时字段的顺序**（`id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time`），个数也要一个不差——用 `desc emp;` 从上往下数一遍就是顺序。第一条写字段名的写法不挑顺序，但字段名和值仍要**一一对应**。
+  
+  这两条就是课程里的"方式 1"和"方式 2"。本机实测（MySQL 9.0.1）两种写法都能插入成功，插完 `id` 由自增发号、`create_time`/`update_time` 是真实当前时间。
+  
+  练习做完同样记得清场（`delete from emp where username in ('shixiu','huarong');`）。
+
+  :::
+
 
 - [ ] **2-3 修改数据**
   在 `emp` 表上完成两次修改：
@@ -407,19 +423,27 @@ PPT 第 46 页的注意原文：
 
   做完回答两个问题：① 这两条语句里的"条件"是什么、如果不写条件会怎样？② 执行修改之前，建议先做什么来避免误伤？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：改数据用 `update`，句式是"改哪张表 → 改成什么 → 改哪些行"三段；两次修改都是"只改符合条件的那几行"，条件就是**用户名**
-  > **二级 · 方法**：`update 表名 set 字段名1 = 值1, 字段名2 = 值2 where 条件;`（多个字段用**逗号**隔开）；文本值加单引号
-  > **三级 · 骨架**：`update emp set ____ = 'yanqing2', name = '燕小乙' where ____ = 'yanqing';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > update emp set username = 'yanqing2', name = '燕小乙' where username = 'yanqing';
-  > update emp set salary = 12000, job = 4 where username = 'shixiu';
-  > ```
-  > 回答：
-  > ① 条件是 `where username = 'yanqing'`（或 `where username = 'shixiu'`），用来**限定改哪些行**。如果不写条件，就是 PPT 第 44 页注意里说的"**会修改整张表的所有数据**"——本机实测（MySQL 9.0.1）一条不带 `where` 的 `update` 把演示表里 **6 行全部**改掉了（用 `select count(*) ... where entry_date = '2010-01-01'` 一查，6 行无一例外）。
-  > ② 建议**先用同条件的 `select` 查一遍**，确认命中的正是要改的那几行（例如先 `select id, username, name from emp where username = 'yanqing';`），再把它复制到 `update` 的 `where` 里执行。
+  **一级 · 思路**：改数据用 `update`，句式是"改哪张表 → 改成什么 → 改哪些行"三段；两次修改都是"只改符合条件的那几行"，条件就是**用户名**
+  **二级 · 方法**：`update 表名 set 字段名1 = 值1, 字段名2 = 值2 where 条件;`（多个字段用**逗号**隔开）；文本值加单引号
+  **三级 · 骨架**：`update emp set ____ = 'yanqing2', name = '燕小乙' where ____ = 'yanqing';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  update emp set username = 'yanqing2', name = '燕小乙' where username = 'yanqing';
+  update emp set salary = 12000, job = 4 where username = 'shixiu';
+  ```
+  回答：
+  ① 条件是 `where username = 'yanqing'`（或 `where username = 'shixiu'`），用来**限定改哪些行**。如果不写条件，就是 PPT 第 44 页注意里说的"**会修改整张表的所有数据**"——本机实测（MySQL 9.0.1）一条不带 `where` 的 `update` 把演示表里 **6 行全部**改掉了（用 `select count(*) ... where entry_date = '2010-01-01'` 一查，6 行无一例外）。
+  ② 建议**先用同条件的 `select` 查一遍**，确认命中的正是要改的那几行（例如先 `select id, username, name from emp where username = 'yanqing';`），再把它复制到 `update` 的 `where` 里执行。
+
+  :::
+
 
 - [ ] **2-4 删除数据**
   需求：把上一题里用户名是 `yanqing2` 的员工**删除**；删完查一下 `emp` 表里还有多少条数据（做这一题之前先记下原始条数，方便对比）。
@@ -429,25 +453,33 @@ PPT 第 46 页的注意原文：
   2. `delete from 表名;`（不带条件）执行之后，这个表还在吗？字段还在吗？
   3. `delete from 表名;` 和 `drop table 表名;` 的区别是什么？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：删除用 `delete from 表名 [where 条件]`，删"哪一行"靠条件；后三问分别考察"删的是行不是字段""删数据不删结构""删数据和删表的区别"
-  > **二级 · 方法**：`delete from emp where username = 'yanqing2';`；清空字段值用 `update 表名 set 字段 = null where ...`；统计行数用 `select count(*) from emp;`
-  > **三级 · 骨架**：`delete from emp ____ username = 'yanqing2';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- 删之前先看看要删的是谁、表里现在有几条
-  > select id, username, name from emp where username = 'yanqing2';
-  > select count(*) from emp;
-  >
-  > delete from emp where username = 'yanqing2';
-  >
-  > select count(*) from emp;   -- 比原来少 1 条
-  > ```
-  > 回答：
-  > 1. **不能**。`delete` 删除的是**一整行**，语法里没有"指定字段"的位置——PPT 第 46 页的注意原文就是"**DELETE 语句不能删除某一个字段的值（如果要操作，可以使用 UPDATE，将该字段的值置为 NULL）**"。本机实测硬写 `delete name from 表名;` 会报 **`ERROR 1109 (42S02): Unknown table 'name' in MULTI DELETE`**（MySQL 把 `name` 当成了另一张表的名字）。要把某个字段清空，用 `update 表名 set 字段名 = null where 条件;`——实测值从 8000 变成 `NULL`，这一行本身还在。
-  > 2. **表还在，字段也都还在**。`delete from 表名;` 只是把数据全部清掉（实测清空后 `count(*) = 0`，再用 `desc 表名;` 依然能列出所有字段）。
-  > 3. `delete from 表名;` 是 **DML**，只删**数据**，表结构（字段、类型、约束）保留；`drop table 表名;` 是 **DDL**，把**表结构和数据一起删掉**（[44 篇](/posts/编程学习/javaweb学习笔记/44-ddl表结构与建表案例/)实测过：装了 3 行数据的表 `drop` 之后连表带数据一起消失）。
+  **一级 · 思路**：删除用 `delete from 表名 [where 条件]`，删"哪一行"靠条件；后三问分别考察"删的是行不是字段""删数据不删结构""删数据和删表的区别"
+  **二级 · 方法**：`delete from emp where username = 'yanqing2';`；清空字段值用 `update 表名 set 字段 = null where ...`；统计行数用 `select count(*) from emp;`
+  **三级 · 骨架**：`delete from emp ____ username = 'yanqing2';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- 删之前先看看要删的是谁、表里现在有几条
+  select id, username, name from emp where username = 'yanqing2';
+  select count(*) from emp;
+  
+  delete from emp where username = 'yanqing2';
+  
+  select count(*) from emp;   -- 比原来少 1 条
+  ```
+  回答：
+  1. **不能**。`delete` 删除的是**一整行**，语法里没有"指定字段"的位置——PPT 第 46 页的注意原文就是"**DELETE 语句不能删除某一个字段的值（如果要操作，可以使用 UPDATE，将该字段的值置为 NULL）**"。本机实测硬写 `delete name from 表名;` 会报 **`ERROR 1109 (42S02): Unknown table 'name' in MULTI DELETE`**（MySQL 把 `name` 当成了另一张表的名字）。要把某个字段清空，用 `update 表名 set 字段名 = null where 条件;`——实测值从 8000 变成 `NULL`，这一行本身还在。
+  2. **表还在，字段也都还在**。`delete from 表名;` 只是把数据全部清掉（实测清空后 `count(*) = 0`，再用 `desc 表名;` 依然能列出所有字段）。
+  3. `delete from 表名;` 是 **DML**，只删**数据**，表结构（字段、类型、约束）保留；`drop table 表名;` 是 **DDL**，把**表结构和数据一起删掉**（[44 篇](/posts/编程学习/javaweb学习笔记/44-ddl表结构与建表案例/)实测过：装了 3 行数据的表 `drop` 之后连表带数据一起消失）。
+
+  :::
+
 
 - [ ] **2-5 排错：三条语句三条错**
   下面三条 SQL 都在 `emp` 表上执行，**三条都有问题**——有的会报错，有的不报错但结果不对。请分别说明**为什么错**、**怎么改**：
@@ -467,24 +499,32 @@ PPT 第 46 页的注意原文：
 
   （提示：三条错的原因各不相同，一条和"顺序"有关、一条和"约束"有关、一条和"条件"有关，都不是语法拼写错误。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：① 值是按位置对号入座的——把值塞进指定的字段名里对一遍，看结果合不合理；② 手机号在 `emp` 表上有什么约束？`13309090001` 是谁的手机号？③ 这条 `update` 少了什么？影响范围会变成多大？
-  > **二级 · 方法**：① 字段顺序与值顺序必须一一对应；② `phone` 上有 `not null unique`（唯一约束），重复会报 `1062 Duplicate entry`；③ `update` 不带 `where` 会改**全表**
-  > **三级 · 骨架**：① `insert into emp(username, password, name, gender, phone) values ('____','12345678','____',1,'13311110007');`（想想哪个位置是用户名、哪个位置是姓名）；③ `update emp set salary = 20000 ____ ...;`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① **字段顺序和值的顺序对不上**：字段写的是 `(username, password, name, gender, phone)`，值却是 `('林冲', '12345678', 'linchong2', ...)`——按位置塞进去，`username` 会变成 `'林冲'`、`name` 会变成 `'linchong2'`。**这条语句不会报错**（值都能装下），但插进去的数据语义全错，这正是 PPT 第 42 页强调"指定的字段顺序需要与值的顺序一一对应"的原因。本机实测（MySQL 9.0.1，插完立刻回滚）：
-  >    ```text
-  >    +----+----------+-----------+
-  >    | id | username | name      |
-  >    +----+----------+-----------+
-  >    | 31 | 林冲     | linchong2 |
-  >    +----+----------+-----------+
-  >    ```
-  >    改法：把值和字段一一对上，`insert into emp(username, password, name, gender, phone) values ('linchong2', '12345678', '林冲', 1, '13311110007');`
-  >    （顺带记一个相关的报错：如果插入时**漏掉了有非空约束、又没有默认值的字段**，MySQL 会报 `ERROR 1364 (HY000): Field 'xxx' doesn't have a default value`——也是"值不合规"的一种。）
-  > ② **违反了唯一约束**：`phone` 是 `not null unique`，而 `13309090001` **是表里已经存在的手机号**（课程测试数据里属于施耐庵），插入会报 **`ERROR 1062 (23000): Duplicate entry '13309090001' for key 'emp.phone'`**（本机实测的原话就是这个）。改法：换一个没被用过的手机号。
-  > ③ **少了 `where` 条件**：`update emp set salary = 20000;` 会把**整张表所有人的薪资都改成 20000**（PPT 第 44 页："如果没有条件，则会修改整张表的所有数据"；本机实测一条不带条件的 `update` 把 6 行全改了）。改法：补上限定范围的条件，例如 `update emp set salary = 20000 where id = 1;`
+  **一级 · 思路**：① 值是按位置对号入座的——把值塞进指定的字段名里对一遍，看结果合不合理；② 手机号在 `emp` 表上有什么约束？`13309090001` 是谁的手机号？③ 这条 `update` 少了什么？影响范围会变成多大？
+  **二级 · 方法**：① 字段顺序与值顺序必须一一对应；② `phone` 上有 `not null unique`（唯一约束），重复会报 `1062 Duplicate entry`；③ `update` 不带 `where` 会改**全表**
+  **三级 · 骨架**：① `insert into emp(username, password, name, gender, phone) values ('____','12345678','____',1,'13311110007');`（想想哪个位置是用户名、哪个位置是姓名）；③ `update emp set salary = 20000 ____ ...;`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① **字段顺序和值的顺序对不上**：字段写的是 `(username, password, name, gender, phone)`，值却是 `('林冲', '12345678', 'linchong2', ...)`——按位置塞进去，`username` 会变成 `'林冲'`、`name` 会变成 `'linchong2'`。**这条语句不会报错**（值都能装下），但插进去的数据语义全错，这正是 PPT 第 42 页强调"指定的字段顺序需要与值的顺序一一对应"的原因。本机实测（MySQL 9.0.1，插完立刻回滚）：
+     ```text
+     +----+----------+-----------+
+     | id | username | name      |
+     +----+----------+-----------+
+     | 31 | 林冲     | linchong2 |
+     +----+----------+-----------+
+     ```
+     改法：把值和字段一一对上，`insert into emp(username, password, name, gender, phone) values ('linchong2', '12345678', '林冲', 1, '13311110007');`
+     （顺带记一个相关的报错：如果插入时**漏掉了有非空约束、又没有默认值的字段**，MySQL 会报 `ERROR 1364 (HY000): Field 'xxx' doesn't have a default value`——也是"值不合规"的一种。）
+  ② **违反了唯一约束**：`phone` 是 `not null unique`，而 `13309090001` **是表里已经存在的手机号**（课程测试数据里属于施耐庵），插入会报 **`ERROR 1062 (23000): Duplicate entry '13309090001' for key 'emp.phone'`**（本机实测的原话就是这个）。改法：换一个没被用过的手机号。
+  ③ **少了 `where` 条件**：`update emp set salary = 20000;` 会把**整张表所有人的薪资都改成 20000**（PPT 第 44 页："如果没有条件，则会修改整张表的所有数据"；本机实测一条不带条件的 `update` 把 6 行全改了）。改法：补上限定范围的条件，例如 `update emp set salary = 20000 where id = 1;`
+
+  :::
+
 
 ### 三、综合题
 
@@ -512,42 +552,50 @@ PPT 第 46 页的注意原文：
   | `delete` + `where` | 第 6、7 步按用户名精确删除 |
   | 数据安全习惯 | 每步执行后用 `select` 核对，练习完清场 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整条链路是"**先看 → 再插 → 核对 → 批量插 → 改 → 删 → 再核对**"，每一步都用 `select` 自己验证；第 8 问的关键词是"条件"和"全表"
-  > **二级 · 方法**：插指定字段 `insert into emp(字段...) values (...);`；批量就写多组括号值；改 `update emp set 字段 = 值, 字段 = 值 where 条件;`；删 `delete from emp where 条件;`；当前时间用 `now()`；统计 `select count(*) from emp;`
-  > **三级 · 骨架**：`insert into emp(username, password, name, gender, phone, job, salary, entry_date) values ('zhusan','12345678','朱三',1,'13311110009',1,6000,'2026-09-01');` / `update emp set job = 3, salary = 8000, update_time = ____ where username = 'zhusan';` / `delete from emp where username = 'zhuqi';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 原始条数（本机课程测试数据是 **30** 条）：
-  >    ```sql
-  >    select count(*) from emp;
-  >    ```
-  > 2. 入职：
-  >    ```sql
-  >    insert into emp(username, password, name, gender, phone, job, salary, entry_date)
-  >              values ('zhusan','12345678','朱三',1,'13311110009',1,6000,'2026-09-01');
-  >    ```
-  > 3. 核对（会看到 id 是自增号，没写的 `image`、`create_time`、`update_time` 都是 `NULL`）：
-  >    ```sql
-  >    select id, username, name, gender, phone, job, salary, entry_date from emp where username = 'zhusan';
-  >    ```
-  > 4. 批量入职：
-  >    ```sql
-  >    insert into emp(username, password, name, gender, phone, job, salary, entry_date) values
-  >              ('zhuliu','12345678','朱六',1,'13311110010',2,9000,'2026-09-10'),
-  >              ('zhuqi','12345678','朱七',2,'13311110011',5,7500,'2026-09-15');
-  >    ```
-  > 5. 调岗（改完再 `select` 一次核对）：
-  >    ```sql
-  >    update emp set job = 3, salary = 8000, update_time = now() where username = 'zhusan';
-  >    ```
-  > 6. 离职：
-  >    ```sql
-  >    delete from emp where username = 'zhuqi';
-  >    ```
-  > 7. 收尾核对：`select count(*) from emp;` 应该等于**原始条数 + 3 - 1**（按 30 条算是 **32**）；确认无误后再清场：
-  >    ```sql
-  >    delete from emp where username in ('zhusan','zhuliu');
-  >    select count(*) from emp;   -- 回到 30
-  >    ```
-  > 8. 第 6 步一定要带条件，因为**不带条件的 `delete` 会删掉整张表的所有数据**（PPT 第 46 页："如果没有条件，则会删除整张表的所有数据"）。如果写成 `delete from emp;`，表里的 30 多条数据会被**一次性清空**——虽然表结构还在（`desc` 还能看到字段）、理论上可以重新执行那套测试数据脚本导回来，但**自己新增/修改过的数据就再也回不来了**。本机实测：一条不带条件的 `delete from zcode_dml_demo;` 之后 `count(*)` 直接变成 **0**，所以 `update` / `delete` 之前先 `select` 看命中范围，是必须养成的习惯。
+  **一级 · 思路**：整条链路是"**先看 → 再插 → 核对 → 批量插 → 改 → 删 → 再核对**"，每一步都用 `select` 自己验证；第 8 问的关键词是"条件"和"全表"
+  **二级 · 方法**：插指定字段 `insert into emp(字段...) values (...);`；批量就写多组括号值；改 `update emp set 字段 = 值, 字段 = 值 where 条件;`；删 `delete from emp where 条件;`；当前时间用 `now()`；统计 `select count(*) from emp;`
+  **三级 · 骨架**：`insert into emp(username, password, name, gender, phone, job, salary, entry_date) values ('zhusan','12345678','朱三',1,'13311110009',1,6000,'2026-09-01');` / `update emp set job = 3, salary = 8000, update_time = ____ where username = 'zhusan';` / `delete from emp where username = 'zhuqi';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 原始条数（本机课程测试数据是 **30** 条）：
+     ```sql
+     select count(*) from emp;
+     ```
+  2. 入职：
+     ```sql
+     insert into emp(username, password, name, gender, phone, job, salary, entry_date)
+               values ('zhusan','12345678','朱三',1,'13311110009',1,6000,'2026-09-01');
+     ```
+  3. 核对（会看到 id 是自增号，没写的 `image`、`create_time`、`update_time` 都是 `NULL`）：
+     ```sql
+     select id, username, name, gender, phone, job, salary, entry_date from emp where username = 'zhusan';
+     ```
+  4. 批量入职：
+     ```sql
+     insert into emp(username, password, name, gender, phone, job, salary, entry_date) values
+               ('zhuliu','12345678','朱六',1,'13311110010',2,9000,'2026-09-10'),
+               ('zhuqi','12345678','朱七',2,'13311110011',5,7500,'2026-09-15');
+     ```
+  5. 调岗（改完再 `select` 一次核对）：
+     ```sql
+     update emp set job = 3, salary = 8000, update_time = now() where username = 'zhusan';
+     ```
+  6. 离职：
+     ```sql
+     delete from emp where username = 'zhuqi';
+     ```
+  7. 收尾核对：`select count(*) from emp;` 应该等于**原始条数 + 3 - 1**（按 30 条算是 **32**）；确认无误后再清场：
+     ```sql
+     delete from emp where username in ('zhusan','zhuliu');
+     select count(*) from emp;   -- 回到 30
+     ```
+  8. 第 6 步一定要带条件，因为**不带条件的 `delete` 会删掉整张表的所有数据**（PPT 第 46 页："如果没有条件，则会删除整张表的所有数据"）。如果写成 `delete from emp;`，表里的 30 多条数据会被**一次性清空**——虽然表结构还在（`desc` 还能看到字段）、理论上可以重新执行那套测试数据脚本导回来，但**自己新增/修改过的数据就再也回不来了**。本机实测：一条不带条件的 `delete from zcode_dml_demo;` 之后 `count(*)` 直接变成 **0**，所以 `update` / `delete` 之前先 `select` 看命中范围，是必须养成的习惯。
+
+  :::
+

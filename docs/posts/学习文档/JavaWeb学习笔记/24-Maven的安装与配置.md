@@ -42,7 +42,7 @@ PPT 第 23 页给的就是**四步**（安装 + 三处配置），第 24 页再�
 | `boot\` | 启动用的引导类库（`plexus-classworlds`） |
 | `README.txt` / `LICENSE` / `NOTICE` | 说明、许可证、版权声明 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 解压路径**别带中文、别带空格**（推荐 `D:\develop\...` 这种）。路径里有中文或空格时，后面配环境变量、命令行敲 mvn 都可能出问题，而且报错信息往往看不出真正原因。
 
 ## 第 2 步：配置本地仓库
@@ -95,7 +95,7 @@ PPT 第 23 页给的就是**四步**（安装 + 三处配置），第 24 页再�
 | `<url>` | **镜像仓库的地址** | `http://maven.aliyun.com/nexus/content/groups/public/` |
 | `<mirrorOf>` | **给哪个仓库做镜像** | `central` 表示"中央仓库都走这个地址" |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 阿里云后来还提供了一个新地址 **`https://maven.aliyun.com/repository/public`**（协议是 https），`<mirrorOf>` 也常写成 `*`（代表所有仓库都走它）。两种写法都能用：**课程用的是上面 PPT 那一版**，照课程写最省事；用新地址的时候把 `<id>` 同时改一下（例如 `aliyunmaven`）也不会有什么影响。
 
 ## 第 4 步：配置环境变量
@@ -113,7 +113,7 @@ Path       = ...;%MAVEN_HOME%\bin                   ← 追加（Path 里原有�
 - `%变量名%` 是 Windows 里"引用另一个环境变量"的写法，所以 Path 里写 `%MAVEN_HOME%\bin` 就不用把长路径再抄一遍；
 - `MAVEN_HOME` 自己也有用：别人（比如 IDEA、其他工具）想找 Maven 装在哪儿时看的就是它。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 改环境变量的顺序：**先建 `MAVEN_HOME`，再从 Path 里引用它**；改完必须**重开命令行窗口**（已打开的窗口读的还是旧环境变量），IDEA 也一样要重启。
 
 ## 验证：`mvn -v`
@@ -147,7 +147,7 @@ OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
 | `Default locale` / `platform encoding` | 语言与默认编码（`zh_CN`、`GBK`），后面遇到中文乱码会用到这一行 |
 | `OS name: "windows 10" ... family: "windows"` | 操作系统信息 |
 
-> [!TIP]
+> [!TIP] 提示
 > 只输出上面这一小段、**不下载任何东西**，这是 `mvn -v` 的特点——所以它是"装没装好"的标准检查动作。真实验证一次（本机 Maven 3.9.14）：
 >
 > ```text
@@ -191,7 +191,7 @@ PPT 第 25 页只有一句话：
 [ERROR] 'mirrors.mirror.mirrorOf' for alimaven is missing @ ...\settings.xml
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 补充一句 settings.xml 的两个位置：**`解压目录\conf\settings.xml`** 是**全局**配置（这台机器上所有 Maven 使用），**`用户目录\.m2\settings.xml`** 是**当前用户**的配置（默认没有这个文件）。课程统一改前者——改一处、全局生效，也方便以后换版本时跟着目录走。
 
 ### 怎么确认配置真的生效了（课程外的补充）
@@ -277,33 +277,41 @@ A:\develop\maven\apache-maven-3.9.14\mvn_repo        ← localRepository 生效�
   配置要放在**正确的位置和层级**上；写完后校验一下这个文件仍然是合法的 XML。
   （练习文件 `test_24_本地仓库与私服配置.xml` 里已经给了 settings 骨架和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：两处配置在两个不同的位置——一处和 `<mirrors>` 平级，一处写在 `<mirrors>` 里面
-  > **二级 · 方法**：本地仓库用 `<localRepository>`（`<settings>` 的直接子标签）；镜像要用 `<mirrors>` 包住 `<mirror>`，`<mirror>` 里放 `<id>` / `<name>` / `<url>` / `<mirrorOf>` 四个子标签，`<mirrorOf>` 写 `central`
-  > **三级 · 骨架**：`<localRepository>____</localRepository>` / `<mirrors><mirror><id>____</id><name>____</name><url>____</url><mirrorOf>____</mirrorOf></mirror></mirrors>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```xml
-  > <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-  >           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  >           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
-  >
-  >     <!-- ① 本地仓库：<settings> 的直接子标签，和 <mirrors> 平级 -->
-  >     <localRepository>D:\develop\apache-maven-3.9.4\mvn_repo</localRepository>
-  >
-  >     <!-- ② 阿里云私服：写在 <mirrors> 里面 -->
-  >     <mirrors>
-  >         <mirror>
-  >             <id>alimaven</id>
-  >             <name>aliyun maven</name>
-  >             <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-  >             <mirrorOf>central</mirrorOf>
-  >         </mirror>
-  >     </mirrors>
-  >
-  > </settings>
-  > ```
-  > 检查点：① 每个标签都正确闭合、能作为合法 XML 解析（练习文件可以直接用浏览器打开看有没有报错）；② `<localRepository>` **不在** `<mirrors>` 里面；③ `<mirror>` 的四个子标签一个不少、拼写大小写都对；④ 用 IDEA 的 `Settings → Build Tools → Maven` 核对，`Local repository` 应该显示 `...\mvn_repo`。
+  **一级 · 思路**：两处配置在两个不同的位置——一处和 `<mirrors>` 平级，一处写在 `<mirrors>` 里面
+  **二级 · 方法**：本地仓库用 `<localRepository>`（`<settings>` 的直接子标签）；镜像要用 `<mirrors>` 包住 `<mirror>`，`<mirror>` 里放 `<id>` / `<name>` / `<url>` / `<mirrorOf>` 四个子标签，`<mirrorOf>` 写 `central`
+  **三级 · 骨架**：`<localRepository>____</localRepository>` / `<mirrors><mirror><id>____</id><name>____</name><url>____</url><mirrorOf>____</mirrorOf></mirror></mirrors>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```xml
+  <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  
+      <!-- ① 本地仓库：<settings> 的直接子标签，和 <mirrors> 平级 -->
+      <localRepository>D:\develop\apache-maven-3.9.4\mvn_repo</localRepository>
+  
+      <!-- ② 阿里云私服：写在 <mirrors> 里面 -->
+      <mirrors>
+          <mirror>
+              <id>alimaven</id>
+              <name>aliyun maven</name>
+              <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+              <mirrorOf>central</mirrorOf>
+          </mirror>
+      </mirrors>
+  
+  </settings>
+  ```
+  检查点：① 每个标签都正确闭合、能作为合法 XML 解析（练习文件可以直接用浏览器打开看有没有报错）；② `<localRepository>` **不在** `<mirrors>` 里面；③ `<mirror>` 的四个子标签一个不少、拼写大小写都对；④ 用 IDEA 的 `Settings → Build Tools → Maven` 核对，`Local repository` 应该显示 `...\mvn_repo`。
+
+  :::
+
 
 - [ ] **2-2 环境变量的配置与验证**
   写清楚三件事：
@@ -312,15 +320,23 @@ A:\develop\maven\apache-maven-3.9.14\mvn_repo        ← localRepository 生效�
   3. 如果敲验证命令提示 `'mvn' 不是内部或外部命令`，你的**排查顺序**（至少写两条）。
   （练习文件 `test_24_环境变量与验证.txt` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个是"告诉系统 Maven 装在哪"，一个是"让系统能找到 mvn 命令"；验证看的是"版本 + 安装路径"
-  > **二级 · 方法**：变量名是 `MAVEN_HOME` 和 `Path`；值分别是解压目录、`%MAVEN_HOME%\bin`；验证命令 `mvn -v`；输出里看 `Apache Maven 3.9.4` 这一行和 `Maven home` 这一行；排查先想"窗口重启了吗 → 变量名/路径对不对 → bin 加了没"
-  > **三级 · 骨架**：`____ = D:\develop\apache-maven-3.9.4` / `Path 追加 ____\bin` / 验证命令 `____ -v`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **2-2**
-  > 1. **两个环境变量**：
-  >    - 新建 **`MAVEN_HOME`** = `D:\develop\apache-maven-3.9.4`（Maven 的解压目录，**不要写到 bin**）；
-  >    - 在 **`Path`** 里追加 **`%MAVEN_HOME%\bin`**（`%变量名%` 引用上面那个变量；Path 原有内容不能删）。
-  > 2. **验证命令**：`mvn -v`。能确认"装好了"的两处信息是 **`Apache Maven 3.9.4 (...)`（版本号那行）** 和 **`Maven home: D:\develop\apache-maven-3.9.4`（安装路径那行）**；这两行对了说明命令能找到、而且指向的就是自己解压的那份。
-  > 3. **排查顺序**（任答两条即可）：① 是不是在**旧窗口**里敲的——重开一个命令行再试（环境变量只对新窗口生效）；② `MAVEN_HOME` 是不是写成了 `...\bin` 或路径拼错、Path 里是不是漏了 `%MAVEN_HOME%\bin`；③ 用 `echo %MAVEN_HOME%`、`echo %Path%` 看变量到底有没有生效；④ 解压目录里有没有 `bin\mvn.cmd`（解压不完整就重新解压）；⑤ 实在不行重启电脑再试。
+  **一级 · 思路**：一个是"告诉系统 Maven 装在哪"，一个是"让系统能找到 mvn 命令"；验证看的是"版本 + 安装路径"
+  **二级 · 方法**：变量名是 `MAVEN_HOME` 和 `Path`；值分别是解压目录、`%MAVEN_HOME%\bin`；验证命令 `mvn -v`；输出里看 `Apache Maven 3.9.4` 这一行和 `Maven home` 这一行；排查先想"窗口重启了吗 → 变量名/路径对不对 → bin 加了没"
+  **三级 · 骨架**：`____ = D:\develop\apache-maven-3.9.4` / `Path 追加 ____\bin` / 验证命令 `____ -v`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **2-2**
+  1. **两个环境变量**：
+     - 新建 **`MAVEN_HOME`** = `D:\develop\apache-maven-3.9.4`（Maven 的解压目录，**不要写到 bin**）；
+     - 在 **`Path`** 里追加 **`%MAVEN_HOME%\bin`**（`%变量名%` 引用上面那个变量；Path 原有内容不能删）。
+  2. **验证命令**：`mvn -v`。能确认"装好了"的两处信息是 **`Apache Maven 3.9.4 (...)`（版本号那行）** 和 **`Maven home: D:\develop\apache-maven-3.9.4`（安装路径那行）**；这两行对了说明命令能找到、而且指向的就是自己解压的那份。
+  3. **排查顺序**（任答两条即可）：① 是不是在**旧窗口**里敲的——重开一个命令行再试（环境变量只对新窗口生效）；② `MAVEN_HOME` 是不是写成了 `...\bin` 或路径拼错、Path 里是不是漏了 `%MAVEN_HOME%\bin`；③ 用 `echo %MAVEN_HOME%`、`echo %Path%` 看变量到底有没有生效；④ 解压目录里有没有 `bin\mvn.cmd`（解压不完整就重新解压）；⑤ 实在不行重启电脑再试。
+
+  :::
+

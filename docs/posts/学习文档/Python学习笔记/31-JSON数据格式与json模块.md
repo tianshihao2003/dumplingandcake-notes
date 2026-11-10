@@ -15,7 +15,7 @@ cover: false
 
 JSON（JavaScript Object Notation）是前端的一种对象表示方法，也是**软件开发中最常用的数据交换格式**。它的表示形式类似于 Python 中的字典，都是 `key: value` 这种形式，不过：
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > JSON 中**所有的 key 都必须使用双引号引起来**，这一点和 Python 字典不同（Python 里 `'name'` 和 `"name"` 都可以）。
 
 ```json
@@ -92,7 +92,7 @@ with open("resources/user.json", "w", encoding="utf-8") as f:
 }
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > `ensure_ascii` 默认是 `True`，此时中文会被转义成 `\u6d9b\u54e5` 这种形式，文件里看不到中文（不影响程序读取，但**人没法检查内容**）。所以写中文必须加 `ensure_ascii=False`。
 
 ### 读取 json 数据（反序列化）
@@ -119,10 +119,10 @@ with open("resources/user.json", "r", encoding="utf-8") as f:
 | `json.load(f)`      | 文件对象             | Python 对象       |
 | `json.loads(s)`     | JSON 格式的**字符串**  | Python 对象       |
 
-> [!TIP]
+> [!TIP] 提示
 > 记忆技巧：**带 s 的是操作字符串（string）**。
 
-> [!NOTE]
+> [!NOTE] 注意
 > JSON 语法比 Python 严格：不支持单引号、不支持注释、最后一个元素后面不能有多余的逗号。手写请求体时最容易在这三处出错。
 
 ## 相关
@@ -148,62 +148,86 @@ with open("resources/user.json", "r", encoding="utf-8") as f:
 - [ ] **2-1 把字典写进 JSON 文件**
   把一个包含姓名、年龄、性别、爱好的字典写进 `user.json`，要求文件里能看到中文、并且有缩进方便阅读。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：写文件要先能打开文件，再用 json 模块提供的方法把对象"倒"进去；中文别被转义，格式要好看
-  > **二级 · 方法**：`with open(...)` + `json.dump(obj, f, ensure_ascii=..., indent=...)`
-  > **三级 · 骨架**：`with open("user.json", "w", encoding="utf-8") as f:\n    json.____(user, f, ensure_ascii=____, indent=____)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import json
-  > 
-  > user = {
-  >     "name": "涛哥",
-  >     "age": 18,
-  >     "gender": "男",
-  >     "hobbies": ["reading", "swimming"]
-  > }
-  > 
-  > with open("user.json", "w", encoding="utf-8") as f:
-  >     json.dump(user, f, ensure_ascii=False, indent=2)
-  > ```
+  **一级 · 思路**：写文件要先能打开文件，再用 json 模块提供的方法把对象"倒"进去；中文别被转义，格式要好看
+  **二级 · 方法**：`with open(...)` + `json.dump(obj, f, ensure_ascii=..., indent=...)`
+  **三级 · 骨架**：`with open("user.json", "w", encoding="utf-8") as f:\n    json.____(user, f, ensure_ascii=____, indent=____)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import json
+  
+  user = {
+      "name": "涛哥",
+      "age": 18,
+      "gender": "男",
+      "hobbies": ["reading", "swimming"]
+  }
+  
+  with open("user.json", "w", encoding="utf-8") as f:
+      json.dump(user, f, ensure_ascii=False, indent=2)
+  ```
+
+  :::
+
 
 - [ ] **2-2 读回 JSON 文件**
   读取上一步写出的 `user.json`，打印内容并打印它的类型。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：读文件 + 把 JSON 文本变回 Python 对象
-  > **二级 · 方法**：`json.load(f)`、`type()`
-  > **三级 · 骨架**：`with open("user.json", "r", encoding="utf-8") as f:\n    user = json.____(f)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import json
-  > 
-  > with open("user.json", "r", encoding="utf-8") as f:
-  >     user = json.load(f)
-  > 
-  > print(user)
-  > print(type(user))   # <class 'dict'>
-  > ```
+  **一级 · 思路**：读文件 + 把 JSON 文本变回 Python 对象
+  **二级 · 方法**：`json.load(f)`、`type()`
+  **三级 · 骨架**：`with open("user.json", "r", encoding="utf-8") as f:\n    user = json.____(f)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import json
+  
+  with open("user.json", "r", encoding="utf-8") as f:
+      user = json.load(f)
+  
+  print(user)
+  print(type(user))   # <class 'dict'>
+  ```
+
+  :::
+
 
 - [ ] **2-3 不落文件的字符串互转**
   把一个字典转成 JSON 字符串打印出来，再把这个字符串转回字典并取出其中一个值。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：想想哪两个方法名带 `s`（string）
-  > **二级 · 方法**：`json.dumps()` / `json.loads()`
-  > **三级 · 骨架**：`s = json.____(obj)` ／ `obj2 = json.____(s)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import json
-  > 
-  > obj = {"name": "张三", "age": 18, "hobbies": ["reading", "swimming"]}
-  > 
-  > s = json.dumps(obj, ensure_ascii=False)
-  > print(s)          # {"name": "张三", ...}  —— 字符串
-  > 
-  > obj2 = json.loads(s)
-  > print(obj2["name"])   # 张三
-  > ```
+  **一级 · 思路**：想想哪两个方法名带 `s`（string）
+  **二级 · 方法**：`json.dumps()` / `json.loads()`
+  **三级 · 骨架**：`s = json.____(obj)` ／ `obj2 = json.____(s)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import json
+  
+  obj = {"name": "张三", "age": 18, "hobbies": ["reading", "swimming"]}
+  
+  s = json.dumps(obj, ensure_ascii=False)
+  print(s)          # {"name": "张三", ...}  —— 字符串
+  
+  obj2 = json.loads(s)
+  print(obj2["name"])   # 张三
+  ```
+
+  :::
+

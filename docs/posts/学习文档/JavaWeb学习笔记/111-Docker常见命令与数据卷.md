@@ -31,7 +31,7 @@ cover: false
 | 32 | 课程案例——创建 MySQL 容器并挂载 data / init / conf 三个目录 | MySQL 容器案例 |
 | 33 | 小结页——数据卷挂载与本地目录挂载的对比 | 两种挂载的区别 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **本篇的实测说明**：命令与数据卷这两半都做了**本机实测**（Docker Desktop 29.1.3），输出都在下面的"本机实测"小节里——包括"容器删了卷还在"这条硬证据，以及用 nginx 容器 + 数据卷部署静态资源、`curl` 拿到自己写的页面的完整过程。**没有实测**的是课程那两个大镜像：`docker pull mysql:8`（几百 MB，本轮没拉）和课程里 nginx 的完整版镜像，MySQL 那套命令按 PPT 第 32 页写。
 
 ## Docker 核心的四块（PPT 第 22、25 页）
@@ -142,7 +142,7 @@ cover: false
 | 8 | 进入 Nginx 容器 | `docker exec -it nginx bash` | 提示符变成容器里的（如 `root@a1b2c3:/#`），可以像在一台小机器里一样敲命令；`exit` 退出 |
 | 9 | 删除容器 | `docker rm nginx`（运行中的先 `docker stop nginx`，或直接 `docker rm -f nginx`） | 回显容器名；`docker ps -a` 里查不到了 |
 
-> [!TIP]
+> [!TIP] 提示
 > 第 4 步的 `-p 80:80` 是按课程的写法（nginx 默认监听 80，宿主机的 80 空着就直接对 80）。如果宿主机上已经有个 nginx（[109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)那种手工装的）占着 80，就换成 `-p 90:80` 之类——**右边（容器里的 80）不能动**。
 
 ### 本机实测：同一串命令跑起来是什么样
@@ -187,7 +187,7 @@ $ docker ps -a --filter name=ch20-             → （无输出，已经删干�
 | `docker stop` 之后状态是 `Exited (137)` | 137 = 128 + 9，表示被强制结束（Docker 停容器先发"温柔"信号，超时后强制杀掉） |
 | `docker logs` 是空的 | `sleep 300` 什么都不打印；日志里有的东西，得是**程序自己往标准输出打的内容**（nginx 的访问日志就是这么看的） |
 
-> [!TIP]
+> [!TIP] 提示
 > **在 Git Bash / MSYS 环境里敲带绝对路径的命令要小心**：本机实验时 `docker exec ch20-demo cat /etc/os-release` 报的是 `cat: can't open 'E:/Git/etc/os-release': No such file or directory`——因为 Git Bash 把 `/etc/os-release` 这个"看起来像路径"的参数**改写成了 Windows 路径**再传给 docker。绕开的办法有两个：把命令包一层 `sh -c '…'`（本机就是这么做的：`docker run --rm 镜像 sh -c 'cat /etc/os-release'`），或者给这条命令加 `MSYS_NO_PATHCONV=1`。在 Linux 服务器上用 FinalShell 敲则完全不会遇到这个问题。
 
 ### 容器的两种状态与状态流转
@@ -259,7 +259,7 @@ PPT 第 26 页的这个需求，就是**为了引出数据卷**——不然"怎�
 2. **它是"桥梁"**——一头接容器里的某个目录，一头接宿主机上的目录。**往宿主机侧放文件，容器里立刻能看到**；反过来也一样。
 3. **数据卷的生命周期独立于容器**——容器删了，数据卷和里面的文件还在（这是它最值钱的地方，下一节"挂载数据卷"里有实测证据）。
 
-> [!TIP]
+> [!TIP] 提示
 > 数据卷解决的是"**容器的数据要留住**"这件事。没有它，容器的文件系统是"临时的"：容器一删，里面写的所有东西一起消失——MySQL 的数据库文件、nginx 的页面、日志，全都留不下来。所以在 Docker 里跑有状态的软件（数据库最典型），**一定要挂数据卷**。
 
 ## 数据卷的五个操作命令（PPT 第 28 页）
@@ -329,7 +329,7 @@ $ docker volume rm ch20-vol                 ← 清理
 
 第 ③④ 步就是"**容器删了数据还在**"的直接证明：`docker rm -f` 把容器连同它的可写层一起删了，但数据卷 `ch20-vol` 是**独立存在**的，新容器只要挂同一个卷，就能看到上次写进去的 `test.txt`。这也解释了为什么 MySQL 容器**必须**挂数据卷——不挂的话，哪天容器删了重建，数据库里的表和数据就全没了。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 数据卷**不会**跟着容器一起被删：`docker rm` 删的是容器，卷还留着（要删卷得用 `docker volume rm`）。反过来说，**卷不删就会一直占着磁盘**——清理那些"没容器在用的卷"用 `docker volume prune`（这也是它存在的意义）。本机实验最后把实验用的容器、卷、镜像都清掉了。
 
 ## 三个问答（PPT 第 30 页）
@@ -396,7 +396,7 @@ $ docker rm -f ch20-nginx && docker volume rm ch20-html && docker rmi docker.m.d
 
 对着 PPT 第 26 页那两条需求看：**"修改容器内的 index.html 并查看变化"**是第 ④⑤⑥ 步，**"将静态资源部署到 nginx 的 html 目录"**就是把第 ⑤ 步那个 `echo` 换成"把自己打包好的页面文件放进这个目录"（[105 篇](/posts/编程学习/javaweb学习笔记/105-前端打包部署/)那套 `dist` 里的东西）——在真实的部署里，更常见的是**从宿主机侧**把文件放进数据卷对应的目录（因为容器里的目录已经接到了宿主机上），效果一样。
 
-> [!TIP]
+> [!TIP] 提示
 > 第 ⑦ 步的日志里，访问者的 IP 显示成 `172.17.0.1`——那是 **Docker 默认网桥（docker0）在宿主机这一侧的地址**（PPT 第 43 页那张网络图上的 `172.17.0.1/16`）。也就是说：外面发来的请求先到宿主机，再由 Docker 的网络转进容器，所以容器里看到的"客户端"是网桥的地址。这条在 [112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)讲网络时会再遇到。
 
 ## 本地目录挂载（PPT 第 31 页）
@@ -476,7 +476,7 @@ docker run -d \
 ![HeidiSQL 里看到的库和表](https://img.tsh520.cn/file/blog/article/18-mysql客户端库表数据.jpg)
 *图：连上之后看到的库与表（左侧是库表树、右侧是表数据）——这就是"MySQL 容器真的能用了"的判定标准。挂载了 `/root/mysql/init` 之后，容器**第一次启动**会自动执行里面的 `.sql` 脚本，用客户端连上看到的这些库表就是那批脚本建出来的*
 
-> [!WARNING]
+> [!WARNING] 警告
 > 本机**没有拉 `mysql:8`** 这个几百 MB 的大镜像（实验都挑最小成本的方式做，`docker pull mysql:8` 本轮跳过），所以上面这条命令是按 PPT 第 32 页的需求写出来的、**没有整条跑过**；但命令里用到的每一块都实测过：`-p` 端口映射（[110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)）、`-e` 环境变量、`-v` 挂载与"容器删了数据还在"（本篇）、`/root/...` 这种本地目录的写法（同一条规则）。真跑的时候，记得先在宿主机上建好 `/root/mysql/data`、`/root/mysql/init`、`/root/mysql/conf` 三个目录，并把要用的 `.sql` 放进 `init`。
 
 ## 小结
@@ -526,146 +526,178 @@ docker run -d \
   需求：写一组命令，证明"容器里的数据能活过容器的删除"：① 创建一个数据卷（名字自取）；② 起一个容器，把这个卷挂到容器里的某个目录；③ 往那个目录写一个文件并确认写进去了；④ 把容器删掉；⑤ 用**新容器**挂同一个卷，把文件内容读出来。每一步后面注明"能看到什么"。
   素材：实验用最小的 `alpine` 镜像就够；容器要能"一直活着"才会停在那儿等你操作（可以让它跑一条 `sleep` 命令）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五步是"**建卷 → 挂卷起容器 → 写文件 → 删容器 → 新容器读文件**"；关键是第 ④ 步删的是容器、**不是卷**
-  > **二级 · 方法**：`docker volume create 卷名`；`docker run -d --name 容器名 -v 卷名:/data 镜像 sleep 300`；`docker exec 容器名 sh -c '…'` 写文件；`docker rm -f 容器名`；`docker run --rm -v 卷名:/data 镜像 cat /data/xxx.txt`
-  > **三级 · 骨架**：① `docker volume ____ myvol`；② `docker run -d --name demo -v ____:____ 镜像 sleep 300`；③ `docker exec demo sh -c 'echo ____ > /data/test.txt; cat /data/test.txt'`；④ `docker rm -f ____`；⑤ `docker run --rm -v ____:/data 镜像 cat /data/____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 创建数据卷
-  > docker volume create myvol
-  > #    回显 myvol 就是建好了；docker volume ls 能看到它
-  >
-  > # ② 起容器，把卷挂到容器里的 /data（-v 数据卷:容器内目录）
-  > docker run -d --name demo -v myvol:/data alpine sleep 300
-  > #    sleep 300 让容器"一直活着"，方便后面进去操作
-  >
-  > # ③ 往挂载目录写文件并当场验证
-  > docker exec demo sh -c 'echo hello-volume > /data/test.txt; ls -l /data; cat /data/test.txt'
-  > #    输出里有 test.txt，cat 出来是 hello-volume
-  >
-  > # ④ 删掉容器（注意：删的是容器，卷 myvol 还在）
-  > docker rm -f demo
-  >
-  > # ⑤ 用新容器挂同一个卷，把文件读出来
-  > docker run --rm -v myvol:/data alpine cat /data/test.txt
-  > #    输出 hello-volume —— 容器是新的，数据是上次写的
-  >
-  > # 收尾：不用了就删卷
-  > docker volume rm myvol
-  > ```
-  > 要点：① `-v` 左边是**卷名**（不能带 `/` 或 `./`，带了就变成"本地目录挂载"了）；② `docker rm` 删容器**不会**删卷，卷要单独 `docker volume rm`；③ 这条证据的意义——MySQL 这类有状态的容器必须挂卷，否则容器重建数据就没了。
+  **一级 · 思路**：五步是"**建卷 → 挂卷起容器 → 写文件 → 删容器 → 新容器读文件**"；关键是第 ④ 步删的是容器、**不是卷**
+  **二级 · 方法**：`docker volume create 卷名`；`docker run -d --name 容器名 -v 卷名:/data 镜像 sleep 300`；`docker exec 容器名 sh -c '…'` 写文件；`docker rm -f 容器名`；`docker run --rm -v 卷名:/data 镜像 cat /data/xxx.txt`
+  **三级 · 骨架**：① `docker volume ____ myvol`；② `docker run -d --name demo -v ____:____ 镜像 sleep 300`；③ `docker exec demo sh -c 'echo ____ > /data/test.txt; cat /data/test.txt'`；④ `docker rm -f ____`；⑤ `docker run --rm -v ____:/data 镜像 cat /data/____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 创建数据卷
+  docker volume create myvol
+  #    回显 myvol 就是建好了；docker volume ls 能看到它
+  
+  # ② 起容器，把卷挂到容器里的 /data（-v 数据卷:容器内目录）
+  docker run -d --name demo -v myvol:/data alpine sleep 300
+  #    sleep 300 让容器"一直活着"，方便后面进去操作
+  
+  # ③ 往挂载目录写文件并当场验证
+  docker exec demo sh -c 'echo hello-volume > /data/test.txt; ls -l /data; cat /data/test.txt'
+  #    输出里有 test.txt，cat 出来是 hello-volume
+  
+  # ④ 删掉容器（注意：删的是容器，卷 myvol 还在）
+  docker rm -f demo
+  
+  # ⑤ 用新容器挂同一个卷，把文件读出来
+  docker run --rm -v myvol:/data alpine cat /data/test.txt
+  #    输出 hello-volume —— 容器是新的，数据是上次写的
+  
+  # 收尾：不用了就删卷
+  docker volume rm myvol
+  ```
+  要点：① `-v` 左边是**卷名**（不能带 `/` 或 `./`，带了就变成"本地目录挂载"了）；② `docker rm` 删容器**不会**删卷，卷要单独 `docker volume rm`；③ 这条证据的意义——MySQL 这类有状态的容器必须挂卷，否则容器重建数据就没了。
+
+  :::
+
 
 - [ ] **2-2 用 nginx 容器把"自己的页面"发布出去**
   需求：写一组命令，把 nginx 跑在容器里，并让浏览器访问到**自己写的一行内容**：① 拉取 nginx 镜像；② 起容器（后台运行、命名 `nginx`、把宿主机的 80 映射到容器的 80、并挂一个数据卷到 nginx 的网页目录 `/usr/share/nginx/html`）；③ 先访问一次看看默认页；④ 把容器里网页目录下的 `index.html` 换成自己的内容；⑤ 再访问确认变了；⑥ 看访问日志；⑦ 收尾（删容器、删卷）。
   素材：nginx 容器里网页文件放在 `/usr/share/nginx/html`；宿主机上可以直接用 `curl` 访问 `http://localhost`；日志用 `docker logs` 看。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：起容器（带端口映射 + 数据卷）→ 访问默认页 → 改容器里网页目录的文件 → 再访问 → 看日志 → 清理
-  > **二级 · 方法**：`docker pull nginx`；`docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx`；`curl http://localhost`；`docker exec nginx sh -c 'echo "<h1>…</h1>" > /usr/share/nginx/html/index.html'`；`docker logs nginx`；`docker rm -f nginx`、`docker volume rm html`
-  > **三级 · 骨架**：① `docker ____ nginx`；② `docker run -d --name ____ -p ____:____ -v ____:/usr/share/nginx/html nginx`；③ `curl http://____`；④ `docker exec nginx sh -c 'echo "<h1>____</h1>" > /usr/share/nginx/____/index.html'`；⑤ 再 `curl`；⑥ `docker ____ nginx`；⑦ `docker rm -f nginx` + `docker volume rm ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 拉取 nginx 镜像
-  > docker pull nginx
-  >
-  > # ② 起容器：后台、命名、80→80、数据卷挂到网页目录
-  > docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx
-  > #    -p 80:80        宿主机 80 → 容器 80（左外右内）
-  > #    -v html:/usr/share/nginx/html   数据卷 html 接到容器里的网页目录
-  >
-  > # ③ 访问默认页
-  > curl http://localhost
-  > #    能看到 <title>Welcome to nginx!</title>
-  >
-  > # ④ 换掉容器里网页目录下的首页文件
-  > docker exec nginx sh -c 'echo "<h1>Hello Docker + Nginx 部署成功</h1>" > /usr/share/nginx/html/index.html'
-  >
-  > # ⑤ 再访问：页面变成自己的了
-  > curl http://localhost
-  > #    <h1>Hello Docker + Nginx 部署成功</h1>
-  >
-  > # ⑥ 看访问日志（两次请求都记着）
-  > docker logs nginx
-  > #    "GET / HTTP/1.1" 200 896 …（默认页）
-  > #    "GET / HTTP/1.1" 200 43  …（自己的页）
-  >
-  > # ⑦ 收尾
-  > docker rm -f nginx
-  > docker volume rm html
-  > ```
-  > 要点：① 挂数据卷的意义是"**这个目录接到了宿主机上**"——真实部署时从宿主机侧往卷的目录里放打包好的静态资源（[105 篇](/posts/编程学习/javaweb学习笔记/105-前端打包部署/)的 `dist`）就行；② 换成 `nginx:alpine` 这类精简镜像时里面只有 `sh`，`docker exec -it nginx bash` 会失败，用 `sh`；③ 容器删了以后卷还在，要单独 `docker volume rm` 清掉。
+  **一级 · 思路**：起容器（带端口映射 + 数据卷）→ 访问默认页 → 改容器里网页目录的文件 → 再访问 → 看日志 → 清理
+  **二级 · 方法**：`docker pull nginx`；`docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx`；`curl http://localhost`；`docker exec nginx sh -c 'echo "<h1>…</h1>" > /usr/share/nginx/html/index.html'`；`docker logs nginx`；`docker rm -f nginx`、`docker volume rm html`
+  **三级 · 骨架**：① `docker ____ nginx`；② `docker run -d --name ____ -p ____:____ -v ____:/usr/share/nginx/html nginx`；③ `curl http://____`；④ `docker exec nginx sh -c 'echo "<h1>____</h1>" > /usr/share/nginx/____/index.html'`；⑤ 再 `curl`；⑥ `docker ____ nginx`；⑦ `docker rm -f nginx` + `docker volume rm ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 拉取 nginx 镜像
+  docker pull nginx
+  
+  # ② 起容器：后台、命名、80→80、数据卷挂到网页目录
+  docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx
+  #    -p 80:80        宿主机 80 → 容器 80（左外右内）
+  #    -v html:/usr/share/nginx/html   数据卷 html 接到容器里的网页目录
+  
+  # ③ 访问默认页
+  curl http://localhost
+  #    能看到 <title>Welcome to nginx!</title>
+  
+  # ④ 换掉容器里网页目录下的首页文件
+  docker exec nginx sh -c 'echo "<h1>Hello Docker + Nginx 部署成功</h1>" > /usr/share/nginx/html/index.html'
+  
+  # ⑤ 再访问：页面变成自己的了
+  curl http://localhost
+  #    <h1>Hello Docker + Nginx 部署成功</h1>
+  
+  # ⑥ 看访问日志（两次请求都记着）
+  docker logs nginx
+  #    "GET / HTTP/1.1" 200 896 …（默认页）
+  #    "GET / HTTP/1.1" 200 43  …（自己的页）
+  
+  # ⑦ 收尾
+  docker rm -f nginx
+  docker volume rm html
+  ```
+  要点：① 挂数据卷的意义是"**这个目录接到了宿主机上**"——真实部署时从宿主机侧往卷的目录里放打包好的静态资源（[105 篇](/posts/编程学习/javaweb学习笔记/105-前端打包部署/)的 `dist`）就行；② 换成 `nginx:alpine` 这类精简镜像时里面只有 `sh`，`docker exec -it nginx bash` 会失败，用 `sh`；③ 容器删了以后卷还在，要单独 `docker volume rm` 清掉。
+
+  :::
+
 
 - [ ] **2-3 起一个 MySQL 容器，让数据、配置、初始化脚本都留在宿主机上**
   需求：一台 Linux 服务器（`192.168.100.128`，root 身份）。要求起一个 MySQL 容器，并做到三件事：① 数据库的数据文件落在宿主机 `/root/mysql/data` 目录里；② 放在 `/root/mysql/init` 里的 `.sql` 脚本能在容器**第一次启动**时自动执行；③ 自己写的配置文件放在 `/root/mysql/conf` 里、容器启动时能读到。请写出完整命令，并说明：这三条挂载分别对应容器里的哪个目录、为什么这里**不能**写成 `-v mysql:/var/lib/mysql` 这种形式。
   素材：容器里 MySQL 的数据目录是 `/var/lib/mysql`、初始化脚本目录是 `/docker-entrypoint-initdb.d`、配置目录是 `/etc/mysql/conf.d`；MySQL 镜像要求的 root 密码用环境变量传；宿主机端口用 3307。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一条 `docker run`，把 [110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)那四个参数和**三条本地目录挂载**拼起来；三条挂载的左边都是"宿主机上真实存在的目录路径"
-  > **二级 · 方法**：`-v /root/mysql/data:/var/lib/mysql`、`-v /root/mysql/init:/docker-entrypoint-initdb.d`、`-v /root/mysql/conf:/etc/mysql/conf.d`；**本地目录必须以 `/` 或 `./` 开头**，否则会被当成数据卷名
-  > **三级 · 骨架**：`docker run -d --name mysql -p ____:____ -e TZ=Asia/Shanghai -e MYSQL_ROOT_PASSWORD=____ -v /root/mysql/data:____ -v /root/mysql/init:____ -v /root/mysql/conf:____ mysql:8`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # 先在宿主机上把三个目录建好，并把要用的 sql / 配置放进去
-  > mkdir -p /root/mysql/data /root/mysql/init /root/mysql/conf
-  >
-  > # 起容器：四个基础参数 + 三条本地目录挂载
-  > docker run -d \
-  >   --name mysql \
-  >   -p 3307:3306 \
-  >   -e TZ=Asia/Shanghai \
-  >   -e MYSQL_ROOT_PASSWORD=123 \
-  >   -v /root/mysql/data:/var/lib/mysql \
-  >   -v /root/mysql/init:/docker-entrypoint-initdb.d \
-  >   -v /root/mysql/conf:/etc/mysql/conf.d \
-  >   mysql:8
-  > ```
-  > 三条挂载各管一件事：
-  > · `/root/mysql/data` → `/var/lib/mysql`：**数据目录**——建过的库表都在宿主机这个目录里，容器删了重建数据还在；
-  > · `/root/mysql/init` → `/docker-entrypoint-initdb.d`：**初始化脚本**——容器**第一次启动**时自动执行目录里的 `.sql`（建库建表、灌数据），之后重启不再执行；
-  > · `/root/mysql/conf` → `/etc/mysql/conf.d`：**配置文件**——宿主机上改 `.cnf` 就等于改容器里 MySQL 的配置。
-  > 为什么不能写成 `-v mysql:/var/lib/mysql`：**`-v` 左边不带 `/` 或 `./` 开头的名字会被识别成"数据卷"**，那样宿主机上的目录就变成 Docker 管的 `/var/lib/docker/volumes/mysql/_data`（位置固定、不归你指定）——而这里要的是"我自己指定 `/root/mysql/data`"。**必须以 `/` 或 `./` 开头**。
-  > 验证：`docker ps` 看容器在跑；用客户端连 `192.168.100.128:3307`（root / 123），能看到 `init` 里脚本建出来的库表；往 `/root/mysql/conf` 放一个 `.cnf` 再重启容器，配置生效。
+  **一级 · 思路**：一条 `docker run`，把 [110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)那四个参数和**三条本地目录挂载**拼起来；三条挂载的左边都是"宿主机上真实存在的目录路径"
+  **二级 · 方法**：`-v /root/mysql/data:/var/lib/mysql`、`-v /root/mysql/init:/docker-entrypoint-initdb.d`、`-v /root/mysql/conf:/etc/mysql/conf.d`；**本地目录必须以 `/` 或 `./` 开头**，否则会被当成数据卷名
+  **三级 · 骨架**：`docker run -d --name mysql -p ____:____ -e TZ=Asia/Shanghai -e MYSQL_ROOT_PASSWORD=____ -v /root/mysql/data:____ -v /root/mysql/init:____ -v /root/mysql/conf:____ mysql:8`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # 先在宿主机上把三个目录建好，并把要用的 sql / 配置放进去
+  mkdir -p /root/mysql/data /root/mysql/init /root/mysql/conf
+  
+  # 起容器：四个基础参数 + 三条本地目录挂载
+  docker run -d \
+    --name mysql \
+    -p 3307:3306 \
+    -e TZ=Asia/Shanghai \
+    -e MYSQL_ROOT_PASSWORD=123 \
+    -v /root/mysql/data:/var/lib/mysql \
+    -v /root/mysql/init:/docker-entrypoint-initdb.d \
+    -v /root/mysql/conf:/etc/mysql/conf.d \
+    mysql:8
+  ```
+  三条挂载各管一件事：
+  · `/root/mysql/data` → `/var/lib/mysql`：**数据目录**——建过的库表都在宿主机这个目录里，容器删了重建数据还在；
+  · `/root/mysql/init` → `/docker-entrypoint-initdb.d`：**初始化脚本**——容器**第一次启动**时自动执行目录里的 `.sql`（建库建表、灌数据），之后重启不再执行；
+  · `/root/mysql/conf` → `/etc/mysql/conf.d`：**配置文件**——宿主机上改 `.cnf` 就等于改容器里 MySQL 的配置。
+  为什么不能写成 `-v mysql:/var/lib/mysql`：**`-v` 左边不带 `/` 或 `./` 开头的名字会被识别成"数据卷"**，那样宿主机上的目录就变成 Docker 管的 `/var/lib/docker/volumes/mysql/_data`（位置固定、不归你指定）——而这里要的是"我自己指定 `/root/mysql/data`"。**必须以 `/` 或 `./` 开头**。
+  验证：`docker ps` 看容器在跑；用客户端连 `192.168.100.128:3307`（root / 123），能看到 `init` 里脚本建出来的库表；往 `/root/mysql/conf` 放一个 `.cnf` 再重启容器，配置生效。
+
+  :::
+
 
 - [ ] **2-4 容器的日常打理（看、停、启、进、删）**
   需求：服务器上有个叫 `nginx` 的容器，请写出下面每件事对应的命令，并说明**会看到什么**：
   ① 看它现在是不是在运行；② 它其实已经停了、想连停止状态的容器一起看；③ 把它停掉；④ 把它重新启动起来；⑤ 进到它里面去敲命令（退出来怎么办）；⑥ 看它最近打印的日志（想一直盯着新的日志输出）；⑦ 把它彻底删掉（运行中的状态直接删）。
   素材：容器名是 `nginx`；容器里是精简镜像，只有 `sh` 没有 `bash`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这七件事就是"查看 → 停止 → 启动 → 进入 → 看日志 → 删除"这几条固定命令，注意 `ps` 加不加参数的区别、`stop` 与 `rm` 的区别
-  > **二级 · 方法**：`docker ps` / `docker ps -a`；`docker stop nginx`；`docker start nginx`；`docker exec -it nginx sh`（`exit` 退出）；`docker logs nginx`（`-f` 实时跟随）；`docker rm -f nginx`
-  > **三级 · 骨架**：① `docker ____`；② `docker ps ____`；③ `docker ____ nginx`；④ `docker ____ nginx`；⑤ `docker exec -____ nginx ____`；⑥ `docker ____ nginx`（加 `____` 实时看）；⑦ `docker rm ____ nginx`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > # ① 看运行中的容器（能看到 nginx 这一行、状态 Up、PORTS 列有映射）
-  > docker ps
-  >
-  > # ② 连已停止的一起看（状态显示 Exited）
-  > docker ps -a
-  >
-  > # ③ 停止（回显容器名；再 ps 就看不到了，但容器还在）
-  > docker stop nginx
-  >
-  > # ④ 启动已停止的容器（注意不是 docker run —— run 会新建一个容器）
-  > docker start nginx
-  >
-  > # ⑤ 进入容器（-i 保持输入、-t 分配终端；精简镜像用 sh，完整镜像可以 bash）
-  > docker exec -it nginx sh
-  > #    提示符变成容器里的样子，敲 ls、cat 都在容器里生效；exit 退出
-  >
-  > # ⑥ 看日志；-f 表示像 tail -f 一样持续输出新日志（Ctrl+C 退出）
-  > docker logs nginx
-  > docker logs -f nginx
-  >
-  > # ⑦ 强制删除运行中的容器（不加 -f 要先 stop）
-  > docker rm -f nginx
-  > ```
-  > 要点：① `ps` 与 `ps -a` 的区别（运行中 / 全部）；② `stop` 只是停、`rm` 才是删；③ `start` 是"把停了的再拉起来"，`run` 是"新建一个容器"——搞混会出现一堆重复容器；④ 删容器不会删镜像，也不会删数据卷。
+  **一级 · 思路**：这七件事就是"查看 → 停止 → 启动 → 进入 → 看日志 → 删除"这几条固定命令，注意 `ps` 加不加参数的区别、`stop` 与 `rm` 的区别
+  **二级 · 方法**：`docker ps` / `docker ps -a`；`docker stop nginx`；`docker start nginx`；`docker exec -it nginx sh`（`exit` 退出）；`docker logs nginx`（`-f` 实时跟随）；`docker rm -f nginx`
+  **三级 · 骨架**：① `docker ____`；② `docker ps ____`；③ `docker ____ nginx`；④ `docker ____ nginx`；⑤ `docker exec -____ nginx ____`；⑥ `docker ____ nginx`（加 `____` 实时看）；⑦ `docker rm ____ nginx`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  # ① 看运行中的容器（能看到 nginx 这一行、状态 Up、PORTS 列有映射）
+  docker ps
+  
+  # ② 连已停止的一起看（状态显示 Exited）
+  docker ps -a
+  
+  # ③ 停止（回显容器名；再 ps 就看不到了，但容器还在）
+  docker stop nginx
+  
+  # ④ 启动已停止的容器（注意不是 docker run —— run 会新建一个容器）
+  docker start nginx
+  
+  # ⑤ 进入容器（-i 保持输入、-t 分配终端；精简镜像用 sh，完整镜像可以 bash）
+  docker exec -it nginx sh
+  #    提示符变成容器里的样子，敲 ls、cat 都在容器里生效；exit 退出
+  
+  # ⑥ 看日志；-f 表示像 tail -f 一样持续输出新日志（Ctrl+C 退出）
+  docker logs nginx
+  docker logs -f nginx
+  
+  # ⑦ 强制删除运行中的容器（不加 -f 要先 stop）
+  docker rm -f nginx
+  ```
+  要点：① `ps` 与 `ps -a` 的区别（运行中 / 全部）；② `stop` 只是停、`rm` 才是删；③ `start` 是"把停了的再拉起来"，`run` 是"新建一个容器"——搞混会出现一堆重复容器；④ 删容器不会删镜像，也不会删数据卷。
+
+  :::
+
 
 ### 三、综合题
 
@@ -678,65 +710,73 @@ docker run -d \
   5. **换到 MySQL**：起一个 MySQL 容器，用**本地目录挂载**把数据目录、初始化脚本目录、配置文件目录都放到 `/root/mysql/` 下面（说明为什么这三条必须用 `/` 开头的路径）；
   6. **收尾**：说清"数据卷挂载"和"本地目录挂载"各自适合什么场景，以及 `docker rm`、`docker volume rm`、`docker rmi` 三条删除命令各删什么。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这份清单的骨架就是"**命令练习 → nginx 起容器 → 挂卷改页面 → 删容器验证持久化 → MySQL 本地目录挂载 → 总结两种挂载**"；每一步都要有一个"看得见的结果"
-  > **二级 · 方法**：拉镜像 `docker pull nginx`；起容器 `docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx`；写页面 `docker exec nginx sh -c 'echo … > /usr/share/nginx/html/index.html'`；验证 `curl http://localhost`；持久化 `docker rm -f nginx` 后用新容器挂 `-v html:/usr/share/nginx/html` 再 `curl`；MySQL 用 `-v /root/mysql/data:/var/lib/mysql` 等三条
-  > **三级 · 骨架**：① `docker pull ____` + `docker images`；② `docker run -d --name ____ -p ____:____ nginx` + `curl http://localhost`；③ `-v ____:/usr/share/nginx/html` + `docker exec … > index.html` + `curl` + `docker logs`；④ `docker rm -f ____` → 新容器挂同一个 ____ → `curl`；⑤ `-v /root/mysql/____:____` ×3（**必须 `/` 开头**）；⑥ 两种挂载的区别 + 三条删除命令各删什么
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 清单：从"练命令"到"两个实验"（PPT 第 22～33 页）
-  >
-  > 【1】熟悉命令
-  >   docker pull nginx          → 逐层下载，最后 Downloaded newer image
-  >   docker images              → 列表里出现 nginx（REPOSITORY / TAG / SIZE）
-  >   顺带认识：docker push（推回仓库）、docker rmi（删镜像）、
-  >             docker save / docker load（导出成文件 / 从文件导入）
-  >
-  > 【2】起 nginx 容器
-  >   docker run -d --name nginx -p 80:80 nginx
-  >   docker ps                  → Up、PORTS 显示 0.0.0.0:80->80/tcp
-  >   curl http://localhost      → <title>Welcome to nginx!</title>（默认页在）
-  >   说明：-d 后台、--name 命名、-p 宿主机 80 → 容器 80
-  >
-  > 【3】挂数据卷 + 换成自己的页面
-  >   docker rm -f nginx         （先删掉上一个，或一开始起就带上 -v）
-  >   docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx
-  >   docker exec nginx sh -c 'echo "<h1>Hello Docker + Nginx 部署成功</h1>" > /usr/share/nginx/html/index.html'
-  >   curl http://localhost      → <h1>Hello Docker + Nginx 部署成功</h1>
-  >   docker logs nginx          → 两条 200：896（默认页）/ 43（自己的页）
-  >   说明：-v 数据卷:容器内目录，卷不存在会自动创建
-  >
-  > 【4】验证"容器删了数据还在"
-  >   docker rm -f nginx
-  >   docker run --rm -v html:/usr/share/nginx/html nginx cat /usr/share/nginx/html/index.html
-  >     → 还是自己写的那行 <h1>…</h1>（新容器、旧数据）
-  >   说明：docker rm 删容器不删卷；要清掉得 docker volume rm html
-  >
-  > 【5】MySQL：本地目录挂载
-  >   mkdir -p /root/mysql/data /root/mysql/init /root/mysql/conf
-  >   docker run -d \
-  >     --name mysql \
-  >     -p 3307:3306 \
-  >     -e TZ=Asia/Shanghai \
-  >     -e MYSQL_ROOT_PASSWORD=123 \
-  >     -v /root/mysql/data:/var/lib/mysql \
-  >     -v /root/mysql/init:/docker-entrypoint-initdb.d \
-  >     -v /root/mysql/conf:/etc/mysql/conf.d \
-  >     mysql:8
-  >   为什么必须带 / ：-v 左边**以 / 或 ./ 开头**才被当成本地目录；
-  >   写成 mysql:/var/lib/mysql 会被识别为"名叫 mysql 的数据卷"，
-  >   宿主机位置就固定成 /var/lib/docker/volumes/mysql/_data 了（不归你指定）
-  >   验证：客户端连 192.168.100.128:3307，能看到 init 脚本建出来的库表
-  >
-  > 【6】两种挂载怎么选 + 三条删除命令
-  >   数据卷挂载   -v 卷名:容器内目录        位置固定 /var/lib/docker/volumes/xxx/_data
-  >                → 数据要留住、不想操心路径（nginx 的 html）
-  >   本地目录挂载 -v 宿主机目录:容器内目录   位置任意指定（必须 / 或 ./ 开头）
-  >                → 要自己指定位置、要把宿主机的文件/配置直接给容器用（MySQL 的 data/init/conf）
-  >
-  >   docker rm 容器名        → 删容器（不删镜像、不删卷）
-  >   docker volume rm 卷名   → 删数据卷（里面的文件一起没）
-  >   docker rmi 镜像名:tag   → 删本地镜像
-  > ```
-  > 检查点：① 每步都有"看得见的结果"（镜像列表、Up 状态、curl 的返回、日志里的两条 200）；② 第 4 步是**新容器**读旧数据；③ MySQL 三条挂载的左边都带 `/`，且能说清"不带 `/` 会变成卷名"；④ 收尾能分清 `rm` / `volume rm` / `rmi` 三条删除命令。
+  **一级 · 思路**：这份清单的骨架就是"**命令练习 → nginx 起容器 → 挂卷改页面 → 删容器验证持久化 → MySQL 本地目录挂载 → 总结两种挂载**"；每一步都要有一个"看得见的结果"
+  **二级 · 方法**：拉镜像 `docker pull nginx`；起容器 `docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx`；写页面 `docker exec nginx sh -c 'echo … > /usr/share/nginx/html/index.html'`；验证 `curl http://localhost`；持久化 `docker rm -f nginx` 后用新容器挂 `-v html:/usr/share/nginx/html` 再 `curl`；MySQL 用 `-v /root/mysql/data:/var/lib/mysql` 等三条
+  **三级 · 骨架**：① `docker pull ____` + `docker images`；② `docker run -d --name ____ -p ____:____ nginx` + `curl http://localhost`；③ `-v ____:/usr/share/nginx/html` + `docker exec … > index.html` + `curl` + `docker logs`；④ `docker rm -f ____` → 新容器挂同一个 ____ → `curl`；⑤ `-v /root/mysql/____:____` ×3（**必须 `/` 开头**）；⑥ 两种挂载的区别 + 三条删除命令各删什么
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  清单：从"练命令"到"两个实验"（PPT 第 22～33 页）
+  
+  【1】熟悉命令
+    docker pull nginx          → 逐层下载，最后 Downloaded newer image
+    docker images              → 列表里出现 nginx（REPOSITORY / TAG / SIZE）
+    顺带认识：docker push（推回仓库）、docker rmi（删镜像）、
+              docker save / docker load（导出成文件 / 从文件导入）
+  
+  【2】起 nginx 容器
+    docker run -d --name nginx -p 80:80 nginx
+    docker ps                  → Up、PORTS 显示 0.0.0.0:80->80/tcp
+    curl http://localhost      → <title>Welcome to nginx!</title>（默认页在）
+    说明：-d 后台、--name 命名、-p 宿主机 80 → 容器 80
+  
+  【3】挂数据卷 + 换成自己的页面
+    docker rm -f nginx         （先删掉上一个，或一开始起就带上 -v）
+    docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx
+    docker exec nginx sh -c 'echo "<h1>Hello Docker + Nginx 部署成功</h1>" > /usr/share/nginx/html/index.html'
+    curl http://localhost      → <h1>Hello Docker + Nginx 部署成功</h1>
+    docker logs nginx          → 两条 200：896（默认页）/ 43（自己的页）
+    说明：-v 数据卷:容器内目录，卷不存在会自动创建
+  
+  【4】验证"容器删了数据还在"
+    docker rm -f nginx
+    docker run --rm -v html:/usr/share/nginx/html nginx cat /usr/share/nginx/html/index.html
+      → 还是自己写的那行 <h1>…</h1>（新容器、旧数据）
+    说明：docker rm 删容器不删卷；要清掉得 docker volume rm html
+  
+  【5】MySQL：本地目录挂载
+    mkdir -p /root/mysql/data /root/mysql/init /root/mysql/conf
+    docker run -d \
+      --name mysql \
+      -p 3307:3306 \
+      -e TZ=Asia/Shanghai \
+      -e MYSQL_ROOT_PASSWORD=123 \
+      -v /root/mysql/data:/var/lib/mysql \
+      -v /root/mysql/init:/docker-entrypoint-initdb.d \
+      -v /root/mysql/conf:/etc/mysql/conf.d \
+      mysql:8
+    为什么必须带 / ：-v 左边**以 / 或 ./ 开头**才被当成本地目录；
+    写成 mysql:/var/lib/mysql 会被识别为"名叫 mysql 的数据卷"，
+    宿主机位置就固定成 /var/lib/docker/volumes/mysql/_data 了（不归你指定）
+    验证：客户端连 192.168.100.128:3307，能看到 init 脚本建出来的库表
+  
+  【6】两种挂载怎么选 + 三条删除命令
+    数据卷挂载   -v 卷名:容器内目录        位置固定 /var/lib/docker/volumes/xxx/_data
+                 → 数据要留住、不想操心路径（nginx 的 html）
+    本地目录挂载 -v 宿主机目录:容器内目录   位置任意指定（必须 / 或 ./ 开头）
+                 → 要自己指定位置、要把宿主机的文件/配置直接给容器用（MySQL 的 data/init/conf）
+  
+    docker rm 容器名        → 删容器（不删镜像、不删卷）
+    docker volume rm 卷名   → 删数据卷（里面的文件一起没）
+    docker rmi 镜像名:tag   → 删本地镜像
+  ```
+  检查点：① 每步都有"看得见的结果"（镜像列表、Up 状态、curl 的返回、日志里的两条 200）；② 第 4 步是**新容器**读旧数据；③ MySQL 三条挂载的左边都带 `/`，且能说清"不带 `/` 会变成卷名"；④ 收尾能分清 `rm` / `volume rm` / `rmi` 三条删除命令。
+
+  :::
+

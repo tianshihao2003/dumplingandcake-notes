@@ -33,7 +33,7 @@ cover: false
 
 **XML**（PPT 的注解）：**（英语：Extensible Markup Language）可扩展标记语言，本质是一种数据格式，可以用来存储复杂的数据结构。**
 
-> [!NOTE]
+> [!NOTE] 注意
 > 这个名字是"历史遗留"：Ajax 诞生那会儿后端返回的数据确实是用 XML 装的。现在实际开发里**几乎都用 JSON**（[15 篇](/posts/编程学习/javaweb学习笔记/15-js函数与自定义对象/)里那种"数组里放对象"的格式就是 JSON 的样子）。**名字没变，装的格式换了**——看到 `XML` 两个字别慌，知道它是"一种数据格式"就够了。
 
 Ajax 的**作用**（PPT 列了两条，都很关键）：
@@ -61,7 +61,7 @@ PPT 第 31 页用一张时间轴图（左同步、右异步）对比"请求服�
 | 等待这 3 秒时页面能干什么 | **什么都干不了**，卡在那里等（前面那些步骤得**按顺序**走完） | 页面**照常能用**：你可以继续打字、滚动、点别的按钮；服务器回话以后再去处理结果 |
 | 一句话 | **一步一步等**，前一步不做完后一步不开始 | **先把请求发出去**，不耽误干别的事，结果回来了再处理 |
 
-> [!TIP]
+> [!TIP] 提示
 > 异步在代码里长什么样？看课程 `15. Axios-请求方式别名.html` 里这几行——注意打印顺序：
 >
 > ```javascript
@@ -95,7 +95,7 @@ PPT 第 31 页用一张时间轴图（左同步、右异步）对比"请求服�
 <script src="js/axios.js"></script>
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 注意和前一篇的区别：**Axios 的引入不用 `type="module"`**——它是普通脚本（把 `axios` 挂成全局变量），所以：
 > - **本地文件方式双击 html 也能跑**（不像 Vue 的模块导入会被 CORS 拦）；
 > - 用的时候直接写 `axios.get(...)`，**不需要 `import`**。
@@ -154,7 +154,7 @@ PPT 第 31 页用一张时间轴图（左同步、右异步）对比"请求服�
 | **`.then((result) => { ... })`** | 请求**成功**（服务器正常返回） | `result` 是响应对象，业务数据在 **`result.data`** 里 |
 | **`.catch((err) => { ... })`** | 请求**失败**（断网、地址写错、服务器报错……） | `err` 是错误对象，`console.log` 出来能看原因 |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 上面两段课程代码里的地址（`https://mock.apifox.cn/m1/3083103-0-default/...`）是**第三方 mock（假接口）平台**给的演示地址——课程用它是因为"能立刻返回一段 JSON 数据、练手方便"。**mock 平台上的地址有失效的可能**，打不开时换成课程的教学接口即可：
 > - 列表：`https://web-server.itheima.net/emps/list`（支持 `?name=xxx&gender=xxx&job=xxx` 三个查询条件）
 > - 修改：`https://web-server.itheima.net/emps/update`（POST，请求体如 `id=1`）
@@ -202,7 +202,7 @@ axios.get('https://web-server.itheima.net/emps/list').then((result) => {
 | 服务器返回的全部内容（含 code/msg） | `result.data` |
 | **员工数组**（真正要渲染的） | **`result.data.data`** |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 报错 `Cannot read properties of undefined (reading 'xxx')` 时先怀疑这里：
 > - 写了 `result.data` 但接口返回的是"包了一层"的结构 → 应该写 `result.data.data`；
 > - 接口返回的字段名和你写的不一样（比如人家叫 `empList`，你按 `data` 取）。
@@ -266,7 +266,7 @@ axios.get('https://web-server.itheima.net/emps/list', {
 
 看规律：**GET 系列（get / delete / head / options）第二个参数是"配置"；POST 系列（post / put / patch）第二个参数是"数据"、第三个才是配置**。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 课程里 GET 用的是 `https://web-server.itheima.net/emps/list`、POST 用的是 `.../emps/update`（同一个服务器的不同接口）。**别把 `get` 和 `post` 和"取/存"这两个语义绑死在一张表上**——用什么方式，看**接口文档**写的什么，不是看你想干什么。
 
 ## async / await：把异步写得像同步
@@ -315,7 +315,7 @@ methods: {
 
 **注意（PPT 原文）**：**`await` 关键字只在 `async` 函数内有效**，`await` 关键字**取代 `then` 函数**，等待获取到**请求成功的结果值**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > `await` 的三个常见坑：
 > 1. **在非 `async` 函数里用 `await`**——语法错误，页面直接不工作。函数前面加上 `async` 就好。
 > 2. **只加了 `async` 没加 `await`**——`let result = axios.get(...)` 拿到的是"尚未完成的请求对象"（Promise），`result.data` 是 `undefined`。**两者要成对出现**。
@@ -345,7 +345,7 @@ methods: {
 - 课程的接口服务器返回了 `Access-Control-Allow-Origin: *`（允许任何来源），所以能正常拿到数据；
 - 换成自己写的后端时，如果**忘了配置跨域**，浏览器控制台会报 `has been blocked by CORS policy`，`.catch` 里拿到的是 `Network Error`。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 后面学 SpringBoot 时，这事有正经解法（后端加跨域配置 / 用 `@CrossOrigin`，前端工程化项目里还有"代理"这一招）。**现在只要会认这个错**：控制台出现 `CORS policy` → 找后端（或问 AI）配允许跨域，**不是前端代码写错了**。
 
 ### 2. 请求地址、方式、参数名要和接口文档一致
@@ -365,7 +365,7 @@ let url = `https://web-server.itheima.net/emps/list?name=${this.searchForm.name}
 let result = await axios.get(url);
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **参数里有中文、空格、`&` 这类字符时**，正规做法是 `encodeURIComponent(...)` 包一层（浏览器通常会自动处理，但自己包上更稳）：
 > ```javascript
 > let url = `https://web-server.itheima.net/emps/list?name=${encodeURIComponent(this.searchForm.name)}`;
@@ -395,7 +395,7 @@ let result = await axios.get(url);
 | **断网 / CDN 打不开** | `Failed to load resource: net::ERR_INTERNET_DISCONNECTED`；**如果 Vue 或 axios 本身是从 CDN 引的，连页面都动不了** | 联网状态；或用本地 js 文件 + Live Server |
 | **都不报错但表格是空的** | 页面正常、控制台没红字，就是没数据 | ①返回的是不是"包一层"的结构（`result.data.data`）；②筛选条件是不是把数据都筛掉了（比如 `name` 传了空串以外的值但没匹配） |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 写这一章的代码时，**养成"先看控制台、再看 Network 面板"的习惯**：报错信息里其实写清了原因（404/405/CORS/Network Error），比"页面没反应"这句描述有用一百倍。接口暂时用不了时，页面该有的表现是**表格空白 + 控制台一条错误**——[22 篇](/posts/编程学习/javaweb学习笔记/22-实战-vueaxios员工列表/)的提示块里还给了"怎么给用户一个友好的失败提示"。
 
 ## 小结
@@ -446,33 +446,41 @@ let result = await axios.get(url);
   4. 请求失败时，把"加载失败"显示到输出区（不要让页面静默无反应）
   （练习文件 `test_21_发送GET请求.html` 里已经准备好了按钮、输出区和 Axios 引入。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一次请求 = 地址 + "要数据"这个动作；结果要"先看清楚结构再取值"，因为返回的内容外面包了一层
-  > **二级 · 方法**：`axios.get(地址)`；成功用 `.then((result) => {...})`，先 `console.log(result.data)` 看结构；员工数组在 `result.data.data`；人数用 `.length`；失败用 `.catch((err) => {...})`
-  > **三级 · 骨架**：`axios.____('https://web-server.itheima.net/emps/list').____((result) => { console.log(result.____); document.querySelector('#out').innerText = \`共 \${result.data.data.____} 人\`; }).____((err) => { ……'加载失败'…… })`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <button type="button" id="btn">获取员工数据</button>
-  > <p id="out"></p>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script>
-  >   document.querySelector('#btn').addEventListener('click', () => {
-  >     axios.get('https://web-server.itheima.net/emps/list')
-  >       .then((result) => {
-  >         console.log(result.data);   // 控制台里看清楚：{code, msg, data:[...]}
-  >         // 员工数组在 result.data.data 里
-  >         document.querySelector('#out').innerText = `共 ${result.data.data.length} 人`;
-  >       })
-  >       .catch((err) => {
-  >         console.log(err);
-  >         document.querySelector('#out').innerText = '加载失败';
-  >       });
-  >   });
-  > </script>
-  > ```
-  > 检查点：① 点按钮后输出区显示"共 4 人"（当前接口里有 4 条数据）；② 控制台里能看到 `{code: 1, msg: "success", data: Array(4)}`；③ **故意把地址改错一个字母**再点，页面显示"加载失败"、控制台里有 404 报错——这就是"接口没起来/地址写错"的表现。
+  **一级 · 思路**：一次请求 = 地址 + "要数据"这个动作；结果要"先看清楚结构再取值"，因为返回的内容外面包了一层
+  **二级 · 方法**：`axios.get(地址)`；成功用 `.then((result) => {...})`，先 `console.log(result.data)` 看结构；员工数组在 `result.data.data`；人数用 `.length`；失败用 `.catch((err) => {...})`
+  **三级 · 骨架**：`axios.____('https://web-server.itheima.net/emps/list').____((result) => { console.log(result.____); document.querySelector('#out').innerText = \`共 \${result.data.data.____} 人\`; }).____((err) => { ……'加载失败'…… })`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <button type="button" id="btn">获取员工数据</button>
+  <p id="out"></p>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    document.querySelector('#btn').addEventListener('click', () => {
+      axios.get('https://web-server.itheima.net/emps/list')
+        .then((result) => {
+          console.log(result.data);   // 控制台里看清楚：{code, msg, data:[...]}
+          // 员工数组在 result.data.data 里
+          document.querySelector('#out').innerText = `共 ${result.data.data.length} 人`;
+        })
+        .catch((err) => {
+          console.log(err);
+          document.querySelector('#out').innerText = '加载失败';
+        });
+    });
+  </script>
+  ```
+  检查点：① 点按钮后输出区显示"共 4 人"（当前接口里有 4 条数据）；② 控制台里能看到 `{code: 1, msg: "success", data: Array(4)}`；③ **故意把地址改错一个字母**再点，页面显示"加载失败"、控制台里有 404 报错——这就是"接口没起来/地址写错"的表现。
+
+  :::
+
 
 - [ ] **2-2 用别名写法提交一次数据**
   页面上有一个"提交修改"按钮。要求：
@@ -481,36 +489,44 @@ let result = await axios.get(url);
   3. 顺手再做一次：把"获取员工列表"这件事**改成别名写法**（地址 `https://web-server.itheima.net/emps/list`），并把返回的 **`msg`** 字段显示到页面上
   （练习文件 `test_21_请求方式别名.html` 里已经准备好了按钮、输出区和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：别名就是"用方法名表示请求方式"；第二个参数的位置决定传进去的是"要提交的数据"还是"配置"
-  > **二级 · 方法**：`axios.post(地址, 数据)`——**提交的数据放在第二个参数**；`axios.get(地址)` 拿数据；显示用 `document.querySelector('#out').innerText = result.data.msg`
-  > **三级 · 骨架**：`axios.____('https://web-server.itheima.net/emps/update', '____').then((result) => { console.log(result.____); });` / `axios.____('https://web-server.itheima.net/emps/list').then((result) => { document.querySelector('#out').innerText = result.data.____; });`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <button type="button" id="btnPost">提交修改</button>
-  > <button type="button" id="btnGet">获取列表</button>
-  > <p id="out"></p>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script>
-  >   // 提交数据：别名 post，第二个参数就是请求体数据
-  >   document.querySelector('#btnPost').addEventListener('click', () => {
-  >     axios.post('https://web-server.itheima.net/emps/update', 'id=1').then((result) => {
-  >       console.log(result.data);   // {code: 1, msg: "success", data: null}
-  >     });
-  >   });
-  >
-  >   // 获取数据：别名 get，把返回的 msg 显示到页面
-  >   document.querySelector('#btnGet').addEventListener('click', () => {
-  >     axios.get('https://web-server.itheima.net/emps/list').then((result) => {
-  >       document.querySelector('#out').innerText = result.data.msg;
-  >     });
-  >   });
-  > </script>
-  > ```
-  > 检查点：① 点"提交修改"控制台打印 `msg: "success"`；② 点"获取列表"页面显示 `success`；③ 能说出 `axios.post(url, data)` 里**第二个参数为什么是数据**——因为 POST 的"要提交的东西"是它的第一个业务参数（对比 `axios.get(url, config)` 的第二个参数是配置）。
-  > 对照课程 `15. Axios-请求方式别名.html`。课程里在那句 `axios.get(...)` 后面还写了一行 `console.log('==========================')`——**它会先打印**，这正是"异步"的证据，自己加进去验证一遍。
+  **一级 · 思路**：别名就是"用方法名表示请求方式"；第二个参数的位置决定传进去的是"要提交的数据"还是"配置"
+  **二级 · 方法**：`axios.post(地址, 数据)`——**提交的数据放在第二个参数**；`axios.get(地址)` 拿数据；显示用 `document.querySelector('#out').innerText = result.data.msg`
+  **三级 · 骨架**：`axios.____('https://web-server.itheima.net/emps/update', '____').then((result) => { console.log(result.____); });` / `axios.____('https://web-server.itheima.net/emps/list').then((result) => { document.querySelector('#out').innerText = result.data.____; });`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <button type="button" id="btnPost">提交修改</button>
+  <button type="button" id="btnGet">获取列表</button>
+  <p id="out"></p>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    // 提交数据：别名 post，第二个参数就是请求体数据
+    document.querySelector('#btnPost').addEventListener('click', () => {
+      axios.post('https://web-server.itheima.net/emps/update', 'id=1').then((result) => {
+        console.log(result.data);   // {code: 1, msg: "success", data: null}
+      });
+    });
+  
+    // 获取数据：别名 get，把返回的 msg 显示到页面
+    document.querySelector('#btnGet').addEventListener('click', () => {
+      axios.get('https://web-server.itheima.net/emps/list').then((result) => {
+        document.querySelector('#out').innerText = result.data.msg;
+      });
+    });
+  </script>
+  ```
+  检查点：① 点"提交修改"控制台打印 `msg: "success"`；② 点"获取列表"页面显示 `success`；③ 能说出 `axios.post(url, data)` 里**第二个参数为什么是数据**——因为 POST 的"要提交的东西"是它的第一个业务参数（对比 `axios.get(url, config)` 的第二个参数是配置）。
+  对照课程 `15. Axios-请求方式别名.html`。课程里在那句 `axios.get(...)` 后面还写了一行 `console.log('==========================')`——**它会先打印**，这正是"异步"的证据，自己加进去验证一遍。
+
+  :::
+
 
 - [ ] **2-3 用 async / await 改写，并做错误处理**
   页面上有一个"查询"按钮和一个输出区。要求：
@@ -520,39 +536,47 @@ let result = await axios.get(url);
   4. 在请求**前后**各打印一行日志，观察它们的执行顺序
   （练习文件 `test_21_async_await.html` 里已经准备好了按钮、输出区和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"要等的异步任务"用 `await` 接住，结果就变成一个普通变量；出错的路用 `try` / `catch` 分成两段
-  > **二级 · 方法**：函数前加 `async`；`let result = await axios.get(地址)`；数组 `.map()` 或用 `for` 拼姓名；`try { … } catch (err) { … }`；`console.log` 用来看顺序
-  > **三级 · 骨架**：`async function load() { try { console.log('开始'); let result = ____ axios.get('……/emps/list'); let names = result.data.data.map(e => e.____).join(', '); document.querySelector('#out').innerText = ____; console.log('结束'); } catch (____) { console.log(err); document.querySelector('#out').innerText = '数据加载失败，请检查网络或接口地址'; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <button type="button" id="btn">查询</button>
-  > <p id="out"></p>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script>
-  >   // async：声明这是一个异步方法，里面才能用 await
-  >   async function load() {
-  >     try {
-  >       console.log('① 开始请求');
-  >       // await：等请求成功的结果，取代 .then()
-  >       let result = await axios.get('https://web-server.itheima.net/emps/list');
-  >       // 把姓名数组拼成一句话
-  >       let names = result.data.data.map(e => e.name).join(', ');
-  >       document.querySelector('#out').innerText = names;
-  >       console.log('② 请求完成');
-  >     } catch (err) {
-  >       // 断网、地址写错、跨域被拦都会走到这里
-  >       console.log(err);
-  >       document.querySelector('#out').innerText = '数据加载失败，请检查网络或接口地址';
-  >     }
-  >   }
-  >
-  >   document.querySelector('#btn').addEventListener('click', load);
-  > </script>
-  > ```
-  > 检查点：① 页面显示"谢逊, 韦一笑, 黛绮丝, 殷天正"（接口返回 4 条；条数可能变，以实际为准）；② 控制台顺序是"① 开始请求 → ② 请求完成"（多了 `await`，打印顺序和 `.then()` 那种写法**不一样**）；③ 把地址改错后点查询，页面显示失败提示、控制台有报错，**页面没有卡死**。
+  **一级 · 思路**：把"要等的异步任务"用 `await` 接住，结果就变成一个普通变量；出错的路用 `try` / `catch` 分成两段
+  **二级 · 方法**：函数前加 `async`；`let result = await axios.get(地址)`；数组 `.map()` 或用 `for` 拼姓名；`try { … } catch (err) { … }`；`console.log` 用来看顺序
+  **三级 · 骨架**：`async function load() { try { console.log('开始'); let result = ____ axios.get('……/emps/list'); let names = result.data.data.map(e => e.____).join(', '); document.querySelector('#out').innerText = ____; console.log('结束'); } catch (____) { console.log(err); document.querySelector('#out').innerText = '数据加载失败，请检查网络或接口地址'; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <button type="button" id="btn">查询</button>
+  <p id="out"></p>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    // async：声明这是一个异步方法，里面才能用 await
+    async function load() {
+      try {
+        console.log('① 开始请求');
+        // await：等请求成功的结果，取代 .then()
+        let result = await axios.get('https://web-server.itheima.net/emps/list');
+        // 把姓名数组拼成一句话
+        let names = result.data.data.map(e => e.name).join(', ');
+        document.querySelector('#out').innerText = names;
+        console.log('② 请求完成');
+      } catch (err) {
+        // 断网、地址写错、跨域被拦都会走到这里
+        console.log(err);
+        document.querySelector('#out').innerText = '数据加载失败，请检查网络或接口地址';
+      }
+    }
+  
+    document.querySelector('#btn').addEventListener('click', load);
+  </script>
+  ```
+  检查点：① 页面显示"谢逊, 韦一笑, 黛绮丝, 殷天正"（接口返回 4 条；条数可能变，以实际为准）；② 控制台顺序是"① 开始请求 → ② 请求完成"（多了 `await`，打印顺序和 `.then()` 那种写法**不一样**）；③ 把地址改错后点查询，页面显示失败提示、控制台有报错，**页面没有卡死**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -566,74 +590,82 @@ let result = await axios.get(url);
   6. 全程用 `try / catch` 处理错误，并在控制台打印每次请求的完整响应（先看清楚结构再取数据）
   （练习文件 `test_21_综合_接口小工具.html` 里已经准备好了页面结构和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"发请求"包成一个函数，界面上的每个按钮只负责"改一下状态 + 调这个函数"；界面上所有文字都靠"改 DOM 内容"或"改元素内容"来更新
-  > **二级 · 方法**：`async function load() { try { … await axios.get(url) … } catch (err) { … } }`；拼参数用模板字符串 `` `...?name=${name}` ``；渲染列表用 `数组.map(item => \`&lt;li>...&lt;/li>\`).join('')` 再赋给 `innerHTML`（[16 篇](/posts/编程学习/javaweb学习笔记/16-js-dom操作/)的套路）；POST 用 `axios.post(url, data)`；状态提示就是改某个元素的 `innerText`
-  > **三级 · 骨架**：`async function load() { out.innerText = '____'; try { let result = await axios.____(\`https://web-server.itheima.net/emps/list?name=\${____}\`); let list = result.data.data; if (list.length == 0) { out.innerText = '没有匹配的员工'; } else { out.innerHTML = list.____(e => \`&lt;li>\${e.name} - \${e.____}&lt;/li>\`).join(''); } } catch (err) { out.innerText = '加载失败：' + ____.message; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <input type="text" id="name" placeholder="请输入姓名">
-  > <button type="button" id="btnSearch">查询</button>
-  > <button type="button" id="btnClear">清空</button>
-  > <button type="button" id="btnUpdate">提交一条数据</button>
-  >
-  > <div id="status"></div>
-  > <ul id="list"></ul>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script>
-  >   let statusBox = document.querySelector('#status');
-  >   let listBox = document.querySelector('#list');
-  >
-  >   // ① + ② + ③ 查询、渲染、状态提示
-  >   async function load() {
-  >     statusBox.innerText = '加载中…';   // 请求前：先给用户一个反馈
-  >     try {
-  >       let name = document.querySelector('#name').value;
-  >       let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${name}`);
-  >       console.log(result.data);        // 先看清楚结构：{code, msg, data}
-  >
-  >       let emps = result.data.data;
-  >       if (emps.length == 0) {
-  >         statusBox.innerText = '没有匹配的员工';
-  >         listBox.innerHTML = '';
-  >       } else {
-  >         statusBox.innerText = `共 ${emps.length} 人`;   // 请求成功：提示换了内容
-  >         listBox.innerHTML = emps.map(e => `<li>${e.name} - ${e.entrydate}</li>`).join('');
-  >       }
-  >     } catch (err) {
-  >       console.log(err);
-  >       statusBox.innerText = '加载失败：' + err.message;
-  >     }
-  >   }
-  >
-  >   // ④ 清空：输入框擦掉、结果区回到初始提示
-  >   function clear() {
-  >     document.querySelector('#name').value = '';
-  >     statusBox.innerText = '请输入姓名后点击查询';
-  >     listBox.innerHTML = '';
-  >   }
-  >
-  >   // ⑤ 提交：POST，数据放在第二个参数
-  >   async function update() {
-  >     try {
-  >       let result = await axios.post('https://web-server.itheima.net/emps/update', 'id=1');
-  >       console.log(result.data);
-  >       statusBox.innerText = '提交结果：' + result.data.msg;
-  >     } catch (err) {
-  >       console.log(err);
-  >       statusBox.innerText = '提交失败：' + err.message;
-  >     }
-  >   }
-  >
-  >   // 页面一打开就给个初始提示（还没学 Vue 的 mounted，这里直接手动调一次）
-  >   clear();
-  >
-  >   document.querySelector('#btnSearch').addEventListener('click', load);
-  >   document.querySelector('#btnClear').addEventListener('click', clear);
-  >   document.querySelector('#btnUpdate').addEventListener('click', update);
-  > </script>
-  > ```
-  > 检查点：① 打开页面结果区显示"请输入姓名后点击查询"；② 姓名填"谢"再查询，列表出现匹配的员工行（参数没生效就会返回全部 4 条——可以对比一下）；③ 姓名填一个乱码（如 `zzz`）查询，显示"没有匹配的员工"；④ 点"提交一条数据"，结果区显示 `提交结果：success`；⑤ **拔网线/改成错的地址**再点查询，显示"加载失败：..."而不是白屏。
-  > 说明：这个练习故意**没用 Vue**——把 [16 篇](/posts/编程学习/javaweb学习笔记/16-js-dom操作/)的 DOM 操作和这一篇的 Axios 合起来练一遍。等下一章用 Vue 写同样的东西，你会发现"渲染列表"和"更新提示文字"都不用手动操作 DOM 了。
+  **一级 · 思路**：把"发请求"包成一个函数，界面上的每个按钮只负责"改一下状态 + 调这个函数"；界面上所有文字都靠"改 DOM 内容"或"改元素内容"来更新
+  **二级 · 方法**：`async function load() { try { … await axios.get(url) … } catch (err) { … } }`；拼参数用模板字符串 `` `...?name=${name}` ``；渲染列表用 `数组.map(item => \`&lt;li>...&lt;/li>\`).join('')` 再赋给 `innerHTML`（[16 篇](/posts/编程学习/javaweb学习笔记/16-js-dom操作/)的套路）；POST 用 `axios.post(url, data)`；状态提示就是改某个元素的 `innerText`
+  **三级 · 骨架**：`async function load() { out.innerText = '____'; try { let result = await axios.____(\`https://web-server.itheima.net/emps/list?name=\${____}\`); let list = result.data.data; if (list.length == 0) { out.innerText = '没有匹配的员工'; } else { out.innerHTML = list.____(e => \`&lt;li>\${e.name} - \${e.____}&lt;/li>\`).join(''); } } catch (err) { out.innerText = '加载失败：' + ____.message; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <input type="text" id="name" placeholder="请输入姓名">
+  <button type="button" id="btnSearch">查询</button>
+  <button type="button" id="btnClear">清空</button>
+  <button type="button" id="btnUpdate">提交一条数据</button>
+  
+  <div id="status"></div>
+  <ul id="list"></ul>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    let statusBox = document.querySelector('#status');
+    let listBox = document.querySelector('#list');
+  
+    // ① + ② + ③ 查询、渲染、状态提示
+    async function load() {
+      statusBox.innerText = '加载中…';   // 请求前：先给用户一个反馈
+      try {
+        let name = document.querySelector('#name').value;
+        let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${name}`);
+        console.log(result.data);        // 先看清楚结构：{code, msg, data}
+  
+        let emps = result.data.data;
+        if (emps.length == 0) {
+          statusBox.innerText = '没有匹配的员工';
+          listBox.innerHTML = '';
+        } else {
+          statusBox.innerText = `共 ${emps.length} 人`;   // 请求成功：提示换了内容
+          listBox.innerHTML = emps.map(e => `<li>${e.name} - ${e.entrydate}</li>`).join('');
+        }
+      } catch (err) {
+        console.log(err);
+        statusBox.innerText = '加载失败：' + err.message;
+      }
+    }
+  
+    // ④ 清空：输入框擦掉、结果区回到初始提示
+    function clear() {
+      document.querySelector('#name').value = '';
+      statusBox.innerText = '请输入姓名后点击查询';
+      listBox.innerHTML = '';
+    }
+  
+    // ⑤ 提交：POST，数据放在第二个参数
+    async function update() {
+      try {
+        let result = await axios.post('https://web-server.itheima.net/emps/update', 'id=1');
+        console.log(result.data);
+        statusBox.innerText = '提交结果：' + result.data.msg;
+      } catch (err) {
+        console.log(err);
+        statusBox.innerText = '提交失败：' + err.message;
+      }
+    }
+  
+    // 页面一打开就给个初始提示（还没学 Vue 的 mounted，这里直接手动调一次）
+    clear();
+  
+    document.querySelector('#btnSearch').addEventListener('click', load);
+    document.querySelector('#btnClear').addEventListener('click', clear);
+    document.querySelector('#btnUpdate').addEventListener('click', update);
+  </script>
+  ```
+  检查点：① 打开页面结果区显示"请输入姓名后点击查询"；② 姓名填"谢"再查询，列表出现匹配的员工行（参数没生效就会返回全部 4 条——可以对比一下）；③ 姓名填一个乱码（如 `zzz`）查询，显示"没有匹配的员工"；④ 点"提交一条数据"，结果区显示 `提交结果：success`；⑤ **拔网线/改成错的地址**再点查询，显示"加载失败：..."而不是白屏。
+  说明：这个练习故意**没用 Vue**——把 [16 篇](/posts/编程学习/javaweb学习笔记/16-js-dom操作/)的 DOM 操作和这一篇的 Axios 合起来练一遍。等下一章用 Vue 写同样的东西，你会发现"渲染列表"和"更新提示文字"都不用手动操作 DOM 了。
+
+  :::
+

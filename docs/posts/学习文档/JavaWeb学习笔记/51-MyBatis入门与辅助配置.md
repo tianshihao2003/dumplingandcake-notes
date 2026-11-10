@@ -22,7 +22,7 @@ cover: false
 
 本机实测环境：MySQL **9.0.1**（课程用的是 8.0.34），库 `web01`、表 `user`（5 条数据：daqiao/大乔、xiaoqiao/小乔、diaochan/貂蝉、lvbu/吕布、zhaoyun/赵云）。笔记里标"本机实测"的输出都是真跑出来的。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 笔记里的连接信息沿用课程原样（库名 `web01`、用户名 `root`、`password=1234`）。**实际动手时把 `password` 换成你自己 MySQL 的密码**，否则连不上数据库。
 
 ## 这一节要走的路线（PPT 第 14、16 页）
@@ -71,7 +71,7 @@ PPT 第 15 页把三层架构和 MyBatis 的位置并排画了出来：
 
 也就是说，三层架构没变、分层解耦的道理没变（[38 篇](/posts/编程学习/javaweb学习笔记/38-分层解耦与ioc-di入门/)），变的只是**持久层这一格的实现方式**：以前是手写 JDBC，现在是调 MyBatis 给的 Mapper 接口。PPT 上给这两个字的评语是——JDBC 那边**繁琐**，MyBatis 这边**简洁、优雅**。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 别把 MyBatis 理解成"不用 JDBC 了"。它底层还是 JDBC 那一套（驱动、连接、预编译），只是把重复代码包起来，把"你要执行什么 SQL"和"结果怎么装进对象"这两件事做成了配置和注解。这也是为什么后面几节（连接池、预编译）讲的东西在 MyBatis 里照样成立。
 
 ## 入门程序：查询所有用户（PPT 第 17 页）
@@ -93,7 +93,7 @@ PPT 还在这一页给了个**提示**（原话）：
 
 > **Mybatis的持久层接口命名规范为 `XxxMapper`，也称为 Mapper接口。**
 
-> [!TIP]
+> [!TIP] 提示
 > 这个命名规范不是形式主义——第 55 篇讲的 XML 映射配置默认规则里，有一整条就是"**XML 文件名要和 Mapper 接口名一致**"。名字起得规范，两种写法可以无缝切换。
 
 ### 1.1 创建工程、引入依赖（PPT 第 17 页）
@@ -189,7 +189,7 @@ public class User {
 ![User实体类属性](https://img.tsh520.cn/file/blog/article/17-User实体类属性.jpg)
 *图：PPT 第 17 页的实体类——五个属性对应表里的五列，每个属性后面标了列的含义*
 
-> [!TIP]
+> [!TIP] 提示
 > 两个容易踩的小地方：① 实体类属于"业务数据容器"，放在 `pojo`（或 `entity`、`domain`）包里，课程放在 `com.itheima.pojo`；② `id` 和 `age` 用**包装类型** `Integer` 而不是 `int`——[47 篇](/posts/编程学习/javaweb学习笔记/47-dql聚合函数与分组查询/)里 `NULL` 值的那条规矩在这里同样适用，`int` 装不了 `null`。
 
 ### 1.3 配置数据源（PPT 第 17 页）
@@ -209,7 +209,7 @@ spring.datasource.password=1234
 
 对照[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的 JDBC 代码看，这四行就是把当初**硬编码在 Java 里的** url、用户名、密码搬到了配置文件里——[52 篇](/posts/编程学习/javaweb学习笔记/52-jdbc与mybatis的对比/)会专门说这件事：JDBC 的痛点之一是"硬编码"，MyBatis 的第一个解法就是"配置化"。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 两个常见的启动报错都出在这里：① `password` 没改成本机密码 → `Access denied for user 'root'@'localhost'`；② `url` 里的数据库名写错（比如写成 `web`）→ 启动时就报 `Unknown database 'web'`。另外 SpringBoot 工程里如果同时存在 `application.properties` 和 `application.yml`，两套配置都生效、以 properties 优先，别放两份互相打脸。
 
 ### 2. 写 Mapper 接口、定义 SQL（PPT 第 17 页）
@@ -245,7 +245,7 @@ public interface UserMapper {
 2. **`@Mapper` 标在接口上**——它的作用课程注释写得很清楚：**程序运行时，MyBatis 会自动为该接口创建一个实现类对象（代理对象），并自动存入 IOC 容器**。这也解释了后面测试类里为什么能 `@Autowired` 一个"没有实现类的接口"（[39 篇](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)讲过 IOC 容器与依赖注入）；
 3. **SQL 写在注解里**：`@Select("select ... from user")`，把要发给数据库的 SQL 原样写进去。返回 `List<User>`，MyBatis 会自动把每一行结果封装成一个 `User` 对象。
 
-> [!TIP]
+> [!TIP] 提示
 > 这就是上一篇 20 行 JDBC 代码对应的全部"工作量"。至于 SQL 是写在注解里还是写在 XML 里，PPT 这句话已经埋了伏笔——"定义 SQL（**注解 / XML**）"，两种都行；XML 那种写法在[第 55 篇](/posts/编程学习/javaweb学习笔记/55-mybatis-xml映射配置/)讲。
 
 ## 用单元测试验证：@SpringBootTest（PPT 第 18 页）
@@ -295,7 +295,7 @@ class SpringbootMybatisQuickstartApplicationTests {
 
 ### 本机实测：测试跑起来的样子
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（工程 `springboot-mybatis-quickstart`，MySQL 9.0.1，`web01.user` 5 条数据）——`mvn test` 跑课程那份测试类里的 5 个测试方法（查所有、按 id 删、新增、更新、按用户名密码查），**5 个全部通过**。其中"查询所有用户"打印出来的是：
 >
 > ```text
@@ -308,7 +308,7 @@ class SpringbootMybatisQuickstartApplicationTests {
 >
 > 接口里只有一句 `@Select("select ... from user")`，**没有任何手写的解析代码**，5 行结果就各自变成了一个 `User` 对象——上面的 `@Data` 生成的 `toString()` 打出来的样子和[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/) JDBC 版一模一样。
 
-> [!TIP]
+> [!TIP] 提示
 > 顺带说一个"工程名称与数据不一致"的地方：测试里的 `insert` 与 `update` 用的是"高圆圆""周瑜"这些课程数据，跑完会**改动** user 表内容（比如 id=1 变成 zhouyu、id=4 被删掉）。自己练习时如果想把数据恢复原样，重新执行一次 1.2 那份 `insert` 脚本即可。
 
 ## 辅助配置一：让 IDEA 认识你写的 SQL（PPT 第 19-20 页）
@@ -345,7 +345,7 @@ PPT 第 19 页原话：
 ![SQL提示注入语言](https://img.tsh520.cn/file/blog/article/19-SQL提示注入语言.jpg)
 *图：PPT 第 19 页的两步——Alt+Enter 打开上下文菜单里的 "Inject language or reference"，把这段字符串声明成 MySQL 的 SQL 语言*
 
-> [!TIP]
+> [!TIP] 提示
 > 两种方式的差别：方式二只是告诉 IDEA "**这段字符串请你按 SQL 来解析**"，它能给语法高亮，但**不知道表里的列**（提示和跳转还是差口气）；方式一则是把**数据库连接和元数据**都交给了 IDEA，所以列名提示、跳转、甚至直接在 IDEA 里跑 SQL 全都有。
 
 ## 辅助配置二：打开 MyBatis 的日志输出（PPT 第 21 页）
@@ -363,7 +363,7 @@ mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
 
 ### 本机实测：这条日志长什么样
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（配了上面那行 `log-impl`，跑 `testFindAll`）——控制台真实输出：
 >
 > ```text
@@ -393,10 +393,10 @@ mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
 | `==> Parameters:` | 这次填进占位符的**参数值**（带类型） | 确认参数有没有传错、传反、传成 `null` |
 | `<==      Total:` | 结果集**返回了多少行** | 查不到数据时，先用它区分"SQL 没查出来"还是"查出来了但没装进去" |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 看第一行的 `?`！注解里写的是 `#{id}`、`#{username}`（[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)细讲），**MyBatis 实际发出去的却是 `?` 占位符 + `Parameters`**——这正是[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)"预编译 SQL"的写法。换句话说：**MyBatis 默认就走预编译**，`#{}` 在底层被翻译成了 `PreparedStatement` 的 `?`。这个结论在本机实测里看得一清二楚。
 
-> [!TIP]
+> [!TIP] 提示
 > 课程里另一个工程（`springboot-mybatis-quickstart`）用的是 **yml** 格式的配置文件，同样这行配置写成：
 >
 > ```yaml
@@ -464,167 +464,191 @@ mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
   做完在文件末尾回答：为什么这个"持久层接口"**没有实现类**却能调用？接口上那个必须加的注解它到底做了什么？
   （练习文件 `test_51_MyBatis入门程序.java` 里按步骤给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按 PPT 的四步走——先让工程具备"操作数据库"的能力（加依赖），再准备好"要操作的表和装数据的类"，然后把连库信息交给配置文件，最后写一个只有声明、没有实现的接口让框架去干活
-  > **二级 · 方法**：依赖是 `mybatis-spring-boot-starter` 与 `mysql-connector-j`；配置写在 `application.properties` 里、四行都以 `spring.datasource.` 打头；接口命名 `XxxMapper`、标上 `@Mapper`，方法上用 `@Select("...")` 写 SQL，返回 `List<User>`
-  > **三级 · 骨架**：
-  > ```xml
-  > <dependency>
-  >     <groupId>____.mybatis.spring.boot</groupId>
-  >     <artifactId>____</artifactId>
-  >     <version>3.0.3</version>
-  > </dependency>
-  > ```
-  > ```properties
-  > spring.datasource.____=jdbc:mysql://localhost:3306/web01
-  > spring.datasource.____-class-name=com.mysql.cj.jdbc.Driver
-  > spring.datasource.username=____
-  > spring.datasource.password=____
-  > ```
-  > ```java
-  > ____            // 让 MyBatis 生成代理实现类对象的注解
-  > public interface ____Mapper {
-  >     @____("select id, username, password, name, age from user")
-  >     public List<User> ____();
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 依赖（`pom.xml`，勾了 MyBatis Framework + MySQL Driver 后 IDEA 自动生成，手写等价物如下）：
-  >    ```xml
-  >    <dependency>
-  >        <groupId>org.mybatis.spring.boot</groupId>
-  >        <artifactId>mybatis-spring-boot-starter</artifactId>
-  >        <version>3.0.3</version>
-  >    </dependency>
-  >    <dependency>
-  >        <groupId>com.mysql</groupId>
-  >        <artifactId>mysql-connector-j</artifactId>
-  >        <scope>runtime</scope>
-  >    </dependency>
-  >    ```
-  > 2. 数据源（`src/main/resources/application.properties`）：
-  >    ```properties
-  >    # 数据库连接信息（password 换成你自己 MySQL 的密码）
-  >    spring.datasource.url=jdbc:mysql://localhost:3306/web01
-  >    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-  >    spring.datasource.username=root
-  >    spring.datasource.password=1234
-  >    ```
-  > 3. 表与实体类：表用课程那份 `user` 建表脚本（5 条数据）；实体类 `com.itheima.pojo.User` 五个属性 `id/username/password/name/age`，用 Lombok 的 `@Data`、`@NoArgsConstructor`、`@AllArgsConstructor` 精简掉 getter/setter
-  > 4. Mapper 接口（`src/main/java/com/itheima/mapper/UserMapper.java`）：
-  >    ```java
-  >    package com.itheima.mapper;
-  >
-  >    import com.itheima.pojo.User;
-  >    import org.apache.ibatis.annotations.Mapper;
-  >    import org.apache.ibatis.annotations.Select;
-  >
-  >    import java.util.List;
-  >
-  >    @Mapper   // 运行时自动生成实现类对象（代理对象）并存入 IOC 容器
-  >    public interface UserMapper {
-  >        /** 查询所有用户 */
-  >        @Select("select id, username, password, name, age from user")
-  >        public List<User> findAll();
-  >    }
-  >    ```
-  > 5. 测试类（`src/test/java/com/itheima/SpringbootMybatisQuickstartApplicationTests.java`）：
-  >    ```java
-  >    @SpringBootTest   // 加载 SpringBoot 环境（IOC 容器）
-  >    class SpringbootMybatisQuickstartApplicationTests {
-  >
-  >        @Autowired
-  >        private UserMapper userMapper;
-  >
-  >        @Test
-  >        public void testFindAll(){
-  >            List<User> userList = userMapper.findAll();
-  >            userList.forEach(System.out::println);
-  >        }
-  >    }
-  >    ```
-  > 两个回答：
-  > ① **接口没有实现类却能调用，靠的是 `@Mapper`**——程序运行时 MyBatis 会**自动为该接口创建一个实现类对象（代理对象）**，并自动存入 IOC 容器；测试类里 `@Autowired` 注入的就是这个代理对象，方法调用时由它去执行注解里写的 SQL。
-  > ② **接口上必须加的注解是 `@Mapper`**（丢了它启动时就报找不到 bean，因为 IOC 容器里没有这个对象）。
-  > 本机实测：这样跑出来的 `testFindAll` 输出 5 行 `User(...)`（daqiao、xiaoqiao、diaochan、lvbu、zhaoyun），和[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/) JDBC 版的解析结果一致。
+  **一级 · 思路**：按 PPT 的四步走——先让工程具备"操作数据库"的能力（加依赖），再准备好"要操作的表和装数据的类"，然后把连库信息交给配置文件，最后写一个只有声明、没有实现的接口让框架去干活
+  **二级 · 方法**：依赖是 `mybatis-spring-boot-starter` 与 `mysql-connector-j`；配置写在 `application.properties` 里、四行都以 `spring.datasource.` 打头；接口命名 `XxxMapper`、标上 `@Mapper`，方法上用 `@Select("...")` 写 SQL，返回 `List<User>`
+  **三级 · 骨架**：
+  ```xml
+  <dependency>
+      <groupId>____.mybatis.spring.boot</groupId>
+      <artifactId>____</artifactId>
+      <version>3.0.3</version>
+  </dependency>
+  ```
+  ```properties
+  spring.datasource.____=jdbc:mysql://localhost:3306/web01
+  spring.datasource.____-class-name=com.mysql.cj.jdbc.Driver
+  spring.datasource.username=____
+  spring.datasource.password=____
+  ```
+  ```java
+  ____            // 让 MyBatis 生成代理实现类对象的注解
+  public interface ____Mapper {
+      @____("select id, username, password, name, age from user")
+      public List<User> ____();
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 依赖（`pom.xml`，勾了 MyBatis Framework + MySQL Driver 后 IDEA 自动生成，手写等价物如下）：
+     ```xml
+     <dependency>
+         <groupId>org.mybatis.spring.boot</groupId>
+         <artifactId>mybatis-spring-boot-starter</artifactId>
+         <version>3.0.3</version>
+     </dependency>
+     <dependency>
+         <groupId>com.mysql</groupId>
+         <artifactId>mysql-connector-j</artifactId>
+         <scope>runtime</scope>
+     </dependency>
+     ```
+  2. 数据源（`src/main/resources/application.properties`）：
+     ```properties
+     # 数据库连接信息（password 换成你自己 MySQL 的密码）
+     spring.datasource.url=jdbc:mysql://localhost:3306/web01
+     spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+     spring.datasource.username=root
+     spring.datasource.password=1234
+     ```
+  3. 表与实体类：表用课程那份 `user` 建表脚本（5 条数据）；实体类 `com.itheima.pojo.User` 五个属性 `id/username/password/name/age`，用 Lombok 的 `@Data`、`@NoArgsConstructor`、`@AllArgsConstructor` 精简掉 getter/setter
+  4. Mapper 接口（`src/main/java/com/itheima/mapper/UserMapper.java`）：
+     ```java
+     package com.itheima.mapper;
+  
+     import com.itheima.pojo.User;
+     import org.apache.ibatis.annotations.Mapper;
+     import org.apache.ibatis.annotations.Select;
+  
+     import java.util.List;
+  
+     @Mapper   // 运行时自动生成实现类对象（代理对象）并存入 IOC 容器
+     public interface UserMapper {
+         /** 查询所有用户 */
+         @Select("select id, username, password, name, age from user")
+         public List<User> findAll();
+     }
+     ```
+  5. 测试类（`src/test/java/com/itheima/SpringbootMybatisQuickstartApplicationTests.java`）：
+     ```java
+     @SpringBootTest   // 加载 SpringBoot 环境（IOC 容器）
+     class SpringbootMybatisQuickstartApplicationTests {
+  
+         @Autowired
+         private UserMapper userMapper;
+  
+         @Test
+         public void testFindAll(){
+             List<User> userList = userMapper.findAll();
+             userList.forEach(System.out::println);
+         }
+     }
+     ```
+  两个回答：
+  ① **接口没有实现类却能调用，靠的是 `@Mapper`**——程序运行时 MyBatis 会**自动为该接口创建一个实现类对象（代理对象）**，并自动存入 IOC 容器；测试类里 `@Autowired` 注入的就是这个代理对象，方法调用时由它去执行注解里写的 SQL。
+  ② **接口上必须加的注解是 `@Mapper`**（丢了它启动时就报找不到 bean，因为 IOC 容器里没有这个对象）。
+  本机实测：这样跑出来的 `testFindAll` 输出 5 行 `User(...)`（daqiao、xiaoqiao、diaochan、lvbu、zhaoyun），和[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/) JDBC 版的解析结果一致。
+
+  :::
+
 
 - [ ] **2-2 只写"查询所有用户"这一段，并把日志打开读懂它**
   需求：工程的依赖、数据库、实体类都已备好，你只做两件事——① 写 Mapper 接口里的那个"查所有用户"的方法；② 写一个能跑起来的单元测试方法把它打印出来；③ 打开 MyBatis 日志配置，再跑一次，把控制台里 SQL 相关的那三行抄到练习文件里，并指出哪一行能证明"注解里的 `#{}` 变成了 `?`"。
   做完还要回答：测试类里注入的是一个**接口**，为什么不会报错？这个测试类能不能放到 `com.itheima.test` 包里？为什么？
   （练习文件 `test_51_查询所有用户.java` 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：① 的答案只有"注解 + SQL + 返回值"三样东西；② 的测试方法离不开"注入接口 + 调用 + 打印"三步；③ 的日志配置是 `application.properties` 里的一行 `mybatis` 配置，抄的时候注意 `Preparing`、`Parameters`、`Total` 三种前缀
-  > **二级 · 方法**：注解用 `@Select`；返回值是 `List<User>`；测试类要加 `@SpringBootTest`，用 `@Autowired` 注入 Mapper；日志配置项是 `mybatis.configuration.log-impl`，值是 `org.apache.ibatis.logging.stdout.StdOutImpl`；包名的问题回想"`@SpringBootTest` 要按包往上找引导类"
-  > **三级 · 骨架**：
-  > ```java
-  > @____("select id, username, password, name, age from ____")
-  > public List<User> ____();
-  > ```
-  > ```java
-  > @____
-  > class MyTest {
-  >     @____
-  >     private ____ userMapper;
-  >
-  >     @Test
-  >     public void testFindAll(){
-  >         List<User> userList = ____.____();
-  >         userList.forEach(____);
-  >     }
-  > }
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① Mapper 接口里的方法：
-  > ```java
-  > @Select("select id, username, password, name, age from user")
-  > public List<User> findAll();
-  > ```
-  > ② 测试方法（放在与引导类同包的 `com.itheima` 下）：
-  > ```java
-  > @SpringBootTest
-  > class SpringbootMybatisQuickstartApplicationTests {
-  >
-  >     @Autowired
-  >     private UserMapper userMapper;
-  >
-  >     @Test
-  >     public void testFindAll(){
-  >         List<User> userList = userMapper.findAll();
-  >         userList.forEach(System.out::println);
-  >     }
-  > }
-  > ```
-  > ③ 日志配置与三行实测日志：
-  > ```properties
-  > mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
-  > ```
-  > ```text
-  > ==>  Preparing: select id, username, password, name, age from user
-  > ==> Parameters: 
-  > <==      Total: 5
-  > ```
-  > 能证明"`#{}` 变成了 `?`"的是 **`Preparing:` 那一行**——注解里写的是 `#{id}`、`#{username}` 这种占位符，MyBatis 实际发出去的却是带 `?` 的预编译 SQL，参数值单独放在 `Parameters:` 里（本机实测 `deleteById(4)`：`Preparing: delete from user where id = ?` + `Parameters: 4(Integer)`）。这正是[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)"预编译 SQL"在 MyBatis 里的默认形态。
-  > 两个回答：
-  > - **注入接口不会报错**，因为 `@Mapper` 让 MyBatis 在运行时生成了该接口的**代理实现类对象**并放进了 IOC 容器，`@Autowired` 按类型注入时容器里确实有这么一个对象。
-  > - **放到 `com.itheima.test` 包是可以的**：`@SpringBootTest` 需要**按包往上找**带 `@SpringBootApplication` 的**引导类**，而引导类在 `com.itheima` 下、`com.itheima.test` 正是它的**子包**，找得到；真正会出问题的是放到与引导类无关的包（例如 `com.other.test`），那时就报找不到配置类的错。稳妥的做法就是**与引导类同包，或放在引导类所在包的子包下**。
+  **一级 · 思路**：① 的答案只有"注解 + SQL + 返回值"三样东西；② 的测试方法离不开"注入接口 + 调用 + 打印"三步；③ 的日志配置是 `application.properties` 里的一行 `mybatis` 配置，抄的时候注意 `Preparing`、`Parameters`、`Total` 三种前缀
+  **二级 · 方法**：注解用 `@Select`；返回值是 `List<User>`；测试类要加 `@SpringBootTest`，用 `@Autowired` 注入 Mapper；日志配置项是 `mybatis.configuration.log-impl`，值是 `org.apache.ibatis.logging.stdout.StdOutImpl`；包名的问题回想"`@SpringBootTest` 要按包往上找引导类"
+  **三级 · 骨架**：
+  ```java
+  @____("select id, username, password, name, age from ____")
+  public List<User> ____();
+  ```
+  ```java
+  @____
+  class MyTest {
+      @____
+      private ____ userMapper;
+  
+      @Test
+      public void testFindAll(){
+          List<User> userList = ____.____();
+          userList.forEach(____);
+      }
+  }
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① Mapper 接口里的方法：
+  ```java
+  @Select("select id, username, password, name, age from user")
+  public List<User> findAll();
+  ```
+  ② 测试方法（放在与引导类同包的 `com.itheima` 下）：
+  ```java
+  @SpringBootTest
+  class SpringbootMybatisQuickstartApplicationTests {
+  
+      @Autowired
+      private UserMapper userMapper;
+  
+      @Test
+      public void testFindAll(){
+          List<User> userList = userMapper.findAll();
+          userList.forEach(System.out::println);
+      }
+  }
+  ```
+  ③ 日志配置与三行实测日志：
+  ```properties
+  mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+  ```
+  ```text
+  ==>  Preparing: select id, username, password, name, age from user
+  ==> Parameters: 
+  <==      Total: 5
+  ```
+  能证明"`#{}` 变成了 `?`"的是 **`Preparing:` 那一行**——注解里写的是 `#{id}`、`#{username}` 这种占位符，MyBatis 实际发出去的却是带 `?` 的预编译 SQL，参数值单独放在 `Parameters:` 里（本机实测 `deleteById(4)`：`Preparing: delete from user where id = ?` + `Parameters: 4(Integer)`）。这正是[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)"预编译 SQL"在 MyBatis 里的默认形态。
+  两个回答：
+  - **注入接口不会报错**，因为 `@Mapper` 让 MyBatis 在运行时生成了该接口的**代理实现类对象**并放进了 IOC 容器，`@Autowired` 按类型注入时容器里确实有这么一个对象。
+  - **放到 `com.itheima.test` 包是可以的**：`@SpringBootTest` 需要**按包往上找**带 `@SpringBootApplication` 的**引导类**，而引导类在 `com.itheima` 下、`com.itheima.test` 正是它的**子包**，找得到；真正会出问题的是放到与引导类无关的包（例如 `com.other.test`），那时就报找不到配置类的错。稳妥的做法就是**与引导类同包，或放在引导类所在包的子包下**。
+
+  :::
+
 
 - [ ] **2-3 让 IDEA 别再把你写的 SQL 当成一坨普通字符串**
   需求：Mapper 里的 `@Select("select ...")` 现在**没有关键字高亮、列名没有提示、表名也不能跳转**。请说出这是由什么原因造成的，并把两种解决办法各做一遍（做出效果即可，不用写代码），然后对比两种办法的效果差别。
   （练习文件 `test_51_查询所有用户.java` 的最后一个作答区里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：关键在"IDEA 手里有没有这张表的信息"——想想 IDEA 从哪儿才能拿到表结构
-  > **二级 · 方法**：办法一是打开 IDEA 的 **Database** 面板 → `+` → **Data Source** → **MySQL**，填 Host/Port/User/Password/Database；办法二是光标停在字符串里按 **Alt+Enter** → **Inject language or reference** → 选 **MySQL (SQL)**
-  > **三级 · 骨架**：办法一填五格：Host `____`、Port `____`、User `____`、Password `____`、Database `____`，再点 `____` 按钮确认连通
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **原因**（PPT 第 20 页原话）：**idea 和数据库没有建立连接，不识别表信息**。`@Select("...")` 里的内容在 IDEA 眼里本来只是普通字符串，它既不知道这是 SQL，更不知道库里有没有 `user` 这张表。
-  > **办法一（推荐）**：Database 面板 → `+` → Data Source → MySQL，填 **Host `localhost`、Port `3306`、User `root`、Password 你自己的密码、Database `web01`**，URL 一栏会自动拼成 `jdbc:mysql://localhost:3306/web01`，点 **Test Connection** 通过后 OK。
-  > **办法二（应急）**：光标停在 `@Select("...")` 里 → **Alt+Enter** → **Inject language or reference** → 选 **MySQL (SQL)**，把这段字符串声明成 MySQL 方言的 SQL。
-  > **差别**：办法二只解决"这是 SQL"这一层——关键字高亮有了，但它**没有表结构的元数据**，所以列名提示、表名跳转还是不行；办法一是把**数据库连接**交进了 IDEA，它拿到了整库的表结构，因此列名提示、跳转、在 IDEA 里直接执行 SQL 全都有。一句话：**办法二靠"声明"，办法一靠"连接"**。
+  **一级 · 思路**：关键在"IDEA 手里有没有这张表的信息"——想想 IDEA 从哪儿才能拿到表结构
+  **二级 · 方法**：办法一是打开 IDEA 的 **Database** 面板 → `+` → **Data Source** → **MySQL**，填 Host/Port/User/Password/Database；办法二是光标停在字符串里按 **Alt+Enter** → **Inject language or reference** → 选 **MySQL (SQL)**
+  **三级 · 骨架**：办法一填五格：Host `____`、Port `____`、User `____`、Password `____`、Database `____`，再点 `____` 按钮确认连通
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **原因**（PPT 第 20 页原话）：**idea 和数据库没有建立连接，不识别表信息**。`@Select("...")` 里的内容在 IDEA 眼里本来只是普通字符串，它既不知道这是 SQL，更不知道库里有没有 `user` 这张表。
+  **办法一（推荐）**：Database 面板 → `+` → Data Source → MySQL，填 **Host `localhost`、Port `3306`、User `root`、Password 你自己的密码、Database `web01`**，URL 一栏会自动拼成 `jdbc:mysql://localhost:3306/web01`，点 **Test Connection** 通过后 OK。
+  **办法二（应急）**：光标停在 `@Select("...")` 里 → **Alt+Enter** → **Inject language or reference** → 选 **MySQL (SQL)**，把这段字符串声明成 MySQL 方言的 SQL。
+  **差别**：办法二只解决"这是 SQL"这一层——关键字高亮有了，但它**没有表结构的元数据**，所以列名提示、表名跳转还是不行；办法一是把**数据库连接**交进了 IDEA，它拿到了整库的表结构，因此列名提示、跳转、在 IDEA 里直接执行 SQL 全都有。一句话：**办法二靠"声明"，办法一靠"连接"**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -651,48 +675,56 @@ mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
   | SQL 提示 | 第 7 步——IDEA 连库（或注入语言）后才能识别 SQL |
   | 预编译 | 第 6 步——日志里的 `?` 就是[上一篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)的预编译 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题就是把本篇的四步 + 两项辅助配置**照着做一遍**，重点不是写多少代码，而是每一步都在你的机器上留下可验证的结果（测试通过、日志三行、SQL 变彩色）
-  > **二级 · 方法**：依赖看 1.1；数据源与日志都在 `application.properties`；Mapper 用 `@Mapper` + `@Select`；测试类用 `@SpringBootTest` + `@Autowired`；IDEA 连库走 Database → Data Source → MySQL
-  > **三级 · 骨架**：第 6 步要抄的三行以 `==>  Preparing:` / `==> Parameters:` / `<==      Total:` 开头；第 8 步的答案在想"哪些内容其实一行 Java 代码都没写"
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1~5. 四块代码（与 2-1 的答案一致，这里只列关键部分）：
-  >    ```properties
-  >    # application.properties
-  >    spring.datasource.url=jdbc:mysql://localhost:3306/web01
-  >    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-  >    spring.datasource.username=root
-  >    spring.datasource.password=1234
-  >    mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
-  >    ```
-  >    ```java
-  >    // UserMapper.java
-  >    @Mapper
-  >    public interface UserMapper {
-  >        @Select("select id, username, password, name, age from user")
-  >        public List<User> findAll();
-  >    }
-  >    ```
-  >    ```java
-  >    // 测试类（与引导类同包 com.itheima）
-  >    @SpringBootTest
-  >    class SpringbootMybatisQuickstartApplicationTests {
-  >        @Autowired
-  >        private UserMapper userMapper;
-  >
-  >        @Test
-  >        public void testFindAll(){
-  >            userMapper.findAll().forEach(System.out::println);
-  >        }
-  >    }
-  >    ```
-  > 6. 本机实测抄下来的三行：
-  >    ```text
-  >    ==>  Preparing: select id, username, password, name, age from user
-  >    ==> Parameters: 
-  >    <==      Total: 5
-  >    ```
-  >    `Preparing` = **MyBatis 真正发给数据库的 SQL**（这正是"排除故障时最想看的那一行"）；`Parameters` = 这次执行的**参数值**（本句没有参数，所以是空的）；`Total` = **返回结果的行数**（5 行，和表里的 5 条数据对得上）。后面 5 行 `User(...)` 是测试代码自己打印的，不是 MyBatis 的日志。
-  > 7. 配置前后：配置前 `@Select("select ...")` 是一段**普通字符串**（单一颜色、无提示、无跳转）；IDEA 连上 `web01` 后，同一段 SQL **关键字高亮、列名有提示、表名可跳转**；用 Alt+Enter 注入 `MySQL (SQL)` 也能高亮，但因为没连库，**列名提示与跳转仍然缺失**。
-  > 8. 这套工程里**真正的"业务代码"只有 Mapper 接口里的 3 行**（`@Mapper` + 方法声明 + `@Select` 注解）。连接信息搬到了 `application.properties`（**配置化**，不再硬编码在 Java 里），SQL 写在注解里（**不用再手写 ResultSet 解析**），连接的获取与释放交给框架（**连接池**，下一篇 [52](/posts/编程学习/javaweb学习笔记/52-jdbc与mybatis的对比/) 的痛点表里会一项项对上）。这三件事，正好就是 MyBatis 相对 JDBC 的价值。
+  **一级 · 思路**：这一题就是把本篇的四步 + 两项辅助配置**照着做一遍**，重点不是写多少代码，而是每一步都在你的机器上留下可验证的结果（测试通过、日志三行、SQL 变彩色）
+  **二级 · 方法**：依赖看 1.1；数据源与日志都在 `application.properties`；Mapper 用 `@Mapper` + `@Select`；测试类用 `@SpringBootTest` + `@Autowired`；IDEA 连库走 Database → Data Source → MySQL
+  **三级 · 骨架**：第 6 步要抄的三行以 `==>  Preparing:` / `==> Parameters:` / `<==      Total:` 开头；第 8 步的答案在想"哪些内容其实一行 Java 代码都没写"
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1~5. 四块代码（与 2-1 的答案一致，这里只列关键部分）：
+     ```properties
+     # application.properties
+     spring.datasource.url=jdbc:mysql://localhost:3306/web01
+     spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+     spring.datasource.username=root
+     spring.datasource.password=1234
+     mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+     ```
+     ```java
+     // UserMapper.java
+     @Mapper
+     public interface UserMapper {
+         @Select("select id, username, password, name, age from user")
+         public List<User> findAll();
+     }
+     ```
+     ```java
+     // 测试类（与引导类同包 com.itheima）
+     @SpringBootTest
+     class SpringbootMybatisQuickstartApplicationTests {
+         @Autowired
+         private UserMapper userMapper;
+  
+         @Test
+         public void testFindAll(){
+             userMapper.findAll().forEach(System.out::println);
+         }
+     }
+     ```
+  6. 本机实测抄下来的三行：
+     ```text
+     ==>  Preparing: select id, username, password, name, age from user
+     ==> Parameters: 
+     <==      Total: 5
+     ```
+     `Preparing` = **MyBatis 真正发给数据库的 SQL**（这正是"排除故障时最想看的那一行"）；`Parameters` = 这次执行的**参数值**（本句没有参数，所以是空的）；`Total` = **返回结果的行数**（5 行，和表里的 5 条数据对得上）。后面 5 行 `User(...)` 是测试代码自己打印的，不是 MyBatis 的日志。
+  7. 配置前后：配置前 `@Select("select ...")` 是一段**普通字符串**（单一颜色、无提示、无跳转）；IDEA 连上 `web01` 后，同一段 SQL **关键字高亮、列名有提示、表名可跳转**；用 Alt+Enter 注入 `MySQL (SQL)` 也能高亮，但因为没连库，**列名提示与跳转仍然缺失**。
+  8. 这套工程里**真正的"业务代码"只有 Mapper 接口里的 3 行**（`@Mapper` + 方法声明 + `@Select` 注解）。连接信息搬到了 `application.properties`（**配置化**，不再硬编码在 Java 里），SQL 写在注解里（**不用再手写 ResultSet 解析**），连接的获取与释放交给框架（**连接池**，下一篇 [52](/posts/编程学习/javaweb学习笔记/52-jdbc与mybatis的对比/) 的痛点表里会一项项对上）。这三件事，正好就是 MyBatis 相对 JDBC 的价值。
+
+  :::
+

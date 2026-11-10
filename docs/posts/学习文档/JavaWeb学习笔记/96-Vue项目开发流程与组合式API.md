@@ -60,7 +60,7 @@ views/EmpList.vue     ← 页面组件（案例里真正的员工列表页）
 ![入口文件 main.js](https://img.tsh520.cn/file/blog/article/15-入口文件mainjs.jpg)
 *图：PPT 第 23 页的 `src/main.js`——引入全局样式、引入 Vue 的 `createApp`、引入根组件 `App.vue`，最后 `createApp(App).mount('#app')`。这行 `mount` 挂的就是 `index.html` 里的那个空 div*
 
-> [!NOTE]
+> [!NOTE] 注意
 > 95 篇看过工程里 `main.js` 的**真实内容**，比这张图多了三行 ElementPlus 相关代码（引入组件库、引入样式、引入中文语言包），那是 PPT 第 35、42 页的内容，[97 篇](/posts/编程学习/javaweb学习笔记/97-elementplus组件库/)细讲。**去掉那三行，剩下的就是这张图的样子**——这就是开发流程的主干。
 
 根组件 `App.vue` 换成自己的内容之前，工程显示的是脚手架自带的欢迎页：
@@ -86,10 +86,10 @@ import EmpList from './views/EmpList.vue'
 
 **根组件里只干了一件事**：把 `views/EmpList.vue`（页面组件）引进来、放到模板里。这样打开 `http://localhost:5173` 看到的就是员工列表页，而不是欢迎页了。
 
-> [!TIP]
+> [!TIP] 提示
 > 本机实测：改 `src/App.vue` 保存后，开发服务器的命令行会打印 `[vite] hmr update /src/App.vue`，浏览器里的页面自动更新——这就是 95 篇说的**热部署**（PPT 第 12 页列的 create-vue 功能之一）。所以"换首页"不需要重启服务，改完存盘刷新即可。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > `index.html` 只有一个、`#app` 也只有一个——**整站所有页面都渲染在这一个 HTML 里**（这就是"单页应用"的雏形）。想在这一个页面里"切换"出不同的页面，就要靠 PPT 第 5 页提到的 **VueRouter**（本课程不深入）；现在只要理解"**页面组件挂在根组件里**"这一层就够用了。
 
 ## `*.vue` 是什么：单文件组件（PPT 第 24 页）
@@ -188,7 +188,7 @@ PPT 对组合式 API 的解释是：
 | `this` | **指向组件实例**（`this` 上能看到 data / methods） | **没有 this**（是 `undefined`） |
 | 风格 | 按"选项类型"分类组织代码 | 按"**函数**"组织，逻辑更灵活、更可组合 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **工程化项目里课程统一用组合式 API**——本机实测的工程里，`App.vue`、`EmpList.vue` 全都是 `<script setup>` 的组合式写法。所以前面学的选项式不能直接抄，得换个写法；但里面的概念（响应式数据、方法、钩子函数）是一个都不变的。
 
 ### 组合式 API 的三个关键点（PPT 第 27 页）
@@ -225,7 +225,7 @@ PPT 第 29 页专门提示：
 npm install axios     # 项目中用到 axios，就需要安装 axios 的依赖
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 本机实测：课程工程 `vue-project2` 的 `package.json` 里已经写着 `"axios": "^1.7.9"`，所以解压后跑一次 `npm install` 就把它一起装好了。**要"新装一个包"时，命令都是 `npm install 包名`**——95 篇讲过，包会被下载到 `node_modules`，并把版本记进 `package.json`。
 
 ### 第二步：写页面组件
@@ -342,10 +342,10 @@ const empList = ref([]);
 | `empList.value = result.data.data` | **更新响应式数据**：`result.data` 是响应体，**再一层 `.data`** 才是员工数组（[21 篇](/posts/编程学习/javaweb学习笔记/21-axios异步请求/)讲过接口的返回结构 `{code, msg, data}`） |
 | `const clear = () => { ... }` | 清空按钮：把条件恢复成空对象，**再查一次**（等于把全部数据取回来） |
 
-> [!TIP]
+> [!TIP] 提示
 > **"先用了、后定义"为什么能跑通？** 上面代码里 `onMounted` 写在 `search` 前面、`search` 里又用了写在最后的 `empList`，看着像顺序错乱。原因是：`onMounted(...)` 只是**注册回调**，函数体要等组件挂载后才执行；等到那时候，`search` 和 `empList` 早就都初始化好了。（对比一下：如果直接在 `onMounted` 外面就调用 `search()`，就会报"未定义"。）
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 组合式 API 里**改数据就是改 `.value`**，改完之后页面**自己**重新渲染——不需要像 [18 篇](/posts/编程学习/javaweb学习笔记/18-实战-js版员工列表/)那样手动 `render()`、手动重绑事件。第 30 页的第二个必答题问的就是这个：**如何更新响应式数据内容？答：`xxx.value`**。
 
 ### 第三步：看运行结果（本机实测）
@@ -371,7 +371,7 @@ const empList = ref([]);
 
 ### 本机实测踩坑：接口对"无头浏览器"返回 405
 
-> [!WARNING]
+> [!WARNING] 警告
 > **实际排查记录（值得记住的现象）**：本机实测时用无头浏览器（Playwright 的 HeadlessChromium）跑这个页面，表格一直是"暂无数据"。抓网络请求发现 axios 请求 `https://web-server.itheima.net/emps/list` 返回的是 **405 + 一段 HTML**（响应头里写着 `server: Tengine`，说明这个响应是黑马的服务器直接给的，**不是本地代码的问题**）。
 >
 > 逐个排查请求头后定位到原因——**服务器按 User-Agent 拦截无头浏览器**：
@@ -388,7 +388,7 @@ const empList = ref([]);
 > 2. 只有用**无头浏览器 / 爬虫工具**访问时才会被黑马的服务器拦掉（405）；
 > 3. 这条接口**支持跨域**（在页面里直接请求也返回 200），所以**这个案例不需要配代理**——[21 篇](/posts/编程学习/javaweb学习笔记/21-axios异步请求/)讲过的"跨域"问题在这里不存在。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 顺带记住一个排查习惯：**页面没数据时先看请求**。405 是"请求方式/被拦"，404 是"地址错"，`Network Error` 是"连不上"，`blocked by CORS policy` 是"跨域没被允许"（[21](/posts/编程学习/javaweb学习笔记/21-axios异步请求/)~[22 篇](/posts/编程学习/javaweb学习笔记/22-实战-vueaxios员工列表/)都遇到过）。这次的现象（405）虽然根因在服务器，但**用普通浏览器就能验证"代码是对的"**。
 
 ## 第 30 页的必答问答
@@ -441,32 +441,40 @@ PPT 第 30 页是这一节的问答页，两道题都必须能立刻答出来：
 - [ ] **2-1 做一个"计数器"组件**
   要求：页面上有一个按钮和一行文字，文字显示当前数字（初始为 0）；点一次按钮数字加 1。用工程里的组件写法（一个 `.vue` 文件三块齐全）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：数字必须是"**响应式**的"，否则改了页面不动；点击事件绑到按钮上，处理函数里改这个数字
-  > **二级 · 方法**：用 `ref(0)` 声明响应式变量；用 `<script setup>` 里的普通函数改 `变量.value`；模板里用 `@click="函数名"` 绑事件、`&#123;&#123; }}` 显示
-  > **三级 · 骨架**：`import { ____ } from 'vue'` / `const count = ____(0)` / `function increment(){ count.____++ }` / `<button @click="____">count:&#123;&#123; ____ }}</button>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <script setup>
-  > import { ref } from 'vue';
-  >
-  > const count = ref(0);        //响应式变量：初始值 0
-  >
-  > function increment(){       //声明函数
-  >   count.value++;             //组合式 API 没有 this，改数据要走 .value
-  > }
-  > </script>
-  >
-  > <template>
-  >   <button @click="increment">count:&#123;&#123; count }}</button>
-  >   <!-- 模板里直接写变量名，Vue 会自动取 .value -->
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 对照 PPT 第 26~27 页的组合式 API 示例。检查点：① 点一下数字 +1；② 把 `count.value++` 改成 `count++`，页面就不动了（这就是"没有 `.value` 就没有生效"的典型症状）。
+  **一级 · 思路**：数字必须是"**响应式**的"，否则改了页面不动；点击事件绑到按钮上，处理函数里改这个数字
+  **二级 · 方法**：用 `ref(0)` 声明响应式变量；用 `<script setup>` 里的普通函数改 `变量.value`；模板里用 `@click="函数名"` 绑事件、`&#123;&#123; }}` 显示
+  **三级 · 骨架**：`import { ____ } from 'vue'` / `const count = ____(0)` / `function increment(){ count.____++ }` / `<button @click="____">count:&#123;&#123; ____ }}</button>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <script setup>
+  import { ref } from 'vue';
+  
+  const count = ref(0);        //响应式变量：初始值 0
+  
+  function increment(){       //声明函数
+    count.value++;             //组合式 API 没有 this，改数据要走 .value
+  }
+  </script>
+  
+  <template>
+    <button @click="increment">count:&#123;&#123; count }}</button>
+    <!-- 模板里直接写变量名，Vue 会自动取 .value -->
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  对照 PPT 第 26~27 页的组合式 API 示例。检查点：① 点一下数字 +1；② 把 `count.value++` 改成 `count++`，页面就不动了（这就是"没有 `.value` 就没有生效"的典型症状）。
+
+  :::
+
 
 - [ ] **2-2 把选项式 API 的代码改写成组合式 API**
   下面是一段选项式 API 的代码，要求改写成组合式 API 的写法（`<script setup>`），**行为保持一致**：
@@ -490,79 +498,95 @@ PPT 第 30 页是这一节的问答页，两道题都必须能立刻答出来：
   }).mount('#app')
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：选项式的"选项"在组合式里各有去处——`data` 里的属性变成 `ref()` 变量，`methods` 里的方法变成普通函数，`mounted` 变成 `onMounted(回调)`
-  > **二级 · 方法**：`ref([])` / `ref('')`；函数里改值用 `.value`；`onMounted(() => { ... })` 里调用那个函数；别再用 `this`
-  > **三级 · 骨架**：`import { ref, ____ } from 'vue'` / `const empList = ref([____])` / `const keyword = ref('')` / `function loadData(){ keyword.____ = '已加载' }` / `____(() => { loadData() })`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <script setup>
-  > import { ref, onMounted } from 'vue';
-  >
-  > // data 里的属性 → ref() 声明的响应式变量
-  > const empList = ref([]);
-  > const keyword = ref('');
-  >
-  > // methods 里的方法 → 普通函数
-  > function loadData() {
-  >   keyword.value = '已加载';   //this.keyword → keyword.value
-  > }
-  >
-  > // mounted 选项 → onMounted 注册回调
-  > onMounted(() => {
-  >   loadData();
-  > });
-  > </script>
-  >
-  > <template>
-  >   <p>&#123;&#123; keyword }}</p>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 对照表：`data()` 里的属性 → `ref()`；`this.xxx` → `xxx.value`；`methods` 里的方法 → `<script setup>` 里的普通函数；`mounted(){}` → `onMounted(() => {})`；**全程没有 this**。
+  **一级 · 思路**：选项式的"选项"在组合式里各有去处——`data` 里的属性变成 `ref()` 变量，`methods` 里的方法变成普通函数，`mounted` 变成 `onMounted(回调)`
+  **二级 · 方法**：`ref([])` / `ref('')`；函数里改值用 `.value`；`onMounted(() => { ... })` 里调用那个函数；别再用 `this`
+  **三级 · 骨架**：`import { ref, ____ } from 'vue'` / `const empList = ref([____])` / `const keyword = ref('')` / `function loadData(){ keyword.____ = '已加载' }` / `____(() => { loadData() })`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <script setup>
+  import { ref, onMounted } from 'vue';
+  
+  // data 里的属性 → ref() 声明的响应式变量
+  const empList = ref([]);
+  const keyword = ref('');
+  
+  // methods 里的方法 → 普通函数
+  function loadData() {
+    keyword.value = '已加载';   //this.keyword → keyword.value
+  }
+  
+  // mounted 选项 → onMounted 注册回调
+  onMounted(() => {
+    loadData();
+  });
+  </script>
+  
+  <template>
+    <p>&#123;&#123; keyword }}</p>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  对照表：`data()` 里的属性 → `ref()`；`this.xxx` → `xxx.value`；`methods` 里的方法 → `<script setup>` 里的普通函数；`mounted(){}` → `onMounted(() => {})`；**全程没有 this**。
+
+  :::
+
 
 - [ ] **2-3 页面一打开就自动去接口取数据**
   要求：写一个组件，页面加载完毕后自动向 `https://web-server.itheima.net/emps/list` 发一次请求（不带任何查询条件），把返回的员工数组存进一个响应式变量，并**先用一个列表把员工姓名显示出来**。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三件事——准备一个空数组、页面加载完发请求、拿到数据塞进数组；要发请求就得先装 axios
-  > **二级 · 方法**：`npm install axios`；`import axios from 'axios'`；`ref([])` 装数据；`onMounted` 里调用一个 `async` 函数；`await axios.get(地址)`，数据在 `result.data.data`；页面上用 `v-for` 渲染姓名
-  > **三级 · 骨架**：`const empList = ref([____])` / `const loadData = async () => { const result = await ____.get('地址'); empList.value = result.data.____ }` / `onMounted(() => { ____() })` / `<li v-for="e in ____" :key="e.id">&#123;&#123; e.____ }}</li>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <script setup>
-  > import { ref, onMounted } from 'vue';
-  > import axios from 'axios';
-  >
-  > //装接口返回的员工数据（先给空数组）
-  > const empList = ref([]);
-  >
-  > //查询：发异步请求，把数据塞进 empList
-  > const loadData = async () => {
-  >   const result = await axios.get('https://web-server.itheima.net/emps/list');
-  >   empList.value = result.data.data;   //两层：响应体 .data 里的 data 才是数组
-  > }
-  >
-  > //钩子函数：组件挂载完成后执行 → 页面加载完毕自动查一次
-  > onMounted(() => {
-  >   loadData();
-  > })
-  > </script>
-  >
-  > <template>
-  >   <ul>
-  >     <li v-for="e in empList" :key="e.id">&#123;&#123; e.name }}</li>
-  >   </ul>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：① 页面上出现 4 个姓名（谢逊、韦一笑、黛绮丝、殷天正）；② 一定要用**普通浏览器**打开页面——本机实测带 `HeadlessChrome` 的 User-Agent 会被黑马接口拦成 **405**（普通浏览器正常，且接口支持跨域、不需要配代理）。
+  **一级 · 思路**：三件事——准备一个空数组、页面加载完发请求、拿到数据塞进数组；要发请求就得先装 axios
+  **二级 · 方法**：`npm install axios`；`import axios from 'axios'`；`ref([])` 装数据；`onMounted` 里调用一个 `async` 函数；`await axios.get(地址)`，数据在 `result.data.data`；页面上用 `v-for` 渲染姓名
+  **三级 · 骨架**：`const empList = ref([____])` / `const loadData = async () => { const result = await ____.get('地址'); empList.value = result.data.____ }` / `onMounted(() => { ____() })` / `<li v-for="e in ____" :key="e.id">&#123;&#123; e.____ }}</li>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <script setup>
+  import { ref, onMounted } from 'vue';
+  import axios from 'axios';
+  
+  //装接口返回的员工数据（先给空数组）
+  const empList = ref([]);
+  
+  //查询：发异步请求，把数据塞进 empList
+  const loadData = async () => {
+    const result = await axios.get('https://web-server.itheima.net/emps/list');
+    empList.value = result.data.data;   //两层：响应体 .data 里的 data 才是数组
+  }
+  
+  //钩子函数：组件挂载完成后执行 → 页面加载完毕自动查一次
+  onMounted(() => {
+    loadData();
+  })
+  </script>
+  
+  <template>
+    <ul>
+      <li v-for="e in empList" :key="e.id">&#123;&#123; e.name }}</li>
+    </ul>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：① 页面上出现 4 个姓名（谢逊、韦一笑、黛绮丝、殷天正）；② 一定要用**普通浏览器**打开页面——本机实测带 `HeadlessChrome` 的 User-Agent 会被黑马接口拦成 **405**（普通浏览器正常，且接口支持跨域、不需要配代理）。
+
+  :::
+
 
 - [ ] **2-4 排查：点了按钮数字不变 / 数据改了页面不动**
   下面这段代码"点了按钮页面没反应"，指出**问题在哪**并改好（一共 3 处问题）：
@@ -587,35 +611,43 @@ PPT 第 30 页是这一节的问答页，两道题都必须能立刻答出来：
   </template>
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：问题都在"组合式 API 的写法规则"上：普通变量不是响应式的、`.value` 只能用在 ref 对象上、钩子要用函数注册的方式
-  > **二级 · 方法**：① 从 vue 里把 `ref` 一起引入；② 用 `ref(0)` 声明变量；③ `onMounted` 要**接收一个回调函数**（`onMounted(() => { ... })`），不是写成选项式那样的方法
-  > **三级 · 骨架**：`import { ref, ____ } from 'vue'` / `let count = ____(0)` / `onMounted(____ => { console.log(...) })`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <script setup>
-  > import { ref, onMounted } from 'vue';   //① 补上 ref 的引入
-  >
-  > const count = ref(0);                   //② 用 ref() 声明响应式变量（原来只是普通变量）
-  >
-  > function increment(){
-  >   count.value++;                        //这行写法是对的：ref 对象要改 .value
-  > }
-  >
-  > onMounted(() => {                       //③ 钩子要注册回调函数
-  >   console.log('Vue Mounted ...');
-  > })
-  > </script>
-  >
-  > <template>
-  >   <button @click="increment">count:&#123;&#123; count }}</button>
-  > </template>
-  > ```
-  > 症状对照：
-  > - 用 `let count = 0`（普通变量）时，改了它 Vue **不知道**，页面不会重新渲染——想要"数据驱动视图"，变量必须用 `ref()`（或其它响应式 API）声明。
-  > - `count.value++` 写在普通变量上时，`count.value` 是 `undefined`，`undefined++` 得到 `NaN`。
-  > - `onMounted(){...}` 这种写法在组合式 API 里是错的：它期望接收**一个回调函数**，要写成 `onMounted(() => {...})`。
+  **一级 · 思路**：问题都在"组合式 API 的写法规则"上：普通变量不是响应式的、`.value` 只能用在 ref 对象上、钩子要用函数注册的方式
+  **二级 · 方法**：① 从 vue 里把 `ref` 一起引入；② 用 `ref(0)` 声明变量；③ `onMounted` 要**接收一个回调函数**（`onMounted(() => { ... })`），不是写成选项式那样的方法
+  **三级 · 骨架**：`import { ref, ____ } from 'vue'` / `let count = ____(0)` / `onMounted(____ => { console.log(...) })`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <script setup>
+  import { ref, onMounted } from 'vue';   //① 补上 ref 的引入
+  
+  const count = ref(0);                   //② 用 ref() 声明响应式变量（原来只是普通变量）
+  
+  function increment(){
+    count.value++;                        //这行写法是对的：ref 对象要改 .value
+  }
+  
+  onMounted(() => {                       //③ 钩子要注册回调函数
+    console.log('Vue Mounted ...');
+  })
+  </script>
+  
+  <template>
+    <button @click="increment">count:&#123;&#123; count }}</button>
+  </template>
+  ```
+  症状对照：
+  - 用 `let count = 0`（普通变量）时，改了它 Vue **不知道**，页面不会重新渲染——想要"数据驱动视图"，变量必须用 `ref()`（或其它响应式 API）声明。
+  - `count.value++` 写在普通变量上时，`count.value` 是 `undefined`，`undefined++` 得到 `NaN`。
+  - `onMounted(){...}` 这种写法在组合式 API 里是错的：它期望接收**一个回调函数**，要写成 `onMounted(() => {...})`。
+
+  :::
+
 
 ### 三、综合题
 
@@ -630,95 +662,103 @@ PPT 第 30 页是这一节的问答页，两道题都必须能立刻答出来：
   7. 打开浏览器（**用普通 Chrome/Edge**）验证：表格里有 4 行数据；再点"查询"按钮确认能按条件查
   （这一题不要求写 ElementPlus 的表格组件——用你最熟的方式把数据展示出来即可，[97 篇](/posts/编程学习/javaweb学习笔记/97-elementplus组件库/)会用组件库重做一遍这张表。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：整题就是"**数据 → 请求 → 渲染**"三步，唯一的新东西是"用钩子让它在页面打开时自动执行"
-  > **二级 · 方法**：`npm install axios`；`ref()` 两个变量；`async` 函数里 `await axios.get(地址)`，数据取 `result.data.data`；`onMounted` 里调用它；条件用模板字符串拼成 `?name=xxx&gender=xxx&job=xxx`；`App.vue` 里 `import` 页面组件并放进模板
-  > **三级 · 骨架**：`const emp = ref({name:'', gender:'', job:''})` / `const empList = ref([])` / `const search = async () => { ... }` / `onMounted(() => { ____() })` / `<table>…<tr v-for="e in ____" :key="e.id">…</tr></table>` / `App.vue`：`import EmpList from './views/____.vue'`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```vue
-  > <!-- src/views/EmpList.vue（数据部分照课程工程写，模板这里用普通 HTML 表格示意） -->
-  > <script setup>
-  > import { ref, onMounted } from 'vue';
-  > import axios from 'axios';
-  >
-  > //① 查询条件（响应式对象）
-  > const emp = ref({name: '', gender: '', job: ''});
-  >
-  > //② 员工数组（先给空数组）
-  > const empList = ref([]);
-  >
-  > //③ 查询：拼条件 → 发请求 → 把数组交给 empList
-  > const search = async () => {
-  >   const result = await axios.get(`https://web-server.itheima.net/emps/list?name=${emp.value.name}&gender=${emp.value.gender}&job=${emp.value.job}`);
-  >   empList.value = result.data.data;
-  > }
-  >
-  > //④ 钩子：页面加载完毕后自动查一次
-  > onMounted(() => {
-  >   search();
-  > })
-  > </script>
-  >
-  > <template>
-  >   <div id="container">
-  >     <!-- 查询条件：姓名 / 性别 / 职位 -->
-  >     <input v-model="emp.name" placeholder="请输入姓名">
-  >     <select v-model="emp.gender">
-  >       <option value="">请选择</option>
-  >       <option value="1">男</option>
-  >       <option value="2">女</option>
-  >     </select>
-  >     <select v-model="emp.job">
-  >       <option value="">请选择</option>
-  >       <option value="1">班主任</option>
-  >       <option value="2">讲师</option>
-  >       <option value="3">学工主管</option>
-  >       <option value="4">教研主管</option>
-  >       <option value="5">咨询师</option>
-  >     </select>
-  >     <button @click="search">查询</button>
-  >
-  >     <!-- 表格：渲染 empList -->
-  >     <table border="1" cellspacing="0" width="100%">
-  >       <tr>
-  >         <th>ID</th><th>姓名</th><th>性别</th><th>职位</th><th>入职日期</th><th>更新时间</th>
-  >       </tr>
-  >       <tr v-for="e in empList" :key="e.id" align="center">
-  >         <td>&#123;&#123; e.id }}</td>
-  >         <td>&#123;&#123; e.name }}</td>
-  >         <td>&#123;&#123; e.gender == 1 ? '男' : '女' }}</td>
-  >         <td>&#123;&#123; e.job }}</td>
-  >         <td>&#123;&#123; e.entrydate }}</td>
-  >         <td>&#123;&#123; e.updatetime }}</td>
-  >       </tr>
-  >     </table>
-  >   </div>
-  > </template>
-  >
-  > <style scoped>
-  > #container {
-  >   width: 70%;
-  >   margin: 0 auto;
-  > }
-  > </style>
-  > ```
-  > ```vue
-  > <!-- src/App.vue：让根组件显示这个页面 -->
-  > <script setup>
-  > import EmpList from './views/EmpList.vue'
-  > </script>
-  >
-  > <template>
-  >   <EmpList></EmpList>
-  > </template>
-  >
-  > <style scoped>
-  > </style>
-  > ```
-  > 检查点：
-  > 1. 命令行有没有报错、浏览器控制台有没有红字（本机实测 405 那种"服务器拦 UA"的问题只在无头浏览器上出现，用普通浏览器不会遇到）；
-  > 2. 页面上出现 **4 行数据**（谢逊 / 韦一笑 / 黛绮丝 / 殷天正）；
-  > 3. 性别一列显示的是"男 / 女"而不是 `1 / 2`（说明渲染时真的在做判断）；
-  > 4. 把接口地址故意写错，刷新页面——表格变空、控制台报错，**这正好验证了"数据是请求来的"**，改回来即可。
-  > 做完这一题，[97 篇](/posts/编程学习/javaweb学习笔记/97-elementplus组件库/)会把这张"手搓的表格"换成组件库的 `el-table`，对比着看就知道组件库省了多少事。
+  **一级 · 思路**：整题就是"**数据 → 请求 → 渲染**"三步，唯一的新东西是"用钩子让它在页面打开时自动执行"
+  **二级 · 方法**：`npm install axios`；`ref()` 两个变量；`async` 函数里 `await axios.get(地址)`，数据取 `result.data.data`；`onMounted` 里调用它；条件用模板字符串拼成 `?name=xxx&gender=xxx&job=xxx`；`App.vue` 里 `import` 页面组件并放进模板
+  **三级 · 骨架**：`const emp = ref({name:'', gender:'', job:''})` / `const empList = ref([])` / `const search = async () => { ... }` / `onMounted(() => { ____() })` / `<table>…<tr v-for="e in ____" :key="e.id">…</tr></table>` / `App.vue`：`import EmpList from './views/____.vue'`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```vue
+  <!-- src/views/EmpList.vue（数据部分照课程工程写，模板这里用普通 HTML 表格示意） -->
+  <script setup>
+  import { ref, onMounted } from 'vue';
+  import axios from 'axios';
+  
+  //① 查询条件（响应式对象）
+  const emp = ref({name: '', gender: '', job: ''});
+  
+  //② 员工数组（先给空数组）
+  const empList = ref([]);
+  
+  //③ 查询：拼条件 → 发请求 → 把数组交给 empList
+  const search = async () => {
+    const result = await axios.get(`https://web-server.itheima.net/emps/list?name=${emp.value.name}&gender=${emp.value.gender}&job=${emp.value.job}`);
+    empList.value = result.data.data;
+  }
+  
+  //④ 钩子：页面加载完毕后自动查一次
+  onMounted(() => {
+    search();
+  })
+  </script>
+  
+  <template>
+    <div id="container">
+      <!-- 查询条件：姓名 / 性别 / 职位 -->
+      <input v-model="emp.name" placeholder="请输入姓名">
+      <select v-model="emp.gender">
+        <option value="">请选择</option>
+        <option value="1">男</option>
+        <option value="2">女</option>
+      </select>
+      <select v-model="emp.job">
+        <option value="">请选择</option>
+        <option value="1">班主任</option>
+        <option value="2">讲师</option>
+        <option value="3">学工主管</option>
+        <option value="4">教研主管</option>
+        <option value="5">咨询师</option>
+      </select>
+      <button @click="search">查询</button>
+  
+      <!-- 表格：渲染 empList -->
+      <table border="1" cellspacing="0" width="100%">
+        <tr>
+          <th>ID</th><th>姓名</th><th>性别</th><th>职位</th><th>入职日期</th><th>更新时间</th>
+        </tr>
+        <tr v-for="e in empList" :key="e.id" align="center">
+          <td>&#123;&#123; e.id }}</td>
+          <td>&#123;&#123; e.name }}</td>
+          <td>&#123;&#123; e.gender == 1 ? '男' : '女' }}</td>
+          <td>&#123;&#123; e.job }}</td>
+          <td>&#123;&#123; e.entrydate }}</td>
+          <td>&#123;&#123; e.updatetime }}</td>
+        </tr>
+      </table>
+    </div>
+  </template>
+  
+  <style scoped>
+  #container {
+    width: 70%;
+    margin: 0 auto;
+  }
+  </style>
+  ```
+  ```vue
+  <!-- src/App.vue：让根组件显示这个页面 -->
+  <script setup>
+  import EmpList from './views/EmpList.vue'
+  </script>
+  
+  <template>
+    <EmpList></EmpList>
+  </template>
+  
+  <style scoped>
+  </style>
+  ```
+  检查点：
+  1. 命令行有没有报错、浏览器控制台有没有红字（本机实测 405 那种"服务器拦 UA"的问题只在无头浏览器上出现，用普通浏览器不会遇到）；
+  2. 页面上出现 **4 行数据**（谢逊 / 韦一笑 / 黛绮丝 / 殷天正）；
+  3. 性别一列显示的是"男 / 女"而不是 `1 / 2`（说明渲染时真的在做判断）；
+  4. 把接口地址故意写错，刷新页面——表格变空、控制台报错，**这正好验证了"数据是请求来的"**，改回来即可。
+  做完这一题，[97 篇](/posts/编程学习/javaweb学习笔记/97-elementplus组件库/)会把这张"手搓的表格"换成组件库的 `el-table`，对比着看就知道组件库省了多少事。
+
+  :::
+

@@ -40,7 +40,7 @@ insert into emp_expr(emp_id, begin, end, company, job) values (39,'2019-01-01', 
 
 在业务上这两句是**一件事**（"新增一个员工"）的两个步骤，可数据库看到的却是两条**彼此无关**的语句。
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 在这一页底下特别加了一条**注意**：
 >
 > **默认 MySQL 的事务是自动提交的**，也就是说，当执行**一条 DML 语句**，MySQL 会立即**隐式的提交事务**。
@@ -163,7 +163,7 @@ public void save(Emp emp) {
 | **类上** | 这个类里所有方法都加事务 | 整个 `EmpServiceImpl` 的方法都会进事务，包括只想读一读的查询 |
 | **接口上** | 实现这个接口的类，所有方法都加 | 和类上类似，但影响面更"隐蔽" |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > `@Transactional` 为什么**推荐加在业务层方法上**？因为"事务边界"就是"业务操作的边界"：`Service` 的一个方法 = 一件完整的事（[37～39 篇](/posts/编程学习/javaweb学习笔记/37-三层架构/)的分工——Controller 只管接收和响应、Mapper 只管单条 SQL）。把事务加在 Mapper 上就变成了"每条 SQL 各自一个事务"，加在 Controller 上又太粗（一次请求里可能不止一件业务）——都达不到"两次插入同生共死"的目的。
 
 ### 开启事务日志，看见 Spring 到底做了什么
@@ -190,7 +190,7 @@ logging:
 
 把 PPT 第 17 页那行 `int i = 1/0;` 用起来，做两次对照实验（工程里的 `save` 上加了 `@Transactional`，配置也开了事务日志）：
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测（一）：正常一次新增员工**
 >
 > ```text
@@ -222,7 +222,7 @@ logging:
 >
 > 事务定义字符串末尾那段 `-java.lang.Exception` 是"**回滚规则**"——本机工程里写的是 `@Transactional(rollbackFor = {Exception.class})`，[71 篇](/posts/编程学习/javaweb学习笔记/71-事务进阶与操作日志/)会专门讲它为什么必须写。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测（二）：`int i = 1/0;` 之后整体回滚**
 >
 > 在 `empMapper.insert(emp);` 后面插入 `int i = 1 / 0;`，重新构建启动后再发一次同样的请求：
@@ -306,90 +306,114 @@ PPT 第 27 页又把"介绍&操作 / Spring事务管理 / 四大特性"的目录
   需求：在客户端里模拟"新增员工"这件事——先插一条员工基本信息，再插这个员工的两条工作经历。要求这两步**作为一个整体**：两步都执行成功才让数据真正生效；请你故意让第二步失败（比如把表名写错、或者中途执行一条报错的语句），观察第一步的数据还在不在，再用合适的方式把这次操作撤销掉。
   （练习文件 `test_70_MySQL事务.sql` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：在整组操作前面加"开启事务"，结尾根据成败挑"提交"或"回滚"；对照实验是"开事务"与"不开事务"各来一次
-  > **二级 · 方法**：`start transaction;`（或 `begin;`）；成功用 `commit;`、失败用 `rollback;`；不顺手的表可以直接 `select * from emp where username = '...';` 验证
-  > **三级 · 骨架**：
-  > ```sql
-  > -- 开启事务
-  > ____;
-  > insert into emp(username, name, ...) values ('事务练习', '事务练习', ...);
-  > -- （故意报错的一句，比如表名写错）
-  > -- 提交 / 回滚
-  > ____;
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```sql
-  > -- ===== 实验一：不开事务（默认自动提交）=====
-  > insert into emp(username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)
-  > values ('tx-test1', '事务测试一', 1, '13100000001', 1, 5000, '1.jpg', '2024-01-01', 1, now(), now());
-  > -- 假设紧接着的"插工作经历"失败（表名故意写错）
-  > insert into emp_expr_wrong(emp_id, begin, end, company, job) values (...);   -- 报错：表不存在
-  > -- 结果：第一条已经落库了（自动提交），数据不一致
-  >
-  > -- ===== 实验二：开启事务 =====
-  > start transaction;                  -- 也可以写 begin;
-  > insert into emp(username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)
-  > values ('tx-test2', '事务测试二', 1, '13100000002', 1, 5000, '1.jpg', '2024-01-01', 1, now(), now());
-  > insert into emp_expr(emp_id, begin, end, company, job)
-  > values (last_insert_id(),'2019-01-01','2020-01-01','百度','开发');          -- 也可以先查出 id 再写死
-  > commit;                             -- 两条都成功 → 提交；只要有一项失败就写 rollback;
-  > ```
-  > 自查：① 第一个实验里，报错之后 `select * from emp where username = 'tx-test1';` **能查到**——自动提交把第一条永久写进去了；② 第二个实验里，如果中途 `rollback;`，两条 SQL 的效果**全部消失**（哪怕第一条已经执行过，日志显示过 `1 row affected`）；③ 想清理实验数据用 `delete from emp where username in ('tx-test1','tx-test2');`（`emp_expr` 里对应的记录也一并删掉）。
+  **一级 · 思路**：在整组操作前面加"开启事务"，结尾根据成败挑"提交"或"回滚"；对照实验是"开事务"与"不开事务"各来一次
+  **二级 · 方法**：`start transaction;`（或 `begin;`）；成功用 `commit;`、失败用 `rollback;`；不顺手的表可以直接 `select * from emp where username = '...';` 验证
+  **三级 · 骨架**：
+  ```sql
+  -- 开启事务
+  ____;
+  insert into emp(username, name, ...) values ('事务练习', '事务练习', ...);
+  -- （故意报错的一句，比如表名写错）
+  -- 提交 / 回滚
+  ____;
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```sql
+  -- ===== 实验一：不开事务（默认自动提交）=====
+  insert into emp(username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)
+  values ('tx-test1', '事务测试一', 1, '13100000001', 1, 5000, '1.jpg', '2024-01-01', 1, now(), now());
+  -- 假设紧接着的"插工作经历"失败（表名故意写错）
+  insert into emp_expr_wrong(emp_id, begin, end, company, job) values (...);   -- 报错：表不存在
+  -- 结果：第一条已经落库了（自动提交），数据不一致
+  
+  -- ===== 实验二：开启事务 =====
+  start transaction;                  -- 也可以写 begin;
+  insert into emp(username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)
+  values ('tx-test2', '事务测试二', 1, '13100000002', 1, 5000, '1.jpg', '2024-01-01', 1, now(), now());
+  insert into emp_expr(emp_id, begin, end, company, job)
+  values (last_insert_id(),'2019-01-01','2020-01-01','百度','开发');          -- 也可以先查出 id 再写死
+  commit;                             -- 两条都成功 → 提交；只要有一项失败就写 rollback;
+  ```
+  自查：① 第一个实验里，报错之后 `select * from emp where username = 'tx-test1';` **能查到**——自动提交把第一条永久写进去了；② 第二个实验里，如果中途 `rollback;`，两条 SQL 的效果**全部消失**（哪怕第一条已经执行过，日志显示过 `1 row affected`）；③ 想清理实验数据用 `delete from emp where username in ('tx-test1','tx-test2');`（`emp_expr` 里对应的记录也一并删掉）。
+
+  :::
+
 
 - [ ] **2-2 让"保存员工"这件事由 Spring 统一管事务**
   需求：业务层的 `save` 方法里要执行"保存基本信息"和"批量保存工作经历"两次数据库操作。要求：不用在代码里手写任何开启/提交/回滚语句，只要在方法上加一个东西，就能让这两次操作成为一个事务——方法顺利执行完就提交，中途抛异常就整体回滚。另外，为了能看到事务到底有没有在工作，请打开相关的底层日志（日志级别配在配置文件里）。
   （练习文件 `test_70_事务管理.java` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：Spring 提供了"声明式事务"——一个注解贴在业务层方法上；日志则是把 Spring 事务管理器的级别调成 debug
-  > **二级 · 方法**：方法上加 `@Transactional`（来自 `org.springframework.transaction.annotation`）；yml 里写 `logging.level.org.springframework.jdbc.support.JdbcTransactionManager: debug`
-  > **三级 · 骨架**：`@____ public void save(Emp emp) { … }`；yml 里 `logging:` → `level:` → `org.springframework.jdbc.support.____: debug`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > @Transactional                       // 方法执行前开启事务，成功提交，异常回滚
-  > @Override
-  > public void save(Emp emp) {
-  >     //1. 保存员工基本信息
-  >     emp.setCreateTime(LocalDateTime.now());
-  >     emp.setUpdateTime(LocalDateTime.now());
-  >     empMapper.insert(emp);
-  >
-  >     //2. 保存员工的工作经历信息 - 批量
-  >     List<EmpExpr> exprList = emp.getExprList();
-  >     if(!CollectionUtils.isEmpty(exprList)){
-  >         exprList.forEach(empExpr -> empExpr.setEmpId(emp.getId()));
-  >         empExprMapper.insertBatch(exprList);
-  >     }
-  > }
-  > ```
-  > ```yaml
-  > # 配置日志信息,查看spring事务管理的底层日志
-  > logging:
-  >   level:
-  >     org.springframework.jdbc.support.JdbcTransactionManager: debug
-  > ```
-  > 自查：① 注解是 `org.springframework.transaction.annotation.Transactional`，别导错包；② 只加注解、不改代码——`start transaction`/`commit`/`rollback` 一句都不用写，Spring 用**代理**在方法前后替你做了；③ 配好日志后，一次成功请求里能依次看到 `Creating new transaction … [EmpServiceImpl.save]`、`Switching JDBC Connection … to manual commit`、`Initiating transaction commit`（本机实测）。
+  **一级 · 思路**：Spring 提供了"声明式事务"——一个注解贴在业务层方法上；日志则是把 Spring 事务管理器的级别调成 debug
+  **二级 · 方法**：方法上加 `@Transactional`（来自 `org.springframework.transaction.annotation`）；yml 里写 `logging.level.org.springframework.jdbc.support.JdbcTransactionManager: debug`
+  **三级 · 骨架**：`@____ public void save(Emp emp) { … }`；yml 里 `logging:` → `level:` → `org.springframework.jdbc.support.____: debug`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  @Transactional                       // 方法执行前开启事务，成功提交，异常回滚
+  @Override
+  public void save(Emp emp) {
+      //1. 保存员工基本信息
+      emp.setCreateTime(LocalDateTime.now());
+      emp.setUpdateTime(LocalDateTime.now());
+      empMapper.insert(emp);
+  
+      //2. 保存员工的工作经历信息 - 批量
+      List<EmpExpr> exprList = emp.getExprList();
+      if(!CollectionUtils.isEmpty(exprList)){
+          exprList.forEach(empExpr -> empExpr.setEmpId(emp.getId()));
+          empExprMapper.insertBatch(exprList);
+      }
+  }
+  ```
+  ```yaml
+  # 配置日志信息,查看spring事务管理的底层日志
+  logging:
+    level:
+      org.springframework.jdbc.support.JdbcTransactionManager: debug
+  ```
+  自查：① 注解是 `org.springframework.transaction.annotation.Transactional`，别导错包；② 只加注解、不改代码——`start transaction`/`commit`/`rollback` 一句都不用写，Spring 用**代理**在方法前后替你做了；③ 配好日志后，一次成功请求里能依次看到 `Creating new transaction … [EmpServiceImpl.save]`、`Switching JDBC Connection … to manual commit`、`Initiating transaction commit`（本机实测）。
+
+  :::
+
 
 - [ ] **2-3 把"为什么要事务"和四大特性讲清楚**
   需求：有人问你——① 为什么"保存员工信息成功了、保存工作经历失败了"这件事不能忍？② MySQL 不是有事务吗，为什么代码里还会出现这种不一致？③ 事务的四大特性分别是什么、各自解决了什么问题？请写一段话（可以配例子）回答清楚，并用"新增员工"这个案例把四条特性各举一次。
   （练习文件 `test_70_事务管理.java` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：从"业务上这是一件事、数据库眼里是两条语句"的落差说起；四大特性按 原子性 → 一致性 → 隔离性 → 持久性 的顺序各配一句案例
-  > **二级 · 方法**：关键词——不可分割的工作单位、要么同时成功要么同时失败、数据的不完整/不一致、默认自动提交、`commit`/`rollback`；四大特性的英文名是 Atomicity / Consistency / Isolation / Durability
-  > **三级 · 骨架**：① 因为"新增员工"是____，两次写入必须____；② MySQL 默认____，两条 DML 是____，所以需要显式地____；③ 原子性=____、一致性=____、隔离性=____、持久性=____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① "新增员工"在**业务上是一个操作**：员工和他的工作经历必须一起存在。基本信息成功、经历失败，数据库就留下一个没有工作经历的残缺员工——**数据的完整性（该有的没有）和一致性（两张表对不上）都被破坏**，用户看到的结果和实际发生的事不一致，所以不能忍。
-  > ② MySQL **默认是自动提交的**（执行一条 DML 就立即隐式提交），所以在没有显式开启事务时，两句 `insert` 是两个**互相独立**的小事务：第一句一提交就永久生效，第二句失败也撤不回第一句。要避免它，就得把这两句"包成一个事务"——SQL 层用 `start transaction` + `commit`/`rollback`，Spring 里用 `@Transactional`。
-  > ③ 四大特性（ACID）：
-  > - **原子性 Atomicity**——事务是不可分割的最小单元，要么全部成功、要么全部失败。案例：`1/0` 抛出后 `emp` 和 `emp_expr` 的插入**都**没了（本机实测 0 条）；
-  > - **一致性 Consistency**——事务完成时所有数据保持一致状态。案例：不允许出现"员工在、经历不在"的中间状态，两张表的关联数据保持完整；
-  > - **隔离性 Isolation**——保证事务在不受外部并发操作影响的独立环境里运行。案例：两个人同时新增员工，各自的事务互不干扰，谁也看不到对方未提交的中间结果；
-  > - **持久性 Durability**——事务一旦提交或回滚，它对数据库数据的改变就是永久的。案例：`commit` 之后（或回滚之后）重启数据库，`emp` 里的 id=38 这条还在。
+  **一级 · 思路**：从"业务上这是一件事、数据库眼里是两条语句"的落差说起；四大特性按 原子性 → 一致性 → 隔离性 → 持久性 的顺序各配一句案例
+  **二级 · 方法**：关键词——不可分割的工作单位、要么同时成功要么同时失败、数据的不完整/不一致、默认自动提交、`commit`/`rollback`；四大特性的英文名是 Atomicity / Consistency / Isolation / Durability
+  **三级 · 骨架**：① 因为"新增员工"是____，两次写入必须____；② MySQL 默认____，两条 DML 是____，所以需要显式地____；③ 原子性=____、一致性=____、隔离性=____、持久性=____
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① "新增员工"在**业务上是一个操作**：员工和他的工作经历必须一起存在。基本信息成功、经历失败，数据库就留下一个没有工作经历的残缺员工——**数据的完整性（该有的没有）和一致性（两张表对不上）都被破坏**，用户看到的结果和实际发生的事不一致，所以不能忍。
+  ② MySQL **默认是自动提交的**（执行一条 DML 就立即隐式提交），所以在没有显式开启事务时，两句 `insert` 是两个**互相独立**的小事务：第一句一提交就永久生效，第二句失败也撤不回第一句。要避免它，就得把这两句"包成一个事务"——SQL 层用 `start transaction` + `commit`/`rollback`，Spring 里用 `@Transactional`。
+  ③ 四大特性（ACID）：
+  - **原子性 Atomicity**——事务是不可分割的最小单元，要么全部成功、要么全部失败。案例：`1/0` 抛出后 `emp` 和 `emp_expr` 的插入**都**没了（本机实测 0 条）；
+  - **一致性 Consistency**——事务完成时所有数据保持一致状态。案例：不允许出现"员工在、经历不在"的中间状态，两张表的关联数据保持完整；
+  - **隔离性 Isolation**——保证事务在不受外部并发操作影响的独立环境里运行。案例：两个人同时新增员工，各自的事务互不干扰，谁也看不到对方未提交的中间结果；
+  - **持久性 Durability**——事务一旦提交或回滚，它对数据库数据的改变就是永久的。案例：`commit` 之后（或回滚之后）重启数据库，`emp` 里的 id=38 这条还在。
+
+  :::
+
 
 ### 三、综合题
 
@@ -418,30 +442,38 @@ PPT 第 27 页又把"介绍&操作 / Spring事务管理 / 四大特性"的目录
   | ACID 四大特性（PPT 28） | 第 7 步——原子性/一致性/隔离性/持久性各对上一个现象 |
   | 数据不一致问题（PPT 17） | 第 5、6 步——`1/0` 是课堂上专门用来制造失败的开关 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先看清楚"正常一次"的日志长什么样，再用 `1/0` 把"提交"换成"回滚"，两段日志一对比，结论就出来了
-  > **二级 · 方法**：`@Transactional` 贴在 `save` 上；yml 里把 `org.springframework.jdbc.support.JdbcTransactionManager` 设为 debug；查库用 `select * from emp where username = '...'` 与 `select * from emp_expr where emp_id = ...`
-  > **三级 · 骨架**：① `@____ @Override public void save(Emp emp){ … }`；② 请求 `POST http://localhost:8080/____`；③ 三行日志的关键词：`Creating new transaction` / `to manual commit` / `Initiating transaction ____`；⑤ 异常那行：`int i = ____;`；⑥ 回滚两行：`Initiating transaction ____` 与 `____ back JDBC transaction`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. 业务层加注解即可（见 2-2 的答案），yml 配置也见 2-2。
-  > 2. **本机实测**响应：`{"code":1,"msg":"success","data":null}`。
-  > 3. **本机实测**三行关键日志（摘录）：
-  >    ```text
-  >    DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name
-  >          [com.itheima.service.impl.EmpServiceImpl.save]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
-  >    DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@…] to manual commit
-  >    DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction commit
-  >    ```
-  >    含义：**进方法前建事务**（名字是"类名.方法名"）、**把自动提交换成手动提交**（事务开始接管）、**方法正常结束 → 提交**。
-  > 4. **本机实测**查库：`emp` 新记录 id = **38**，`emp_expr` **2 条**，`emp_id` 都是 **38**（主键返回 + 批量插入都正常）。
-  > 5. 异常用例：`empMapper.insert(emp);` 之后加 `int i = 1 / 0;`，重新构建启动，换一个 `username` 再发一次。
-  > 6. **本机实测**：HTTP **500**；日志出现
-  >    ```text
-  >    DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction rollback
-  >    DEBUG o.s.jdbc.support.JdbcTransactionManager - Rolling back JDBC transaction on Connection [HikariProxyConnection@…]
-  >    ```
-  >    查库：`emp` 里那条（testuser02）**0 条**、`emp_expr` 里对应记录 **0 条**——注意日志中明明出现过 `<== Updates: 1`，最终却没留下数据，这正是"回滚"。
-  > 7. 两个回答：
-  >    ① **原子性**的定义是"事务是不可分割的最小单元，要么全部成功、要么全部失败"。这次两个插入没能一起成功（第二个根本没执行），于是已经执行过的那个也被撤销——**整体要么全有、要么全无**，从数据库里看就是"什么都没发生"，与原子性的定义完全对上。
-  >    ② 去掉 `@Transactional` 后再做第 5 步，会看到**数据不一致**：`emp` 表里留下了新员工，`emp_expr` 表里一条都没有（本机实测过这个反面场景）——因为这时的两句 insert 是两个各自提交的独立事务，第一句早就生效了。
+  **一级 · 思路**：先看清楚"正常一次"的日志长什么样，再用 `1/0` 把"提交"换成"回滚"，两段日志一对比，结论就出来了
+  **二级 · 方法**：`@Transactional` 贴在 `save` 上；yml 里把 `org.springframework.jdbc.support.JdbcTransactionManager` 设为 debug；查库用 `select * from emp where username = '...'` 与 `select * from emp_expr where emp_id = ...`
+  **三级 · 骨架**：① `@____ @Override public void save(Emp emp){ … }`；② 请求 `POST http://localhost:8080/____`；③ 三行日志的关键词：`Creating new transaction` / `to manual commit` / `Initiating transaction ____`；⑤ 异常那行：`int i = ____;`；⑥ 回滚两行：`Initiating transaction ____` 与 `____ back JDBC transaction`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. 业务层加注解即可（见 2-2 的答案），yml 配置也见 2-2。
+  2. **本机实测**响应：`{"code":1,"msg":"success","data":null}`。
+  3. **本机实测**三行关键日志（摘录）：
+     ```text
+     DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name
+           [com.itheima.service.impl.EmpServiceImpl.save]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+     DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@…] to manual commit
+     DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction commit
+     ```
+     含义：**进方法前建事务**（名字是"类名.方法名"）、**把自动提交换成手动提交**（事务开始接管）、**方法正常结束 → 提交**。
+  4. **本机实测**查库：`emp` 新记录 id = **38**，`emp_expr` **2 条**，`emp_id` 都是 **38**（主键返回 + 批量插入都正常）。
+  5. 异常用例：`empMapper.insert(emp);` 之后加 `int i = 1 / 0;`，重新构建启动，换一个 `username` 再发一次。
+  6. **本机实测**：HTTP **500**；日志出现
+     ```text
+     DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction rollback
+     DEBUG o.s.jdbc.support.JdbcTransactionManager - Rolling back JDBC transaction on Connection [HikariProxyConnection@…]
+     ```
+     查库：`emp` 里那条（testuser02）**0 条**、`emp_expr` 里对应记录 **0 条**——注意日志中明明出现过 `<== Updates: 1`，最终却没留下数据，这正是"回滚"。
+  7. 两个回答：
+     ① **原子性**的定义是"事务是不可分割的最小单元，要么全部成功、要么全部失败"。这次两个插入没能一起成功（第二个根本没执行），于是已经执行过的那个也被撤销——**整体要么全有、要么全无**，从数据库里看就是"什么都没发生"，与原子性的定义完全对上。
+     ② 去掉 `@Transactional` 后再做第 5 步，会看到**数据不一致**：`emp` 表里留下了新员工，`emp_expr` 表里一条都没有（本机实测过这个反面场景）——因为这时的两句 insert 是两个各自提交的独立事务，第一句早就生效了。
+
+  :::
+

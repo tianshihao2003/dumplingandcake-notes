@@ -15,7 +15,7 @@ cover: false
 
 这一篇覆盖第 19 章 PPT 第 22～51 页，把课程里列的**六组常用命令**逐个讲透：**目录操作 → 文件查看 → 拷贝移动 → 打包压缩 → 文本编辑 → 查找**。每组都按 PPT 的四要素来——**作用、语法、选项、举例**，并且在每条命令后面贴上**本机实测的真实输出**（原文来自 `lab/linux-cmd-test-output.txt`）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **环境提醒（很重要）**：本机实测环境是 **WSL 里的 Ubuntu 24.04.3 LTS**（内核 `6.6.87.2-microsoft-standard-WSL2`，用户 `dumplingandcake`），而**课程环境是 CentOS 7**（用户 `root`）。两边在**这一篇的命令上完全一致**（`ls/cd/mkdir/rm/cat/head/tail/cp/mv/tar/find/grep/vi/vim` 都一样），真正会分叉的是**包管理和防火墙**（[106 篇](/posts/编程学习/javaweb学习笔记/106-linux概述与系统安装/)那张差异表）：CentOS 用 `yum` + `firewalld`，Ubuntu 用 `apt` + `ufw`。所以下文的实测输出只当"命令行为长什么样"的证据看，**发到服务器上的命令照 CentOS 7 那一套写**。
 >
 > 另外，本机实测里有一处平台差异要特别点出来：**Ubuntu 默认没有 `ll` 这个别名**（Linux 环境下习惯把 `ls -l` 简写成 `ll`），所以实测里都写 `ls -l`。
@@ -68,7 +68,7 @@ cover: false
 | **文本编辑命令** | 45～47 | 文本编辑命令：vi / vim |
 | **查找命令** | 49～51 | 查找命令：find 与 grep |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 第 23、30、36、40、44、48 页都是**同一张小节页**——PPT 用它在六组命令之间做分隔，每放一次，紧接着就是那一组的具体命令。所以本节的节奏是"**六组命令，一组一组往下走**"，每组结束的位置还有一页**问答页**（第 29、35、39、43、51 页）把那组命令收个口。
 
 ## 本篇实测用的那套"素材"
@@ -103,7 +103,7 @@ tar  -zcvf  itcast.tar.gz  itcast
 └─ command：命令名
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **中括号 [] 的意思就是"可省略"**，所以 `ls`（只有命令名）、`ls -l`（命令 + 选项）、`ls -l /usr/local`（命令 + 选项 + 参数）都是合法写法。另外**命令名、选项、参数之间必须用空格隔开**，`ls-l` 是错的。
 
 PPT 第 24 页还给了四个使用技巧——**这四个技巧能让敲命令的体验好一大截**：
@@ -115,7 +115,7 @@ PPT 第 24 页还给了四个使用技巧——**这四个技巧能让敲命令�
 | 使用**上下箭头** | ↑ / ↓ | 快速调出**曾经使用过的命令**（历史命令），改一改就能再跑一遍 |
 | **清屏** | `clear` 命令 或 `Ctrl + l` 快捷键 | 把屏幕清干净（`Ctrl+l` 是快捷键版，更快） |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 这四个技巧都是**交互式操作**（要靠键盘和屏幕实时反应），本机实测是在非交互环境里批量跑的脚本，**没法演示**——知道它们存在、并且第一条"Tab 补全"从现在起就要用起来就行。第四条的 `clear` 是命令，随时可敲。
 
 ## 目录操作命令（PPT 第 25～29 页）
@@ -223,7 +223,7 @@ $ mkdir -p itcast/test          # 一条命令建出两层（itcast 和它下面
 $ ls -al itcast                 # 验证：itcast 里确实有 test（见上面 ls 的实测输出）
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > **`-p` 是"顺手救命的选项"**：不加 `-p` 时，如果上级目录不存在，`mkdir` 会直接报错（`No such file or directory`）——这也是它能被用来"一层层建目录"的原因。以后要建的目录路径比较深（比如 `/usr/local/nginx/conf/backup`），**一律加上 `-p`**：存在就不动它、不存在才建，重复执行也不会报错。
 
 ### `rm`：删除文件或目录（PPT 第 28 页）
@@ -248,7 +248,7 @@ $ ls -al itcast                 # 验证：itcast 里确实有 test（见上面 
 | `rm -r itcast/` | 删**目录**（连同里面所有东西），**会逐个确认** | 删目录，想看一眼再删 |
 | `rm -rf itcast/` | 删目录（连同里面所有东西），**不问直接删** | 打包前的清理、清临时目录——**要格外小心** |
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`rm -rf` 是这一章最危险的命令，没有之一**：Linux 的删除是**真删**——没有 Windows 那样的回收站，删完就没了，也**没有"撤销"**。两条保命习惯：① 敲 `rm -rf` 之前先 **`pwd` 看一眼自己在哪、`ls` 看一眼要删的是什么**；② **路径尽量别用变量、别随手加通配符**（`rm -rf *` 这种命令如果在错误的目录里执行，后果不堪设想），需要整目录删除时，名字一定写全（`rm -rf itcast`）。
 >
 > 本机实测里并没有拿 `itcast` 单独演示删除（跑完还要用它），而是在**收尾时把整个测试目录清掉了**——脚本最后一行输出的就是"`已清理 /tmp/linux-cmd-test`"。
@@ -300,7 +300,7 @@ $ cat -n 1.log          # -n：给每一行加上行号（由 1 开始）
 
 `more` 和 `cat` 的区别就一个字：**大文件**。`cat` 是把整个文件一次性甩到屏幕上（几十万行的日志能刷到你怀疑人生），`more` 则是**一屏一屏给**，看完一屏敲空格继续。
 
-> [!NOTE]
+> [!NOTE] 注意
 > `more` 是**交互式**的（敲一下按键才动一下），本机实测跑在非交互环境里，脚本对它的记录就是一行"`(more 需要交互，略)`"——这不算"没验证"，而是这类命令**只能在真实的终端里体验**，你在 FinalShell 的窗口里随便找个大文件（比如 `/etc/profile`）敲一下 `more` 就明白了。
 
 ### `head`：查看文件开头的内容（PPT 第 33 页）
@@ -325,7 +325,7 @@ $ head -3 1.log         # 只要开头 3 行
 3
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > "**默认 10 行**"这件事PPT 只写在举例的注释里，很容易漏——上面第一条实测就是专门把它量出来的：`head 1.log | wc -l` 输出 `10`。顺带认识一个以后天天要用的符号：**`|` 是管道**，把前一个命令的输出交给后一个命令处理（`wc -l` 数行数）。它和 `>` / `>>`（重定向）会在 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)讲 `nohup java -jar ... &> tlias.log &` 时正式登场。
 
 ### `tail`：查看文件末尾的内容（PPT 第 34 页）
@@ -358,7 +358,7 @@ $ tail -3 1.log         # 最后 3 行
 | `tail -20 1.log` | 末尾 **20 行** |
 | `tail -f 1.log` | **动态**：先显示末尾若干行，然后**文件一有新内容就立刻追加到屏幕上**，不退出 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **`tail -f` 是后端工程师用得最多的命令**：项目跑起来之后日志一直在写，`tail -f tlias.log` 打开就等于"盯着日志看"，页面一出错、后台一抛异常，屏幕上马上滚出来。它**不会自己结束**——看够了按 **`Ctrl + C`** 退出（本机实测里没有跑 `-f`，因为它会一直挂在终端上）。
 >
 > 顺带对比 `tail -n 100 -f xxx.log` 这种写法：**先给 `-n` 表示"从末尾 100 行开始跟"**，比默认的十几行更实用。
@@ -545,7 +545,7 @@ $ # 把两个包放在一起比大小（脚本打印出来的两行）：
 | 想看过程 | 加 `v`（verbose） | 上面每一条都可以加 `v` |
 | **必须带的** | `f`（file） | **`f` 要放在选项最后、紧跟包名**：`tar -zcvf itcast.tar.gz itcast` |
 
-> [!TIP]
+> [!TIP] 提示
 > 几个实战里的细节：
 > ① **`-C` 是"解到哪去"**：不加 `-C` 就解在当前目录；课件里装 JDK 用的正是 `tar -zxvf jdk-17...tar.gz -C /usr/local`（[108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)）。
 > ② **`f` 后面必须紧跟包名**：`tar -zcvf itcast.tar.gz itcast` 里 `f` 是最后一个选项字母，紧跟着的就是包名，再后面才是"要打包的文件/目录"。
@@ -591,7 +591,7 @@ $ vim --version | head -1
 VIM - Vi IMproved 9.1 (2024 Jan 02, compiled Aug 24 2026 22:13:04)
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **`yum install vim`** 是 PPT 给 CentOS 的安装命令（Ubuntu 上对应 `apt install vim`）。本机实测这台 Ubuntu 里 vim **是装好的**（前面 `which java nginx mysql vim` 唯一回显的就是 `/usr/bin/vim`，见 [106 篇](/posts/编程学习/javaweb学习笔记/106-linux概述与系统安装/)）。
 
 ### 三种模式与切换（PPT 第 46～47 页）
@@ -664,7 +664,7 @@ line2
 
 真实的操作流程是**三次按键**：`vim vim-test.txt` 打开（命令模式）→ 按 **`i`** 进插入模式、改内容 → 按 **ESC** 回命令模式 → 敲 **`:wq`** 回车保存退出。这套流程在本机非交互环境里没法"代敲"，所以脚本里用 `-c` 参数把该敲的命令直接传了进去（**-c 后面跟的就是底行模式的命令**）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 两个新手必踩的坑：
 > ① **`:` 不认识"直接打字"**——在命令模式敲字母是"移动/删除"的意思，想打字必须**先按 `i`**（按了没反应不是卡了，是在等你按对键）；
 > ② **退不出去**时按 **ESC** 回到命令模式，再敲 `:q!`（**不保存**退出，放弃这次修改）或 `:wq`（保存）。另外**只有 `:wq` 会写文件**，别用 `:q` 试图"退出不保存"——它遇到未保存的修改会报错不让你退（这正是它提醒你的方式）。
@@ -696,7 +696,7 @@ $ find . -name '*.log'
 | `-name` | 按**文件名**匹配 |
 | `'*.log'` | 通配符：`*` 代表任意多个字符 → 所有 `.log` 结尾的文件。**建议用单引号包住**，避免通配符被 shell 提前展开 |
 
-> [!TIP]
+> [!TIP] 提示
 > `find` 的强项是**递归**（目录套目录也照样找下去）和**按属性找**——文件名、大小（`-size`）、修改时间（`-mtime`）都行。最常用的还是按名字找：`find / -name "*.log"` 这种"全盘找"会扫很久，日常都是**限定在某个目录里**找。
 
 ### `grep`：从指定文件中查找文本内容（PPT 第 50 页）
@@ -737,7 +737,7 @@ hello java                      # -A1：再带出它后面 1 行
 | `-A` / `-B` | 出错时**只看关键行不够**（异常信息往往在关键行之**后**几行、上下文在**之前**几行），`-A5` / `-B5` 就是"把上下文带出来" |
 | 文件名写 `*.java` | 支持通配符，一次搜一批文件（PPT 举例里的 `grep hello *.java`） |
 
-> [!TIP]
+> [!TIP] 提示
 > `grep` 真正的高频用武之地是**配合管道**看进程和日志：`ps -ef | grep java`（把 `ps -ef` 列出的进程交给 `grep` 筛出含 java 的那行）——这条命令会在 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)部署后端时正式出场；现在先记住"**命令的输出可以用 `|` 丢给 `grep` 筛**"就行。
 
 ### 第 51 页问答：find 和 grep 差在哪（这页要背）
@@ -821,187 +821,219 @@ hello java                      # -A1：再带出它后面 1 行
   需求（只给需求，命令自己想）：① 在当前目录下建出一个 `itcast` 目录，并在它里面再建一个 `test` 子目录——**要能一条命令建出这两层**；② 列出 `itcast` 目录下的内容，要求**连 `.` 开头的隐藏文件一起显示**，而且能看到**权限、拥有者、大小**这些详细信息；③ 练习做完了，把整个 `itcast` 目录（连着里面的东西）删掉，**不要一条条确认**；④ 顺手说出：删之前应该先做什么检查？为什么 Linux 的删除要格外小心？
   素材：本机实测的练习目录是 `/tmp/linux-cmd-test`，`itcast` 里后来还有 `hello.txt`、`test/`、`hello2.txt`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四件事对应四条命令——"建目录"、"详细看目录"、"删目录"、再谈安全习惯。注意②里"隐藏文件 + 详细信息"是**两个选项叠加**
-  > **二级 · 方法**：建多层目录用 **`mkdir -p itcast/test`**（`-p` = 上级不存在就创建）；详细看目录用 **`ls -al itcast`**（`-a` 显示隐藏文件、`-l` 详细列表）；删目录用 **`rm -rf itcast`**（`-r` 递归、`-f` 不确认）。检查：删之前先 **`pwd`（我在哪）** 和 **`ls`（要删的是什么）**；小心是因为**Linux 没有回收站，删了不能恢复**
-  > **三级 · 骨架**：① `mkdir ____ itcast/test` ② `ls ____ itcast` ③ `rm ____ itcast` ④ 先 `____` + `____` 确认对象；原因：没有 `____`、无法恢复
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > ① 一条命令建出两层：
-  >    mkdir -p itcast/test
-  >    （本机实测：mkdir -p itcast/test 之后 ls -al itcast，里面能看到 test 目录）
-  >
-  > ② 连隐藏文件一起详细列出：
-  >    ls -al itcast
-  >    本机实测输出：
-  >      total 12
-  >      drwxr-xr-x 3 dumplingandcake dumplingandcake 4096 Sep 30 02:18 .
-  >      drwxr-xr-x 3 dumplingandcake dumplingandcake 4096 Sep 30 02:18 ..
-  >      drwxr-xr-x 2 dumplingandcake dumplingandcake 4096 Sep 30 02:18 test
-  >    读法：第 1 位 d = 目录（- 表示文件）；后面 9 位是权限（拥有者/同组/其他人
-  >    的 rwx）；再后面是拥有者、所属组、大小、时间、名字。
-  >    -a 让 . （当前目录）和 .. （上级目录）这两行也显示出来。
-  >
-  > ③ 连内容一起删掉、不确认：
-  >    rm -rf itcast
-  >
-  > ④ 删之前的检查：pwd（确认自己在哪个目录）、ls（确认要删的是什么）。
-  >    要小心是因为：Linux 的删除是真删——没有回收站，也没有"撤销"，
-  >    尤其 rm -rf 一旦目录敲错就没有任何补救。
-  >    （本机实测是收尾时把整个测试目录清掉的，脚本输出"已清理 /tmp/linux-cmd-test"）
-  > ```
-  > 检查点：① 建多层目录用了 `-p`；② 看目录用的是 `ls -al`（`-a` 和 `-l` 都要有）；③ 删目录用的是 `rm -rf`（不是 `rm -f`、不是 `rm -r` 就完事）；④ 能说出"没有回收站"。
+  **一级 · 思路**：四件事对应四条命令——"建目录"、"详细看目录"、"删目录"、再谈安全习惯。注意②里"隐藏文件 + 详细信息"是**两个选项叠加**
+  **二级 · 方法**：建多层目录用 **`mkdir -p itcast/test`**（`-p` = 上级不存在就创建）；详细看目录用 **`ls -al itcast`**（`-a` 显示隐藏文件、`-l` 详细列表）；删目录用 **`rm -rf itcast`**（`-r` 递归、`-f` 不确认）。检查：删之前先 **`pwd`（我在哪）** 和 **`ls`（要删的是什么）**；小心是因为**Linux 没有回收站，删了不能恢复**
+  **三级 · 骨架**：① `mkdir ____ itcast/test` ② `ls ____ itcast` ③ `rm ____ itcast` ④ 先 `____` + `____` 确认对象；原因：没有 `____`、无法恢复
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  ① 一条命令建出两层：
+     mkdir -p itcast/test
+     （本机实测：mkdir -p itcast/test 之后 ls -al itcast，里面能看到 test 目录）
+  
+  ② 连隐藏文件一起详细列出：
+     ls -al itcast
+     本机实测输出：
+       total 12
+       drwxr-xr-x 3 dumplingandcake dumplingandcake 4096 Sep 30 02:18 .
+       drwxr-xr-x 3 dumplingandcake dumplingandcake 4096 Sep 30 02:18 ..
+       drwxr-xr-x 2 dumplingandcake dumplingandcake 4096 Sep 30 02:18 test
+     读法：第 1 位 d = 目录（- 表示文件）；后面 9 位是权限（拥有者/同组/其他人
+     的 rwx）；再后面是拥有者、所属组、大小、时间、名字。
+     -a 让 . （当前目录）和 .. （上级目录）这两行也显示出来。
+  
+  ③ 连内容一起删掉、不确认：
+     rm -rf itcast
+  
+  ④ 删之前的检查：pwd（确认自己在哪个目录）、ls（确认要删的是什么）。
+     要小心是因为：Linux 的删除是真删——没有回收站，也没有"撤销"，
+     尤其 rm -rf 一旦目录敲错就没有任何补救。
+     （本机实测是收尾时把整个测试目录清掉的，脚本输出"已清理 /tmp/linux-cmd-test"）
+  ```
+  检查点：① 建多层目录用了 `-p`；② 看目录用的是 `ls -al`（`-a` 和 `-l` 都要有）；③ 删目录用的是 `rm -rf`（不是 `rm -f`、不是 `rm -r` 就完事）；④ 能说出"没有回收站"。
+
+  :::
+
 
 - [ ] **2-2 看一眼日志和配置文件**
   需求：① 项目日志 `1.log` 一共有 30 行，先看它**开头的 3 行**，再看**末尾的 3 行**；② 想知道"默认看开头"的那条命令默认看多少行——写出命令并说明结果；③ 要把 `/etc/profile` 的每一行带上行号看（一次性全打出来）；④ 服务正在跑，想**盯着**日志文件的新内容（写出命令，并说明怎么退出）。
   素材：`1.log` 的内容是第 1 行 `1`、第 2 行 `2`……第 30 行 `30`（这样行号一眼可数）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：四条需求分别是"看头"、"看尾"、"数行数"、"实时跟"——正好是这一组四条查看命令各自的看家本领。①②③ 都是**一次性输出**（自动结束），④ 是**交互式**的（要手动停）
-  > **二级 · 方法**：看开头用 **`head -3 1.log`**；看末尾用 **`tail -3 1.log`**；数行数用 **`head 1.log | wc -l`**（`head` 不写 `-n` 默认 10 行，管道 `|` 把输出交给 `wc -l` 数行）；带行号看整个文件用 **`cat -n /etc/profile`**（`-n` 由 1 开始编号）；实时跟新内容用 **`tail -f 1.log`**，退出按 **`Ctrl+C`**
-  > **三级 · 骨架**：① `____ -3 1.log` / `____ -3 1.log` ② `head 1.log | ____ -l` ③ `cat ____ /etc/profile` ④ `tail ____ 1.log`，退出 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > ① 开头 3 行、末尾 3 行：
-  >    head -3 1.log
-  >    1
-  >    2
-  >    3
-  >
-  >    tail -3 1.log
-  >    28
-  >    29
-  >    30
-  >    （以上是本机实测的真实输出）
-  >
-  > ② 默认看多少行：
-  >    head 1.log | wc -l
-  >    10
-  >    → head 不写 -n 时默认输出前 10 行；tail 不写 -n 时同样是末尾 10 行。
-  >    （| 是管道：把 head 的输出交给 wc -l 去数行数）
-  >
-  > ③ 带行号看整个文件：
-  >    cat -n /etc/profile
-  >    每行前面会多出由 1 开始的行号（本机实测 cat -n 1.log 的效果）：
-  >         1	1
-  >         2	2
-  >         3	3
-  >         4	4
-  >         5	5
-  >    （小文件用 cat 合适；几百上千行的大文件应该用 more 分页看）
-  >
-  > ④ 实时盯日志：
-  >    tail -f 1.log
-  >    · 先显示末尾若干行，之后文件一有新内容就立刻追加显示；
-  >    · 它不会自己结束，看够了按 Ctrl+C 退出；
-  >    · 常用变体：tail -n 100 -f 1.log（从末尾 100 行开始跟）。
-  >    （本机实测没有跑 -f，因为它会一直挂在终端上，不属于"一次性命令"）
-  > ```
-  > 检查点：① 看头 / 看尾分别用 `head -3` / `tail -3`（数字写在选项后）；② 数行数用的是 `head ... | wc -l`，结果 **10**；③ 带行号用的是 `cat -n`；④ 实时跟日志是 `tail -f` 并用 `Ctrl+C` 退出。
+  **一级 · 思路**：四条需求分别是"看头"、"看尾"、"数行数"、"实时跟"——正好是这一组四条查看命令各自的看家本领。①②③ 都是**一次性输出**（自动结束），④ 是**交互式**的（要手动停）
+  **二级 · 方法**：看开头用 **`head -3 1.log`**；看末尾用 **`tail -3 1.log`**；数行数用 **`head 1.log | wc -l`**（`head` 不写 `-n` 默认 10 行，管道 `|` 把输出交给 `wc -l` 数行）；带行号看整个文件用 **`cat -n /etc/profile`**（`-n` 由 1 开始编号）；实时跟新内容用 **`tail -f 1.log`**，退出按 **`Ctrl+C`**
+  **三级 · 骨架**：① `____ -3 1.log` / `____ -3 1.log` ② `head 1.log | ____ -l` ③ `cat ____ /etc/profile` ④ `tail ____ 1.log`，退出 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  ① 开头 3 行、末尾 3 行：
+     head -3 1.log
+     1
+     2
+     3
+  
+     tail -3 1.log
+     28
+     29
+     30
+     （以上是本机实测的真实输出）
+  
+  ② 默认看多少行：
+     head 1.log | wc -l
+     10
+     → head 不写 -n 时默认输出前 10 行；tail 不写 -n 时同样是末尾 10 行。
+     （| 是管道：把 head 的输出交给 wc -l 去数行数）
+  
+  ③ 带行号看整个文件：
+     cat -n /etc/profile
+     每行前面会多出由 1 开始的行号（本机实测 cat -n 1.log 的效果）：
+          1	1
+          2	2
+          3	3
+          4	4
+          5	5
+     （小文件用 cat 合适；几百上千行的大文件应该用 more 分页看）
+  
+  ④ 实时盯日志：
+     tail -f 1.log
+     · 先显示末尾若干行，之后文件一有新内容就立刻追加显示；
+     · 它不会自己结束，看够了按 Ctrl+C 退出；
+     · 常用变体：tail -n 100 -f 1.log（从末尾 100 行开始跟）。
+     （本机实测没有跑 -f，因为它会一直挂在终端上，不属于"一次性命令"）
+  ```
+  检查点：① 看头 / 看尾分别用 `head -3` / `tail -3`（数字写在选项后）；② 数行数用的是 `head ... | wc -l`，结果 **10**；③ 带行号用的是 `cat -n`；④ 实时跟日志是 `tail -f` 并用 `Ctrl+C` 退出。
+
+  :::
+
 
 - [ ] **2-3 复制、改名、搬走**
   需求：当前目录下有 `hello.txt` 和目录 `itcast/`，请依次完成：① 把 `hello.txt` **复制**到 `itcast` 目录里（原文件留着）；② 把 `hello.txt` 复制到当前目录、并且**改名为 `hi.txt`**；③ 把整个 `itcast` 目录**连同里面所有文件**复制一份成 `itheima`；④ 把 `hi.txt` **改名**成 `hello2.txt`，并写出**怎么验证改名成功**；⑤ 把 `hello2.txt` **移动**进 `itcast` 目录；⑥ 最后说清楚：`cp` 和 `mv` 最本质的区别是什么，"复制整个目录"必须加哪个选项。
   素材：本机实测里 `itcast` 目录最初只有一个 `test` 子目录，`hello.txt` 和 `hello2.txt` 都是这几步操作后进去的。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五个动作里，"复制到目录"和"复制并改名"是同一命令的两种写法（看**第二个参数是不是已存在的目录**）；"改名"和"移动"也是**同一个命令**的两种结果（同样是看第二个参数）
-  > **二级 · 方法**：复制到目录 **`cp hello.txt itcast/`**；复制并改名 **`cp hello.txt ./hi.txt`**；复制目录 **`cp -r itcast/ ./itheima/`**（`-r` 递归）；改名 **`mv hi.txt hello2.txt`**，验证用 **`ls hi.txt`**（会报 `No such file or directory` 说明旧名字没了）；移动到目录 **`mv hello2.txt itcast/`**。区别：**`cp` 会留下源文件（多一份），`mv` 不留（搬走或改名）**
-  > **三级 · 骨架**：① `cp hello.txt ____/` ② `cp hello.txt ./____` ③ `cp ____ itcast/ ./itheima/` ④ `mv hi.txt ____`，验证 `____ hi.txt` ⑤ `mv hello2.txt ____/` ⑥ `cp` 留下源文件、`mv` 不留；复制目录必须加 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > ① cp hello.txt itcast/
-  >    本机实测 ls itcast 的结果（hello.txt 进来了，原来就有 test）：
-  >      hello.txt
-  >      test
-  >
-  > ② cp hello.txt ./hi.txt        # 复制到当前目录并改名，hello.txt 还在
-  >    本机实测 ls 能看到 hi.txt
-  >
-  > ③ cp -r itcast/ ./itheima/     # 复制目录必须加 -r
-  >    本机实测 ls itheima 的结果（itcast 的全部内容都复制过来了）：
-  >      hello.txt
-  >      test
-  >
-  > ④ mv hi.txt hello2.txt         # 重命名
-  >    验证：
-  >      ls hi.txt
-  >      ls: cannot access 'hi.txt': No such file or directory
-  >      ls                            # 能看到 hello2.txt
-  >    → 旧名字已经不存在了，说明是"改名"而不是"复制了一份"。
-  >
-  > ⑤ mv hello2.txt itcast/        # 移动到已存在的目录里
-  >    本机实测 ls itcast 的结果：
-  >      hello.txt
-  >      hello2.txt
-  >      test
-  >
-  > ⑥ 本质区别：
-  >    · cp 是"抄一份"——源文件还在，结果是两份；
-  >    · mv 是"搬走 / 改名"——源文件不在了，结果还是一份。
-  >    复制目录必须加 -r（递归），不加会报 "omitting directory"。
-  >
-  >    另外记死 mv 的那条规则：mv source dest —— dest 是已存在的目录就移动，
-  >    否则就是重命名（④ 和 ⑤ 就是这句话的两次演示）。
-  > ```
-  > 检查点：① 复制目录写了 `-r`；② 改名后知道要用 `ls 旧名字`（或 `ls` 看列表）来验证；③ 能说出 `cp` 留源文件、`mv` 不留；④ 能说出 `mv` 判断移动还是重命名的依据是"第二个参数是不是已存在的目录"。
+  **一级 · 思路**：五个动作里，"复制到目录"和"复制并改名"是同一命令的两种写法（看**第二个参数是不是已存在的目录**）；"改名"和"移动"也是**同一个命令**的两种结果（同样是看第二个参数）
+  **二级 · 方法**：复制到目录 **`cp hello.txt itcast/`**；复制并改名 **`cp hello.txt ./hi.txt`**；复制目录 **`cp -r itcast/ ./itheima/`**（`-r` 递归）；改名 **`mv hi.txt hello2.txt`**，验证用 **`ls hi.txt`**（会报 `No such file or directory` 说明旧名字没了）；移动到目录 **`mv hello2.txt itcast/`**。区别：**`cp` 会留下源文件（多一份），`mv` 不留（搬走或改名）**
+  **三级 · 骨架**：① `cp hello.txt ____/` ② `cp hello.txt ./____` ③ `cp ____ itcast/ ./itheima/` ④ `mv hi.txt ____`，验证 `____ hi.txt` ⑤ `mv hello2.txt ____/` ⑥ `cp` 留下源文件、`mv` 不留；复制目录必须加 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  ① cp hello.txt itcast/
+     本机实测 ls itcast 的结果（hello.txt 进来了，原来就有 test）：
+       hello.txt
+       test
+  
+  ② cp hello.txt ./hi.txt        # 复制到当前目录并改名，hello.txt 还在
+     本机实测 ls 能看到 hi.txt
+  
+  ③ cp -r itcast/ ./itheima/     # 复制目录必须加 -r
+     本机实测 ls itheima 的结果（itcast 的全部内容都复制过来了）：
+       hello.txt
+       test
+  
+  ④ mv hi.txt hello2.txt         # 重命名
+     验证：
+       ls hi.txt
+       ls: cannot access 'hi.txt': No such file or directory
+       ls                            # 能看到 hello2.txt
+     → 旧名字已经不存在了，说明是"改名"而不是"复制了一份"。
+  
+  ⑤ mv hello2.txt itcast/        # 移动到已存在的目录里
+     本机实测 ls itcast 的结果：
+       hello.txt
+       hello2.txt
+       test
+  
+  ⑥ 本质区别：
+     · cp 是"抄一份"——源文件还在，结果是两份；
+     · mv 是"搬走 / 改名"——源文件不在了，结果还是一份。
+     复制目录必须加 -r（递归），不加会报 "omitting directory"。
+  
+     另外记死 mv 的那条规则：mv source dest —— dest 是已存在的目录就移动，
+     否则就是重命名（④ 和 ⑤ 就是这句话的两次演示）。
+  ```
+  检查点：① 复制目录写了 `-r`；② 改名后知道要用 `ls 旧名字`（或 `ls` 看列表）来验证；③ 能说出 `cp` 留源文件、`mv` 不留；④ 能说出 `mv` 判断移动还是重命名的依据是"第二个参数是不是已存在的目录"。
+
+  :::
+
 
 - [ ] **2-4 打包、解压、查找**
   需求：① 把 `itcast` 目录打成一个 **`.tar.gz`** 的压缩包，并且**打包过程要能看到文件列表**；② 把上面那个包**解压到 `unpack` 目录**（不是解到当前目录）；③ 再试一次"**只打包不压缩**"，说明两种做法**后缀**和**体积**的差别；④ 在当前目录**及其子目录**下找出所有 `.log` 结尾的文件；⑤ 在 `HelloWorld.java` 里搜内容含 `hello` 的行，要求：a) 带行号；b) 关键字写成大写 `HELLO` 也要能搜到；c) 把关键字**所在行及它后面 1 行**都带出来。
   素材：`HelloWorld.java` 的内容是第 1 行 `hey there`、第 2 行 `hello java`；`1.log` 就在当前目录；`itcast` 里有 `hello.txt`、`hello2.txt`、`test/`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：①②③ 是同一个命令的三种形态（**造包** vs **还原**，加不加压缩）；④⑤ 是两个不同的"查找"——一个按**文件名**，一个按**内容**
-  > **二级 · 方法**：打包并压缩 **`tar -zcvf itcast.tar.gz itcast`**；解压到指定目录 **`tar -zxvf itcast.tar.gz -C unpack`**；只打包 **`tar -cvf itcast.tar itcast`**（`.tar` 10240 字节 vs `.tar.gz` 207 字节，本机实测）；找文件 **`find . -name "*.log"`**；搜内容 **`grep -n hello HelloWorld.java`**、**`grep -in HELLO HelloWorld.java`**、**`grep -A1 hey HelloWorld.java`**
-  > **三级 · 骨架**：① `tar ____ itcast.tar.gz itcast` ② `tar -zxvf itcast.tar.gz ____ unpack` ③ `tar -cvf ____ itcast`（对比后缀与体积）④ `find . ____ "*.log"` ⑤ `grep ____ hello ...` / `grep -in ____ ...` / `grep ____ hey ...`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > ① 打包 + 压缩（-v 显示过程）：
-  >    tar -zcvf itcast.tar.gz itcast
-  >    本机实测输出（能看到打进去的每一个目录/文件）：
-  >      itcast/
-  >      itcast/hello.txt
-  >      itcast/test/
-  >      itcast/hello2.txt
-  >    再看一眼体积：
-  >      ls -lh itcast.tar.gz
-  >      -rw-r--r-- 1 dumplingandcake dumplingandcake 207 Sep 30 02:18 itcast.tar.gz
-  >
-  > ② 解压到指定目录：
-  >    tar -zxvf itcast.tar.gz -C unpack
-  >    本机实测 ls unpack/itcast 的结果：
-  >      hello.txt
-  >      hello2.txt
-  >      test
-  >    （-C 就是"解到哪去"；不写 -C 解到当前目录）
-  >
-  > ③ 只打包、不压缩：
-  >    tar -cvf itcast.tar itcast
-  >    体积对比（本机实测）：
-  >      itcast.tar      10240 字节   ← 只打包（没有 -z）
-  >      itcast.tar.gz     207 字节   ← 打包 + 压缩
-  >    后缀规律：.tar = 只打包；.tar.gz = 打包并压缩；
-  >    解包相应写 tar -xvf xxx.tar、tar -zxvf xxx.tar.gz。
-  >
-  > ④ 按文件名递归查找：
-  >    find . -name "*.log"
-  >    本机实测输出：
-  >      ./1.log
-  >
-  > ⑤ 按内容搜（HelloWorld.java 第 1 行 hey there、第 2 行 hello java）：
-  >    a) grep -n hello HelloWorld.java
-  >       2:hello java                      ← -n 带出行号
-  >    b) grep -in HELLO HelloWorld.java
-  >       2:hello java                      ← -i 忽略大小写，大写 HELLO 也能搜到
-  >    c) grep -A1 hey HelloWorld.java
-  >       hey there                         ← 关键字所在行
-  >       hello java                        ← -A1：再带出后面 1 行
-  >    （-B1 则是带出关键字所在行之前的 1 行）
-  > ```
-  > 检查点：① 打包用 `tar -zcvf`（有 `z`、有 `v`、`f` 在最后紧跟包名）；② 解压到指定目录用了 `-C`；③ 体积对比记住 **10240 vs 207**（`.tar` vs `.tar.gz`）；④ `find` 是按文件名找（`-name "*.log"`）、`grep` 是按内容找；⑤ `-i` / `-n` / `-A1` 三个选项的效果能各说一句。
+  **一级 · 思路**：①②③ 是同一个命令的三种形态（**造包** vs **还原**，加不加压缩）；④⑤ 是两个不同的"查找"——一个按**文件名**，一个按**内容**
+  **二级 · 方法**：打包并压缩 **`tar -zcvf itcast.tar.gz itcast`**；解压到指定目录 **`tar -zxvf itcast.tar.gz -C unpack`**；只打包 **`tar -cvf itcast.tar itcast`**（`.tar` 10240 字节 vs `.tar.gz` 207 字节，本机实测）；找文件 **`find . -name "*.log"`**；搜内容 **`grep -n hello HelloWorld.java`**、**`grep -in HELLO HelloWorld.java`**、**`grep -A1 hey HelloWorld.java`**
+  **三级 · 骨架**：① `tar ____ itcast.tar.gz itcast` ② `tar -zxvf itcast.tar.gz ____ unpack` ③ `tar -cvf ____ itcast`（对比后缀与体积）④ `find . ____ "*.log"` ⑤ `grep ____ hello ...` / `grep -in ____ ...` / `grep ____ hey ...`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  ① 打包 + 压缩（-v 显示过程）：
+     tar -zcvf itcast.tar.gz itcast
+     本机实测输出（能看到打进去的每一个目录/文件）：
+       itcast/
+       itcast/hello.txt
+       itcast/test/
+       itcast/hello2.txt
+     再看一眼体积：
+       ls -lh itcast.tar.gz
+       -rw-r--r-- 1 dumplingandcake dumplingandcake 207 Sep 30 02:18 itcast.tar.gz
+  
+  ② 解压到指定目录：
+     tar -zxvf itcast.tar.gz -C unpack
+     本机实测 ls unpack/itcast 的结果：
+       hello.txt
+       hello2.txt
+       test
+     （-C 就是"解到哪去"；不写 -C 解到当前目录）
+  
+  ③ 只打包、不压缩：
+     tar -cvf itcast.tar itcast
+     体积对比（本机实测）：
+       itcast.tar      10240 字节   ← 只打包（没有 -z）
+       itcast.tar.gz     207 字节   ← 打包 + 压缩
+     后缀规律：.tar = 只打包；.tar.gz = 打包并压缩；
+     解包相应写 tar -xvf xxx.tar、tar -zxvf xxx.tar.gz。
+  
+  ④ 按文件名递归查找：
+     find . -name "*.log"
+     本机实测输出：
+       ./1.log
+  
+  ⑤ 按内容搜（HelloWorld.java 第 1 行 hey there、第 2 行 hello java）：
+     a) grep -n hello HelloWorld.java
+        2:hello java                      ← -n 带出行号
+     b) grep -in HELLO HelloWorld.java
+        2:hello java                      ← -i 忽略大小写，大写 HELLO 也能搜到
+     c) grep -A1 hey HelloWorld.java
+        hey there                         ← 关键字所在行
+        hello java                        ← -A1：再带出后面 1 行
+     （-B1 则是带出关键字所在行之前的 1 行）
+  ```
+  检查点：① 打包用 `tar -zcvf`（有 `z`、有 `v`、`f` 在最后紧跟包名）；② 解压到指定目录用了 `-C`；③ 体积对比记住 **10240 vs 207**（`.tar` vs `.tar.gz`）；④ `find` 是按文件名找（`-name "*.log"`）、`grep` 是按内容找；⑤ `-i` / `-n` / `-A1` 三个选项的效果能各说一句。
+
+  :::
+
 
 ### 三、综合题
 
@@ -1018,70 +1050,78 @@ hello java                      # -A1：再带出它后面 1 行
   8. 演练结束，把 `itcast` 目录和刚才那两个包都清理掉（不用一个个确认）
   9. **收尾回答三个问题**：① "打包"和"压缩"的区别是什么？② `find` 和 `grep` 的区别是什么？③ 万一在 `vim` 里改错了内容、又不想保存，怎么退出？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这是一条"**造 → 看 → 搜 → 包 → 解 → 找 → 清**"的完整流水线，每一步只用一条命令；第 2 步是唯一一个"交互式"的（要在 vim 里按键），第 5、6 步都是 `tar` 的变体，第 7 步不要和"按内容搜"搞混
-  > **二级 · 方法**：① `mkdir -p itcast/test`；② `vim itcast/HelloWorld.java` → 按 **`i`** 打字 → 按 **`ESC`** → 敲 **`:wq`** 回车；③ `cat -n itcast/HelloWorld.java`；④ `grep -in hello itcast/HelloWorld.java`；⑤ `tar -zcvf itcast.tar.gz itcast`；⑥ `tar -zxvf itcast.tar.gz -C unpack`；⑦ `find . -name "*.java"`；⑧ `rm -rf itcast itcast.tar.gz itcast.tar`。收尾：打包 = 装进一个文件、压缩 = 再压小（`.tar` 10240 字节 vs `.tar.gz` 207 字节）；`find` 按文件名、`grep` 按内容；改错了用 **`ESC` 后 `:q!`**（不保存退出）
-  > **三级 · 骨架**：① `____ -p itcast/test` ② `vim ____` → `i` → 打字 → `____` → `:____` ③ `cat ____ ...` ④ `grep ____ hello ...` ⑤ `tar -zcvf ____ itcast` ⑥ `tar -zxvf itcast.tar.gz ____ unpack` ⑦ `find . ____ "*.java"` ⑧ `rm ____ itcast ...`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```bash
-  > ① 建两层目录：
-  >    mkdir -p itcast/test
-  >    确认：ls -al itcast   → 能看到 test 目录
-  >    （本机实测：mkdir -p itcast/test 后，ls -al itcast 里有 test）
-  >
-  > ② 用 vim 建文件并写两行：
-  >    vim itcast/HelloWorld.java
-  >    按键顺序：进入后是【命令模式】→ 按 i 进【插入模式】→ 输入两行：
-  >        hey there
-  >        hello java
-  >      → 按 ESC 回【命令模式】→ 敲 :wq 回车（保存并退出）
-  >    确认：cat itcast/HelloWorld.java → 两行内容都在
-  >
-  > ③ 带行号看内容：
-  >    cat -n itcast/HelloWorld.java
-  >         1	hey there
-  >         2	hello java
-  >    （-n 由 1 开始给每一行编号）
-  >
-  > ④ 忽略大小写 + 带行号搜：
-  >    grep -in hello itcast/HelloWorld.java
-  >    本机实测同样的写法（文件在工作目录下时）：grep -in HELLO HelloWorld.java
-  >       2:hello java
-  >    （-i 忽略大小写、-n 显示行号；想带上下文再加 -A5 / -B5）
-  >
-  > ⑤ 打包并压缩：
-  >    tar -zcvf itcast.tar.gz itcast
-  >    本机实测输出（过程看得见）：
-  >        itcast/
-  >        itcast/hello.txt
-  >        itcast/test/
-  >        itcast/hello2.txt
-  >    确认：ls -lh itcast.tar.gz → 207 字节（本机实测）
-  >
-  > ⑥ 解压到指定目录：
-  >    tar -zxvf itcast.tar.gz -C unpack
-  >    确认：ls unpack/itcast → 能看到包里的内容
-  >    （本机实测：unpack/itcast 下是 hello.txt、hello2.txt、test）
-  >
-  > ⑦ 按文件名递归查找：
-  >    find . -name "*.java"
-  >    确认：输出里应该有 ./itcast/HelloWorld.java
-  >    （本机实测同款写法：find . -name '*.log' → ./1.log）
-  >
-  > ⑧ 清理（不用一条条确认）：
-  >    rm -rf itcast itcast.tar.gz unpack itcast.tar
-  >    确认：ls → 这些名字都不在了
-  >    注意：rm -rf 之前先 pwd + ls 看清对象；Linux 没有回收站，删了不能恢复。
-  >
-  > ⑨ 三个问题：
-  >    ① 打包 vs 压缩：打包是把一堆文件装进一个文件（后缀 .tar，本机实测 10240 字节）；
-  >       压缩是在打包基础上用 gzip 再压小（后缀 .tar.gz，同样内容只有 207 字节）。
-  >       命令上差一个 -z；解的时候 .tar 用 -xvf、.tar.gz 用 -zxvf。
-  >    ② find vs grep：find 按"文件的属性（尤其是文件名）"找文件，
-  >       会顺着目录递归找，如 find . -name "*.java"；
-  >       grep 按"文件里的关键字"搜内容，如 grep -in hello HelloWorld.java。
-  >    ③ vim 改错了不想保存：按 ESC 回命令模式，敲 :q! 回车（不保存退出）；
-  >       想保存就是 :wq。
-  > ```
-  > 检查点：① 建目录用 `-p`、看内容用 `cat -n`、搜内容用 `grep -in`，选项一个不漏；② vim 那一步写清了"`i` → 打字 → `ESC` → `:wq`"的完整按键顺序；③ 打包用 `-zcvf`、解压到指定目录用 `-C`；④ `find` 用法是 `-name "*.java"`（不是 grep）；⑤ 清理用的是 `rm -rf` 且知道"先 `pwd` + `ls` 确认对象"；⑥ 三个收尾问题答得上（尤其 `:q!` 与 `:wq` 的区别）。
+  **一级 · 思路**：这是一条"**造 → 看 → 搜 → 包 → 解 → 找 → 清**"的完整流水线，每一步只用一条命令；第 2 步是唯一一个"交互式"的（要在 vim 里按键），第 5、6 步都是 `tar` 的变体，第 7 步不要和"按内容搜"搞混
+  **二级 · 方法**：① `mkdir -p itcast/test`；② `vim itcast/HelloWorld.java` → 按 **`i`** 打字 → 按 **`ESC`** → 敲 **`:wq`** 回车；③ `cat -n itcast/HelloWorld.java`；④ `grep -in hello itcast/HelloWorld.java`；⑤ `tar -zcvf itcast.tar.gz itcast`；⑥ `tar -zxvf itcast.tar.gz -C unpack`；⑦ `find . -name "*.java"`；⑧ `rm -rf itcast itcast.tar.gz itcast.tar`。收尾：打包 = 装进一个文件、压缩 = 再压小（`.tar` 10240 字节 vs `.tar.gz` 207 字节）；`find` 按文件名、`grep` 按内容；改错了用 **`ESC` 后 `:q!`**（不保存退出）
+  **三级 · 骨架**：① `____ -p itcast/test` ② `vim ____` → `i` → 打字 → `____` → `:____` ③ `cat ____ ...` ④ `grep ____ hello ...` ⑤ `tar -zcvf ____ itcast` ⑥ `tar -zxvf itcast.tar.gz ____ unpack` ⑦ `find . ____ "*.java"` ⑧ `rm ____ itcast ...`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```bash
+  ① 建两层目录：
+     mkdir -p itcast/test
+     确认：ls -al itcast   → 能看到 test 目录
+     （本机实测：mkdir -p itcast/test 后，ls -al itcast 里有 test）
+  
+  ② 用 vim 建文件并写两行：
+     vim itcast/HelloWorld.java
+     按键顺序：进入后是【命令模式】→ 按 i 进【插入模式】→ 输入两行：
+         hey there
+         hello java
+       → 按 ESC 回【命令模式】→ 敲 :wq 回车（保存并退出）
+     确认：cat itcast/HelloWorld.java → 两行内容都在
+  
+  ③ 带行号看内容：
+     cat -n itcast/HelloWorld.java
+          1	hey there
+          2	hello java
+     （-n 由 1 开始给每一行编号）
+  
+  ④ 忽略大小写 + 带行号搜：
+     grep -in hello itcast/HelloWorld.java
+     本机实测同样的写法（文件在工作目录下时）：grep -in HELLO HelloWorld.java
+        2:hello java
+     （-i 忽略大小写、-n 显示行号；想带上下文再加 -A5 / -B5）
+  
+  ⑤ 打包并压缩：
+     tar -zcvf itcast.tar.gz itcast
+     本机实测输出（过程看得见）：
+         itcast/
+         itcast/hello.txt
+         itcast/test/
+         itcast/hello2.txt
+     确认：ls -lh itcast.tar.gz → 207 字节（本机实测）
+  
+  ⑥ 解压到指定目录：
+     tar -zxvf itcast.tar.gz -C unpack
+     确认：ls unpack/itcast → 能看到包里的内容
+     （本机实测：unpack/itcast 下是 hello.txt、hello2.txt、test）
+  
+  ⑦ 按文件名递归查找：
+     find . -name "*.java"
+     确认：输出里应该有 ./itcast/HelloWorld.java
+     （本机实测同款写法：find . -name '*.log' → ./1.log）
+  
+  ⑧ 清理（不用一条条确认）：
+     rm -rf itcast itcast.tar.gz unpack itcast.tar
+     确认：ls → 这些名字都不在了
+     注意：rm -rf 之前先 pwd + ls 看清对象；Linux 没有回收站，删了不能恢复。
+  
+  ⑨ 三个问题：
+     ① 打包 vs 压缩：打包是把一堆文件装进一个文件（后缀 .tar，本机实测 10240 字节）；
+        压缩是在打包基础上用 gzip 再压小（后缀 .tar.gz，同样内容只有 207 字节）。
+        命令上差一个 -z；解的时候 .tar 用 -xvf、.tar.gz 用 -zxvf。
+     ② find vs grep：find 按"文件的属性（尤其是文件名）"找文件，
+        会顺着目录递归找，如 find . -name "*.java"；
+        grep 按"文件里的关键字"搜内容，如 grep -in hello HelloWorld.java。
+     ③ vim 改错了不想保存：按 ESC 回命令模式，敲 :q! 回车（不保存退出）；
+        想保存就是 :wq。
+  ```
+  检查点：① 建目录用 `-p`、看内容用 `cat -n`、搜内容用 `grep -in`，选项一个不漏；② vim 那一步写清了"`i` → 打字 → `ESC` → `:wq`"的完整按键顺序；③ 打包用 `-zcvf`、解压到指定目录用 `-C`；④ `find` 用法是 `-name "*.java"`（不是 grep）；⑤ 清理用的是 `rm -rf` 且知道"先 `pwd` + `ls` 确认对象"；⑥ 三个收尾问题答得上（尤其 `:q!` 与 `:wq` 的区别）。
+
+  :::
+

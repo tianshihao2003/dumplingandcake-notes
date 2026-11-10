@@ -64,7 +64,7 @@ data() {
 }
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **为什么要给一个空数组，而不是不给？**
 > - `v-for="(e, index) in empList"` 要求 `empList` **必须存在**：写成 `[]` 时，`v-for` 遍历 0 次——**页面正常显示、只是没有数据行**；
 > - 如果 `data` 里压根没有 `empList`（或者写了 `null`），`v-for` 找不到要遍历的东西，Vue 会**报错**。
@@ -109,12 +109,12 @@ let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${th
 this.empList = result.data.data;
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 这一行 `this.empList = ...` 就是整个案例的**枢纽**：
 > - **改数据**（`this.empList`）→ **页面自己重新渲染**（`v-for` 按新数组重新出行）——不需要 `render()`、不需要重新绑事件；
 > - 对比 [18 篇](/posts/编程学习/javaweb学习笔记/18-实战-js版员工列表/)：那边取到数据以后还要 `render(); stripe(); bindDelete();` 一串手动调用，这边**只有一句赋值**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > `await` 千万别忘：写成 `let result = axios.get(...)`（少了 `await`）时，`result` 是"还没完成的任务对象"，`result.data` 是 `undefined`，接着写 `result.data.data` 就会报 **`Cannot read properties of undefined (reading 'data')`**——报这个错先回去看 `await` 和 `.data` 的层数。
 
 ## 第 3 步：渲染
@@ -146,7 +146,7 @@ this.empList = result.data.data;
 </tbody>
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **渲染代码一个字都不用改，是这一章最值得拍一下大腿的地方**：模板只认 `empList` 这个数组，至于它是"手写的"还是"从接口取回来的"，`v-for` 根本不关心。
 > 回想 [18 篇](/posts/编程学习/javaweb学习笔记/18-实战-js版员工列表/)手写渲染那版：数据一变就要重跑渲染函数、重新上色、重新绑事件；到了 Vue 这里，"换数据源"只是**第 2 步那一行赋值**的事。
 
@@ -233,7 +233,7 @@ mounted() {
 | Vue 生命周期共分为几个阶段？ | **共分为八个阶段** |
 | Vue 生命周期典型的应用场景？ | **在页面加载完毕时，发起异步请求，加载数据，渲染页面** |
 
-> [!TIP]
+> [!TIP] 提示
 > "八个阶段"不用全部背下来现在就用——**先牢牢记住 `mounted`："页面加载完毕"时自动执行的钩子**，前面这一堆"页面打开就自动查一次""打开详情页先加载数据"的场景，全是它。
 > 其余几个等用到时候自然会遇到（比如组件销毁时清理定时器用 `unmounted`，那是后面项目里的事）。
 
@@ -280,7 +280,7 @@ mounted() {
 </script>
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > **两个脚本的写法**：课程把 `<script src="js/axios.js">`（引入 Axios 的**普通脚本**）写在 `<script type="module">` **前面**——"依赖先引、代码后用"，照着写最稳。
 > 顺便说清背后的机制：`type="module"` 的脚本**默认延迟执行**（等页面解析完才跑），而普通脚本在**页面解析到它时就执行**——所以就算把两个 `<script>` 的顺序调过来，模块脚本也总能等到 Axios 就绪，功能不受影响。（真正会出问题的是给类库脚本加 `async`：它什么时候执行完不做保证。）
 > 另外注意这个页面的挂载点是 **`#container`**（整个页面容器），不是 `#app`。
@@ -297,7 +297,7 @@ mounted() {
 | 页面能打开、**Vue 也没生效**（花括号原样显示） | Vue 模块没加载出来（本地文件用了双击打开 / 断网导致 CDN 失败） | 用 Live Server 打开，或换在线 CDN 地址 |
 | 页面正常、表格空、**控制台没有任何红字** | 请求成功但结果是空数组——筛选条件把数据筛没了（比如 `name` 填了个不存在的名字） | 换个条件（或清空）再试；先 `console.log(result.data)` 看返回了什么 |
 
-> [!TIP]
+> [!TIP] 提示
 > 想让页面在接口失败时**不那么难看**，给 `search()` 套上 `try / catch`（[21 篇](/posts/编程学习/javaweb学习笔记/21-axios异步请求/)给过写法）：
 >
 > ```javascript
@@ -333,7 +333,7 @@ mounted() {
 
 只要契约不变：**后端换成 Java 写的、Python 写的、甚至数据换成从数据库里查，前端一行代码都不用改**；反过来，前端这次是 Vue、下次换个框架，后端也不用动。这就是"前后端分离"的意义——对比 [12 篇](/posts/编程学习/javaweb学习笔记/12-实战-tlias员工管理页面/)那种"数据写死在 HTML 里"的做法，那种叫"前后端不分离"（页面由后端渲染好整页发过来）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 回头看 [18 篇](/posts/编程学习/javaweb学习笔记/18-实战-js版员工列表/)结尾那句"数据是唯一真身，页面是它的渲染结果"——到了这一篇，**数据的来源从"写在代码里"变成了"从服务器来"**，但"改数据 → 页面变"这条主线没变。
 > 后面学 SpringBoot 时，你会**自己写那个接口**（Java 后端返回 JSON），前端这个页面就能连自己写的后端了——那时候两边就通了。
 
@@ -387,52 +387,60 @@ mounted() {
   4. 顺手把"姓名"列显示成数据里的 `name`（字段名和"图书"不一样，按接口来）
   （练习文件 `test_22_自动加载列表.html` 里已经准备好了表头、空数组和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三件事——数据先摆个空的、写一个"取数"的方法、在"页面加载完"的那一刻调它
-  > **二级 · 方法**：`data` 里 `books: []`；方法前加 `async`、请求前加 `await`；返回的数组在 **`result.data.data`**；"页面加载完"用**生命周期钩子 `mounted()`**（写在 `methods` 同级，和 `data` 并列）
-  > **三级 · 骨架**：`let result = ____ axios.get('https://web-server.itheima.net/emps/list'); this.____ = result.data.____;` / `mounted() { this.____(); }` / 表格里 `<tr v-____="(b, index) in books" :key="b.id">` + `<td>&#123;&#123;b.____}}</td>`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <div id="app">
-  >   <table>
-  >     <thead>
-  >       <tr><th>序号</th><th>书名</th><th>作者</th></tr>
-  >     </thead>
-  >     <tbody>
-  >       <tr v-for="(b, index) in books" :key="b.id">
-  >         <td>&#123;&#123;index + 1}}</td>
-  >         <td>&#123;&#123;b.name}}</td>
-  >         <td>&#123;&#123;b.entrydate}}</td>
-  >       </tr>
-  >     </tbody>
-  >   </table>
-  > </div>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script type="module">
-  >   import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-  >
-  >   createApp({
-  >     data() {
-  >       return {
-  >         books: []   // 先给空数组，等接口数据回来再填
-  >       }
-  >     },
-  >     methods: {
-  >       async load() {
-  >         let result = await axios.get('https://web-server.itheima.net/emps/list');
-  >         this.books = result.data.data;   // 改数据 → v-for 自动重新渲染
-  >       }
-  >     },
-  >     // 生命周期钩子：挂载完成（页面已经渲染出来），在这里自动发请求
-  >     mounted() {
-  >       this.load();
-  >     }
-  >   }).mount('#app');
-  > </script>
-  > ```
-  > 检查点：① 打开页面**不点任何按钮**，表格里就有数据（说明 `mounted` 生效了）；② 把 `mounted()` 整个删掉刷新，表格变空——这就是"没写钩子"的对照；③ 控制台里 `console.log(result.data)` 能看到 `{code, msg, data}` 这层结构。
+  **一级 · 思路**：三件事——数据先摆个空的、写一个"取数"的方法、在"页面加载完"的那一刻调它
+  **二级 · 方法**：`data` 里 `books: []`；方法前加 `async`、请求前加 `await`；返回的数组在 **`result.data.data`**；"页面加载完"用**生命周期钩子 `mounted()`**（写在 `methods` 同级，和 `data` 并列）
+  **三级 · 骨架**：`let result = ____ axios.get('https://web-server.itheima.net/emps/list'); this.____ = result.data.____;` / `mounted() { this.____(); }` / 表格里 `<tr v-____="(b, index) in books" :key="b.id">` + `<td>&#123;&#123;b.____}}</td>`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <div id="app">
+    <table>
+      <thead>
+        <tr><th>序号</th><th>书名</th><th>作者</th></tr>
+      </thead>
+      <tbody>
+        <tr v-for="(b, index) in books" :key="b.id">
+          <td>&#123;&#123;index + 1}}</td>
+          <td>&#123;&#123;b.name}}</td>
+          <td>&#123;&#123;b.entrydate}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+  
+    createApp({
+      data() {
+        return {
+          books: []   // 先给空数组，等接口数据回来再填
+        }
+      },
+      methods: {
+        async load() {
+          let result = await axios.get('https://web-server.itheima.net/emps/list');
+          this.books = result.data.data;   // 改数据 → v-for 自动重新渲染
+        }
+      },
+      // 生命周期钩子：挂载完成（页面已经渲染出来），在这里自动发请求
+      mounted() {
+        this.load();
+      }
+    }).mount('#app');
+  </script>
+  ```
+  检查点：① 打开页面**不点任何按钮**，表格里就有数据（说明 `mounted` 生效了）；② 把 `mounted()` 整个删掉刷新，表格变空——这就是"没写钩子"的对照；③ 控制台里 `console.log(result.data)` 能看到 `{code, msg, data}` 这层结构。
+
+  :::
+
 
 - [ ] **2-2 带条件的查询 + 清空后重新查**
   页面上有一个输入框（姓名）、一个"查询"按钮、一个"清空"按钮，和一张员工表格。要求：
@@ -443,69 +451,77 @@ mounted() {
   5. 请求过程中在页面上显示"加载中…"，失败时显示"加载失败"
   （练习文件 `test_22_带条件查询.html` 里已经准备好了表单、表格、提示区和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：查询方法一共三段——"改提示为加载中"→"发请求并渲染"→"出错就改提示"；清空 = 把条件还原 + 调一次查询方法
-  > **二级 · 方法**：`v-model="form.name"`；`` `...?name=${this.form.name}` ``；`this.list = result.data.data`；条数用 `list.length`；错误用 `try / catch`；清空方法末尾调 `this.search()`
-  > **三级 · 骨架**：`async search() { this.tip = '加载中…'; try { let result = await axios.____(\`https://web-server.itheima.net/emps/list?name=\${this.____.name}\`); this.list = result.data.____; this.tip = this.list.____ == 0 ? '没有匹配的员工' : \`共 \${this.list.length} 人\`; } catch (err) { this.tip = '____'; } }` / `clear() { this.form.name = '____'; this.search(); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <div id="app">
-  >   <input type="text" v-model="form.name" placeholder="请输入姓名">
-  >   <button type="button" @click="search">查询</button>
-  >   <button type="button" @click="clear">清空</button>
-  >
-  >   <p>&#123;&#123;tip}}</p>
-  >   <table>
-  >     <thead>
-  >       <tr><th>姓名</th><th>职位</th><th>入职日期</th></tr>
-  >     </thead>
-  >     <tbody>
-  >       <tr v-for="e in list" :key="e.id">
-  >         <td>&#123;&#123;e.name}}</td>
-  >         <td>&#123;&#123;e.job}}</td>
-  >         <td>&#123;&#123;e.entrydate}}</td>
-  >       </tr>
-  >     </tbody>
-  >   </table>
-  > </div>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script type="module">
-  >   import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-  >
-  >   createApp({
-  >     data() {
-  >       return {
-  >         form: { name: '' },   // 采集输入（v-model 双向绑定）
-  >         list: [],             // 员工列表（先空着）
-  >         tip: ''               // 提示文字
-  >       }
-  >     },
-  >     methods: {
-  >       async search() {
-  >         this.tip = '加载中…';
-  >         try {
-  >           let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.form.name}`);
-  >           this.list = result.data.data;
-  >           this.tip = this.list.length == 0 ? '没有匹配的员工' : `共 ${this.list.length} 人`;
-  >         } catch (err) {
-  >           console.log(err);
-  >           this.tip = '加载失败';
-  >         }
-  >       },
-  >       clear() {
-  >         this.form.name = '';   // 清空输入框里的条件（v-model 会同步到页面）
-  >         this.search();         // 清空后重新查一次，恢复全部数据
-  >       }
-  >     },
-  >     mounted() {
-  >       this.search();   // 页面加载完先查一次
-  >     }
-  >   }).mount('#app');
-  > </script>
-  > ```
-  > 检查点：① 打开页面自动加载，提示"共 4 人"（条数以实际为准）；② 输入"谢"再查询，提示"共 1 人"、表格只剩匹配那行；③ 输入 `zzz` 查询，提示"没有匹配的员工"、表格清空；④ 点"清空"，输入框变空**并且表格恢复成全量数据**；⑤ 把地址改错，提示"加载失败"。
+  **一级 · 思路**：查询方法一共三段——"改提示为加载中"→"发请求并渲染"→"出错就改提示"；清空 = 把条件还原 + 调一次查询方法
+  **二级 · 方法**：`v-model="form.name"`；`` `...?name=${this.form.name}` ``；`this.list = result.data.data`；条数用 `list.length`；错误用 `try / catch`；清空方法末尾调 `this.search()`
+  **三级 · 骨架**：`async search() { this.tip = '加载中…'; try { let result = await axios.____(\`https://web-server.itheima.net/emps/list?name=\${this.____.name}\`); this.list = result.data.____; this.tip = this.list.____ == 0 ? '没有匹配的员工' : \`共 \${this.list.length} 人\`; } catch (err) { this.tip = '____'; } }` / `clear() { this.form.name = '____'; this.search(); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <div id="app">
+    <input type="text" v-model="form.name" placeholder="请输入姓名">
+    <button type="button" @click="search">查询</button>
+    <button type="button" @click="clear">清空</button>
+  
+    <p>&#123;&#123;tip}}</p>
+    <table>
+      <thead>
+        <tr><th>姓名</th><th>职位</th><th>入职日期</th></tr>
+      </thead>
+      <tbody>
+        <tr v-for="e in list" :key="e.id">
+          <td>&#123;&#123;e.name}}</td>
+          <td>&#123;&#123;e.job}}</td>
+          <td>&#123;&#123;e.entrydate}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+  
+    createApp({
+      data() {
+        return {
+          form: { name: '' },   // 采集输入（v-model 双向绑定）
+          list: [],             // 员工列表（先空着）
+          tip: ''               // 提示文字
+        }
+      },
+      methods: {
+        async search() {
+          this.tip = '加载中…';
+          try {
+            let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.form.name}`);
+            this.list = result.data.data;
+            this.tip = this.list.length == 0 ? '没有匹配的员工' : `共 ${this.list.length} 人`;
+          } catch (err) {
+            console.log(err);
+            this.tip = '加载失败';
+          }
+        },
+        clear() {
+          this.form.name = '';   // 清空输入框里的条件（v-model 会同步到页面）
+          this.search();         // 清空后重新查一次，恢复全部数据
+        }
+      },
+      mounted() {
+        this.search();   // 页面加载完先查一次
+      }
+    }).mount('#app');
+  </script>
+  ```
+  检查点：① 打开页面自动加载，提示"共 4 人"（条数以实际为准）；② 输入"谢"再查询，提示"共 1 人"、表格只剩匹配那行；③ 输入 `zzz` 查询，提示"没有匹配的员工"、表格清空；④ 点"清空"，输入框变空**并且表格恢复成全量数据**；⑤ 把地址改错，提示"加载失败"。
+
+  :::
+
 
 - [ ] **2-3 用钩子做一次"页面打开就显示"的信息**
   页面上有一行"系统信息"，打开页面时既要显示时间、也要显示一条从接口取来的数据。要求：
@@ -515,44 +531,52 @@ mounted() {
   4. 在控制台把两个钩子的执行顺序打印出来（各一行日志），观察谁先谁后
   （练习文件 `test_22_生命周期钩子.html` 里已经准备好了页面和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：钩子就是"写在选项对象里的、到点自动执行的方法"——名字固定，位置和 `data` / `methods` 平级
-  > **二级 · 方法**："创建后"是 `created()`，"挂载完成"是 `mounted()`；钩子里用 `this` 读写数据；请求用 `await axios.get(...)`，条数是 `result.data.data.length`
-  > **三级 · 骨架**：`created() { console.log('____'); this.time = new Date().toLocaleString(); }` / `async mounted() { console.log('____'); let result = ____ axios.get('https://web-server.itheima.net/emps/list'); this.count = result.data.____.length; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <div id="app">
-  >   <p>系统时间：&#123;&#123;time}}</p>
-  >   <p>接口返回 &#123;&#123;count}} 条数据</p>
-  > </div>
-  >
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script type="module">
-  >   import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-  >
-  >   createApp({
-  >     data() {
-  >       return {
-  >         time: '',
-  >         count: 0
-  >       }
-  >     },
-  >     // 创建后：数据已经可用，页面还没渲染
-  >     created() {
-  >       console.log('① created：创建后');
-  >       this.time = new Date().toLocaleString();
-  >     },
-  >     // 挂载完成：页面元素已经在页面上了，适合发请求
-  >     async mounted() {
-  >       console.log('② mounted：挂载完成');
-  >       let result = await axios.get('https://web-server.itheima.net/emps/list');
-  >       this.count = result.data.data.length;
-  >     }
-  >   }).mount('#app');
-  > </script>
-  > ```
-  > 检查点：① 页面显示当前时间与"接口返回 4 条数据"；② 控制台顺序是 `① created` → `② mounted`（创建在前、挂载在后）；③ 把 `mounted` 里的请求换成 `created` 也能跑——但**习惯上"要操作页面/发请求取数据"都放 `mounted`**（PPT 说的典型应用场景），因为那时页面元素已经就绪。
+  **一级 · 思路**：钩子就是"写在选项对象里的、到点自动执行的方法"——名字固定，位置和 `data` / `methods` 平级
+  **二级 · 方法**："创建后"是 `created()`，"挂载完成"是 `mounted()`；钩子里用 `this` 读写数据；请求用 `await axios.get(...)`，条数是 `result.data.data.length`
+  **三级 · 骨架**：`created() { console.log('____'); this.time = new Date().toLocaleString(); }` / `async mounted() { console.log('____'); let result = ____ axios.get('https://web-server.itheima.net/emps/list'); this.count = result.data.____.length; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <div id="app">
+    <p>系统时间：&#123;&#123;time}}</p>
+    <p>接口返回 &#123;&#123;count}} 条数据</p>
+  </div>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+  
+    createApp({
+      data() {
+        return {
+          time: '',
+          count: 0
+        }
+      },
+      // 创建后：数据已经可用，页面还没渲染
+      created() {
+        console.log('① created：创建后');
+        this.time = new Date().toLocaleString();
+      },
+      // 挂载完成：页面元素已经在页面上了，适合发请求
+      async mounted() {
+        console.log('② mounted：挂载完成');
+        let result = await axios.get('https://web-server.itheima.net/emps/list');
+        this.count = result.data.data.length;
+      }
+    }).mount('#app');
+  </script>
+  ```
+  检查点：① 页面显示当前时间与"接口返回 4 条数据"；② 控制台顺序是 `① created` → `② mounted`（创建在前、挂载在后）；③ 把 `mounted` 里的请求换成 `created` 也能跑——但**习惯上"要操作页面/发请求取数据"都放 `mounted`**（PPT 说的典型应用场景），因为那时页面元素已经就绪。
+
+  :::
+
 
 ### 三、综合题
 
@@ -567,120 +591,128 @@ mounted() {
   7. **验证筛选**：分别试一次"姓名填一个存在的字"和"姓名填乱码"，确认表格数据真的跟着条件变了
   （练习文件 `test_22_综合_Vue员工列表.html` 里已经准备好了整个页面结构（含样式）、Axios 引入和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把第 1、2 步写完（数据 + 取数方法），页面自然有数据了再补第 3 步的渲染；表单和按钮是最后一步——每一步都能单独验证
-  > **二级 · 方法**：`async search() { try { let result = await axios.get(地址); this.empList = result.data.data; } catch (err) {...} }`；地址用模板字符串拼 `` `https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}` ``；渲染指令照 20 篇；`clear()` 末尾调 `this.search()`；钩子用 `mounted()`
-  > **三级 · 骨架**：`data() { return { searchForm: { name: '____', gender: '', job: '' }, empList: ____ } }` / `async search() { let result = await axios.get(\`……?name=\${this.searchForm.____}&gender=\${this.searchForm.gender}&job=\${this.searchForm.job}\`); this.empList = result.data.____; }` / `clear() { this.searchForm = { name: '', gender: '', job: '' }; this.____(); }` / `mounted() { this.____(); }`
-  >
-  > **排错顺序**（卡住时按这个查）：
-  > 1. 控制台有没有红字？（`Network Error` = 接口连不上；404 = 地址错；CORS = 跨域）
-  > 2. F12 的 Network 面板里那条 `emps/list` 请求回来了吗？返回的 JSON 长什么样？
-  > 3. `this.empList = result.data.data` 有没有写成 `result.data`？
-  > 4. 表格是不是有 `v-for` 但数组名写错（比如写成 `empList` 之外的名字）？
-  > 5. 挂载点 `#container` 和页面上容器的 `id` 对得上吗？
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 模板里的关键部分（其余结构和 20 篇的综合题一样）：
-  >
-  > ```html
-  > <div id="container">
-  >   <!-- 搜索表单区域 -->
-  >   <form class="search-form">
-  >     <label for="name">姓名：</label>
-  >     <input type="text" id="name" name="name" v-model="searchForm.name" placeholder="请输入姓名">
-  >
-  >     <label for="gender">性别：</label>
-  >     <select id="gender" name="gender" v-model="searchForm.gender">
-  >       <option value=""></option>
-  >       <option value="1">男</option>
-  >       <option value="2">女</option>
-  >     </select>
-  >
-  >     <label for="position">职位：</label>
-  >     <select id="position" name="position" v-model="searchForm.job">
-  >       <option value=""></option>
-  >       <option value="1">班主任</option>
-  >       <option value="2">讲师</option>
-  >       <option value="3">学工主管</option>
-  >       <option value="4">教研主管</option>
-  >       <option value="5">咨询师</option>
-  >     </select>
-  >
-  >     <button type="button" v-on:click="search">查询</button>
-  >     <button type="button" @click="clear">清空</button>
-  >   </form>
-  >
-  >   <!-- 表格展示区 -->
-  >   <table>
-  >     <thead>
-  >       <tr>
-  >         <th>序号</th><th>姓名</th><th>性别</th><th>头像</th>
-  >         <th>职位</th><th>入职日期</th><th>最后操作时间</th><th>操作</th>
-  >       </tr>
-  >     </thead>
-  >     <tbody>
-  >       <tr v-for="(e, index) in empList" :key="e.id">
-  >         <td>&#123;&#123;index + 1}}</td>
-  >         <td>&#123;&#123;e.name}}</td>
-  >         <td>&#123;&#123;e.gender == 1?'男' : '女'}}</td>
-  >         <td><img class="avatar" v-bind:src="e.image" :alt="e.name"></td>
-  >         <td>
-  >           <span v-if="e.job == 1">班主任</span>
-  >           <span v-else-if="e.job == 2">讲师</span>
-  >           <span v-else-if="e.job == 3">学工主管</span>
-  >           <span v-else-if="e.job == 4">教研主管</span>
-  >           <span v-else-if="e.job == 5">咨询师</span>
-  >           <span v-else>其他</span>
-  >         </td>
-  >         <td>&#123;&#123;e.entrydate}}</td>
-  >         <td>&#123;&#123;e.updatetime}}</td>
-  >         <td class="action-buttons">
-  >           <button type="button">编辑</button>
-  >           <button type="button">删除</button>
-  >         </td>
-  >       </tr>
-  >     </tbody>
-  >   </table>
-  > </div>
-  > ```
-  >
-  > 脚本部分：
-  >
-  > ```html
-  > <!-- Axios 是普通脚本（课程写法：放在模块脚本之前） -->
-  > <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  > <script type="module">
-  >   import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-  >
-  >   createApp({
-  >     data() {
-  >       return {
-  >         searchForm: { name: '', gender: '', job: '' },   // 查询条件
-  >         empList: []                                      // 员工列表：先空着，等接口数据
-  >       }
-  >     },
-  >     methods: {
-  >       async search() {
-  >         try {
-  >           // ① 把条件拼到地址后面 ② await 等结果 ③ 取两层 data
-  >           let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`);
-  >           this.empList = result.data.data;   // 改数据 → 页面自动重新渲染
-  >         } catch (err) {
-  >           console.log(err);
-  >           alert('数据加载失败，请稍后重试');
-  >         }
-  >       },
-  >       clear() {
-  >         this.searchForm = { name: '', gender: '', job: '' };  // 清空条件
-  >         this.search();                                        // 清完重新查一次
-  >       }
-  >     },
-  >     // 生命周期钩子：页面加载完毕 → 自动查一次
-  >     mounted() {
-  >       this.search();
-  >     }
-  >   }).mount('#container')
-  > </script>
-  > ```
-  > 检查点：① **打开页面不用点按钮，表格里就是接口返回的数据**（`mounted` 生效）；② 序号从 1 开始、性别"男/女"、职位是中文、头像正常显示；③ 姓名填"谢"点查询，表格只剩匹配的数据；④ 点"清空"，输入框变空且表格恢复全部数据；⑤ 把接口地址改错再刷新，弹出失败提示（`try / catch` 生效）而不是静默白屏；⑥ 对照课程 `16. Vue-案例-员工列表(异步交互).html` 逐段核对（课程代码里没有 `try / catch`，其余一致）。
-  > 说明：课程页面的头像是阿里云图床链接（**现已失效返回 403**），显示成破图不代表写错；想看得舒服就把 `data` 里 `image` 的值换成本地图片地址。
+  **一级 · 思路**：先把第 1、2 步写完（数据 + 取数方法），页面自然有数据了再补第 3 步的渲染；表单和按钮是最后一步——每一步都能单独验证
+  **二级 · 方法**：`async search() { try { let result = await axios.get(地址); this.empList = result.data.data; } catch (err) {...} }`；地址用模板字符串拼 `` `https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}` ``；渲染指令照 20 篇；`clear()` 末尾调 `this.search()`；钩子用 `mounted()`
+  **三级 · 骨架**：`data() { return { searchForm: { name: '____', gender: '', job: '' }, empList: ____ } }` / `async search() { let result = await axios.get(\`……?name=\${this.searchForm.____}&gender=\${this.searchForm.gender}&job=\${this.searchForm.job}\`); this.empList = result.data.____; }` / `clear() { this.searchForm = { name: '', gender: '', job: '' }; this.____(); }` / `mounted() { this.____(); }`
+  
+  **排错顺序**（卡住时按这个查）：
+  1. 控制台有没有红字？（`Network Error` = 接口连不上；404 = 地址错；CORS = 跨域）
+  2. F12 的 Network 面板里那条 `emps/list` 请求回来了吗？返回的 JSON 长什么样？
+  3. `this.empList = result.data.data` 有没有写成 `result.data`？
+  4. 表格是不是有 `v-for` 但数组名写错（比如写成 `empList` 之外的名字）？
+  5. 挂载点 `#container` 和页面上容器的 `id` 对得上吗？
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  模板里的关键部分（其余结构和 20 篇的综合题一样）：
+  
+  ```html
+  <div id="container">
+    <!-- 搜索表单区域 -->
+    <form class="search-form">
+      <label for="name">姓名：</label>
+      <input type="text" id="name" name="name" v-model="searchForm.name" placeholder="请输入姓名">
+  
+      <label for="gender">性别：</label>
+      <select id="gender" name="gender" v-model="searchForm.gender">
+        <option value=""></option>
+        <option value="1">男</option>
+        <option value="2">女</option>
+      </select>
+  
+      <label for="position">职位：</label>
+      <select id="position" name="position" v-model="searchForm.job">
+        <option value=""></option>
+        <option value="1">班主任</option>
+        <option value="2">讲师</option>
+        <option value="3">学工主管</option>
+        <option value="4">教研主管</option>
+        <option value="5">咨询师</option>
+      </select>
+  
+      <button type="button" v-on:click="search">查询</button>
+      <button type="button" @click="clear">清空</button>
+    </form>
+  
+    <!-- 表格展示区 -->
+    <table>
+      <thead>
+        <tr>
+          <th>序号</th><th>姓名</th><th>性别</th><th>头像</th>
+          <th>职位</th><th>入职日期</th><th>最后操作时间</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(e, index) in empList" :key="e.id">
+          <td>&#123;&#123;index + 1}}</td>
+          <td>&#123;&#123;e.name}}</td>
+          <td>&#123;&#123;e.gender == 1?'男' : '女'}}</td>
+          <td><img class="avatar" v-bind:src="e.image" :alt="e.name"></td>
+          <td>
+            <span v-if="e.job == 1">班主任</span>
+            <span v-else-if="e.job == 2">讲师</span>
+            <span v-else-if="e.job == 3">学工主管</span>
+            <span v-else-if="e.job == 4">教研主管</span>
+            <span v-else-if="e.job == 5">咨询师</span>
+            <span v-else>其他</span>
+          </td>
+          <td>&#123;&#123;e.entrydate}}</td>
+          <td>&#123;&#123;e.updatetime}}</td>
+          <td class="action-buttons">
+            <button type="button">编辑</button>
+            <button type="button">删除</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  ```
+  
+  脚本部分：
+  
+  ```html
+  <!-- Axios 是普通脚本（课程写法：放在模块脚本之前） -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+  
+    createApp({
+      data() {
+        return {
+          searchForm: { name: '', gender: '', job: '' },   // 查询条件
+          empList: []                                      // 员工列表：先空着，等接口数据
+        }
+      },
+      methods: {
+        async search() {
+          try {
+            // ① 把条件拼到地址后面 ② await 等结果 ③ 取两层 data
+            let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`);
+            this.empList = result.data.data;   // 改数据 → 页面自动重新渲染
+          } catch (err) {
+            console.log(err);
+            alert('数据加载失败，请稍后重试');
+          }
+        },
+        clear() {
+          this.searchForm = { name: '', gender: '', job: '' };  // 清空条件
+          this.search();                                        // 清完重新查一次
+        }
+      },
+      // 生命周期钩子：页面加载完毕 → 自动查一次
+      mounted() {
+        this.search();
+      }
+    }).mount('#container')
+  </script>
+  ```
+  检查点：① **打开页面不用点按钮，表格里就是接口返回的数据**（`mounted` 生效）；② 序号从 1 开始、性别"男/女"、职位是中文、头像正常显示；③ 姓名填"谢"点查询，表格只剩匹配的数据；④ 点"清空"，输入框变空且表格恢复全部数据；⑤ 把接口地址改错再刷新，弹出失败提示（`try / catch` 生效）而不是静默白屏；⑥ 对照课程 `16. Vue-案例-员工列表(异步交互).html` 逐段核对（课程代码里没有 `try / catch`，其余一致）。
+  说明：课程页面的头像是阿里云图床链接（**现已失效返回 403**），显示成破图不代表写错；想看得舒服就把 `data` 里 `image` 的值换成本地图片地址。
+
+  :::
+

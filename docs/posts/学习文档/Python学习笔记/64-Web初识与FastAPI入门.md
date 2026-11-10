@@ -23,7 +23,7 @@ Web：全球广域网，也称为万维网（www，World Wide Web），能够通
 | 服务端程序 | 业务逻辑处理 | Python 里可用 **Django / Flask / FastAPI** |
 | 数据库 | 数据存储和管理 | MySQL 等（本章案例用 JSON 文件代替） |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 前端三件套的分工在第 4 章（爬虫）里已经见过：HTML 管结构、CSS 管样式、JS 管交互。这里要写的是**服务端**。
 
 ## FastAPI 是什么
@@ -81,7 +81,7 @@ uvicorn main:app --reload
 | `main:app` | 文件 `main.py` 里的 `app` 对象 |
 | `--reload` | 改代码后自动重启（开发时用） |
 
-> [!TIP]
+> [!TIP] 提示
 > 启动后浏览器打开 http://127.0.0.1:8000 就能看到接口返回的 JSON；FastAPI 还自带交互式接口文档，打开 **/docs** 就能直接在网页上试接口——**这也是它比 Django/Flask 更适合做 API 的地方**。
 
 ## 相关
@@ -107,72 +107,96 @@ uvicorn main:app --reload
 - [ ] **2-1 第一个接口**
   写一个 FastAPI 程序：`/` 返回 `{"message": "Hello World"}`，`/users` 返回 3 个用户的列表。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：创建实例 → 用装饰器把函数"挂"到路径上
-  > **二级 · 方法**：`app = FastAPI()` / `@app.get("/")`
-  > **三级 · 骨架**：函数返回字典或列表，FastAPI 会自动转成 JSON
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > from fastapi import FastAPI
-  >
-  > app = FastAPI(title="入门练习")
-  >
-  > USERS = [
-  >     {"id": 1, "name": "张三"},
-  >     {"id": 2, "name": "李四"},
-  >     {"id": 3, "name": "王五"},
-  > ]
-  >
-  > @app.get("/")
-  > def root():
-  >     return {"message": "Hello World"}
-  >
-  > @app.get("/users")
-  > def get_users():
-  >     return USERS
-  > ```
+  **一级 · 思路**：创建实例 → 用装饰器把函数"挂"到路径上
+  **二级 · 方法**：`app = FastAPI()` / `@app.get("/")`
+  **三级 · 骨架**：函数返回字典或列表，FastAPI 会自动转成 JSON
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  from fastapi import FastAPI
+  
+  app = FastAPI(title="入门练习")
+  
+  USERS = [
+      {"id": 1, "name": "张三"},
+      {"id": 2, "name": "李四"},
+      {"id": 3, "name": "王五"},
+  ]
+  
+  @app.get("/")
+  def root():
+      return {"message": "Hello World"}
+  
+  @app.get("/users")
+  def get_users():
+      return USERS
+  ```
+
+  :::
+
 
 - [ ] **2-2 带路径参数的接口**
   再加一个 `/users/{user_id}` 接口：根据路径里的编号返回对应用户（编号不存在就返回提示）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：路径里的花括号就是"路径参数"，要写进函数形参
-  > **二级 · 方法**：`@app.get("/users/{user_id}")` + `def get_user(user_id: int):`
-  > **三级 · 骨架**：`user_id: int` 会让 FastAPI 自动把字符串转成整数
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > @app.get("/users/{user_id}")
-  > def get_user(user_id: int):
-  >     for user in USERS:
-  >         if user["id"] == user_id:
-  >             return user
-  >     return {"message": "用户不存在"}
-  > ```
+  **一级 · 思路**：路径里的花括号就是"路径参数"，要写进函数形参
+  **二级 · 方法**：`@app.get("/users/{user_id}")` + `def get_user(user_id: int):`
+  **三级 · 骨架**：`user_id: int` 会让 FastAPI 自动把字符串转成整数
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  @app.get("/users/{user_id}")
+  def get_user(user_id: int):
+      for user in USERS:
+          if user["id"] == user_id:
+              return user
+      return {"message": "用户不存在"}
+  ```
+
+  :::
+
 
 - [ ] **2-3 用测试客户端验证**
   不启动服务器，用 FastAPI 自带的测试客户端直接请求上面几个接口，打印状态码和返回内容。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：像写单元测试一样调接口，不用真的开服务器
-  > **二级 · 方法**：`from fastapi.testclient import TestClient` / `client = TestClient(app)`
-  > **三级 · 骨架**：`print(response.status_code, response.json())`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3：不启动服务器也能测
-  > from fastapi.testclient import TestClient
-  >
-  > if __name__ == "__main__":
-  >     client = TestClient(app)
-  >     for path in ["/", "/users", "/users/2", "/users/99"]:
-  >         resp = client.get(path)
-  >         print(path, resp.status_code, resp.json())
-  >
-  > # 真正启动服务时用：
-  > #   fastapi dev main.py   或   uvicorn main:app --reload
-  > ```
+  **一级 · 思路**：像写单元测试一样调接口，不用真的开服务器
+  **二级 · 方法**：`from fastapi.testclient import TestClient` / `client = TestClient(app)`
+  **三级 · 骨架**：`print(response.status_code, response.json())`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3：不启动服务器也能测
+  from fastapi.testclient import TestClient
+  
+  if __name__ == "__main__":
+      client = TestClient(app)
+      for path in ["/", "/users", "/users/2", "/users/99"]:
+          resp = client.get(path)
+          print(path, resp.status_code, resp.json())
+  
+  # 真正启动服务时用：
+  #   fastapi dev main.py   或   uvicorn main:app --reload
+  ```
+
+  :::
+
 

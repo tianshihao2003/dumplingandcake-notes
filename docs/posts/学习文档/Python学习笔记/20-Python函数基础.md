@@ -196,29 +196,37 @@ def circle_area_len(r):
 
   > **批改（2026-09-28）**：✅ 正确（实测 93→A、90→A、80→B、75→B、65→C、60→C、59→D，四个分支都对；只是改用 `input()` 交互，未像参考答案那样一次跑多组）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分数从高到低依次判断，命中一档就把对应字母交回去；最后一个分支兜住剩下的分数
-  > **二级 · 方法**：`def 函数名(参数):` 定义；用 `if score >= 90:` / `elif` / `else:` 分档；每档 `return "A"` 这样的字符串
-  > **三级 · 骨架**：`def get_grade(score):` / `    if score >= ____:` / `        return "A"` / `    elif ...: ` / `    else: return "____"`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > def get_grade(score):
-  >     if score >= 90:
-  >         return "A"
-  >     elif score >= 75:
-  >         return "B"
-  >     elif score >= 60:
-  >         return "C"
-  >     else:
-  >         return "D"
-  >
-  > print(get_grade(93))   # A
-  > print(get_grade(80))   # B
-  > print(get_grade(65))   # C
-  > print(get_grade(40))   # D
-  > ```
+  **一级 · 思路**：分数从高到低依次判断，命中一档就把对应字母交回去；最后一个分支兜住剩下的分数
+  **二级 · 方法**：`def 函数名(参数):` 定义；用 `if score >= 90:` / `elif` / `else:` 分档；每档 `return "A"` 这样的字符串
+  **三级 · 骨架**：`def get_grade(score):` / `    if score >= ____:` / `        return "A"` / `    elif ...: ` / `    else: return "____"`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  def get_grade(score):
+      if score >= 90:
+          return "A"
+      elif score >= 75:
+          return "B"
+      elif score >= 60:
+          return "C"
+      else:
+          return "D"
+  
+  print(get_grade(93))   # A
+  print(get_grade(80))   # B
+  print(get_grade(65))   # C
+  print(get_grade(40))   # D
+  ```
+
+  :::
+
 
 - [x] **2-2 回文串判断**
   定义一个函数 `is_palindrome(s)`，判断字符串是否是回文串（正读和反读相同），返回 bool 值。
@@ -226,42 +234,58 @@ def circle_area_len(r):
 
   > **批改（2026-09-28）**：⚠️ 函数本身正确，但只测了 `is_palindrome("level")` 一个回文用例（输出 True），没有反例；建议补 `print(is_palindrome("hello"))`（应为 False）和中文/数字用例。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：回文就是"原串"和"把它整个倒过来"完全一样，所以先得到倒序字符串，再和原串比一比
-  > **二级 · 方法**：字符串切片 `s[::-1]` 得到倒序；返回比较结果 `s == s[::-1]`（比较运算本身就是布尔值，不必再写 if）
-  > **三级 · 骨架**：`def is_palindrome(s):` / `    return s == s[____]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > def is_palindrome(s):
-  >     return s == s[::-1]
-  >
-  > print(is_palindrome("level"))          # True
-  > print(is_palindrome("hello"))          # False
-  > print(is_palindrome("黄山落叶松叶落山黄"))  # True
-  > print(is_palindrome("12321"))          # True
-  > print(is_palindrome("12345"))          # False
-  > ```
+  **一级 · 思路**：回文就是"原串"和"把它整个倒过来"完全一样，所以先得到倒序字符串，再和原串比一比
+  **二级 · 方法**：字符串切片 `s[::-1]` 得到倒序；返回比较结果 `s == s[::-1]`（比较运算本身就是布尔值，不必再写 if）
+  **三级 · 骨架**：`def is_palindrome(s):` / `    return s == s[____]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  def is_palindrome(s):
+      return s == s[::-1]
+  
+  print(is_palindrome("level"))          # True
+  print(is_palindrome("hello"))          # False
+  print(is_palindrome("黄山落叶松叶落山黄"))  # True
+  print(is_palindrome("12321"))          # True
+  print(is_palindrome("12345"))          # False
+  ```
+
+  :::
+
 
 - [x] **2-3 时间转换**
   定义一个函数 `time_convert(seconds)`，将传入的秒数转换为小时、分钟、秒，并返回格式化的字符串。
 
   > **批改（2026-09-28）**：⚠️ 换算逻辑和输出正确（772 → 0 小时 12 分钟 52 秒），但有两点差在题面：函数名拼成了 `time_conver`（要求 `time_convert`），且只测了小时为 0 的 772；建议改用 `time_convert(3772)` 验证小时位。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先除出整小时数（不够 1 小时的零头留下继续算）；剩下的秒按同样的办法拆出分钟和秒
-  > **二级 · 方法**：整除 `//` 取商、取余 `%` 拿余数——`hours = seconds // 3600`、`minutes = (seconds % 3600) // 60`、`seconds = (seconds % 3600) % 60`；最后用 f-string 拼成 `f"{hours} 小时 {minutes} 分钟 {seconds} 秒"`
-  > **三级 · 骨架**：`hours = seconds ____ 3600` / `minutes = (seconds % 3600) ____ 60` / `return f"{____} 小时 {minutes} 分钟 {seconds} 秒"`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > def time_convert(seconds):
-  >     hours = seconds // 3600
-  >     minutes = (seconds % 3600) // 60
-  >     seconds = (seconds % 3600) % 60
-  >     return f"{hours} 小时 {minutes} 分钟 {seconds} 秒"
-  >
-  > print(time_convert(3772))  # 1 小时 2 分钟 52 秒
-  > ```
+  **一级 · 思路**：先除出整小时数（不够 1 小时的零头留下继续算）；剩下的秒按同样的办法拆出分钟和秒
+  **二级 · 方法**：整除 `//` 取商、取余 `%` 拿余数——`hours = seconds // 3600`、`minutes = (seconds % 3600) // 60`、`seconds = (seconds % 3600) % 60`；最后用 f-string 拼成 `f"{hours} 小时 {minutes} 分钟 {seconds} 秒"`
+  **三级 · 骨架**：`hours = seconds ____ 3600` / `minutes = (seconds % 3600) ____ 60` / `return f"{____} 小时 {minutes} 分钟 {seconds} 秒"`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  def time_convert(seconds):
+      hours = seconds // 3600
+      minutes = (seconds % 3600) // 60
+      seconds = (seconds % 3600) % 60
+      return f"{hours} 小时 {minutes} 分钟 {seconds} 秒"
+  
+  print(time_convert(3772))  # 1 小时 2 分钟 52 秒
+  ```
+
+  :::
+

@@ -16,7 +16,7 @@ cover: false
 
 这一篇（PPT 第 9～13 页）干两件事：**① 怎么把查询结果取出来（ResultSet）**；**② 为什么参数不能拼进 SQL 字符串（预编译 SQL）**。第二件事是这一节的重头戏——它决定你的程序安不安全。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 第 13 页是这一节的收尾问答页；再往后（第 15 页起）讲的就是 **MyBatis** 那一块了。也就是说，本篇是"直接玩 JDBC"的最后一块内容，后面 MyBatis 会把这些手工活全替你包掉——但**它包掉的东西正是这一篇讲的这些**。
 
 ## 查询数据：需求（PPT 第 9 页）
@@ -106,7 +106,7 @@ while (resultSet.next()) {
 2. **`getXxx()` 的类型要和列的取值类型对得上**：整数列（`id`、`age`）用 `getInt`，字符串列（`username`、`password`、`name`）用 `getString`。列名写错会直接报错（不是返回空值）。
 3. **取值推荐用列名，不要用列号**：列号虽然能写（`getInt(1)` 就是第一列），但它**从 1 开始数**、而且一旦表的列顺序调整了，所有列号都要跟着改；列名则一眼能看出取的是谁。PPT 那句"（推荐）"就是这个意思。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（用户本机 MySQL 9.0.1，库 `web01`、表 `user`，工程为课程 `jdbc-demo`）——按上面的写法把 `daqiao` 查出来并封装，控制台输出：
 >
 > ```text
@@ -211,7 +211,7 @@ public class JdbcTest {
 - `finally` 里**后开先关**：`rs` → `stmt` → `conn`（结果集挂在语句上、语句挂在连接上，反过来关会出问题）；
 - **注意这段代码第 3 步用的是 `conn.prepareStatement(sql)`，SQL 里写的是 `?`**——不是[上一篇](/posts/编程学习/javaweb学习笔记/49-jdbc入门/)那个 `createStatement()` 拼字符串的写法。下面就是原因。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课件示例里的用户名密码（`root` / `"1234"`）是示例值，动手时把 `password` 换成**你自己 MySQL 的密码**。
 
 ## 预编译 SQL：两种写法的对照（PPT 第 11 页）
@@ -284,7 +284,7 @@ ResultSet rs = statement.executeQuery(sql);
 
 拼出来的 SQL 就变成了另一条语句——本机实测的对照结果如下。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**（用户本机 MySQL 9.0.1，库 `web01`、表 `user`，同一个登录查询分别用两种写法跑，输入都是 `' or '1'='1`）：
 >
 > **① `Statement` 拼接（有漏洞）**——打印出实际执行的 SQL：
@@ -331,7 +331,7 @@ where username = '' or '1'='1' and password = '' or '1'='1'
 
 用 `or` 连起来：**只要有一段为真，整条条件就为真**——第三段 `'1'='1'` 永远为真，所以**每一行都符合条件**，5 条全被查出来。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 登录被绕过只是最轻的后果：**同一条口子，换成别的输入就是别人数据的泄露或破坏**。所以"把参数拼进 SQL"不是"写法不优雅"的问题，而是**安全问题**——这也是 PPT 把它排在预编译优势第一条的原因。
 
 ### 预编译为什么能防住
@@ -352,7 +352,7 @@ ResultSet rs = pstmt.executeQuery();
 
 > **静态 SQL 里，参数是"SQL 的一部分"；预编译 SQL 里，参数是"值"。**
 
-> [!TIP]
+> [!TIP] 提示
 > 课程资料里还有两个打包好的演示程序（`资料/02. SQL注入演示/sql_Injection_demo-0.0.1-SNAPSHOT.jar` 和 `sql_prepared_demo-0.0.1-SNAPSHOT.jar`），双击或 `java -jar` 就能跑课程版的注入演示——**上面本机实测那组数字，就是同一件事在自己的环境里复现出来的**。
 
 ## 优势二：性能更高（PPT 第 12 页）
@@ -385,7 +385,7 @@ delete from user where id = ?;  ───▶ 语法解析检查 → 编译SQL �
 
 道理说穿了很简单：**静态 SQL 每次参数一变就是一条"新语句"**（`id = 1` 和 `id = 2` 在数据库看来是两个不同的字符串），数据库得重新做语法解析、重新优化、重新生成执行计划；**预编译 SQL 的结构是固定的**，编译一次之后把结果放到缓存里，后面同样结构只换参数——**省下的就是重复编译的那部分开销**。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这个优势有前提：**同一条预编译 SQL 被反复执行**（参数不同）。项目里"一条 SQL 被无数请求复用"是常态，所以这个优化在大并发下特别值钱；但如果你只是随手执行一条语句，是看不出差别的——**预编译最不能省的还是"安全"那一条**。
 
 ## 必答问答（PPT 第 13 页）
@@ -484,111 +484,127 @@ public class User {
   要求：查出来的每一个字段都要**按列名**取值；方法里最后**把三个资源都关掉**；写完后在文件末尾回答：① 为什么这里取值推荐用列名而不是列号？② 这条 SQL 最终只查到了几行，`while` 循环里的代码执行了几次？
   （练习文件 `test_50_查询封装User.java` 里给了题目注释、表结构、`User` 实体类和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：五步不变，只有第 4 步换成"查询 + 解析"——先拿到结果集，再让光标往下走一行、把这一行的值一格一格取出来装进对象
-  > **二级 · 方法**：`statement.executeQuery(sql)` 返回 `ResultSet`；用 `resultSet.next()` 判断有没有数据，用 `resultSet.getInt("id")` / `resultSet.getString("username")` 取字段；最后 `rs.close()`、`statement.close()`、`connection.close()`（仍然可以先用 `Statement` + SQL 里写死参数，下一题再换预编译）
-  > **三级 · 骨架**：`ResultSet rs = statement.____("select id, username, password, name, age from user where username = 'daqiao' and password = '123456'"); while (rs.____()) { User user = new User(rs.____("id"), rs.____("username"), rs.____("password"), rs.____("name"), rs.____("age")); System.out.println(user); }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import com.itheima.pojo.User;
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.*;
-  >
-  > public class JdbcQueryTest {
-  >
-  >     @Test
-  >     public void testSelect() throws Exception {
-  >         //1. 注册驱动
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         //2. 获取连接
-  >         Connection conn = DriverManager.getConnection(
-  >                 "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
-  >         //3. 获取SQL语句执行对象
-  >         Statement statement = conn.createStatement();
-  >         //4. 执行SQL（DQL：executeQuery 返回结果集）
-  >         ResultSet rs = statement.executeQuery(
-  >                 "select id, username, password, name, age from user where username = 'daqiao' and password = '123456'");
-  >         //5. 解析结果集：先 next() 往下走一行，再按列名取值封装
-  >         while (rs.next()) {
-  >             User user = new User(
-  >                     rs.getInt("id"),
-  >                     rs.getString("username"),
-  >                     rs.getString("password"),
-  >                     rs.getString("name"),
-  >                     rs.getInt("age"));
-  >             System.out.println(user);
-  >         }
-  >         //6. 释放资源（后开先关）
-  >         rs.close();
-  >         statement.close();
-  >         conn.close();
-  >     }
-  > }
-  > ```
-  > 本机实测控制台输出：
-  > ```text
-  > User(id=1, username=daqiao, password=123456, name=大乔, age=22)
-  > ```
-  > 两问两答：① **按列名取值可读性最好，而且抗改动**——表的列顺序调整了、或者中间插了新列，列名不用改；用列号则要重新数一遍（而且列号**从 1 开始**，很容易数错一格）；② 条件命中 1 行，所以 `while` 里的代码执行了 **1 次**，打印出 1 行 `User(...)`；如果没有命中的行，`next()` 第一次就返回 `false`，循环体一次都不会执行（**不报错**）。
+  **一级 · 思路**：五步不变，只有第 4 步换成"查询 + 解析"——先拿到结果集，再让光标往下走一行、把这一行的值一格一格取出来装进对象
+  **二级 · 方法**：`statement.executeQuery(sql)` 返回 `ResultSet`；用 `resultSet.next()` 判断有没有数据，用 `resultSet.getInt("id")` / `resultSet.getString("username")` 取字段；最后 `rs.close()`、`statement.close()`、`connection.close()`（仍然可以先用 `Statement` + SQL 里写死参数，下一题再换预编译）
+  **三级 · 骨架**：`ResultSet rs = statement.____("select id, username, password, name, age from user where username = 'daqiao' and password = '123456'"); while (rs.____()) { User user = new User(rs.____("id"), rs.____("username"), rs.____("password"), rs.____("name"), rs.____("age")); System.out.println(user); }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import com.itheima.pojo.User;
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.*;
+  
+  public class JdbcQueryTest {
+  
+      @Test
+      public void testSelect() throws Exception {
+          //1. 注册驱动
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          //2. 获取连接
+          Connection conn = DriverManager.getConnection(
+                  "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
+          //3. 获取SQL语句执行对象
+          Statement statement = conn.createStatement();
+          //4. 执行SQL（DQL：executeQuery 返回结果集）
+          ResultSet rs = statement.executeQuery(
+                  "select id, username, password, name, age from user where username = 'daqiao' and password = '123456'");
+          //5. 解析结果集：先 next() 往下走一行，再按列名取值封装
+          while (rs.next()) {
+              User user = new User(
+                      rs.getInt("id"),
+                      rs.getString("username"),
+                      rs.getString("password"),
+                      rs.getString("name"),
+                      rs.getInt("age"));
+              System.out.println(user);
+          }
+          //6. 释放资源（后开先关）
+          rs.close();
+          statement.close();
+          conn.close();
+      }
+  }
+  ```
+  本机实测控制台输出：
+  ```text
+  User(id=1, username=daqiao, password=123456, name=大乔, age=22)
+  ```
+  两问两答：① **按列名取值可读性最好，而且抗改动**——表的列顺序调整了、或者中间插了新列，列名不用改；用列号则要重新数一遍（而且列号**从 1 开始**，很容易数错一格）；② 条件命中 1 行，所以 `while` 里的代码执行了 **1 次**，打印出 1 行 `User(...)`；如果没有命中的行，`next()` 第一次就返回 `false`，循环体一次都不会执行（**不报错**）。
+
+  :::
+
 
 - [ ] **2-2 把符合条件的多行都查出来，装成一个集合打印**
   需求：查出 `user` 表里**年龄大于 20** 的所有用户，把每一条都封装成对象、放进一个**集合**里，最后把集合打印出来。
   要求：用**循环**解析结果集（不要只取第一行）；打印时能看出集合里有几条数据；跑完回答：如果一条都没查到，这个集合里应该是什么？
   （练习文件 `test_50_查询用户列表.java` 里给了题目注释、表结构、`User` 实体类和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：和上一题的差别就在"要装的不止一个对象"——所以要准备一个能装多个对象的容器，每读到一行就往里放一个
-  > **二级 · 方法**：`List<User> userList = new ArrayList<>();`，循环里 `userList.add(user)`；结果集还是 `while (resultSet.next())` 一行行读；条件写在 SQL 的 `where age > 20` 里
-  > **三级 · 骨架**：`List<User> userList = new ____<>(); ResultSet rs = statement.____("select * from user where age > 20"); while (rs.next()) { User user = new User(…); userList.____(user); } System.out.println(userList); System.out.println("共 " + userList.size() + " 条");`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima;
-  >
-  > import com.itheima.pojo.User;
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.*;
-  > import java.util.ArrayList;
-  > import java.util.List;
-  >
-  > public class JdbcQueryListTest {
-  >
-  >     @Test
-  >     public void testSelectList() throws Exception {
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         Connection conn = DriverManager.getConnection(
-  >                 "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
-  >         Statement statement = conn.createStatement();
-  >
-  >         // 查询：年龄大于 20 的用户
-  >         ResultSet rs = statement.executeQuery("select id, username, password, name, age from user where age > 20");
-  >
-  >         // 每读到一行就封装一个对象，放进集合
-  >         List<User> userList = new ArrayList<>();
-  >         while (rs.next()) {
-  >             userList.add(new User(
-  >                     rs.getInt("id"),
-  >                     rs.getString("username"),
-  >                     rs.getString("password"),
-  >                     rs.getString("name"),
-  >                     rs.getInt("age")));
-  >         }
-  >         System.out.println(userList);
-  >         System.out.println("共 " + userList.size() + " 条");
-  >
-  >         rs.close();
-  >         statement.close();
-  >         conn.close();
-  >     }
-  > }
-  > ```
-  > 按课程资料 `user.txt` 那张表的数据算一遍：5 条里年龄大于 20 的是 daqiao(22)、diaochan(24)、lvbu(28)、zhaoyun(27)，所以会输出 **4 个 `User(...)`** 和一句 `共 4 条`——循环体执行了 4 次。
-  > 第三问的答案：**集合是一个空集合（`size()` 为 0），打印出来是 `[]`**——没查到数据是正常情况，不是错误；要判断"有没有查到"，看 `userList.isEmpty()` 或 `size()` 就行，千万别拿 `null` 当"没查到"（空集合和 `null` 是两件事）。
+  **一级 · 思路**：和上一题的差别就在"要装的不止一个对象"——所以要准备一个能装多个对象的容器，每读到一行就往里放一个
+  **二级 · 方法**：`List<User> userList = new ArrayList<>();`，循环里 `userList.add(user)`；结果集还是 `while (resultSet.next())` 一行行读；条件写在 SQL 的 `where age > 20` 里
+  **三级 · 骨架**：`List<User> userList = new ____<>(); ResultSet rs = statement.____("select * from user where age > 20"); while (rs.next()) { User user = new User(…); userList.____(user); } System.out.println(userList); System.out.println("共 " + userList.size() + " 条");`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima;
+  
+  import com.itheima.pojo.User;
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.*;
+  import java.util.ArrayList;
+  import java.util.List;
+  
+  public class JdbcQueryListTest {
+  
+      @Test
+      public void testSelectList() throws Exception {
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          Connection conn = DriverManager.getConnection(
+                  "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
+          Statement statement = conn.createStatement();
+  
+          // 查询：年龄大于 20 的用户
+          ResultSet rs = statement.executeQuery("select id, username, password, name, age from user where age > 20");
+  
+          // 每读到一行就封装一个对象，放进集合
+          List<User> userList = new ArrayList<>();
+          while (rs.next()) {
+              userList.add(new User(
+                      rs.getInt("id"),
+                      rs.getString("username"),
+                      rs.getString("password"),
+                      rs.getString("name"),
+                      rs.getInt("age")));
+          }
+          System.out.println(userList);
+          System.out.println("共 " + userList.size() + " 条");
+  
+          rs.close();
+          statement.close();
+          conn.close();
+      }
+  }
+  ```
+  按课程资料 `user.txt` 那张表的数据算一遍：5 条里年龄大于 20 的是 daqiao(22)、diaochan(24)、lvbu(28)、zhaoyun(27)，所以会输出 **4 个 `User(...)`** 和一句 `共 4 条`——循环体执行了 4 次。
+  第三问的答案：**集合是一个空集合（`size()` 为 0），打印出来是 `[]`**——没查到数据是正常情况，不是错误；要判断"有没有查到"，看 `userList.isEmpty()` 或 `size()` 就行，千万别拿 `null` 当"没查到"（空集合和 `null` 是两件事）。
+
+  :::
+
 
 - [ ] **2-3 把一个能被人钻空子的登录查询改成预编译**
   下面这段代码是某个登录功能的核心：用户在登录页填的帐号密码，被直接拼进了 SQL。请把它**改成预编译写法**，并在文件末尾回答：① 攻击者填 `' or '1'='1` 时，原来的写法为什么会把整张表都查出来？② 改完之后同样的输入为什么查不到东西？
@@ -605,23 +621,31 @@ public class User {
   要求：参数位置一个都不许再拼字符串；`setXxx` 的序号和类型都写对；执行时不再传 SQL。
   （练习文件 `test_50_预编译查询.java` 里给了题目注释和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"会变的两个值"从 SQL 里拿出去，SQL 里给它们留两个空位；值改从"填空"的方式给进去
-  > **二级 · 方法**：`connection.prepareStatement("… = ? and … = ?")`；两个参数用 `setString(1, username)`、`setString(2, password)`（**从 1 开始**）；执行用 `pstmt.executeQuery()`（**不传 SQL**）
-  > **三级 · 骨架**：`PreparedStatement pstmt = conn.____("select id, username, password, name, age from user where username = ? and password = ?"); pstmt.____(1, username); pstmt.____(2, password); ResultSet rs = pstmt.____();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > // 改完：预编译写法
-  > String sql = "select id, username, password, name, age from user where username = ? and password = ?";
-  > PreparedStatement pstmt = conn.prepareStatement(sql);
-  > pstmt.setString(1, username);   // 第 1 个 ? —— 序号从 1 开始
-  > pstmt.setString(2, password);   // 第 2 个 ?
-  > ResultSet rs = pstmt.executeQuery();   // 注意：不用再传 SQL
-  > ```
-  > 两问两答：
-  > ① 原来的写法把用户输入**当成 SQL 文本的一部分**——`' or '1'='1` 里开头的单引号把用户名那个字符串**提前闭合**，后面的 `or '1'='1'` 就变成了真正的 SQL 语法。本机实测这条拼出来的 SQL 是 `… where username = '' or '1'='1' and password = '' or '1'='1'`：`and` 比 `or` 先算，条件被切成三段，最后一段 `'1'='1'` **恒为真**，用 `or` 连起来整条条件就恒真——**5 行全被查出来，密码填错也能"登录成功"**。
-  > ② 预编译时 SQL 的结构（哪里是列、哪里是值）**已经定死**，`?` 的位置只能填"一个值"。`setString` 把 `' or '1'='1` 当作**普通的字符串值**传进去（它就是"用户名等于这串字符的人"），表里没有这样的用户名 → 查出 **0 行**。一句话：**静态 SQL 里参数是"SQL 的一部分"，预编译 SQL 里参数是"值"。**
+  **一级 · 思路**：把"会变的两个值"从 SQL 里拿出去，SQL 里给它们留两个空位；值改从"填空"的方式给进去
+  **二级 · 方法**：`connection.prepareStatement("… = ? and … = ?")`；两个参数用 `setString(1, username)`、`setString(2, password)`（**从 1 开始**）；执行用 `pstmt.executeQuery()`（**不传 SQL**）
+  **三级 · 骨架**：`PreparedStatement pstmt = conn.____("select id, username, password, name, age from user where username = ? and password = ?"); pstmt.____(1, username); pstmt.____(2, password); ResultSet rs = pstmt.____();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  // 改完：预编译写法
+  String sql = "select id, username, password, name, age from user where username = ? and password = ?";
+  PreparedStatement pstmt = conn.prepareStatement(sql);
+  pstmt.setString(1, username);   // 第 1 个 ? —— 序号从 1 开始
+  pstmt.setString(2, password);   // 第 2 个 ?
+  ResultSet rs = pstmt.executeQuery();   // 注意：不用再传 SQL
+  ```
+  两问两答：
+  ① 原来的写法把用户输入**当成 SQL 文本的一部分**——`' or '1'='1` 里开头的单引号把用户名那个字符串**提前闭合**，后面的 `or '1'='1'` 就变成了真正的 SQL 语法。本机实测这条拼出来的 SQL 是 `… where username = '' or '1'='1' and password = '' or '1'='1'`：`and` 比 `or` 先算，条件被切成三段，最后一段 `'1'='1'` **恒为真**，用 `or` 连起来整条条件就恒真——**5 行全被查出来，密码填错也能"登录成功"**。
+  ② 预编译时 SQL 的结构（哪里是列、哪里是值）**已经定死**，`?` 的位置只能填"一个值"。`setString` 把 `' or '1'='1` 当作**普通的字符串值**传进去（它就是"用户名等于这串字符的人"），表里没有这样的用户名 → 查出 **0 行**。一句话：**静态 SQL 里参数是"SQL 的一部分"，预编译 SQL 里参数是"值"。**
+
+  :::
+
 
 - [ ] **2-4 找错：这份预编译代码写不对**
   同学想用预编译查 `daqiao` 的登录信息，代码如下。请指出**每一处**问题并给出改正后的写法：
@@ -636,56 +660,64 @@ public class User {
   要求：把每处问题的"哪里错、会发生什么"写清楚，再写出改好的完整代码（连资源释放一起写）。
   （练习文件 `test_50_预编译排错.java` 里给了题目注释和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：从"序号、类型、执行方法、收尾"四个角度逐个检查——预编译的坑几乎都在这四处
-  > **二级 · 方法**：`setXxx` 的序号**从 1 开始**（第 1 个 `?` 是 1）；参数是字符串就用 `setString`（密码列是 `varchar`，写 `123456` 也要当字符串）；查询要用 `executeQuery()` 拿结果集（`executeUpdate()` 是给 DML 用的）；`PreparedStatement`、`ResultSet`、`Connection` 都要关
-  > **三级 · 骨架**：`pstmt.____(1, "daqiao"); pstmt.____(2, "123456"); ResultSet rs = pstmt.____(); … rs.close(); pstmt.close(); connection.close();`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 四处问题：
-  > 1. **序号从 0 开始写了**：`pstmt.setString(0, …)` 是错的——**`?` 的序号从 1 开始**，第 1 个 `?` 要写 `setString(1, …)`；写 0 运行时会报"参数索引超出范围"这类错误；
-  > 2. **类型给错了**：密码列是 `varchar(32)`（字符串），要用 `setString(2, "123456")`；`setInt(2, 123456)` 既把序号跳到了 2（第 1 个 `?` 没赋值），又给了个数字类型，执行时不是报错就是查不到；
-  > 3. **执行方法用错了**：查询（DQL）要用 **`executeQuery()`** 拿 `ResultSet`；`executeUpdate()` 是给增删改用的（返回影响行数），用它接 `ResultSet` 直接编译不过；
-  > 4. **资源没关**：`ResultSet`、`PreparedStatement`、`Connection` 三个都没关（后开先关）。
-  > 
-  > 改好的完整代码：
-  > ```java
-  > package com.itheima;
-  >
-  > import org.junit.jupiter.api.Test;
-  >
-  > import java.sql.*;
-  >
-  > public class JdbcPreparedTest {
-  >
-  >     @Test
-  >     public void testPrepared() throws Exception {
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         Connection connection = DriverManager.getConnection(
-  >                 "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
-  >
-  >         // SQL 里只用 ? 占位，参数不拼字符串
-  >         String sql = "select id, username, password, name, age from user where username = ? and password = ?";
-  >         PreparedStatement pstmt = connection.prepareStatement(sql);
-  >
-  >         pstmt.setString(1, "daqiao");    // 第 1 个 ?（序号从 1 开始）
-  >         pstmt.setString(2, "123456");    // 第 2 个 ?（字符串列用 setString）
-  >
-  >         ResultSet rs = pstmt.executeQuery();   // 查询用 executeQuery
-  >         while (rs.next()) {
-  >             System.out.println(rs.getInt("id") + " " + rs.getString("username")
-  >                     + " " + rs.getString("name") + " " + rs.getInt("age"));
-  >         }
-  >
-  >         // 资源释放：后开先关
-  >         rs.close();
-  >         pstmt.close();
-  >         connection.close();
-  >     }
-  > }
-  > ```
-  > 本机实测输出：`1 daqiao 大乔 22`（正常登录那种情况，两种写法都是这一行）。
-  > 记一条口诀：**序号从 1、类型要对、查询用 executeQuery、三个资源都要关**。
+  **一级 · 思路**：从"序号、类型、执行方法、收尾"四个角度逐个检查——预编译的坑几乎都在这四处
+  **二级 · 方法**：`setXxx` 的序号**从 1 开始**（第 1 个 `?` 是 1）；参数是字符串就用 `setString`（密码列是 `varchar`，写 `123456` 也要当字符串）；查询要用 `executeQuery()` 拿结果集（`executeUpdate()` 是给 DML 用的）；`PreparedStatement`、`ResultSet`、`Connection` 都要关
+  **三级 · 骨架**：`pstmt.____(1, "daqiao"); pstmt.____(2, "123456"); ResultSet rs = pstmt.____(); … rs.close(); pstmt.close(); connection.close();`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  四处问题：
+  1. **序号从 0 开始写了**：`pstmt.setString(0, …)` 是错的——**`?` 的序号从 1 开始**，第 1 个 `?` 要写 `setString(1, …)`；写 0 运行时会报"参数索引超出范围"这类错误；
+  2. **类型给错了**：密码列是 `varchar(32)`（字符串），要用 `setString(2, "123456")`；`setInt(2, 123456)` 既把序号跳到了 2（第 1 个 `?` 没赋值），又给了个数字类型，执行时不是报错就是查不到；
+  3. **执行方法用错了**：查询（DQL）要用 **`executeQuery()`** 拿 `ResultSet`；`executeUpdate()` 是给增删改用的（返回影响行数），用它接 `ResultSet` 直接编译不过；
+  4. **资源没关**：`ResultSet`、`PreparedStatement`、`Connection` 三个都没关（后开先关）。
+  
+  改好的完整代码：
+  ```java
+  package com.itheima;
+  
+  import org.junit.jupiter.api.Test;
+  
+  import java.sql.*;
+  
+  public class JdbcPreparedTest {
+  
+      @Test
+      public void testPrepared() throws Exception {
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          Connection connection = DriverManager.getConnection(
+                  "jdbc:mysql://localhost:3306/web01", "root", "1234"); // 密码换成你自己的
+  
+          // SQL 里只用 ? 占位，参数不拼字符串
+          String sql = "select id, username, password, name, age from user where username = ? and password = ?";
+          PreparedStatement pstmt = connection.prepareStatement(sql);
+  
+          pstmt.setString(1, "daqiao");    // 第 1 个 ?（序号从 1 开始）
+          pstmt.setString(2, "123456");    // 第 2 个 ?（字符串列用 setString）
+  
+          ResultSet rs = pstmt.executeQuery();   // 查询用 executeQuery
+          while (rs.next()) {
+              System.out.println(rs.getInt("id") + " " + rs.getString("username")
+                      + " " + rs.getString("name") + " " + rs.getInt("age"));
+          }
+  
+          // 资源释放：后开先关
+          rs.close();
+          pstmt.close();
+          connection.close();
+      }
+  }
+  ```
+  本机实测输出：`1 daqiao 大乔 22`（正常登录那种情况，两种写法都是这一行）。
+  记一条口诀：**序号从 1、类型要对、查询用 executeQuery、三个资源都要关**。
+
+  :::
+
 
 ### 三、综合题
 
@@ -712,86 +744,94 @@ public class User {
   | 运算符优先级 | 第 4 步——`and` 先算、`or` 后算，所以整条条件为真 |
   | 两大优势 | 第 7 步——安全（防注入）+ 性能更高（结构编译 1 次可复用） |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题不比写代码，比"设计对照实验"——同一张表、同一条查询、同一个输入，只让"写法"这一个变量不同；抓证据的方式是把**实际执行的 SQL** 打印出来
-  > **二级 · 方法**：拼接版 `String sql = "… where username = '" + username + "' and password = '" + password + "'";` 再 `statement.executeQuery(sql)`；预编译版 `connection.prepareStatement("… = ? and … = ?")` + 两次 `setString`；两种写法各自记行数
-  > **三级 · 骨架**：`queryByStatement("' or '1'='1", "' or '1'='1");` / `queryByPrepared("' or '1'='1", "' or '1'='1");`，每个方法里 `while (rs.next()) { rows++; … }` 最后打印 `共 X 行`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 参考实现（**本机实测就是照这个思路跑的**）：两个方法都接收 `username` / `password` 参数，一个用 `Statement` 拼接、一个用 `PreparedStatement` 预编译，各自统计行数并打印。
-  >
-  > ```java
-  > package com.itheima;
-  >
-  > import java.sql.*;
-  >
-  > public class InjectionTest {
-  >
-  >     private static final String URL = "jdbc:mysql://localhost:3306/web01";
-  >     private static final String USER = "root";
-  >     private static final String PASSWORD = "1234";   // 换成你自己 MySQL 的密码
-  >
-  >     // 写法一：Statement 拼接（有漏洞）
-  >     private void queryByStatement(String username, String password) throws Exception {
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-  >              Statement stmt = conn.createStatement()) {
-  >             String sql = "select id, username, password, name, age from user where username = '"
-  >                     + username + "' and password = '" + password + "'";
-  >             System.out.println("实际执行的 SQL：" + sql);
-  >             ResultSet rs = stmt.executeQuery(sql);
-  >             int rows = 0;
-  >             while (rs.next()) {
-  >                 rows++;
-  >                 System.out.println("  查到：" + rs.getInt("id") + " " + rs.getString("username")
-  >                         + " " + rs.getString("name") + " " + rs.getInt("age"));
-  >             }
-  >             System.out.println("共 " + rows + " 行");
-  >             rs.close();
-  >         }
-  >     }
-  >
-  >     // 写法二：PreparedStatement 预编译（防住）
-  >     private void queryByPrepared(String username, String password) throws Exception {
-  >         Class.forName("com.mysql.cj.jdbc.Driver");
-  >         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-  >              PreparedStatement pstmt = conn.prepareStatement(
-  >                      "select id, username, password, name, age from user where username = ? and password = ?")) {
-  >             pstmt.setString(1, username);
-  >             pstmt.setString(2, password);
-  >             System.out.println("实际执行的 SQL：select ... where username = ? and password = ? （参数：username="
-  >                     + username + " , password=" + password + "）");
-  >             ResultSet rs = pstmt.executeQuery();
-  >             int rows = 0;
-  >             while (rs.next()) {
-  >                 rows++;
-  >                 System.out.println("  查到：" + rs.getInt("id") + " " + rs.getString("username")
-  >                         + " " + rs.getString("name") + " " + rs.getInt("age"));
-  >             }
-  >             System.out.println("共 " + rows + " 行");
-  >             rs.close();
-  >         }
-  >     }
-  > }
-  > ```
-  > 2~3. **本机实测结果**（用户本机 MySQL 9.0.1，库 `web01`、表 `user`）：
-  > - **正常登录（daqiao / 123456）**：拼接写法 **1 行**、预编译写法 **1 行**（输出 `1 daqiao 大乔 22`）；
-  > - **攻击输入（两边都填 `' or '1'='1`）**：
-  >   ```text
-  >   # Statement 拼接
-  >   实际执行的 SQL：select id, username, password, name, age from user where username = '' or '1'='1' and password = '' or '1'='1'
-  >     查到：1 daqiao 大乔 22
-  >     查到：2 xiaoqiao 小乔 18
-  >     查到：3 diaochan 貂蝉 24
-  >     查到：4 lvbu 吕布 28
-  >     查到：5 zhaoyun 赵云 27
-  >   共 5 行
-  >
-  >   # PreparedStatement 预编译
-  >   实际执行的 SQL：select ... where username = ? and password = ? （参数：username=' or '1'='1 , password=' or '1'='1）
-  >   共 0 行
-  >   ```
-  > 4. 漏洞解释：输入的 `' or '1'='1` **开头的单引号把 `username = '` 这个字符串提前闭合**，后面的 `or '1'='1'` 脱离了"值"的身份、变成**真正的 SQL 语法**。拼出来的条件是 `username = '' or '1'='1' and password = '' or '1'='1'`——按优先级先算 `and`，条件被切成三段（`username = ''`、`'1'='1' and password = ''`、`'1'='1'`），**最后一段恒为真**，再用 `or` 一连，整条条件恒真 → **每一行都符合条件，5 行全被查出来**。
-  > 5. 防线解释：预编译把**语句结构固定死了**——`?` 的位置只能填"一个值"，驱动把参数当**纯字符串值**交给数据库，即使值里带着引号和 `or`，也只是这个字符串的字符，不会升级成语法。所以 `' or '1'='1` 被当成"用户名等于这一串字符"，表里没有 → **0 行**。
-  > 6. 第 5 条输出（`共 5 行` 那一次）就是"**密码是错的，却把 5 条全查出来**"——也就是密码校验被整个跳过了。所以"参数是内部用的、不会有人乱填"这种想法站不住脚：**只要有一个输入口通向 SQL 字符串，那个口子就是入口**。
-  > 7. 两大优势各一句话：**安全**——预编译的参数只能当"值"，从根上堵住 SQL 注入；**性能更高**——预编译 SQL 的语句结构只需要编译一次、编译结果可缓存复用，而同一条语句如果用拼接写法，参数一变就是一条"新语句"，每次都要重新解析、优化、编译（PPT 那三条 delete：3 次 vs 1 次）。性能优势的**前提是"同一条 SQL 被反复执行"**（参数不同），项目里一条 SQL 被大量请求复用正是常态。
+  **一级 · 思路**：这一题不比写代码，比"设计对照实验"——同一张表、同一条查询、同一个输入，只让"写法"这一个变量不同；抓证据的方式是把**实际执行的 SQL** 打印出来
+  **二级 · 方法**：拼接版 `String sql = "… where username = '" + username + "' and password = '" + password + "'";` 再 `statement.executeQuery(sql)`；预编译版 `connection.prepareStatement("… = ? and … = ?")` + 两次 `setString`；两种写法各自记行数
+  **三级 · 骨架**：`queryByStatement("' or '1'='1", "' or '1'='1");` / `queryByPrepared("' or '1'='1", "' or '1'='1");`，每个方法里 `while (rs.next()) { rows++; … }` 最后打印 `共 X 行`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  参考实现（**本机实测就是照这个思路跑的**）：两个方法都接收 `username` / `password` 参数，一个用 `Statement` 拼接、一个用 `PreparedStatement` 预编译，各自统计行数并打印。
+  
+  ```java
+  package com.itheima;
+  
+  import java.sql.*;
+  
+  public class InjectionTest {
+  
+      private static final String URL = "jdbc:mysql://localhost:3306/web01";
+      private static final String USER = "root";
+      private static final String PASSWORD = "1234";   // 换成你自己 MySQL 的密码
+  
+      // 写法一：Statement 拼接（有漏洞）
+      private void queryByStatement(String username, String password) throws Exception {
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+               Statement stmt = conn.createStatement()) {
+              String sql = "select id, username, password, name, age from user where username = '"
+                      + username + "' and password = '" + password + "'";
+              System.out.println("实际执行的 SQL：" + sql);
+              ResultSet rs = stmt.executeQuery(sql);
+              int rows = 0;
+              while (rs.next()) {
+                  rows++;
+                  System.out.println("  查到：" + rs.getInt("id") + " " + rs.getString("username")
+                          + " " + rs.getString("name") + " " + rs.getInt("age"));
+              }
+              System.out.println("共 " + rows + " 行");
+              rs.close();
+          }
+      }
+  
+      // 写法二：PreparedStatement 预编译（防住）
+      private void queryByPrepared(String username, String password) throws Exception {
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+               PreparedStatement pstmt = conn.prepareStatement(
+                       "select id, username, password, name, age from user where username = ? and password = ?")) {
+              pstmt.setString(1, username);
+              pstmt.setString(2, password);
+              System.out.println("实际执行的 SQL：select ... where username = ? and password = ? （参数：username="
+                      + username + " , password=" + password + "）");
+              ResultSet rs = pstmt.executeQuery();
+              int rows = 0;
+              while (rs.next()) {
+                  rows++;
+                  System.out.println("  查到：" + rs.getInt("id") + " " + rs.getString("username")
+                          + " " + rs.getString("name") + " " + rs.getInt("age"));
+              }
+              System.out.println("共 " + rows + " 行");
+              rs.close();
+          }
+      }
+  }
+  ```
+  2~3. **本机实测结果**（用户本机 MySQL 9.0.1，库 `web01`、表 `user`）：
+  - **正常登录（daqiao / 123456）**：拼接写法 **1 行**、预编译写法 **1 行**（输出 `1 daqiao 大乔 22`）；
+  - **攻击输入（两边都填 `' or '1'='1`）**：
+    ```text
+    # Statement 拼接
+    实际执行的 SQL：select id, username, password, name, age from user where username = '' or '1'='1' and password = '' or '1'='1'
+      查到：1 daqiao 大乔 22
+      查到：2 xiaoqiao 小乔 18
+      查到：3 diaochan 貂蝉 24
+      查到：4 lvbu 吕布 28
+      查到：5 zhaoyun 赵云 27
+    共 5 行
+  
+    # PreparedStatement 预编译
+    实际执行的 SQL：select ... where username = ? and password = ? （参数：username=' or '1'='1 , password=' or '1'='1）
+    共 0 行
+    ```
+  4. 漏洞解释：输入的 `' or '1'='1` **开头的单引号把 `username = '` 这个字符串提前闭合**，后面的 `or '1'='1'` 脱离了"值"的身份、变成**真正的 SQL 语法**。拼出来的条件是 `username = '' or '1'='1' and password = '' or '1'='1'`——按优先级先算 `and`，条件被切成三段（`username = ''`、`'1'='1' and password = ''`、`'1'='1'`），**最后一段恒为真**，再用 `or` 一连，整条条件恒真 → **每一行都符合条件，5 行全被查出来**。
+  5. 防线解释：预编译把**语句结构固定死了**——`?` 的位置只能填"一个值"，驱动把参数当**纯字符串值**交给数据库，即使值里带着引号和 `or`，也只是这个字符串的字符，不会升级成语法。所以 `' or '1'='1` 被当成"用户名等于这一串字符"，表里没有 → **0 行**。
+  6. 第 5 条输出（`共 5 行` 那一次）就是"**密码是错的，却把 5 条全查出来**"——也就是密码校验被整个跳过了。所以"参数是内部用的、不会有人乱填"这种想法站不住脚：**只要有一个输入口通向 SQL 字符串，那个口子就是入口**。
+  7. 两大优势各一句话：**安全**——预编译的参数只能当"值"，从根上堵住 SQL 注入；**性能更高**——预编译 SQL 的语句结构只需要编译一次、编译结果可缓存复用，而同一条语句如果用拼接写法，参数一变就是一条"新语句"，每次都要重新解析、优化、编译（PPT 那三条 delete：3 次 vs 1 次）。性能优势的**前提是"同一条 SQL 被反复执行"**（参数不同），项目里一条 SQL 被大量请求复用正是常态。
+
+  :::
+

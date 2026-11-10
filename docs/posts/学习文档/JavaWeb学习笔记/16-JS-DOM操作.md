@@ -62,7 +62,7 @@ PPT 列出的是被包装成的五种对象：
 - 每个标签都是树上的一个**节点（对象）**，标签嵌套就是**父子关系**（`<body>` 是 `<h1>` 的父节点，`<h1>` 是 `<body>` 的子节点）
 - 标签的属性（`href`）、标签里的文字（"传智教育"）也都各自是一个对象，**挂在所属元素下面**
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 记住这一句就够用了：**DOM 把网页里所有的元素都当做对象来处理——标签上写的所有属性，在这个对象上都能找到**。所以 `img` 标签的 `src` 在对象上叫 `img.src`，`a` 标签的 `href` 在对象上叫 `a.href`，字号、颜色这些 CSS 也能用 `元素.style.xxx` 改。
 
 ## DOM 操作的两步套路
@@ -114,7 +114,7 @@ let hs = document.querySelectorAll('h1'); // 拿到全部 3 个 h1
 | `.txt` | 按 **class** 选 | `document.querySelectorAll('.txt')` |
 | `span` | 按**标签名**选 | `document.querySelectorAll('span')` |
 
-> [!WARNING]
+> [!WARNING] 警告
 > `querySelectorAll(..)` 得到的是一个 **NodeList 节点集合，是一个伪数组**——"伪"在：
 > - **有**长度（`.length`）、**有**索引（`[0]`、`[1]`…），可以用 `for` 循环挨个处理；
 > - **没有**真数组的方法（`push()`、`pop()`、`join()` 这些都不能用）。
@@ -129,7 +129,7 @@ document.getElementsByTagName('div');   // 按标签名拿一组（HTMLCollectio
 document.getElementsByClassName('cls'); // 按类名拿一组（HTMLCollection，老写法）
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 新一代写法 `querySelector` / `querySelectorAll` **一套通吃**（id、类名、标签名、后代、并集选择器都能写），所以课程的代码统一用它；`getElementById` 那三个老方法在老项目、老教程里到处都是，看得懂就行，新代码不写。
 
 ## 第二步之一：操作内容（innerHTML / innerText）
@@ -163,7 +163,7 @@ document.querySelector('#box2').innerText = '我是<b>加粗</b>的';  // 连标
 
 它们也能**读**（不赋值就是取）：`console.log(h1.innerHTML)` 会把当前标签里的内容打印出来。
 
-> [!TIP]
+> [!TIP] 提示
 > 怎么选？**内容里带 HTML 标签（要拼表格、拼按钮）就用 `innerHTML`，只塞一句纯文字用 `innerText`**。后面的员工列表案例要靠 `innerHTML` 一次性拼出整个表格，`innerText` 做不到这件事。
 >
 > ⚠️ `innerHTML` 是"**整体替换**"，不是追加——`hs[0].innerHTML = 'xxx'` 会把原来的内容全部覆盖掉，想保留原内容就要自己拼字符串（`hs[0].innerHTML = hs[0].innerHTML + 'xxx'`）。
@@ -200,7 +200,7 @@ document.querySelector('#submitBtn').disabled = true;
 | `<input disabled>` | `input.disabled = true` | 布尔属性：有就是 true、没有就是 false |
 | `<div class="a b">` | `div.className = 'a b'` | 类名（**整串覆盖**） |
 
-> [!NOTE]
+> [!NOTE] 注意
 > 顺便提一句：课程页面里的头像用的是图床地址 `https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg`，这个链接**现在已经失效（访问返回 403）**，照着课程代码做时头像显示不出来是正常的——把 `src` 换成本地任意一张图片即可，**赋值方式完全一样**。
 
 **class 的三种改法**（写页面交互最常用，这里补上）：
@@ -224,7 +224,7 @@ btn.setAttribute('data-id', '1001');             // 写属性
 btn.removeAttribute('data-id');                  // 删属性
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 什么时候用 `classList` 而不是 `style`？**成组的样式（颜色 + 边框 + 圆角）写进 CSS 类，JS 只负责"换类名"**；只有一个属性要改的时候直接用 `style` 更省事。项目里样式写在 CSS 里、行为写在 JS 里，改起来不至于两头找。
 
 ## 第二步之三：操作样式（style）
@@ -251,7 +251,7 @@ h1.style.width = '200px';          // 宽度
 | `margin-top` | `style.marginTop` | |
 | `width` | `style.width` | 本来就没有连字符，直接写 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > 写 `style` 的两个高频错误：
 > 1. **值必须是字符串、必须带单位**——`h1.style.fontSize = 30` 不生效（少了引号和 `px`），要写 `'30px'`；
 > 2. **别直接写 CSS 的名字**——`style.background-color = '#fff'` 是**语法错误**，JS 里减号是运算符，属性名不许有连字符，要么写 `style.backgroundColor`，要么写 `style['background-color']`。
@@ -295,7 +295,7 @@ for (let i = 0; i < trList.length; i++) {
 
 **为什么 `i % 2 == 0` 是"奇数行"？** 因为**索引从 0 开始**：`i = 0` 对应页面上的第 1 行、`i = 2` 对应第 3 行……所以 `i % 2 == 0`（索引为偶数）恰好是页面上数下来的**奇数行**。这类"索引和肉眼数的行号差 1"的地方，是初学者最容易写反的，写完一定要数一遍页面。
 
-> [!TIP]
+> [!TIP] 提示
 > 隔行变色 [12 篇](/posts/编程学习/javaweb学习笔记/12-实战-tlias员工管理页面/)用一行 CSS 就能做（`tr:nth-child(even) { background-color: #f2f2f2; }`）。那为什么还要用 JS 做一遍？
 > - **CSS 的颜色是写死的**：只能"按位置"交替，做不到"分数 90 以上的行标绿"这种**按数据算出来的颜色**；
 > - 这个案例的真正目的是练**"获取元素 → 遍历 → 操作样式"**这条 DOM 主线（第 25 页的 AI 提示词也是让你练"看懂 AI 给的 DOM 代码并会改"）。
@@ -347,26 +347,34 @@ for (let i = 0; i < trList.length; i++) {
   3. 再用**标签名**抓一次，只拿到**第一个**，打印它的内容
   （练习文件 `test_16_获取元素.html` 里已经准备好了三个标题，在写作区写 JS 即可。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个是"抓一个"的方法，一个是"抓一把"的方法；"抓一把"的结果要自己数个数、自己按下标取第一个
-  > **二级 · 方法**：`document.querySelector('选择器')` 抓第一个、`document.querySelectorAll('选择器')` 抓全部；选择器写 `#id`、`.类名`、`标签名`；个数用 `length`；打印用 `console.log()`
-  > **三级 · 骨架**：`let first = document.querySelector('____');` / `console.log(first.____);` / `let all = document.querySelectorAll('____');` / `console.log(all.____);` / `console.log(all[____].innerHTML);`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```javascript
-  > //1. 用 id 拿第一个标题
-  > let h1 = document.querySelector('#title1');
-  > console.log(h1.innerHTML);      // 11111
-  >
-  > //2. 用标签名拿所有标题，打印个数
-  > let hs = document.querySelectorAll('h1');
-  > console.log(hs.length);         // 3
-  >
-  > //3. 用标签名只拿第一个
-  > let h1First = document.querySelector('h1');
-  > console.log(h1First.innerHTML); // 11111
-  > ```
-  > 对照课程 `07. JS-DOM.html` 的第一段注释（课程里三种写法都写了，只是把后两种注释掉了）。注意：`querySelectorAll` 的结果是**伪数组**，要取里面某一个必须写索引 `hs[0]`。
+  **一级 · 思路**：一个是"抓一个"的方法，一个是"抓一把"的方法；"抓一把"的结果要自己数个数、自己按下标取第一个
+  **二级 · 方法**：`document.querySelector('选择器')` 抓第一个、`document.querySelectorAll('选择器')` 抓全部；选择器写 `#id`、`.类名`、`标签名`；个数用 `length`；打印用 `console.log()`
+  **三级 · 骨架**：`let first = document.querySelector('____');` / `console.log(first.____);` / `let all = document.querySelectorAll('____');` / `console.log(all.____);` / `console.log(all[____].innerHTML);`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```javascript
+  //1. 用 id 拿第一个标题
+  let h1 = document.querySelector('#title1');
+  console.log(h1.innerHTML);      // 11111
+  
+  //2. 用标签名拿所有标题，打印个数
+  let hs = document.querySelectorAll('h1');
+  console.log(hs.length);         // 3
+  
+  //3. 用标签名只拿第一个
+  let h1First = document.querySelector('h1');
+  console.log(h1First.innerHTML); // 11111
+  ```
+  对照课程 `07. JS-DOM.html` 的第一段注释（课程里三种写法都写了，只是把后两种注释掉了）。注意：`querySelectorAll` 的结果是**伪数组**，要取里面某一个必须写索引 `hs[0]`。
+
+  :::
+
 
 - [ ] **2-2 把标题的文字换掉**
   页面上有一个标题（id 为 `title1`）和一个说明段落（id 为 `msg`）。要求：
@@ -376,23 +384,31 @@ for (let i = 0; i < trList.length; i++) {
   做完看一眼两个段落的区别，说出为什么不一样。
   （练习文件 `test_16_修改内容.html` 里已经准备好了标签和写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：改内容用的是元素对象上的一个属性；"标签生效还是原样显示"取决于用哪个属性
-  > **二级 · 方法**：`innerHTML` 会解析标签、`innerText` 不解析；写的时候把标签当成字符串拼进去（如 `'我是<b>加粗</b>的文字'`）
-  > **三级 · 骨架**：`document.querySelector('#title1').____ = '修改后的文本内容';` / `document.querySelector('#msg').____ = '我是____加粗____的文字';` / 第二段换成 `____Text`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```javascript
-  > //1. 改标题内容
-  > document.querySelector('#title1').innerHTML = '修改后的文本内容';
-  >
-  > //2. 用 innerHTML：标签会被解析，<b> 真的变成加粗
-  > document.querySelector('#msg').innerHTML = '我是<b>加粗</b>的文字';
-  >
-  > //3. 用 innerText：标签不解析，原样显示
-  > document.querySelector('#msg2').innerText = '我是<b>加粗</b>的文字';
-  > ```
-  > 区别的原因：`innerHTML` 按 **HTML** 解析这段字符串，所以 `<b>` 变成了加粗标签；`innerText` 把它当**纯文本**，标签就原样露出来了。这也是"要拼标签用 innerHTML、只塞纯文字用 innerText"的由来。
+  **一级 · 思路**：改内容用的是元素对象上的一个属性；"标签生效还是原样显示"取决于用哪个属性
+  **二级 · 方法**：`innerHTML` 会解析标签、`innerText` 不解析；写的时候把标签当成字符串拼进去（如 `'我是<b>加粗</b>的文字'`）
+  **三级 · 骨架**：`document.querySelector('#title1').____ = '修改后的文本内容';` / `document.querySelector('#msg').____ = '我是____加粗____的文字';` / 第二段换成 `____Text`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```javascript
+  //1. 改标题内容
+  document.querySelector('#title1').innerHTML = '修改后的文本内容';
+  
+  //2. 用 innerHTML：标签会被解析，<b> 真的变成加粗
+  document.querySelector('#msg').innerHTML = '我是<b>加粗</b>的文字';
+  
+  //3. 用 innerText：标签不解析，原样显示
+  document.querySelector('#msg2').innerText = '我是<b>加粗</b>的文字';
+  ```
+  区别的原因：`innerHTML` 按 **HTML** 解析这段字符串，所以 `<b>` 变成了加粗标签；`innerText` 把它当**纯文本**，标签就原样露出来了。这也是"要拼标签用 innerHTML、只塞纯文字用 innerText"的由来。
+
+  :::
+
 
 - [ ] **2-3 换掉图片地址，再把一行字改成红字**
   页面上有一个头像图片（id 为 `avatar`，现在是一条坏图）和一行文字（id 为 `slogan`）。要求：
@@ -401,49 +417,65 @@ for (let i = 0; i < trList.length; i++) {
   3. 顺便把页面上的链接（id 为 `home`）的地址换成 `https://www.itcast.cn`
   （练习文件 `test_16_改属性和样式.html` 里已经准备好了元素、样式和写作区，同目录下有 `img/1.png`。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：属性用点号直接改（HTML 里叫什么就点什么）；样式用 `style`，加粗这条走"加类名"的路子
-  > **二级 · 方法**：`img.src`、`img.alt`、`a.href`；`style.color`、`style.fontSize`（值要带引号和单位）；加类名用 `classList.add('bold')`
-  > **三级 · 骨架**：`document.querySelector('#avatar').____ = 'img/____.png';` / `...____ = '员工头像';` / `let s = document.querySelector('#slogan');` / `s.style.____ = 'red';` / `s.style.____ = '30px';` / `s.classList.____('bold');` / `document.querySelector('#home').____ = 'https://itcast.cn';`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```javascript
-  > //1. 改图片的属性
-  > let img = document.querySelector('#avatar');
-  > img.src = 'img/1.png';
-  > img.alt = '员工头像';
-  >
-  > //2. 改文字样式：颜色、字号走 style，加粗走类名
-  > let slogan = document.querySelector('#slogan');
-  > slogan.style.color = 'red';
-  > slogan.style.fontSize = '30px';   // 注意写成 fontSize，值要带 px
-  > slogan.classList.add('bold');     // 类名里已经有 font-weight: bold
-  >
-  > //3. 改超链接地址
-  > document.querySelector('#home').href = 'https://itcast.cn';
-  > ```
-  > 两个检查点：① 字号必须写 `'30px'`——写 `30` 不生效；② 加粗演示的是"**样式写进 CSS 类、JS 只换类名**"这个更耐维护的写法（用 `slogan.style.fontWeight = 'bold'` 效果一样，但样式就散在 JS 里了）。
+  **一级 · 思路**：属性用点号直接改（HTML 里叫什么就点什么）；样式用 `style`，加粗这条走"加类名"的路子
+  **二级 · 方法**：`img.src`、`img.alt`、`a.href`；`style.color`、`style.fontSize`（值要带引号和单位）；加类名用 `classList.add('bold')`
+  **三级 · 骨架**：`document.querySelector('#avatar').____ = 'img/____.png';` / `...____ = '员工头像';` / `let s = document.querySelector('#slogan');` / `s.style.____ = 'red';` / `s.style.____ = '30px';` / `s.classList.____('bold');` / `document.querySelector('#home').____ = 'https://itcast.cn';`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```javascript
+  //1. 改图片的属性
+  let img = document.querySelector('#avatar');
+  img.src = 'img/1.png';
+  img.alt = '员工头像';
+  
+  //2. 改文字样式：颜色、字号走 style，加粗走类名
+  let slogan = document.querySelector('#slogan');
+  slogan.style.color = 'red';
+  slogan.style.fontSize = '30px';   // 注意写成 fontSize，值要带 px
+  slogan.classList.add('bold');     // 类名里已经有 font-weight: bold
+  
+  //3. 改超链接地址
+  document.querySelector('#home').href = 'https://itcast.cn';
+  ```
+  两个检查点：① 字号必须写 `'30px'`——写 `30` 不生效；② 加粗演示的是"**样式写进 CSS 类、JS 只换类名**"这个更耐维护的写法（用 `slogan.style.fontWeight = 'bold'` 效果一样，但样式就散在 JS 里了）。
+
+  :::
+
 
 - [ ] **2-4 实现表格隔行换色**
   页面上有一张成绩表（表头 3 列，数据行 5 行）。要求：**奇数行**背景色 `#f2e2e2`、**偶数行**背景色 `#e6f7ff`；表头**不能**被染色。
   （练习文件 `test_16_隔行换色.html` 里已经准备好了表格，在写作区写 JS 即可——这就是 PPT 第 25 页的案例。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先把"要染色的行"一把抓出来（注意别把表头抓进来），再一行一行按顺序判断该染哪个色
-  > **二级 · 方法**：`document.querySelectorAll('tbody tr')`；`for (let i = 0; i < 集合.length; i++)` 循环；`i % 2 == 0` 判断奇偶；`元素.style.backgroundColor` 改背景色
-  > **三级 · 骨架**：`let trList = document.querySelectorAll('____ tr');` / `for (let i = 0; i < trList.____; i++) {` / `if (i ____ 2 == 0) { trList[i].style.____ = '#f2e2e2'; } else { …… '#e6f7ff'; } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```javascript
-  > // 获取所有数据行（tbody 里的 tr，表头在 thead 里不会被选到）
-  > let trList = document.querySelectorAll('tbody tr');
-  >
-  > for (let i = 0; i < trList.length; i++) {
-  >   if (i % 2 == 0) {                                // 索引 0、2、4… → 页面上第 1、3、5 行
-  >     trList[i].style.backgroundColor = '#f2e2e2';   // 奇数行
-  >   } else {
-  >     trList[i].style.backgroundColor = '#e6f7ff';   // 偶数行
-  >   }
-  > }
-  > ```
-  > 对照课程 `06. JS-案例-员工列表.html` 结尾的 `<script>`。检查点：① **表头不变色**（说明你没写 `querySelectorAll('tr')`）；② 第 1 行是浅粉、第 2 行是浅蓝（说明 `i % 2` 的判断没写反）。
+  **一级 · 思路**：先把"要染色的行"一把抓出来（注意别把表头抓进来），再一行一行按顺序判断该染哪个色
+  **二级 · 方法**：`document.querySelectorAll('tbody tr')`；`for (let i = 0; i < 集合.length; i++)` 循环；`i % 2 == 0` 判断奇偶；`元素.style.backgroundColor` 改背景色
+  **三级 · 骨架**：`let trList = document.querySelectorAll('____ tr');` / `for (let i = 0; i < trList.____; i++) {` / `if (i ____ 2 == 0) { trList[i].style.____ = '#f2e2e2'; } else { …… '#e6f7ff'; } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```javascript
+  // 获取所有数据行（tbody 里的 tr，表头在 thead 里不会被选到）
+  let trList = document.querySelectorAll('tbody tr');
+  
+  for (let i = 0; i < trList.length; i++) {
+    if (i % 2 == 0) {                                // 索引 0、2、4… → 页面上第 1、3、5 行
+      trList[i].style.backgroundColor = '#f2e2e2';   // 奇数行
+    } else {
+      trList[i].style.backgroundColor = '#e6f7ff';   // 偶数行
+    }
+  }
+  ```
+  对照课程 `06. JS-案例-员工列表.html` 结尾的 `<script>`。检查点：① **表头不变色**（说明你没写 `querySelectorAll('tr')`）；② 第 1 行是浅粉、第 2 行是浅蓝（说明 `i % 2` 的判断没写反）。
+
+  :::
+

@@ -222,7 +222,7 @@ src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoCo
 com.aliyun.oss.AliyunOSSAutoConfiguration
 ```
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 这个文件的**路径一个字都不能改**：目录是 `META-INF/spring/`，文件名是 `org.springframework.boot.autoconfigure.AutoConfiguration.imports`——SpringBoot 就是按这个名字去 jar 包里找的（[89 篇](/posts/编程学习/javaweb学习笔记/89-springboot自动配置原理/)里 `AutoConfigurationImportSelector` 读名单那一行，找不到时的报错信息直接把这个文件名印在日志里）。
 
 ## 使用方怎么用（只做三件事）
@@ -354,48 +354,56 @@ AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperat
   ④ 回答：为什么 starter 模块里通常一个 Java 类都没有？
   （写作区见练习文件 `test_90_自定义starter.txt` 的题目2-1。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一个模块专门"带货"（依赖），一个模块专门"干活"（自动配置）；使用方只引"带货"的那个，另一个靠依赖传递跟进来
-  > **二级 · 方法**：两个模块名 `aliyun-oss-spring-boot-starter` 与 `aliyun-oss-spring-boot-autoconfigure`（同 groupId、同版本）；starter 的依赖是 `spring-boot-starter` + `aliyun-oss-spring-boot-autoconfigure`；组件用到的第三方坐标（`com.aliyun.oss:aliyun-sdk-oss`、`javax.xml.bind:jaxb-api`、`javax.activation:activation`、`org.glassfish.jaxb:jaxb-runtime`）写在使用到它们的模块里
-  > **三级 · 骨架**：
-  > ```xml
-  > <dependency>
-  >     <groupId>org.springframework.boot</groupId>
-  >     <artifactId>spring-boot-starter</artifactId>
-  > </dependency>
-  > <dependency>
-  >     <groupId>com.aliyun.oss</groupId>
-  >     <artifactId>____</artifactId>
-  >     <version>0.0.1-SNAPSHOT</version>
-  > </dependency>
-  > ```
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 模块结构与依赖方向：
-  > ```text
-  > aliyun-oss-spring-boot-starter         ← 依赖管理功能（管"带哪些依赖进来"）
-  >         │ 依赖
-  >         ▼
-  > aliyun-oss-spring-boot-autoconfigure   ← 自动配置功能（管"不写配置就能注入"）
-  > ```
-  > ② starter 模块的依赖部分：
-  > ```xml
-  > <dependencies>
-  >     <dependency>
-  >         <groupId>org.springframework.boot</groupId>
-  >         <artifactId>spring-boot-starter</artifactId>
-  >     </dependency>
-  >
-  >     <dependency>
-  >         <groupId>com.aliyun.oss</groupId>
-  >         <artifactId>aliyun-oss-spring-boot-autoconfigure</artifactId>
-  >         <version>0.0.1-SNAPSHOT</version>
-  >     </dependency>
-  > </dependencies>
-  > ```
-  > ③ 写在 **autoconfigure 模块**的 pom 里——因为工具类 `AliyunOSSOperator` 就在这个模块里编译，它用到的 `aliyun-sdk-oss`、jaxb 三兄弟必须在这个模块声明；使用方引 starter 时，这些坐标靠**依赖传递**自动到位（这也正是"依赖管理功能"的实现方式）。
-  > ④ 因为它的职责只有"声明依赖"：starter 自己不写代码，引什么由 pom 说、干活的代码在 autoconfigure 模块里。这样分工的好处是职责清晰，将来要调整"带哪些依赖"不用碰自动配置代码。
-  > 自查：把使用方工程里除 starter 之外的所有相关依赖删掉再编译——能编译过、能启动，就说明依赖被 starter 带进来了。
+  **一级 · 思路**：一个模块专门"带货"（依赖），一个模块专门"干活"（自动配置）；使用方只引"带货"的那个，另一个靠依赖传递跟进来
+  **二级 · 方法**：两个模块名 `aliyun-oss-spring-boot-starter` 与 `aliyun-oss-spring-boot-autoconfigure`（同 groupId、同版本）；starter 的依赖是 `spring-boot-starter` + `aliyun-oss-spring-boot-autoconfigure`；组件用到的第三方坐标（`com.aliyun.oss:aliyun-sdk-oss`、`javax.xml.bind:jaxb-api`、`javax.activation:activation`、`org.glassfish.jaxb:jaxb-runtime`）写在使用到它们的模块里
+  **三级 · 骨架**：
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+  </dependency>
+  <dependency>
+      <groupId>com.aliyun.oss</groupId>
+      <artifactId>____</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+  ```
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 模块结构与依赖方向：
+  ```text
+  aliyun-oss-spring-boot-starter         ← 依赖管理功能（管"带哪些依赖进来"）
+          │ 依赖
+          ▼
+  aliyun-oss-spring-boot-autoconfigure   ← 自动配置功能（管"不写配置就能注入"）
+  ```
+  ② starter 模块的依赖部分：
+  ```xml
+  <dependencies>
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter</artifactId>
+      </dependency>
+  
+      <dependency>
+          <groupId>com.aliyun.oss</groupId>
+          <artifactId>aliyun-oss-spring-boot-autoconfigure</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
+  </dependencies>
+  ```
+  ③ 写在 **autoconfigure 模块**的 pom 里——因为工具类 `AliyunOSSOperator` 就在这个模块里编译，它用到的 `aliyun-sdk-oss`、jaxb 三兄弟必须在这个模块声明；使用方引 starter 时，这些坐标靠**依赖传递**自动到位（这也正是"依赖管理功能"的实现方式）。
+  ④ 因为它的职责只有"声明依赖"：starter 自己不写代码，引什么由 pom 说、干活的代码在 autoconfigure 模块里。这样分工的好处是职责清晰，将来要调整"带哪些依赖"不用碰自动配置代码。
+  自查：把使用方工程里除 starter 之外的所有相关依赖删掉再编译——能编译过、能启动，就说明依赖被 starter 带进来了。
+
+  :::
+
 
 - [ ] **2-2 写这个公共组件的自动配置功能（三个类 + 一个文件）**
   需求：组件的工具类 `AliyunOSSOperator`（构造方法需要一个参数对象 `AliyunOSSProperties`，参数对象要能读到配置文件里 `aliyun.oss` 前缀下的 `endpoint` / `bucketName` / `region`）已经搬进 autoconfigure 模块了。要求写出自动配置功能：
@@ -405,80 +413,88 @@ AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperat
   ④ 回答：如果使用方自己在工程里定义了一个同类型的工具类 bean，你的 starter 会怎么表现？靠哪个注解保证的？
   （写作区见练习文件 `test_90_自定义starter.txt` 的题目2-2。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：第三方组件不能指望"被使用方扫描到"，所以两个类都别再标"交给容器管理"的注解——工具类改成构造接收参数对象，参数类只留"绑定前缀"，由自动配置类统一把它们造出来；最后别忘了登记文件，否则 SpringBoot 根本不知道有这个自动配置类
-  > **二级 · 方法**：类上 `@EnableConfigurationProperties(AliyunOSSProperties.class)` + `@Configuration`（顺序无所谓）；方法上 `@Bean` + `@ConditionalOnMissingBean`，返回 `new AliyunOSSOperator(aliyunOSSProperties)`；登记文件 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，内容一行全类名；"让位"靠 `@ConditionalOnMissingBean`
-  > **三级 · 骨架**：
-  > ```java
-  > public class AliyunOSSOperator {
-  >     private AliyunOSSProperties aliyunOSSProperties;
-  >     public AliyunOSSOperator(____ aliyunOSSProperties) { this.aliyunOSSProperties = aliyunOSSProperties; }
-  > }
-  >
-  > @____(prefix = "aliyun.oss")
-  > public class AliyunOSSProperties { private String endpoint; /* ... */ }
-  >
-  > @____(AliyunOSSProperties.class)
-  > @____
-  > public class AliyunOSSAutoConfiguration {
-  >     @____
-  >     @____
-  >     public AliyunOSSOperator aliyunOSSOperator(____ props) { return new AliyunOSSOperator(props); }
-  > }
-  > ```
-  > ③ 路径 `src/main/resources/____/____/org.springframework.boot.autoconfigure.____.imports`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 两个类的改造：**都去掉 `@Component`**——工具类改成构造方法接收参数对象；参数类只留 `@ConfigurationProperties(prefix = "aliyun.oss")`（以及 getter/setter），它由自动配置类上的 `@EnableConfigurationProperties` 启用：
-  > ```java
-  > public class AliyunOSSOperator {
-  >     private AliyunOSSProperties aliyunOSSProperties;
-  >     public AliyunOSSOperator(AliyunOSSProperties aliyunOSSProperties) {
-  >         this.aliyunOSSProperties = aliyunOSSProperties;
-  >     }
-  >     public String upload(byte[] content, String originalFilename) throws Exception { /* OSS 上传逻辑 */ }
-  > }
-  > ```
-  > ```java
-  > @ConfigurationProperties(prefix = "aliyun.oss")
-  > public class AliyunOSSProperties {
-  >     private String endpoint;
-  >     private String bucketName;
-  >     private String region;
-  >     // getter / setter
-  > }
-  > ```
-  > ② 自动配置类：
-  > ```java
-  > package com.aliyun.oss;
-  >
-  > import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-  > import org.springframework.boot.context.properties.EnableConfigurationProperties;
-  > import org.springframework.context.annotation.Bean;
-  > import org.springframework.context.annotation.Configuration;
-  >
-  > @EnableConfigurationProperties(AliyunOSSProperties.class)   // 让参数类成为 bean 并绑定 aliyun.oss 前缀
-  > @Configuration
-  > public class AliyunOSSAutoConfiguration {
-  >
-  >     @Bean
-  >     @ConditionalOnMissingBean                                // 使用方自己定义了就让位
-  >     public AliyunOSSOperator aliyunOSSOperator(AliyunOSSProperties aliyunOSSProperties){
-  >         return new AliyunOSSOperator(aliyunOSSProperties);   // 形参由容器按类型自动装配
-  >     }
-  > }
-  > ```
-  > ③ 登记文件：
-  > ```text
-  > src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-  > ```
-  > 内容一行：
-  > ```text
-  > com.aliyun.oss.AliyunOSSAutoConfiguration
-  > ```
-  > （2.7.0 之前写在 `META-INF/spring.factories` 里，是历史写法；本机 Spring Boot 3.2.x 读的是 `.imports`。）
-  > ④ 使用方自己定义过同类型 bean 时，**自动配置类里那个 `@Bean` 方法不会执行**——容器里用使用方定义的那个，应用照常启动、注入也不会报"同类型 bean 有两个"。保证这件事的注解是 **`@ConditionalOnMissingBean`**：判断环境中没有对应的 bean（按类型或名称）时才注册。本机实测过：加上自定义 bean 后，控制台打印了 `[实验] 自定义的 AliyunOSSOperator bean 被创建`，应用正常启动，`/check` 依然能注入。
-  > 自查：把自动配置类的登记文件删掉（或改个名字）再启动使用方工程——注入会失败（找不到 bean），这就是"登记文件是必需品"的证明。
+  **一级 · 思路**：第三方组件不能指望"被使用方扫描到"，所以两个类都别再标"交给容器管理"的注解——工具类改成构造接收参数对象，参数类只留"绑定前缀"，由自动配置类统一把它们造出来；最后别忘了登记文件，否则 SpringBoot 根本不知道有这个自动配置类
+  **二级 · 方法**：类上 `@EnableConfigurationProperties(AliyunOSSProperties.class)` + `@Configuration`（顺序无所谓）；方法上 `@Bean` + `@ConditionalOnMissingBean`，返回 `new AliyunOSSOperator(aliyunOSSProperties)`；登记文件 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，内容一行全类名；"让位"靠 `@ConditionalOnMissingBean`
+  **三级 · 骨架**：
+  ```java
+  public class AliyunOSSOperator {
+      private AliyunOSSProperties aliyunOSSProperties;
+      public AliyunOSSOperator(____ aliyunOSSProperties) { this.aliyunOSSProperties = aliyunOSSProperties; }
+  }
+  
+  @____(prefix = "aliyun.oss")
+  public class AliyunOSSProperties { private String endpoint; /* ... */ }
+  
+  @____(AliyunOSSProperties.class)
+  @____
+  public class AliyunOSSAutoConfiguration {
+      @____
+      @____
+      public AliyunOSSOperator aliyunOSSOperator(____ props) { return new AliyunOSSOperator(props); }
+  }
+  ```
+  ③ 路径 `src/main/resources/____/____/org.springframework.boot.autoconfigure.____.imports`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 两个类的改造：**都去掉 `@Component`**——工具类改成构造方法接收参数对象；参数类只留 `@ConfigurationProperties(prefix = "aliyun.oss")`（以及 getter/setter），它由自动配置类上的 `@EnableConfigurationProperties` 启用：
+  ```java
+  public class AliyunOSSOperator {
+      private AliyunOSSProperties aliyunOSSProperties;
+      public AliyunOSSOperator(AliyunOSSProperties aliyunOSSProperties) {
+          this.aliyunOSSProperties = aliyunOSSProperties;
+      }
+      public String upload(byte[] content, String originalFilename) throws Exception { /* OSS 上传逻辑 */ }
+  }
+  ```
+  ```java
+  @ConfigurationProperties(prefix = "aliyun.oss")
+  public class AliyunOSSProperties {
+      private String endpoint;
+      private String bucketName;
+      private String region;
+      // getter / setter
+  }
+  ```
+  ② 自动配置类：
+  ```java
+  package com.aliyun.oss;
+  
+  import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+  import org.springframework.boot.context.properties.EnableConfigurationProperties;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  
+  @EnableConfigurationProperties(AliyunOSSProperties.class)   // 让参数类成为 bean 并绑定 aliyun.oss 前缀
+  @Configuration
+  public class AliyunOSSAutoConfiguration {
+  
+      @Bean
+      @ConditionalOnMissingBean                                // 使用方自己定义了就让位
+      public AliyunOSSOperator aliyunOSSOperator(AliyunOSSProperties aliyunOSSProperties){
+          return new AliyunOSSOperator(aliyunOSSProperties);   // 形参由容器按类型自动装配
+      }
+  }
+  ```
+  ③ 登记文件：
+  ```text
+  src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+  ```
+  内容一行：
+  ```text
+  com.aliyun.oss.AliyunOSSAutoConfiguration
+  ```
+  （2.7.0 之前写在 `META-INF/spring.factories` 里，是历史写法；本机 Spring Boot 3.2.x 读的是 `.imports`。）
+  ④ 使用方自己定义过同类型 bean 时，**自动配置类里那个 `@Bean` 方法不会执行**——容器里用使用方定义的那个，应用照常启动、注入也不会报"同类型 bean 有两个"。保证这件事的注解是 **`@ConditionalOnMissingBean`**：判断环境中没有对应的 bean（按类型或名称）时才注册。本机实测过：加上自定义 bean 后，控制台打印了 `[实验] 自定义的 AliyunOSSOperator bean 被创建`，应用正常启动，`/check` 依然能注入。
+  自查：把自动配置类的登记文件删掉（或改个名字）再启动使用方工程——注入会失败（找不到 bean），这就是"登记文件是必需品"的证明。
+
+  :::
+
 
 - [ ] **2-3 把"我的组件怎么才能被别的工程用上"讲清楚**
   需求：同事问你三个问题，请写清楚：
@@ -487,16 +503,24 @@ AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperat
   ③ 使用方接入你的组件要做哪几件事，其中哪几件是"必须的"。
   （写作区见练习文件 `test_90_自定义starter.txt` 的题目2-3。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：① 从"重复维护"和"依赖与配置都得自己补"两个角度说；② 关键词是"装进本地仓库"与"打进 target"的区别；③ 数一数使用方写的东西：依赖、配置、注入
-  > **二级 · 方法**：`mvn clean install`（`install` 会把 jar 装进本地仓库，`package` 只到 `target/`）；使用方 pom 一行依赖 + yml 参数（前缀与参数类 `prefix` 一致）+ `@Autowired` 注入；`install` 安装顺序：先 autoconfigure 再 starter（被依赖的先装）
-  > **三级 · 骨架**：① 拷贝源码 → 每个团队各维护一份，改一次要改 N 处；而且 OSS 的 SDK 与 jaxb 三兄弟还得各自补；② 在组件模块里执行 `mvn ____` → 装进本地仓库；③ 使用方：____ 一行依赖、____ 参数、____ 注入
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ① 不拷源码的理由：**重复维护**——每个团队各存一份，组件一改就要挨个通知、挨个改；**依赖与配置也得自己补**——OSS 的 SDK 与那三个 jaxb 坐标要各自加一遍，工具类的 bean 也要各自声明（[73 篇](/posts/编程学习/javaweb学习笔记/73-阿里云oss与参数配置化/)就是这么干的，麻烦之处都见过）；此外还有**版本失控**的问题（各团队引的版本可能不一致）。做成 starter 后，这些都被封进依赖里。
-  > ② 交付方式：在两个模块的目录下分别执行 **`mvn clean install`**——`install` 会把打好的 jar **装进本地仓库**（本机是 `A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\...`）；`package` 只把 jar 打进工程的 `target/` 目录，本地仓库里没有，别的工程就引不到。顺序上**先 install autoconfigure、再 install starter**（被依赖的模块要先在仓库里）。
-  > ③ 使用方要做三件事：pom 里加**一行** starter 依赖（**必须**）、`application.yml` 里写参数（`aliyun.oss` 三项，**按需必须**——组件要和 OSS 通信就得配）、`@Autowired` 注入工具类（用的时候写）。**不必须**的是任何配置类、任何 `@Component`、任何 `@Import`——这三样一件都不用写，正是"自动配置功能"省下来的。
-  > 自查：本机实测的结果是 `/check` 返回 `AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee`——使用方工程里确实没有任何配置代码。
+  **一级 · 思路**：① 从"重复维护"和"依赖与配置都得自己补"两个角度说；② 关键词是"装进本地仓库"与"打进 target"的区别；③ 数一数使用方写的东西：依赖、配置、注入
+  **二级 · 方法**：`mvn clean install`（`install` 会把 jar 装进本地仓库，`package` 只到 `target/`）；使用方 pom 一行依赖 + yml 参数（前缀与参数类 `prefix` 一致）+ `@Autowired` 注入；`install` 安装顺序：先 autoconfigure 再 starter（被依赖的先装）
+  **三级 · 骨架**：① 拷贝源码 → 每个团队各维护一份，改一次要改 N 处；而且 OSS 的 SDK 与 jaxb 三兄弟还得各自补；② 在组件模块里执行 `mvn ____` → 装进本地仓库；③ 使用方：____ 一行依赖、____ 参数、____ 注入
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ① 不拷源码的理由：**重复维护**——每个团队各存一份，组件一改就要挨个通知、挨个改；**依赖与配置也得自己补**——OSS 的 SDK 与那三个 jaxb 坐标要各自加一遍，工具类的 bean 也要各自声明（[73 篇](/posts/编程学习/javaweb学习笔记/73-阿里云oss与参数配置化/)就是这么干的，麻烦之处都见过）；此外还有**版本失控**的问题（各团队引的版本可能不一致）。做成 starter 后，这些都被封进依赖里。
+  ② 交付方式：在两个模块的目录下分别执行 **`mvn clean install`**——`install` 会把打好的 jar **装进本地仓库**（本机是 `A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\...`）；`package` 只把 jar 打进工程的 `target/` 目录，本地仓库里没有，别的工程就引不到。顺序上**先 install autoconfigure、再 install starter**（被依赖的模块要先在仓库里）。
+  ③ 使用方要做三件事：pom 里加**一行** starter 依赖（**必须**）、`application.yml` 里写参数（`aliyun.oss` 三项，**按需必须**——组件要和 OSS 通信就得配）、`@Autowired` 注入工具类（用的时候写）。**不必须**的是任何配置类、任何 `@Component`、任何 `@Import`——这三样一件都不用写，正是"自动配置功能"省下来的。
+  自查：本机实测的结果是 `/check` 返回 `AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee`——使用方工程里确实没有任何配置代码。
+
+  :::
+
 
 ### 三、综合题
 
@@ -527,25 +551,33 @@ AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperat
   | 本机实测（第 14 章 ） | 第 5～8 步的对照答案——`/check` 返回"已自动装配: true" |
   | 版本差异 | 第 9 步——本机 3.2.x 走 `.imports`，`spring.factories` 是历史写法 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"依赖 → 自动配置 → 登记 → 使用"的顺序做，每完成一步都先想"使用方少写了什么"；第 8 步的对照实验是把 [89 篇](/posts/编程学习/javaweb学习笔记/89-springboot自动配置原理/)那个实测再做一次，只是这次组件是你自己写的
-  > **二级 · 方法**：类上 `@EnableConfigurationProperties` + `@Configuration`；方法上 `@Bean` + `@ConditionalOnMissingBean`；登记文件 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`；`mvn clean install`（本机本地仓库换过位置，打包时用 `-s settings.xml`）；使用方 yml 的前缀与参数类 `prefix` 一致（`aliyun.oss`）；"同类型 bean 有两个"的报错关键词是 `NoUniqueBeanDefinitionException`
-  > **三级 · 骨架**：① `@____(AliyunOSSProperties.class)` + `@____`；`@____` + `@____`；③ 文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；⑤ `mvn clean ____`；⑥ 使用方 pom 一整块依赖 + yml 的 `aliyun:` → `oss:` 三项 + Controller 里 `@____ private AliyunOSSOperator ____;`；⑧ `@____ public class MyConfig { @____ public AliyunOSSOperator ____() { ... } }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1~4. 模块、pom、三个类与登记文件见 2-1、2-2 的答案（自动配置类是 `@EnableConfigurationProperties(AliyunOSSProperties.class)` + `@Configuration`，方法上 `@Bean` + `@ConditionalOnMissingBean`；登记文件里一行全类名 `com.aliyun.oss.AliyunOSSAutoConfiguration`）。
-  > 5. **本机实测**：两条 `mvn -s settings.xml clean install` 的控制台里分别出现
-  >    ```text
-  >    Installing ... to A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\aliyun-oss-spring-boot-autoconfigure\0.0.1-SNAPSHOT\...
-  >    Installing ... to A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\aliyun-oss-spring-boot-starter\0.0.1-SNAPSHOT\...
-  >    ```
-  > 6. 测试工程那三件事：pom 一行 `com.aliyun.oss:aliyun-oss-spring-boot-starter:0.0.1-SNAPSHOT`；yml 里 `aliyun.oss` 的 `endpoint` / `bucketName` / `region`；Controller 里 `@Autowired private AliyunOSSOperator aliyunOSSOperator;`（这个类型来自 starter 的包，工程里没有它的源码）。
-  > 7. **本机实测**：`/check` 返回原文——
-  >    ```text
-  >    AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee
-  >    ```
-  > 8. **本机实测**：加上自定义的 `@Bean` 后控制台出现 `[实验] 自定义的 AliyunOSSOperator bean 被创建`，应用**正常启动**（`Started SpringbootAutoconfigurationTestApplication in 2.084 seconds`），`/check` 依然能注入，**没有** `NoUniqueBeanDefinitionException`——说明自动配置类里那个带 `@ConditionalOnMissingBean` 的方法让位了。
-  > 9. 三个回答：
-  >    ① **依赖管理功能**由 starter 模块的 pom 提供（引入 autoconfigure，连带阿里云 SDK 与 jaxb 三兄弟一起进来）；**自动配置功能**由 autoconfigure 模块提供（自动配置类 + `.imports` 登记文件）。
-  >    ② 因为自动配置类已经把"造哪些 bean"写好了，而 `.imports` 文件让 SpringBoot 在启动时自动读到它（`AutoConfigurationImportSelector` 读名单 → `@Conditional` 条件满足 → 注册 bean）——使用方**不需要**再写 `@Component` / `@Configuration` / `@Import` 中的任何一个。
-  >    ③ **本机是 Spring Boot 3.2.x**，读的是 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`；`spring.factories` 是 2.7.0 之前的**历史写法**。
+  **一级 · 思路**：按"依赖 → 自动配置 → 登记 → 使用"的顺序做，每完成一步都先想"使用方少写了什么"；第 8 步的对照实验是把 [89 篇](/posts/编程学习/javaweb学习笔记/89-springboot自动配置原理/)那个实测再做一次，只是这次组件是你自己写的
+  **二级 · 方法**：类上 `@EnableConfigurationProperties` + `@Configuration`；方法上 `@Bean` + `@ConditionalOnMissingBean`；登记文件 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`；`mvn clean install`（本机本地仓库换过位置，打包时用 `-s settings.xml`）；使用方 yml 的前缀与参数类 `prefix` 一致（`aliyun.oss`）；"同类型 bean 有两个"的报错关键词是 `NoUniqueBeanDefinitionException`
+  **三级 · 骨架**：① `@____(AliyunOSSProperties.class)` + `@____`；`@____` + `@____`；③ 文件路径 `META-INF/spring/org.springframework.boot.autoconfigure.____.imports`；⑤ `mvn clean ____`；⑥ 使用方 pom 一整块依赖 + yml 的 `aliyun:` → `oss:` 三项 + Controller 里 `@____ private AliyunOSSOperator ____;`；⑧ `@____ public class MyConfig { @____ public AliyunOSSOperator ____() { ... } }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1~4. 模块、pom、三个类与登记文件见 2-1、2-2 的答案（自动配置类是 `@EnableConfigurationProperties(AliyunOSSProperties.class)` + `@Configuration`，方法上 `@Bean` + `@ConditionalOnMissingBean`；登记文件里一行全类名 `com.aliyun.oss.AliyunOSSAutoConfiguration`）。
+  5. **本机实测**：两条 `mvn -s settings.xml clean install` 的控制台里分别出现
+     ```text
+     Installing ... to A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\aliyun-oss-spring-boot-autoconfigure\0.0.1-SNAPSHOT\...
+     Installing ... to A:\develop\maven\apache-maven-3.9.14\mvn_repo\com\aliyun\oss\aliyun-oss-spring-boot-starter\0.0.1-SNAPSHOT\...
+     ```
+  6. 测试工程那三件事：pom 一行 `com.aliyun.oss:aliyun-oss-spring-boot-starter:0.0.1-SNAPSHOT`；yml 里 `aliyun.oss` 的 `endpoint` / `bucketName` / `region`；Controller 里 `@Autowired private AliyunOSSOperator aliyunOSSOperator;`（这个类型来自 starter 的包，工程里没有它的源码）。
+  7. **本机实测**：`/check` 返回原文——
+     ```text
+     AliyunOSSOperator 已自动装配: true , 实例: com.aliyun.oss.AliyunOSSOperator@38ec98ee
+     ```
+  8. **本机实测**：加上自定义的 `@Bean` 后控制台出现 `[实验] 自定义的 AliyunOSSOperator bean 被创建`，应用**正常启动**（`Started SpringbootAutoconfigurationTestApplication in 2.084 seconds`），`/check` 依然能注入，**没有** `NoUniqueBeanDefinitionException`——说明自动配置类里那个带 `@ConditionalOnMissingBean` 的方法让位了。
+  9. 三个回答：
+     ① **依赖管理功能**由 starter 模块的 pom 提供（引入 autoconfigure，连带阿里云 SDK 与 jaxb 三兄弟一起进来）；**自动配置功能**由 autoconfigure 模块提供（自动配置类 + `.imports` 登记文件）。
+     ② 因为自动配置类已经把"造哪些 bean"写好了，而 `.imports` 文件让 SpringBoot 在启动时自动读到它（`AutoConfigurationImportSelector` 读名单 → `@Conditional` 条件满足 → 注册 bean）——使用方**不需要**再写 `@Component` / `@Configuration` / `@Import` 中的任何一个。
+     ③ **本机是 Spring Boot 3.2.x**，读的是 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`；`spring.factories` 是 2.7.0 之前的**历史写法**。
+
+  :::
+

@@ -281,6 +281,106 @@ function fixAngleBrackets(text) {
 }
 
 /** 逐行处理，跳过围栏代码块；行内代码也不动 */
+/** Obsidian callout 类型 → 中文默认标题（Obsidian 中文界面就是这么显示的） */
+const CALLOUT_TITLES = {
+	note: "注意",
+	tip: "提示",
+	important: "重要",
+	warning: "警告",
+	caution: "危险",
+};
+
+/** VitePress 原生支持的 GitHub 告警类型，其余类型它不认（会原样显示 [!xxx]） */
+const CALLOUT_TYPES = new Set(Object.keys(CALLOUT_TITLES));
+
+/**
+ * Obsidian callout → VitePress 可渲染的形式。
+ *
+ * VitePress 原生支持 `> [!NOTE]` 这类 GitHub 告警（会渲染成带颜色的 custom-block），
+ * 但**不认 Obsidian 的折叠标记**：
+ *   `> [!TIP]- 提示（点开看）`  →  标题变成 "- 提示（点开看）"，而且不折叠
+ *   `> [!TIP]+ 提示`            →  标题变成 "+ 提示"
+ * 笔记里有 1700+ 处 `[!TIP]-`（全是「参考答案，做完再点开」），展开就等于剧透。
+ *
+ * 所以：
+ *   [!TYPE]- 标题  →  `::: details 标题` … `:::`（VitePress 原生折叠容器，列表项里也能用）
+ *   [!TYPE]+ 标题  →  去掉 `+`，留作普通告警（本来就是展开的）
+ *   [!TYPE] 标题   →  不动；标题为空时补中文默认标题（VitePress 会显示英文 NOTE/TIP）
+ */
+function convertCallouts(text) {
+	const lines = text.split("\n");
+	const out = [];
+	let inFence = false;
+	let fenceChar = "";
+	let converted = 0;
+	let titled = 0;
+
+	const fenceAt = (line) => fenceMarker(line);
+
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		const mark = fenceAt(line);
+		if (mark) {
+			if (!inFence) {
+				inFence = true;
+				fenceChar = mark;
+			} else if (mark === fenceChar) {
+				inFence = false;
+			}
+			out.push(line);
+			continue;
+		}
+		if (inFence) {
+			out.push(line);
+			continue;
+		}
+
+		// 缩进 + 可选的引用前缀，捕获：缩进 / 类型 / 折叠符 / 标题
+		const m = /^(\s*)>\s*\[!(\w+)\]([-+]?)[ \t]*(.*)$/.exec(line);
+		if (!m) {
+			out.push(line);
+			continue;
+		}
+		const [, indent, typeRaw, fold, titleRaw] = m;
+		const type = typeRaw.toLowerCase();
+		if (!CALLOUT_TYPES.has(type)) {
+			out.push(line); // 不认识的类型（abstract/example 之类）保持原样，别乱改
+			continue;
+		}
+		const title = titleRaw.trim() || CALLOUT_TITLES[type];
+
+		if (fold === "-") {
+			// 收集这个 callout 的所有 `>` 行，剥掉一层引用前缀
+			const body = [];
+			let j = i + 1;
+			while (j < lines.length && /^\s*>/.test(lines[j])) {
+				body.push(lines[j].replace(/^(\s*)>[ \t]?/, "$1"));
+				j++;
+			}
+			if (out.length > 0 && out[out.length - 1].trim() !== "") out.push("");
+			out.push(`${indent}::: details ${title}`);
+			out.push("");
+			out.push(...body);
+			out.push("");
+			out.push(`${indent}:::`);
+			out.push("");
+			converted++;
+			i = j - 1;
+			continue;
+		}
+
+		// `+` 或没有折叠符：去掉 `+`，标题为空时补中文
+		if (fold === "+" || !titleRaw.trim()) {
+			out.push(`${indent}> [!${typeRaw}] ${title}`);
+			if (!titleRaw.trim()) titled++;
+			continue;
+		}
+		out.push(line);
+	}
+
+	return { text: out.join("\n"), converted, titled };
+}
+
 function transformOutsideCode(text, fn) {
 	const lines = text.split("\n");
 	let inFence = false;
@@ -340,6 +440,11 @@ function sanitize(text, opts = {}) {
 	}
 
 	// 正文：尖括号配平的保留，不配平的转成文本
+	// callout 要在尖括号处理之前跑：折叠 callout 会改写成 ::: details 容器，
+	// 里面的内容随后仍会正常走尖括号/标签处理。
+	const callout = convertCallouts(body);
+	body = callout.text;
+
 	const angle = fixAngleBrackets(body);
 	body = angle.text;
 
@@ -426,6 +531,8 @@ function sanitize(text, opts = {}) {
 		escapedBlocks: angle.escapedBlocks,
 		imgFixed,
 		redacted,
+		calloutConverted: callout.converted,
+		calloutTitled: callout.titled,
 		wikiImg,
 		wikiMiss,
 		pathFixed,
@@ -548,6 +655,7 @@ const stat = {
 	escaped: 0,
 	img: 0,
 	redacted: 0,
+	callout: 0,
 	wikiImg: 0,
 	wikiMiss: 0,
 	pathFixed: 0,
@@ -585,6 +693,7 @@ for (const { full, rel } of files) {
 		escapedBlocks,
 		imgFixed,
 		redacted,
+		calloutConverted,
 		wikiImg,
 		wikiMiss,
 		pathFixed,
@@ -603,6 +712,7 @@ for (const { full, rel } of files) {
 	if (escapedBlocks > 0) stat.escaped++;
 	if (imgFixed) stat.img++;
 	if (redacted > 0) stat.redacted++;
+	if (calloutConverted > 0) stat.callout++;
 	if (wikiImg > 0) stat.wikiImg++;
 	if (wikiMiss > 0) stat.wikiMiss++;
 	if (pathFixed > 0) stat.pathFixed++;
@@ -775,6 +885,7 @@ console.log(`  删零宽字符    : ${stat.zeroWidth} 篇`);
 console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
 console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
+console.log(`  折叠callout转换: ${stat.callout} 篇`);
 console.log(`  双链图片转换  : ${stat.wikiImg} 篇`);
 console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
 if (stat.wikiMiss > 0) {

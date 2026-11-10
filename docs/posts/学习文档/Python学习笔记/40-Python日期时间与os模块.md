@@ -34,10 +34,10 @@ print(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
 | `%M` | 分钟 | 00 |
 | `%S` | 秒 | 05 |
 
-> [!TIP]
+> [!TIP] 提示
 > 格式串 `"%Y-%m-%d_%H-%M-%S"` 里把**日期用 `-`、时间用 `-`、中间用 `_` 分隔**，是为了让文件名既好读、又不会包含非法字符（Windows 文件名不允许 `:` `/` 等符号）。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 用时间做标识的前提是**格式化精确到秒**。同一秒内点了两次"新建会话"会得到重名——课程项目里靠"聊天记录为空时不重复新建"来规避（见 [会话管理](/posts/编程学习/python学习笔记/41-实战-ai智能伴侣-会话管理/)）。
 
 ## os 模块
@@ -70,10 +70,10 @@ if os.path.exists("sessions/2026-01-11_18-00-05.json"):
     os.remove("sessions/2026-01-11_18-00-05.json")
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > `os.mkdir()` 只能创建**一级**目录，而且目录已存在时会抛 `FileExistsError`；要一次创建多级目录用 `os.makedirs(path, exist_ok=True)`。
 
-> [!NOTE]
+> [!NOTE] 注意
 > `filename[:-5]` 是字符串切片：`-5` 表示从末尾往前数 5 个字符，正好去掉 `.json` 这 5 个字符。更直观的写法是 `filename.removesuffix(".json")`（Python 3.9+）。
 
 ## 环境变量怎么设置
@@ -87,7 +87,7 @@ if os.path.exists("sessions/2026-01-11_18-00-05.json"):
 | macOS / Linux | `export DEEPSEEK_API_KEY=sk-xxxx` |
 | PyCharm | 运行配置 → Environment variables 里添加 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > API Key 属于密钥，**不能写死在代码里**。一旦写死又提交到 Git 仓库，就等于公开泄露（密钥会被扫描器批量收割）。放环境变量是最基本的做法。
 
 ## 相关
@@ -113,78 +113,102 @@ if os.path.exists("sessions/2026-01-11_18-00-05.json"):
 - [ ] **2-1 生成会话标识**
   打印一个形如 `2026-01-11_18-00-05` 的时间字符串；再打印一个中文格式的日期，如 `2026年01月11日`。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：取当前时间 → 用格式化字符串拼成想要的样式
-  > **二级 · 方法**：`datetime.now().strftime("格式串")`
-  > **三级 · 骨架**：中文格式就是格式串里直接写中文：`"%Y年%m月%d日"`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > from datetime import datetime
-  > 
-  > # 会话标识格式
-  > print(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
-  > 
-  > # 中文日期格式（格式串里可以直接写中文）
-  > print(datetime.now().strftime("%Y年%m月%d日"))
-  > 
-  > # 连续运行两次，秒数不同（同一个脚本里两次 now() 也会不同）
-  > ```
+  **一级 · 思路**：取当前时间 → 用格式化字符串拼成想要的样式
+  **二级 · 方法**：`datetime.now().strftime("格式串")`
+  **三级 · 骨架**：中文格式就是格式串里直接写中文：`"%Y年%m月%d日"`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  from datetime import datetime
+  
+  # 会话标识格式
+  print(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+  
+  # 中文日期格式（格式串里可以直接写中文）
+  print(datetime.now().strftime("%Y年%m月%d日"))
+  
+  # 连续运行两次，秒数不同（同一个脚本里两次 now() 也会不同）
+  ```
+
+  :::
+
 
 - [ ] **2-2 目录准备与列目录**
   写一个函数：如果 `sessions` 目录不存在就创建；然后列出该目录下所有 `.json` 文件名（去掉扩展名后打印）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先判断再创建；列出来的文件名要筛一遍再切掉后缀
-  > **二级 · 方法**：`os.path.exists` / `os.mkdir` / `os.listdir` / `endswith(".json")`
-  > **三级 · 骨架**：`if not os.path.____("sessions"):`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import os
-  > 
-  > # 1. 目录不存在就创建
-  > if not os.path.exists("sessions"):
-  >     os.mkdir("sessions")
-  > 
-  > # 2. 造两个 json 文件
-  > with open("sessions/2026-01-11_18-00-05.json", "w", encoding="utf-8") as f:
-  >     f.write("{}")
-  > with open("sessions/2026-01-11_18-04-42.json", "w", encoding="utf-8") as f:
-  >     f.write("{}")
-  > 
-  > # 3. 列出 .json 文件并去掉后缀
-  > session_list = []
-  > for filename in os.listdir("sessions"):
-  >     if filename.endswith(".json"):
-  >         session_list.append(filename[:-5])
-  > session_list.sort(reverse=True)
-  > print(session_list)
-  > ```
+  **一级 · 思路**：先判断再创建；列出来的文件名要筛一遍再切掉后缀
+  **二级 · 方法**：`os.path.exists` / `os.mkdir` / `os.listdir` / `endswith(".json")`
+  **三级 · 骨架**：`if not os.path.____("sessions"):`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import os
+  
+  # 1. 目录不存在就创建
+  if not os.path.exists("sessions"):
+      os.mkdir("sessions")
+  
+  # 2. 造两个 json 文件
+  with open("sessions/2026-01-11_18-00-05.json", "w", encoding="utf-8") as f:
+      f.write("{}")
+  with open("sessions/2026-01-11_18-04-42.json", "w", encoding="utf-8") as f:
+      f.write("{}")
+  
+  # 3. 列出 .json 文件并去掉后缀
+  session_list = []
+  for filename in os.listdir("sessions"):
+      if filename.endswith(".json"):
+          session_list.append(filename[:-5])
+  session_list.sort(reverse=True)
+  print(session_list)
+  ```
+
+  :::
+
 
 - [ ] **2-3 安全地删除文件**
   写一个函数：先创建一个临时文件（如 `temp_demo.txt`）并写入内容，再判断它存在后删除它，最后再列一次目录确认删掉了。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：删除前一定先判断存在，否则会抛异常
-  > **二级 · 方法**：`os.path.exists` / `os.remove`
-  > **三级 · 骨架**：`if os.path.____(path): os.____(path)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import os
-  > 
-  > # 1. 创建临时文件
-  > with open("temp_demo.txt", "w", encoding="utf-8") as f:
-  >     f.write("删除我\n")
-  > 
-  > # 2. 判断存在后删除
-  > if os.path.exists("temp_demo.txt"):
-  >     os.remove("temp_demo.txt")
-  >     print("已删除")
-  > 
-  > # 3. 确认
-  > print("temp_demo.txt" in os.listdir("."))
-  > 
-  > # 如果不判断存在就删，会抛：FileNotFoundError
-  > ```
+  **一级 · 思路**：删除前一定先判断存在，否则会抛异常
+  **二级 · 方法**：`os.path.exists` / `os.remove`
+  **三级 · 骨架**：`if os.path.____(path): os.____(path)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import os
+  
+  # 1. 创建临时文件
+  with open("temp_demo.txt", "w", encoding="utf-8") as f:
+      f.write("删除我\n")
+  
+  # 2. 判断存在后删除
+  if os.path.exists("temp_demo.txt"):
+      os.remove("temp_demo.txt")
+      print("已删除")
+  
+  # 3. 确认
+  print("temp_demo.txt" in os.listdir("."))
+  
+  # 如果不判断存在就删，会抛：FileNotFoundError
+  ```
+
+  :::
+

@@ -15,7 +15,7 @@ cover: false
 
 LangChain 1.2 要求 **Python >= 3.10**，课程使用 **Python 3.13.12**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 课程讲义里特别提醒：安装依赖包时**必须显式指明版本**，否则容易出现不兼容（LangChain 生态各包之间版本咬得很紧）。
 
 ## 为什么要用虚拟环境
@@ -38,10 +38,10 @@ LangChain 1.2 要求 **Python >= 3.10**，课程使用 **Python 3.13.12**。
 - **方案2 uv**：现代 Python 包管理工具，只管 Python 生态依赖；FastAPI 项目、LangChain 项目、脚本工具、RAG 应用层代码都可以优先考虑。
 - **方案3 venv**：Python 自带、简单轻量，`python -m venv .venv` 一条命令；但不负责安装解释器和非 Python 依赖。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 对于 LangChain 这样的纯 Python 环境，uv 和 conda 都能用；**本课程选择 conda**（配套《尚硅谷-conda使用指南.md》）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > conda 环境里可以用 pip，但**建议先用 conda 装底层依赖，再用 pip 补充 Python 包**，不要随意反复交替使用。
 
 ### uv 的完整适用清单
@@ -55,7 +55,7 @@ LangChain 1.2 要求 **Python >= 3.10**，课程使用 **Python 3.13.12**。
 5. **普通 AI Agent 应用**
 6. RAG 应用层代码
 
-> [!TIP]
+> [!TIP] 提示
 > 判断标准其实只有一条：项目里**有没有需要 conda 才能装的东西**（CUDA、编译器、系统库、数据库驱动）。有就用 conda——更稳妥；没有就用 uv——更快、体验更好。上面对比表里 uv 那行的"适合场景"写的是"纯 Python 项目、Web、Agent、RAG 应用层"，和这 6 条正好对得上。
 
 ### conda 能管哪些非 Python 依赖
@@ -66,7 +66,7 @@ LangChain 1.2 要求 **Python >= 3.10**，课程使用 **Python 3.13.12**。
 - 以及很多**非 Python 依赖**：**CUDA、编译器、系统库、数据库驱动、科学计算底层库**等；
 - 因此在**数据科学、深度学习、AI 工程、科学计算**等场景中，conda 更稳妥、优先推荐。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 这也划出了 uv 的边界：uv 是"现代 Python 包管理工具"，**主要管理 Python 生态依赖**，不能像 conda 那样管理 CUDA、系统级数据库驱动、编译器这类通用非 Python 依赖。所以本课程落在"纯 Python"这一侧，uv 和 conda 都能用，只是课程选了 conda。
 
 ## conda 常用命令
@@ -98,7 +98,7 @@ conda remove --name langchain1.2 --all
 
 课程讲义演示 `python -V` 的输出时写的是 `Python 3.12.13`，和它自己创建环境时指定的 `python=3.13.12` 对不上——这是**数字顺序写反的笔误**。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 以创建命令为准：`conda create --name langchain1.2 python=3.13.12` 装出来的是 **Python 3.13.12**，验证时也应该看到 `Python 3.13.12`。
 
 ## 安装 langchain：conda 还是 pip
@@ -150,7 +150,7 @@ pip list                             # 查看已安装包
 ![](https://img.tsh520.cn/file/blog/article/ch01-p017-PyCharm下载页与版本.jpg)
 *图：PyCharm 下载页——Version 选 2025.3，再按系统挑安装包（课程用的是 2025.3.3）*
 
-> [!TIP]
+> [!TIP] 提示
 > 版本不必和课程一模一样，但记住一点：**PyCharm 只是写代码的地方，真正干活的是 conda 环境**——下面新建工程时，解释器一定要指向刚建好的 `langchain1.2`。
 
 ## PyCharm 配置
@@ -193,79 +193,98 @@ print(langchain.__version__)
 - [ ] **2-1 创建并验证环境**
   从零建一个名为 `langchain1.2` 的 conda 环境（Python 3.13.12）：创建 → 初始化 → 激活 → 确认当前 Python 版本 → 退出。要求退出后再确认一次版本，看解释器是不是回到了系统环境。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：创建 → 初始化（要重启命令行窗口才生效）→ 激活 → 验证 → 退出
-  > **二级 · 方法**：`conda create --name langchain1.2 python=3.13.12`、`conda init`、`conda activate langchain1.2`、`python -V`、`conda deactivate`
-  > **三级 · 骨架**：激活成功后提示符前面会出现 `(langchain1.2)`；`python -V` 应输出 `Python 3.13.12`（讲义里演示输出写成 3.12.13 是笔误）
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：创建 → 初始化（要重启命令行窗口才生效）→ 激活 → 验证 → 退出
+  **二级 · 方法**：`conda create --name langchain1.2 python=3.13.12`、`conda init`、`conda activate langchain1.2`、`python -V`、`conda deactivate`
+  **三级 · 骨架**：激活成功后提示符前面会出现 `(langchain1.2)`；`python -V` 应输出 `Python 3.13.12`（讲义里演示输出写成 3.12.13 是笔误）
+
+  :::
+
 
 - [ ] **2-2 写脚本验证环境**
   先给环境装上指定版本（1.2.12）的 langchain，再写一个脚本回答四个问题：现在跑代码的是哪个 Python 解释器（版本 + 可执行文件路径）？装的是哪个版本的 langchain？这个包装在哪个目录下？后面课程要用的"创建模型"和"创建智能体"两个入口能不能导入成功？
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：解释器的事问 `sys`，包的事问包自己
-  > **二级 · 方法**：`sys.version` / `sys.executable`；`langchain.__version__` / `langchain.__file__`；两个入口分别是 `from langchain.chat_models import init_chat_model` 和 `from langchain.agents import create_agent`
-  > **三级 · 骨架**：两个导入放进 `try/except` 里，失败就打印原因——一次同时验证"版本对不对"和"包装得全不全"
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：解释器的事问 `sys`，包的事问包自己
+  **二级 · 方法**：`sys.version` / `sys.executable`；`langchain.__version__` / `langchain.__file__`；两个入口分别是 `from langchain.chat_models import init_chat_model` 和 `from langchain.agents import create_agent`
+  **三级 · 骨架**：两个导入放进 `try/except` 里，失败就打印原因——一次同时验证"版本对不对"和"包装得全不全"
+
+  :::
+
 
 - [ ] **2-3 检查包的来源**
   用命令行查看已安装的包，判断 `langchain` 这一行是从 conda 频道装的还是从 pypi 装的；顺便看看 `python` 这一行是哪来的。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：包列表里有一列专门写来源渠道
-  > **二级 · 方法**：`conda list`（不在该环境里时用 `conda list -n langchain1.2`）
-  > **三级 · 骨架**：Channel 列写 `pypi` 的是 pip 装的，写上频道名（如 `conda-forge`）的是 conda 装的
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：包列表里有一列专门写来源渠道
+  **二级 · 方法**：`conda list`（不在该环境里时用 `conda list -n langchain1.2`）
+  **三级 · 骨架**：Channel 列写 `pypi` 的是 pip 装的，写上频道名（如 `conda-forge`）的是 conda 装的
+
+  :::
+
 
 - [ ] **2-4 环境方案选型**
   三个项目：① 要装 CUDA、跑本地大模型推理的深度学习项目；② 纯 Python 的 FastAPI + LangChain 后端；③ 给同事演示一段 20 行的教学代码。分别选 conda / uv / venv 里的哪一个？并说出判断标准。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：判断标准只有一条——项目里有没有"非 Python 依赖"
-  > **二级 · 角度**：CUDA、编译器、系统库、数据库驱动属不属于 Python 包？uv 的适用清单里有没有"Web 后端"？
-  > **三级 · 骨架**：有非 Python 依赖 → ____；纯 Python 且想更快 → ____；临时轻量隔离 → ____
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```bash
-> # 2-1
-> conda create --name langchain1.2 python=3.13.12
-> conda init                      # 执行后重启命令行窗口
-> conda activate langchain1.2     # 提示符前面出现 (langchain1.2)
-> python -V                       # 应输出 Python 3.13.12
-> conda deactivate                # 退出后提示符前的 (langchain1.2) 消失
-> python -V                       # 这时用的是系统环境里的 Python
->
-> # 2-2 装包（优先 conda，conda 没有的再用 pip）
-> conda install langchain==1.2.12
-> # 或 pip 安装 + 国内镜像加速：
-> pip install langchain==1.2.12 -i https://pypi.tuna.tsinghua.edu.cn/simple
->
-> # 2-3
-> conda list                      # 不在该环境里时：conda list -n langchain1.2
-> # 本机实测（langchain1.2 环境）：
-> #   langchain   1.2.12  pypi_0               pypi   ← 这一行是 pip 装的
-> #   python      3.13.12 h39c999c_100_cp313          ← 这一行是 conda 装的（Channel 列不是 pypi）
-> ```
->
-> ```python
-> # 2-2 的验证脚本（行末注释是本机实测输出）
-> import sys
->
-> import langchain
->
-> print("解释器版本:", sys.version.split()[0])      # 3.13.12
-> print("解释器路径:", sys.executable)              # …\envs\langchain1.2\python.exe（应指向 conda 环境，而不是系统 Python）
-> print("langchain 版本:", langchain.__version__)   # 1.2.12
-> print("langchain 安装目录:", langchain.__file__)
->
-> try:
->     from langchain.chat_models import init_chat_model
->     print("创建模型入口导入成功")
-> except Exception as e:
->     print("创建模型入口导入失败:", e)
->
-> try:
->     from langchain.agents import create_agent
->     print("创建智能体入口导入成功")
-> except Exception as e:
->     print("创建智能体入口导入失败:", e)
-> ```
->
-> **2-4** ① 选 **conda**：CUDA、编译器这类非 Python 依赖只有 conda 能装（uv 和 venv 都管不了）；② 选 **uv**：纯 Python 的 Web 后端正好在 uv 的适用清单里（FastAPI 项目、LangChain 项目、Web 后端、普通 AI Agent 应用、RAG 应用层代码），比 conda 更快、体验更好；③ 选 **venv**：Python 自带、一条命令就能起一个轻量隔离，教学演示够用。判断标准：**项目里有没有需要 conda 才能装的东西（CUDA、编译器、系统库、数据库驱动）——有就用 conda，没有就用 uv**。
+  **一级 · 思路**：判断标准只有一条——项目里有没有"非 Python 依赖"
+  **二级 · 角度**：CUDA、编译器、系统库、数据库驱动属不属于 Python 包？uv 的适用清单里有没有"Web 后端"？
+  **三级 · 骨架**：有非 Python 依赖 → ____；纯 Python 且想更快 → ____；临时轻量隔离 → ____
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```bash
+# 2-1
+conda create --name langchain1.2 python=3.13.12
+conda init                      # 执行后重启命令行窗口
+conda activate langchain1.2     # 提示符前面出现 (langchain1.2)
+python -V                       # 应输出 Python 3.13.12
+conda deactivate                # 退出后提示符前的 (langchain1.2) 消失
+python -V                       # 这时用的是系统环境里的 Python
+
+# 2-2 装包（优先 conda，conda 没有的再用 pip）
+conda install langchain==1.2.12
+# 或 pip 安装 + 国内镜像加速：
+pip install langchain==1.2.12 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 2-3
+conda list                      # 不在该环境里时：conda list -n langchain1.2
+# 本机实测（langchain1.2 环境）：
+#   langchain   1.2.12  pypi_0               pypi   ← 这一行是 pip 装的
+#   python      3.13.12 h39c999c_100_cp313          ← 这一行是 conda 装的（Channel 列不是 pypi）
+```
+
+```python
+# 2-2 的验证脚本（行末注释是本机实测输出）
+import sys
+
+import langchain
+
+print("解释器版本:", sys.version.split()[0])      # 3.13.12
+print("解释器路径:", sys.executable)              # …\envs\langchain1.2\python.exe（应指向 conda 环境，而不是系统 Python）
+print("langchain 版本:", langchain.__version__)   # 1.2.12
+print("langchain 安装目录:", langchain.__file__)
+
+try:
+    from langchain.chat_models import init_chat_model
+    print("创建模型入口导入成功")
+except Exception as e:
+    print("创建模型入口导入失败:", e)
+
+try:
+    from langchain.agents import create_agent
+    print("创建智能体入口导入成功")
+except Exception as e:
+    print("创建智能体入口导入失败:", e)
+```
+
+**2-4** ① 选 **conda**：CUDA、编译器这类非 Python 依赖只有 conda 能装（uv 和 venv 都管不了）；② 选 **uv**：纯 Python 的 Web 后端正好在 uv 的适用清单里（FastAPI 项目、LangChain 项目、Web 后端、普通 AI Agent 应用、RAG 应用层代码），比 conda 更快、体验更好；③ 选 **venv**：Python 自带、一条命令就能起一个轻量隔离，教学演示够用。判断标准：**项目里有没有需要 conda 才能装的东西（CUDA、编译器、系统库、数据库驱动）——有就用 conda，没有就用 uv**。
+
+:::

@@ -64,7 +64,7 @@ https://docs.spring.io/spring-boot/docs/3.1.3/reference/htmlsingle/#using.build-
 
 更完整的清单可以命令行打出来（`mvn dependency:tree`）。本机实测：
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（Maven 3.9.14 / JDK 17 / Spring Boot 3.2.8），工程就是我们写 `HelloController` 的那个 `springboot-web-quickstart`：
 >
 > ```text
@@ -87,10 +87,10 @@ https://docs.spring.io/spring-boot/docs/3.1.3/reference/htmlsingle/#using.build-
 > | **`spring-boot-starter-web`** | `spring-boot-starter`（`spring-boot`、`spring-boot-autoconfigure`、`spring-boot-starter-logging` → logback、`snakeyaml`）、`spring-boot-starter-json`（`jackson-databind`/`-core`/`-annotations`、`jackson-datatype-jdk8`、`jackson-datatype-jsr310`、`jackson-module-parameter-names`）、**`spring-boot-starter-tomcat`**（`tomcat-embed-core` **10.1.26**、`tomcat-embed-el`、`tomcat-embed-websocket`）、`spring-web` 6.1.11、`spring-webmvc` 6.1.11（含 `spring-aop`、`spring-context`、`spring-expression`） |
 > | **`spring-boot-starter-test`**（范围 `test`） | `spring-boot-test`、`spring-boot-test-autoconfigure`、`json-path`、`assertj-core`、**`junit-jupiter` 5.10.3**、`mockito-core`/`mockito-junit-jupiter`、`jsonassert`、`spring-test`、`xmlunit-core` |
 
-> [!WARNING]
+> [!WARNING] 警告
 > PPT 第 16 页的截图和它的官方文档链接用的是 **Spring Boot 3.1.3**（所以那张图上内嵌 Tomcat 是 10.1.12），而课程代码与本机实测都是 **3.2.8**（内嵌 Tomcat 10.1.26）。版本号跟着课程代码走就行，**starter 的组成结构是一样的**。
 
-> [!TIP]
+> [!TIP] 提示
 > 记住 starter 的命名规律，以后看 pom 不用猜：官方 starter 都叫 **`spring-boot-starter-xxx`**（如 `-web`、`-test`、`-json`、`-tomcat`），第三方提供的则把名字放前面（`xxx-spring-boot-starter`）。
 
 ## 第二块：内嵌 Tomcat（PPT 第 17 页）
@@ -108,7 +108,7 @@ PPT 第 17 页只写了两个词：**内嵌 Tomcat** / **运行**。把上一节
 ![启动日志](https://img.tsh520.cn/file/blog/article/17-启动日志.jpg)
 *图：PPT 第 17 页——运行启动类后控制台的输出：先打印 Spring Boot 的 banner（`:: Spring Boot :: (v3.1.3)`），然后是启动过程日志，中间几行是 `Tomcat initialized with port(s): 8080 (http)`、`Starting service [Tomcat]`、`Starting Servlet engine: [Apache Tomcat/10.1.12]`、`Tomcat started on port(s): 8080 (http) with context path ''`，最后一行是 `Started SpringbootWebQuickstartApplication in 1.72 seconds`*
 
-> [!TIP]
+> [!TIP] 提示
 > 实测（本机 `java -jar springboot-web-quickstart-0.0.1-SNAPSHOT.jar`，JDK 17 / Spring Boot 3.2.8；为了好读，省略了每行前面的时间戳、PID 和 `[main]` 标记）：
 >
 > ```text
@@ -153,7 +153,7 @@ PPT 第 17 页只写了两个词：**内嵌 Tomcat** / **运行**。把上一节
 | `Tomcat started on port 8080 (http) with context path ''` | Tomcat 真正开始监听；**`context path ''`** 表示没有项目前缀 |
 | `Started SpringbootWebQuickstartApplication in 1.803 seconds` | **启动成功**、总耗时——看到这一行就可以访问接口了 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 两个容易踩的点：
 > 1. **端口 8080 被占用时会启动失败**（报 `Port 8080 was already in use`），先把占着端口的程序关掉再启动；
 > 2. **`context path ''`** 意味着访问地址里**没有项目名前缀**——所以是 `http://localhost:8080/hello`，而不是 `http://localhost:8080/springboot-web-quickstart/hello`（传统部署 war 包到独立 Tomcat 时，地址里通常要带项目名，这就是"内嵌 + 空 context path"省掉的麻烦）。
@@ -172,7 +172,7 @@ PPT 第 17 页只写了两个词：**内嵌 Tomcat** / **运行**。把上一节
 | **`src/main/resources`** | 配置文件与资源文件 | 工程生成时就有 `application.properties`（配置文件，默认只有一行 `spring.application.name=...`）；后面课程里的用户数据文件、前端静态页面也放在这里 |
 | **`src/test/java`** | 测试代码 | 生成时自带 `SpringbootWebQuickstartApplicationTests`（一个带 `@SpringBootTest` 的空测试类，方法上标 `@Test`），跑它等于"验证工程能不能启动" |
 
-> [!TIP]
+> [!TIP] 提示
 > 目录里放的东西和 [Maven 约定](/posts/编程学习/javaweb学习笔记/25-idea集成maven与项目坐标/)完全一致：`main` 是主程序、`test` 是测试程序——这正是 [29 篇](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)里"依赖范围"能生效的前提（`spring-boot-starter-test` 的 `<scope>test</scope>` 就是靠这个目录划分起作用的）。
 
 ## 小结
@@ -215,70 +215,110 @@ PPT 第 17 页只写了两个词：**内嵌 Tomcat** / **运行**。把上一节
   请从"依赖"和"服务器"两个方面回答，并说出这件事替我们省掉了哪些传统步骤。
 
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这件事要拆成"东西从哪来"（依赖）和"谁来跑"（服务器）两条线
-  > **二级 · 方法**：翻回前面"起步依赖"和"内嵌 Tomcat"两节，各找一句话
-  > **三级 · 骨架**：① 依赖：pom 里只写 ＿＿ 一行坐标，它带回一整套 jar；② 服务器：Tomcat 以 ＿＿ 的形式存在，由 ＿＿ 创建并启动
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 两个方面：
-  > ① **依赖方面——起步依赖**：`pom.xml` 里只写了 `spring-boot-starter-web` 一行坐标，它往下带回了 Web 开发所需要的常见依赖（spring-webmvc、jackson、日志，**以及 `spring-boot-starter-tomcat`**），不需要我们一个个去找 jar 坐标；
-  > ② **服务器方面——内嵌 Tomcat**：Tomcat 作为 jar（`tomcat-embed-core`）跟着依赖一起下载，运行启动类时 `SpringApplication.run(...)` 把它创建并启动，日志里能看到 `Tomcat started on port 8080 (http) with context path ''`。
-  > 省掉的步骤：**不用下载安装独立 Tomcat、不用配置 Tomcat、不用把工程打成 war 包丢进 webapps 部署**——直接运行 `main` 即可，打出来的是可执行 jar（`java -jar` 就能起）。
+  **一级 · 思路**：这件事要拆成"东西从哪来"（依赖）和"谁来跑"（服务器）两条线
+  **二级 · 方法**：翻回前面"起步依赖"和"内嵌 Tomcat"两节，各找一句话
+  **三级 · 骨架**：① 依赖：pom 里只写 ＿＿ 一行坐标，它带回一整套 jar；② 服务器：Tomcat 以 ＿＿ 的形式存在，由 ＿＿ 创建并启动
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  两个方面：
+  ① **依赖方面——起步依赖**：`pom.xml` 里只写了 `spring-boot-starter-web` 一行坐标，它往下带回了 Web 开发所需要的常见依赖（spring-webmvc、jackson、日志，**以及 `spring-boot-starter-tomcat`**），不需要我们一个个去找 jar 坐标；
+  ② **服务器方面——内嵌 Tomcat**：Tomcat 作为 jar（`tomcat-embed-core`）跟着依赖一起下载，运行启动类时 `SpringApplication.run(...)` 把它创建并启动，日志里能看到 `Tomcat started on port 8080 (http) with context path ''`。
+  省掉的步骤：**不用下载安装独立 Tomcat、不用配置 Tomcat、不用把工程打成 war 包丢进 webapps 部署**——直接运行 `main` 即可，打出来的是可执行 jar（`java -jar` 就能起）。
+
+  :::
+
 
 - [ ] **2-2 pom 里只有两行依赖坐标，工程里为什么能用 Spring MVC、能返回 JSON、能写 `@SpringBootTest` 测试？**
   解释"起步依赖"与"传递性依赖"在其中的作用，并说出这两行坐标分别对应哪套能力。
 
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一行坐标能用一堆东西，说明这行坐标是"套餐"而不是单个 jar
-  > **二级 · 方法**：看依赖树里 starter-web / starter-test 下面分别挂了什么
-  > **三级 · 骨架**：starter-web → ＿＿（请求处理）+ ＿＿（JSON）+ ＿＿（内嵌服务器）；starter-test → ＿＿ 等测试件
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 因为 **starter 是"依赖套餐"**：`spring-boot-starter-web` 往下带了 `spring-web` + `spring-webmvc`（`@RestController`、`@RequestMapping` 来自这里）、`spring-boot-starter-json`（Jackson，把对象/集合转成 JSON）、`spring-boot-starter-tomcat`（内嵌服务器）等；`spring-boot-starter-test` 往下带了 `junit-jupiter`、`mockito`、`assertj`、`spring-test`（`@SpringBootTest` 来自这里）。
-  > Maven 会把"依赖的依赖"一起解析进来，这就是**传递性依赖**（[26 篇](/posts/编程学习/javaweb学习笔记/26-maven依赖管理与生命周期/)）。所以写一行 starter 坐标 = 引入一整套配套 jar，这正是 SpringBoot"简化配置、快速开发"的体现。
+  **一级 · 思路**：一行坐标能用一堆东西，说明这行坐标是"套餐"而不是单个 jar
+  **二级 · 方法**：看依赖树里 starter-web / starter-test 下面分别挂了什么
+  **三级 · 骨架**：starter-web → ＿＿（请求处理）+ ＿＿（JSON）+ ＿＿（内嵌服务器）；starter-test → ＿＿ 等测试件
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  因为 **starter 是"依赖套餐"**：`spring-boot-starter-web` 往下带了 `spring-web` + `spring-webmvc`（`@RestController`、`@RequestMapping` 来自这里）、`spring-boot-starter-json`（Jackson，把对象/集合转成 JSON）、`spring-boot-starter-tomcat`（内嵌服务器）等；`spring-boot-starter-test` 往下带了 `junit-jupiter`、`mockito`、`assertj`、`spring-test`（`@SpringBootTest` 来自这里）。
+  Maven 会把"依赖的依赖"一起解析进来，这就是**传递性依赖**（[26 篇](/posts/编程学习/javaweb学习笔记/26-maven依赖管理与生命周期/)）。所以写一行 starter 坐标 = 引入一整套配套 jar，这正是 SpringBoot"简化配置、快速开发"的体现。
+
+  :::
+
 
 - [ ] **2-3 依赖树里 `spring-boot-starter-test` 后面为什么跟着 `:test`？这对主程序有什么影响？**
   结合本机实测的那行 `\- org.springframework.boot:spring-boot-starter-test:jar:3.2.8:test` 回答。
 
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：冒号分隔的最后一段就是"范围"
-  > **二级 · 方法**：对照 29 篇的依赖范围表，看 test 范围的三条效果（编译/打包/运行时）
-  > **三级 · 骨架**：`:test` = ＿＿ 范围 → 主程序引用会 ＿＿，打包时 ＿＿
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 那一段就是**依赖范围（scope）**：starter-test 在 pom 里写了 `<scope>test</scope>`，所以依赖树里显示 `:test`。
-  > 影响：它是**测试程序范围**才有效的依赖——`src/main/java` 里的主程序引用不到它（引用会编译失败），打包运行时也不会带上它（junit、mockito 这些只在写测试时有用，没有必要上生产）。这正好和 [29 篇](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)里 junit 那条规则一致：**测试框架的依赖要限制在测试范围**。
+  **一级 · 思路**：冒号分隔的最后一段就是"范围"
+  **二级 · 方法**：对照 29 篇的依赖范围表，看 test 范围的三条效果（编译/打包/运行时）
+  **三级 · 骨架**：`:test` = ＿＿ 范围 → 主程序引用会 ＿＿，打包时 ＿＿
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  那一段就是**依赖范围（scope）**：starter-test 在 pom 里写了 `<scope>test</scope>`，所以依赖树里显示 `:test`。
+  影响：它是**测试程序范围**才有效的依赖——`src/main/java` 里的主程序引用不到它（引用会编译失败），打包运行时也不会带上它（junit、mockito 这些只在写测试时有用，没有必要上生产）。这正好和 [29 篇](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)里 junit 那条规则一致：**测试框架的依赖要限制在测试范围**。
+
+  :::
+
 
 - [ ] **2-4 启动日志里 `context path ''` 是什么意思？它决定了什么？**
   再顺带说出：日志里**端口信息**是哪一行、哪一行代表"可以访问了"。
 
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：context path 就是 URL 里"工程名前缀"那一段
-  > **二级 · 方法**：对比传统 war 部署到独立 Tomcat 时的访问地址
-  > **三级 · 骨架**：`''` 表示部署在 ＿＿，所以地址是 http://localhost:8080/＿＿（不带 ＿＿）；端口在 ＿＿ 行，成功标志是 ＿＿ 行
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > `context path ''` 表示应用部署在**根路径**上（没有项目名前缀），所以访问接口的地址是 `http://localhost:8080/hello`，**地址里不带工程名**；如果 context path 不是空的，就要写成 `http://localhost:8080/项目名/hello`。
-  > 相关日志行：端口信息在 **`Tomcat initialized with port 8080 (http)`**（以及后面的 `Tomcat started on port 8080 (http)`）；"可以访问了"的标志是 **`Started XxxApplication in N seconds`**，也可以直接看 `Tomcat started on port 8080` 那一行。
+  **一级 · 思路**：context path 就是 URL 里"工程名前缀"那一段
+  **二级 · 方法**：对比传统 war 部署到独立 Tomcat 时的访问地址
+  **三级 · 骨架**：`''` 表示部署在 ＿＿，所以地址是 http://localhost:8080/＿＿（不带 ＿＿）；端口在 ＿＿ 行，成功标志是 ＿＿ 行
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  `context path ''` 表示应用部署在**根路径**上（没有项目名前缀），所以访问接口的地址是 `http://localhost:8080/hello`，**地址里不带工程名**；如果 context path 不是空的，就要写成 `http://localhost:8080/项目名/hello`。
+  相关日志行：端口信息在 **`Tomcat initialized with port 8080 (http)`**（以及后面的 `Tomcat started on port 8080 (http)`）；"可以访问了"的标志是 **`Started XxxApplication in N seconds`**，也可以直接看 `Tomcat started on port 8080` 那一行。
+
+  :::
+
 
 - [ ] **2-5 工程里的 `src/main/java`、`src/main/resources`、`src/test/java` 各放什么？**
   启动类和请求处理类分别放在哪里、为什么？
 
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：三条路径按"代码还是资源""主程序还是测试"来分
-  > **二级 · 方法**：看真实工程的目录树（本机实测的工程结构）
-  > **三级 · 骨架**：java → ＿＿ 与 ＿＿；resources → ＿＿ 与 ＿＿；test/java → ＿＿
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > `src/main/java` 放**主程序代码**：启动类 `SpringbootWebQuickstartApplication`（带 `@SpringBootApplication`，类里有 `main` 方法）和请求处理类 `HelloController`（本课都放在 `com.itheima` 包下）；
-  > `src/main/resources` 放**配置文件与资源文件**：工程生成时自带 `application.properties`，后面的用户数据文件、前端静态页面也会放在这里；
-  > `src/test/java` 放**测试代码**：生成时自带 `SpringbootWebQuickstartApplicationTests`（`@SpringBootTest` + `@Test`），跑它相当于验证工程能否正常启动。
-  > 启动类之所以要放在工程里、且带着 `main`，是因为它就是我们"运行"的入口——所有启动动作都由那一行 `SpringApplication.run(...)` 触发。
+  **一级 · 思路**：三条路径按"代码还是资源""主程序还是测试"来分
+  **二级 · 方法**：看真实工程的目录树（本机实测的工程结构）
+  **三级 · 骨架**：java → ＿＿ 与 ＿＿；resources → ＿＿ 与 ＿＿；test/java → ＿＿
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  `src/main/java` 放**主程序代码**：启动类 `SpringbootWebQuickstartApplication`（带 `@SpringBootApplication`，类里有 `main` 方法）和请求处理类 `HelloController`（本课都放在 `com.itheima` 包下）；
+  `src/main/resources` 放**配置文件与资源文件**：工程生成时自带 `application.properties`，后面的用户数据文件、前端静态页面也会放在这里；
+  `src/test/java` 放**测试代码**：生成时自带 `SpringbootWebQuickstartApplicationTests`（`@SpringBootTest` + `@Test`），跑它相当于验证工程能否正常启动。
+  启动类之所以要放在工程里、且带着 `main`，是因为它就是我们"运行"的入口——所有启动动作都由那一行 `SpringApplication.run(...)` 触发。
+
+  :::
+
 
 ### 三、综合题
 
@@ -325,15 +365,23 @@ PPT 第 17 页只写了两个词：**内嵌 Tomcat** / **运行**。把上一节
   | 依赖范围 | `:test` 的含义（只测试程序有效） |
   | 启动日志 | 版本、端口、context path、启动成功的判断 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：日志给"服务器状态"，依赖树给"装了哪些零件"，两条线互相印证——**版本看括号里的数字，服务器看 Tomcat 那几行，能不能跑看最后一行**
-  > **二级 · 方法**：`:: Spring Boot :: (v3.2.8)` 看 Spring Boot 版本；`Starting Servlet engine: [Apache Tomcat/10.1.26]` 看 Tomcat 版本；`context path ''` 说明地址不带工程名；`:test` 说明该依赖只在测试范围有效
-  > **三级 · 骨架**：① 版本 = banner 里的 `v____`；② 端口 = `Tomcat initialized with port ____`；③ 成功标志 = `Started ____ in ____ seconds`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **Spring Boot 3.2.8**——banner 那行 `:: Spring Boot :: (v3.2.8)`；依赖树里各 starter 的 `:3.2.8` 也一致。
-  > 2. **Tomcat 10.1.26**（`Starting Servlet engine: [Apache Tomcat/10.1.26]`），端口 **8080**（`Tomcat initialized with port 8080 (http)`，后面 `Tomcat started on port 8080 (http)` 再次确认）。
-  > 3. **启动成功了**（`Started SpringbootWebQuickstartApplication in 1.803 seconds`）。地址前缀是 **`http://localhost:8080/xxx`**——依据是 `context path ''`，表示没有项目名前缀。
-  > 4. pom 里至少写了两个 starter：**`spring-boot-starter-web`** 和 **`spring-boot-starter-test`**（依赖树的一级子节点就这两条；父工程 `spring-boot-starter-parent` 也在 pom 里，但它不出现在依赖树里）。
-  > 5. **都能**。`@RestController` / `@RequestMapping` 来自 `spring-webmvc`（随 `spring-boot-starter-web` 带进来）；返回 JSON 靠 `spring-boot-starter-json` 里的 **Jackson**（`jackson-databind` 等）。
-  > 6. **主程序照样能正常启动**，因为 `spring-boot-starter-test` 的范围是 **`test`**（依赖树末尾的 `:test`），它只在**测试程序**范围内有效——主程序不需要它、打包运行时也不会带上它。受影响的只有 `src/test/java` 里的测试类（`@SpringBootTest`、`@Test` 会找不到类而编译报错）。这也顺手解释了 PPT 第 16 页为什么把它单独列出来：**Web 开发和单元测试用的依赖是两套，各有个 starter**。
+  **一级 · 思路**：日志给"服务器状态"，依赖树给"装了哪些零件"，两条线互相印证——**版本看括号里的数字，服务器看 Tomcat 那几行，能不能跑看最后一行**
+  **二级 · 方法**：`:: Spring Boot :: (v3.2.8)` 看 Spring Boot 版本；`Starting Servlet engine: [Apache Tomcat/10.1.26]` 看 Tomcat 版本；`context path ''` 说明地址不带工程名；`:test` 说明该依赖只在测试范围有效
+  **三级 · 骨架**：① 版本 = banner 里的 `v____`；② 端口 = `Tomcat initialized with port ____`；③ 成功标志 = `Started ____ in ____ seconds`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **Spring Boot 3.2.8**——banner 那行 `:: Spring Boot :: (v3.2.8)`；依赖树里各 starter 的 `:3.2.8` 也一致。
+  2. **Tomcat 10.1.26**（`Starting Servlet engine: [Apache Tomcat/10.1.26]`），端口 **8080**（`Tomcat initialized with port 8080 (http)`，后面 `Tomcat started on port 8080 (http)` 再次确认）。
+  3. **启动成功了**（`Started SpringbootWebQuickstartApplication in 1.803 seconds`）。地址前缀是 **`http://localhost:8080/xxx`**——依据是 `context path ''`，表示没有项目名前缀。
+  4. pom 里至少写了两个 starter：**`spring-boot-starter-web`** 和 **`spring-boot-starter-test`**（依赖树的一级子节点就这两条；父工程 `spring-boot-starter-parent` 也在 pom 里，但它不出现在依赖树里）。
+  5. **都能**。`@RestController` / `@RequestMapping` 来自 `spring-webmvc`（随 `spring-boot-starter-web` 带进来）；返回 JSON 靠 `spring-boot-starter-json` 里的 **Jackson**（`jackson-databind` 等）。
+  6. **主程序照样能正常启动**，因为 `spring-boot-starter-test` 的范围是 **`test`**（依赖树末尾的 `:test`），它只在**测试程序**范围内有效——主程序不需要它、打包运行时也不会带上它。受影响的只有 `src/test/java` 里的测试类（`@SpringBootTest`、`@Test` 会找不到类而编译报错）。这也顺手解释了 PPT 第 16 页为什么把它单独列出来：**Web 开发和单元测试用的依赖是两套，各有个 starter**。
+
+  :::
+

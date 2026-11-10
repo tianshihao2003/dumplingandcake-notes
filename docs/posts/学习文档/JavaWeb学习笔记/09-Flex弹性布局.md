@@ -38,7 +38,7 @@ cover: false
 
 用法上最反直觉的一点：
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **flex 的属性写在"父容器"身上，控制的是"子元素"的位置和排列方式。** 也就是说，想让三个 `<div>` 横着排开会散开，就给**包着它们的那一层**加 `display: flex`，而不是给这三个 `<div>` 分别加。
 
 两个术语：
@@ -106,7 +106,7 @@ PPT 给了完整的属性表：
 | `space-around` | 每个子元素的**两侧留白相等**（最外侧留白是相邻间隙的一半） |
 | `space-between` | **两端贴边，中间的间隙平分**剩余空间 |
 
-> [!TIP]
+> [!TIP] 提示
 > `space-between` 是日常用得最多的一个：**"一行两端的两个东西"**（左边标题 + 右边退出登录、左边文字 + 右边按钮）直接就用它，中间不用写任何间距。
 
 ## 案例实战：顶部导航栏
@@ -159,7 +159,7 @@ PPT 给了完整的属性表：
 4. **`align-items: center`** 是正文 PPT 属性表之外的补充（案例代码里用到）：它以**交叉轴**为准做对齐——主轴是水平方向时，它管的是"**垂直方向居中**"，让标题和链接在导航栏高度里上下居中。名字好记：`justify-content` 管主轴、`align-items` 管交叉轴。
 5. **`h1` 要写 `margin: 0`**：浏览器给标题标签自带一圈默认外边距（这正是 08 篇的盒子模型——`margin` 是外边距那一层），不删掉的话导航栏上下会多出空白、撑得过高。
 
-> [!WARNING]
+> [!WARNING] 警告
 > **`display: flex` 要加在"包着它们的那一层"上**。如果把 `display: flex` 写在了子元素（比如 `<h1>`）身上，那条 "space-between" 就没有任何效果——这是初学者最常犯的错。
 
 ## 小结
@@ -199,56 +199,80 @@ PPT 给了完整的属性表：
   容器里有三个方块，要求：**横着排成一行**，第一个贴着左边、第三个贴着右边，剩下的空间在它们之间的空隙里**平分**。
   （练习文件 `test_09_两端贴边.html` 里有容器和三个方块，样式写在 head 的样式区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**："横着排" + "两端贴边、中间均分" → 用弹性布局，而且是"先两边贴边再平分"的那个取值
-  > **二级 · 方法**：父容器加 `display: flex`（默认主轴就是水平方向）；对齐方式用 `justify-content: space-between`
-  > **三级 · 骨架**：`#container { display: ____; justify-content: ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```css
-  > #container {
-  >   display: flex;                  /* 开启 flex 布局，主轴默认水平向右 */
-  >   justify-content: space-between; /* 先两边贴边，再平分剩余空间 */
-  > }
-  > ```
-  > 对照课程 `11. flex布局.html`（那份文件改的就是这一条 `justify-content`）。注意三个方块**不要**写 `margin`——空隙是 flex 自己分出来的。
+  **一级 · 思路**："横着排" + "两端贴边、中间均分" → 用弹性布局，而且是"先两边贴边再平分"的那个取值
+  **二级 · 方法**：父容器加 `display: flex`（默认主轴就是水平方向）；对齐方式用 `justify-content: space-between`
+  **三级 · 骨架**：`#container { display: ____; justify-content: ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```css
+  #container {
+    display: flex;                  /* 开启 flex 布局，主轴默认水平向右 */
+    justify-content: space-between; /* 先两边贴边，再平分剩余空间 */
+  }
+  ```
+  对照课程 `11. flex布局.html`（那份文件改的就是这一条 `justify-content`）。注意三个方块**不要**写 `margin`——空隙是 flex 自己分出来的。
+
+  :::
+
 
 - [ ] **2-2 三个方块的间距要"散得均匀"**
   同样三个方块横排，这次要求：**每个方块左右两侧的留白一样多**（所以方块之间的空隙看起来比两端到边缘的距离大一倍）。
   （练习文件 `test_09_均分间距.html` 里有容器和三个方块。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：还是横向排 + 分剩余空间，但这次是"每块两边都留白"，不是"两端贴边"
-  > **二级 · 方法**：`display: flex` + `justify-content` 的 **`space-around`**
-  > **三级 · 骨架**：`#container { display: ____; justify-content: ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```css
-  > #container {
-  >   display: flex;
-  >   justify-content: space-around;   /* 平分剩余空间：每个元素两侧留白相等 */
-  > }
-  > ```
-  > `space-around` 与 `space-between` 的差别就在**两端**：`space-between` 两端贴边（第一个元素左边没有空隙），`space-around` 两端也留白（等于相邻间隙的一半）。PPT 上这两个取值的描述分别是"**平分剩余空间**"和"**先两边贴边，再平分剩余空间**"。
+  **一级 · 思路**：还是横向排 + 分剩余空间，但这次是"每块两边都留白"，不是"两端贴边"
+  **二级 · 方法**：`display: flex` + `justify-content` 的 **`space-around`**
+  **三级 · 骨架**：`#container { display: ____; justify-content: ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```css
+  #container {
+    display: flex;
+    justify-content: space-around;   /* 平分剩余空间：每个元素两侧留白相等 */
+  }
+  ```
+  `space-around` 与 `space-between` 的差别就在**两端**：`space-between` 两端贴边（第一个元素左边没有空隙），`space-around` 两端也留白（等于相邻间隙的一半）。PPT 上这两个取值的描述分别是"**平分剩余空间**"和"**先两边贴边，再平分剩余空间**"。
+
+  :::
+
 
 - [ ] **2-3 让三个方块竖着排，并且整体上下居中**
   容器高度 300px，里面三个方块现在横着排。要求：改成**从上往下竖着排**，而且这一列**在容器里上下居中**。
   （练习文件 `test_09_竖排居中.html` 里有容器和三个方块。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：排列方向由"主轴"决定，改主轴方向就能从横排变竖排；居中仍然是 `justify-content`，只是这次它沿的主轴变成了上下方向
-  > **二级 · 方法**：`flex-direction` 改成 `column`（y 轴、垂直向下）；`justify-content` 用 `center`
-  > **三级 · 骨架**：`#container { display: flex; flex-direction: ____; justify-content: ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```css
-  > #container {
-  >   display: flex;
-  >   flex-direction: column;   /* 主轴方向为 y 轴，垂直向下 */
-  >   justify-content: center;  /* 子元素在主轴（此时是上下方向）居中对齐 */
-  > }
-  > ```
-  > 验证一下 `justify-content` "跟着主轴走"：把 `flex-direction` 换回 `row`，`center` 就变成**水平居中**了。课件里那句"**子元素在主轴上的对齐方式**"，就是提醒你别把它当成固定的"左右对齐"。
+  **一级 · 思路**：排列方向由"主轴"决定，改主轴方向就能从横排变竖排；居中仍然是 `justify-content`，只是这次它沿的主轴变成了上下方向
+  **二级 · 方法**：`flex-direction` 改成 `column`（y 轴、垂直向下）；`justify-content` 用 `center`
+  **三级 · 骨架**：`#container { display: flex; flex-direction: ____; justify-content: ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```css
+  #container {
+    display: flex;
+    flex-direction: column;   /* 主轴方向为 y 轴，垂直向下 */
+    justify-content: center;  /* 子元素在主轴（此时是上下方向）居中对齐 */
+  }
+  ```
+  验证一下 `justify-content` "跟着主轴走"：把 `flex-direction` 换回 `row`，`center` 就变成**水平居中**了。课件里那句"**子元素在主轴上的对齐方式**"，就是提醒你别把它当成固定的"左右对齐"。
+
+  :::
+
 
 ### 三、综合题
 
@@ -263,38 +287,46 @@ PPT 给了完整的属性表：
   6. **链接样式**：白色、去掉下划线
   7. **观察题**：把第 1~3 步里的 `flex-direction` 临时改成 `column`，刷新看效果——说明为什么"标题居左、退出登录居右"在这时就不成立了
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：导航栏就是一个"一行两格"的弹性容器；第 1~3 步全是写在**父容器** `.navbar` 上的属性
-  > **二级 · 方法**：`display: flex` / `justify-content: space-between` / `align-items: center` / `padding` / `background-color`；标题 `margin: 0`、`color: white`、`font-weight: bold`、`font-family`；链接 `color: white`、`text-decoration: none`
-  > **三级 · 骨架**：`.navbar { display: ____; justify-content: ____; align-items: ____; padding: ____; background-color: ____; }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```html
-  > <style>
-  >   /* 导航栏样式 */
-  >   .navbar {
-  >     background-color: #b5b3b3;        /* 灰色背景 */
-  >     display: flex;                    /* flex弹性布局 */
-  >     justify-content: space-between;   /* 左右对齐 */
-  >     padding: 10px;                    /* 内边距 */
-  >     align-items: center;              /* 垂直居中 */
-  >   }
-  >   .navbar h1 {
-  >     margin: 0;                        /* 移除默认的上下外边距 */
-  >     font-weight: bold;                /* 加粗 */
-  >     color: white;
-  >     font-family: "楷体";
-  >   }
-  >   .navbar a {
-  >     color: white;                     /* 链接颜色为白色 */
-  >     text-decoration: none;            /* 移除下划线 */
-  >   }
-  > </style>
-  > <body>
-  >   <div class="navbar">
-  >     <h1>Tlias智能学习辅助系统</h1>
-  >     <a href="#">退出登录</a>
-  >   </div>
-  > </body>
-  > ```
-  > 第 7 步的答案：`flex-direction: column` 把**主轴换成了上下方向**，`justify-content` 的"两端贴边"就变成"**上端贴顶、下端贴底**"，两个子元素也就一上一下竖着排了——`space-between` 本身没变，变的是它作用的那条轴。
+  **一级 · 思路**：导航栏就是一个"一行两格"的弹性容器；第 1~3 步全是写在**父容器** `.navbar` 上的属性
+  **二级 · 方法**：`display: flex` / `justify-content: space-between` / `align-items: center` / `padding` / `background-color`；标题 `margin: 0`、`color: white`、`font-weight: bold`、`font-family`；链接 `color: white`、`text-decoration: none`
+  **三级 · 骨架**：`.navbar { display: ____; justify-content: ____; align-items: ____; padding: ____; background-color: ____; }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```html
+  <style>
+    /* 导航栏样式 */
+    .navbar {
+      background-color: #b5b3b3;        /* 灰色背景 */
+      display: flex;                    /* flex弹性布局 */
+      justify-content: space-between;   /* 左右对齐 */
+      padding: 10px;                    /* 内边距 */
+      align-items: center;              /* 垂直居中 */
+    }
+    .navbar h1 {
+      margin: 0;                        /* 移除默认的上下外边距 */
+      font-weight: bold;                /* 加粗 */
+      color: white;
+      font-family: "楷体";
+    }
+    .navbar a {
+      color: white;                     /* 链接颜色为白色 */
+      text-decoration: none;            /* 移除下划线 */
+    }
+  </style>
+  <body>
+    <div class="navbar">
+      <h1>Tlias智能学习辅助系统</h1>
+      <a href="#">退出登录</a>
+    </div>
+  </body>
+  ```
+  第 7 步的答案：`flex-direction: column` 把**主轴换成了上下方向**，`justify-content` 的"两端贴边"就变成"**上端贴顶、下端贴底**"，两个子元素也就一上一下竖着排了——`space-between` 本身没变，变的是它作用的那条轴。
+
+  :::
+

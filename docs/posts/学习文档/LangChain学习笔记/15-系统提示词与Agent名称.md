@@ -44,7 +44,7 @@ agent = create_agent(
 | **定义输出格式** | 让回答结构稳定、方便阅读 | "输出：天气状况 / 温度 / 注意事项" |
 | **说明何时使用工具** | 减少"该调工具却没调"或"乱调工具" | "查天气必须调用 get_weather 工具" |
 
-> [!TIP]
+> [!TIP] 提示
 > 系统提示词还有一个"隐性用途"：**兜底处理异常情况**。第 14 篇的自主重试就是靠提示词写的——"工具返回以 `TEMP_UNAVAILABLE:` 开头时说明是临时故障，最多重试 3 次"。框架不会替你处理这些，**规则得你写**。
 
 ### 两种设置方式：静态 vs 动态
@@ -75,7 +75,7 @@ agent = create_agent(model=model, tools=[get_weather],
 
 两种写法**效果一样**，`SystemMessage` 更适合把长指令拆成多段拼接（每段一个参数），可读性好一点。
 
-> [!NOTE]
+> [!NOTE] 注意
 > 想在**某一次调用**里临时给指令，也可以不用 `system_prompt`，直接在 `invoke` 的 messages 列表开头塞一条 `{"role": "system", "content": ...}`（第 13 篇的 2-2 就是这么做的）。区别是：`system_prompt` 是**给整个 Agent** 的，写进 messages 的只影响这一次调用。
 
 ### 两个完整例子：加法助手与"重试型"天气助手
@@ -142,7 +142,7 @@ rprint(response)
 }
 ```
 
-> [!NOTE]
+> [!NOTE] 注意
 > 这段输出里有几件事特别值得看：
 > 1. **工具只会算两个数，模型自己决定调两次**：先 `(10, 20)` 得 30，再 `(30, 30)` 得 60——"怎么拆解任务"是模型干的，不是我们写死的。
 > 2. **发起工具调用时 `AIMessage.content` 是空字符串**——所以取最终回答不能图省事拿中间那条（第 18 篇的助手就是靠 `msg.content` 判空来避开这个坑）。
@@ -209,7 +209,7 @@ TEMP_UNAVAILABLE: 天气服务暂时不可用，请稍后重试
 杭州今天天气挺好。
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > 两个写法怎么选？**"只影响这一次"用 messages，"整个 Agent 都该遵守"用 `system_prompt`**。
 > 重试规则、人设、输出格式这类"规矩"都属于后者——写进 `system_prompt` 后，不管谁来 invoke 都带着它，不用每次自己拼 messages。
 
@@ -251,7 +251,7 @@ Name: chat_assistant
 | **前端展示与运行态可观测性** | 界面里显示"当前活跃 Agent""本轮输出来源""调用链路中的执行节点" |
 | **稳定的运行时身份标识** | 相当于 Agent 的"运行时身份 ID"，方便日志检索、监控统计、链路分析与跨模块协作 |
 
-> [!TIP]
+> [!TIP] 提示
 > 官方建议：**生产环境要显式设置 name，不要依赖默认行为**。哪怕你现在只有一个 Agent，将来它被塞进更大的工作流时，一个规范的 name 能省掉很多排查时间。
 
 ## 相关
@@ -279,139 +279,159 @@ Name: chat_assistant
 - [ ] **2-1 写一段"规范型"系统提示词**
   创建一个天气助手 Agent，系统提示词里同时写清三件事：**角色**、**工作流程**（理解查询 → 调用工具 → 简洁回答）、**输出格式**（天气状况 / 温度 / 注意事项）。然后用同一个问题分别问"有提示词的 Agent"和"没提示词的 Agent"，比较两次回答的**结构差异**。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：提示词的作用是让输出"可控"，所以重点看**格式是否稳定**
-  > **二级 · 方法**：`system_prompt="""..."""` 用三引号写多行提示词
-  > **三级 · 骨架**：把"输出格式"那几行写成列表（`- 天气状况`、`- 温度`），模型更容易照做
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：提示词的作用是让输出"可控"，所以重点看**格式是否稳定**
+  **二级 · 方法**：`system_prompt="""..."""` 用三引号写多行提示词
+  **三级 · 骨架**：把"输出格式"那几行写成列表（`- 天气状况`、`- 温度`），模型更容易照做
+
+  :::
+
 
 - [ ] **2-2 换个类型传提示词**
   把 2-1 的提示词改成"消息对象"的形式传进去（不再给字符串），确认效果一致；写的时候把长指令**一行一句**拆开。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：字符串和消息对象是同一件事的两种写法，后者可读性好一点
-  > **二级 · 方法**：`from langchain.messages import SystemMessage` + `system_prompt=SystemMessage(...)`
-  > **三级 · 骨架**：多个字符串直接相邻会**自动拼接**，长指令可以拆成一行一句
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：字符串和消息对象是同一件事的两种写法，后者可读性好一点
+  **二级 · 方法**：`from langchain.messages import SystemMessage` + `system_prompt=SystemMessage(...)`
+  **三级 · 骨架**：多个字符串直接相邻会**自动拼接**，长指令可以拆成一行一句
+
+  :::
+
 
 - [ ] **2-3 给 Agent 起名字，并确认名字进了消息**
   创建一个带名字的 Agent（比如叫 `chat_assistant`），调用后遍历消息，找出哪条消息带有"名字"属性、值是什么；也可以打印那条消息，看输出里的 `Name:` 那一行。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：名字会写进 Agent 产出的 AI 回复上，用户消息上没有
-  > **二级 · 方法**：`create_agent(model=model, name="chat_assistant")` + `getattr(msg, "name", None)`
-  > **三级 · 骨架**：`msg.pretty_print()` 的输出里会显示 `Name: chat_assistant`
+  ::: details 提示（先自己想，实在想不出再点开）
+
+  **一级 · 思路**：名字会写进 Agent 产出的 AI 回复上，用户消息上没有
+  **二级 · 方法**：`create_agent(model=model, name="chat_assistant")` + `getattr(msg, "name", None)`
+  **三级 · 骨架**：`msg.pretty_print()` 的输出里会显示 `Name: chat_assistant`
+
+  :::
+
 
 - [ ] **2-4 加法助手：看模型自己拆解任务**
   写一个只会把两个数相加的工具，创建一个数学助手 Agent（系统提示词用消息对象的形式传），问"10 加上 20 再加上 30 是多少？"。然后检查四件事：
   ① 模型一共发起了几次工具调用 ② 每次调用请求的正文内容是什么 ③ 两次请求的编号与两条结果的配对编号是否各自对上 ④ 返回的消息列表第一条是什么类型（系统消息去哪了）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：工具只会算两个数，"怎么拆成两步"完全是模型自己决定的；系统消息的"消失"是 `system_prompt` 路线的特征
-  > **二级 · 方法**：`@tool` + `f"和为：{a + b}"`；`system_prompt=SystemMessage(content="你是一个数学助手，解决日常的算术问题")`
-  > **三级 · 骨架**：数调用次数可以用 `getattr(msg, "tool_calls", None)` 过滤；配对编号看 `msg.tool_call_id` 和第 1、2 次请求的 `tool_calls[0]["id"]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-> [!TIP]- 参考答案（做完再点开）
-> ```python
-> import os
->
-> from dotenv import load_dotenv
-> from langchain.agents import create_agent
-> from langchain.chat_models import init_chat_model
-> from langchain.messages import SystemMessage
-> from langchain.tools import tool
->
-> load_dotenv(override=True)
->
-> model = init_chat_model(
->     model="deepseek-v4-flash",
->     model_provider="openai",
->     api_key=os.getenv("DEEPSEEK_API_KEY"),
->     base_url=os.getenv("DEEPSEEK_BASE_URL"),
-> )
->
-> # ---------- 2-1 有提示词 vs 没提示词 ----------
-> @tool(parse_docstring=True)
-> def get_weather(city: str) -> str:
->     """天气查询工具
->
->     Args:
->         city: 城市名称
->     """
->     return f"{city}的天气为晴朗，25°C。"
->
-> PROMPT = """你是天气助手。
->
-> 工作流程：
-> 1. 理解用户的城市查询
-> 2. 使用 get_weather 工具获取数据
-> 3. 简洁清晰地回答
->
-> 输出格式：
-> - 天气状况
-> - 温度
-> - 注意事项（如有）
-> """
->
-> agent_with = create_agent(model=model, tools=[get_weather], system_prompt=PROMPT)
-> agent_without = create_agent(model=model, tools=[get_weather])
->
-> q = "北京的天气怎么样？"
-> print("【有提示词】", agent_with.invoke({"messages": [q]})["messages"][-1].content)
-> print("【无提示词】", agent_without.invoke({"messages": [q]})["messages"][-1].content)
-> # 有提示词的版本会按"天气状况 / 温度 / 注意事项"分点回答，格式稳定
->
-> # ---------- 2-2 用 SystemMessage 传入 ----------
-> agent_msg = create_agent(
->     model=model,
->     tools=[get_weather],
->     system_prompt=SystemMessage(
->         "你是天气助手。"
->         "工作流程：1. 理解用户的城市查询 2. 使用 get_weather 工具获取数据 3. 简洁清晰地回答。"
->         "输出格式：天气状况 / 温度 / 注意事项（如有）。"
->     ),
-> )
-> print("【SystemMessage】", agent_msg.invoke({"messages": [q]})["messages"][-1].content)
->
-> # ---------- 2-3 设置 name ----------
-> agent_named = create_agent(model=model, tools=[get_weather], name="chat_assistant")
-> resp = agent_named.invoke({"messages": ["你好"]})
-> for msg in resp["messages"]:
->     print(type(msg).__name__, "| name =", getattr(msg, "name", None))
-> # HumanMessage | name = None
-> # AIMessage    | name = 'chat_assistant'   ← 名字写在了 AI 回复上
-> resp["messages"][-1].pretty_print()      # 输出里能看到 Name: chat_assistant
->
-> # ---------- 2-4 加法助手 ----------
-> @tool
-> def add_numbers(a: int, b: int) -> str:
->     """计算并返回两个数的和。"""
->     return f"和为：{a + b}"
->
-> agent_math = create_agent(
->     model=model,
->     tools=[add_numbers],
->     # system_prompt="你是一个数学助手，解决日常的算术问题",                       # 写法一：字符串
->     system_prompt=SystemMessage(content="你是一个数学助手，解决日常的算术问题"),   # 写法二：SystemMessage
-> )
->
-> resp2 = agent_math.invoke({"messages": [{"role": "user", "content": "10加上20再加上30是多少？"}]})
->
-> for msg in resp2["messages"]:
->     print(type(msg).__name__, "| content =", repr(msg.content[:20]),
->           "| tool_calls =", len(getattr(msg, "tool_calls", []) or []))
-> # HumanMessage | content = '10加上20再加上30是多少？'  | tool_calls = 0
-> # AIMessage    | content = ''                        | tool_calls = 1   ← 第 1 次调用 (10, 20)
-> # ToolMessage  | content = '和为：30'                 | tool_calls = 0
-> # AIMessage    | content = ''                        | tool_calls = 1   ← 第 2 次调用 (30, 30)
-> # ToolMessage  | content = '和为：60'                 | tool_calls = 0
-> # AIMessage    | content = '10加上20再加上30等于 **60**。' | tool_calls = 0  ← 最终回答
->
-> print("工具一共被调了几次:",
->       len([m for m in resp2["messages"] if getattr(m, "tool_calls", None)]))   # 2
-> print("第一条消息的类型:", type(resp2["messages"][0]).__name__)   # HumanMessage：SystemMessage 不在列表里
->
-> for msg in resp2["messages"]:
->     if type(msg).__name__ == "ToolMessage":
->         print("结果", msg.content, "的配对编号:", msg.tool_call_id)
-> # 和为：30 的配对编号: call_add1    ← 和第 1 次请求的 tool_calls[0]["id"] 一致
-> # 和为：60 的配对编号: call_add2    ← 和第 2 次请求的 tool_calls[0]["id"] 一致
-> ```
+  **一级 · 思路**：工具只会算两个数，"怎么拆成两步"完全是模型自己决定的；系统消息的"消失"是 `system_prompt` 路线的特征
+  **二级 · 方法**：`@tool` + `f"和为：{a + b}"`；`system_prompt=SystemMessage(content="你是一个数学助手，解决日常的算术问题")`
+  **三级 · 骨架**：数调用次数可以用 `getattr(msg, "tool_calls", None)` 过滤；配对编号看 `msg.tool_call_id` 和第 1、2 次请求的 `tool_calls[0]["id"]`
+
+  :::
+
+
+::: details 参考答案（做完再点开）
+
+```python
+import os
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from langchain.messages import SystemMessage
+from langchain.tools import tool
+
+load_dotenv(override=True)
+
+model = init_chat_model(
+    model="deepseek-v4-flash",
+    model_provider="openai",
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url=os.getenv("DEEPSEEK_BASE_URL"),
+)
+
+# ---------- 2-1 有提示词 vs 没提示词 ----------
+@tool(parse_docstring=True)
+def get_weather(city: str) -> str:
+    """天气查询工具
+
+    Args:
+        city: 城市名称
+    """
+    return f"{city}的天气为晴朗，25°C。"
+
+PROMPT = """你是天气助手。
+
+工作流程：
+1. 理解用户的城市查询
+2. 使用 get_weather 工具获取数据
+3. 简洁清晰地回答
+
+输出格式：
+- 天气状况
+- 温度
+- 注意事项（如有）
+"""
+
+agent_with = create_agent(model=model, tools=[get_weather], system_prompt=PROMPT)
+agent_without = create_agent(model=model, tools=[get_weather])
+
+q = "北京的天气怎么样？"
+print("【有提示词】", agent_with.invoke({"messages": [q]})["messages"][-1].content)
+print("【无提示词】", agent_without.invoke({"messages": [q]})["messages"][-1].content)
+# 有提示词的版本会按"天气状况 / 温度 / 注意事项"分点回答，格式稳定
+
+# ---------- 2-2 用 SystemMessage 传入 ----------
+agent_msg = create_agent(
+    model=model,
+    tools=[get_weather],
+    system_prompt=SystemMessage(
+        "你是天气助手。"
+        "工作流程：1. 理解用户的城市查询 2. 使用 get_weather 工具获取数据 3. 简洁清晰地回答。"
+        "输出格式：天气状况 / 温度 / 注意事项（如有）。"
+    ),
+)
+print("【SystemMessage】", agent_msg.invoke({"messages": [q]})["messages"][-1].content)
+
+# ---------- 2-3 设置 name ----------
+agent_named = create_agent(model=model, tools=[get_weather], name="chat_assistant")
+resp = agent_named.invoke({"messages": ["你好"]})
+for msg in resp["messages"]:
+    print(type(msg).__name__, "| name =", getattr(msg, "name", None))
+# HumanMessage | name = None
+# AIMessage    | name = 'chat_assistant'   ← 名字写在了 AI 回复上
+resp["messages"][-1].pretty_print()      # 输出里能看到 Name: chat_assistant
+
+# ---------- 2-4 加法助手 ----------
+@tool
+def add_numbers(a: int, b: int) -> str:
+    """计算并返回两个数的和。"""
+    return f"和为：{a + b}"
+
+agent_math = create_agent(
+    model=model,
+    tools=[add_numbers],
+    # system_prompt="你是一个数学助手，解决日常的算术问题",                       # 写法一：字符串
+    system_prompt=SystemMessage(content="你是一个数学助手，解决日常的算术问题"),   # 写法二：SystemMessage
+)
+
+resp2 = agent_math.invoke({"messages": [{"role": "user", "content": "10加上20再加上30是多少？"}]})
+
+for msg in resp2["messages"]:
+    print(type(msg).__name__, "| content =", repr(msg.content[:20]),
+          "| tool_calls =", len(getattr(msg, "tool_calls", []) or []))
+# HumanMessage | content = '10加上20再加上30是多少？'  | tool_calls = 0
+# AIMessage    | content = ''                        | tool_calls = 1   ← 第 1 次调用 (10, 20)
+# ToolMessage  | content = '和为：30'                 | tool_calls = 0
+# AIMessage    | content = ''                        | tool_calls = 1   ← 第 2 次调用 (30, 30)
+# ToolMessage  | content = '和为：60'                 | tool_calls = 0
+# AIMessage    | content = '10加上20再加上30等于 **60**。' | tool_calls = 0  ← 最终回答
+
+print("工具一共被调了几次:",
+      len([m for m in resp2["messages"] if getattr(m, "tool_calls", None)]))   # 2
+print("第一条消息的类型:", type(resp2["messages"][0]).__name__)   # HumanMessage：SystemMessage 不在列表里
+
+for msg in resp2["messages"]:
+    if type(msg).__name__ == "ToolMessage":
+        print("结果", msg.content, "的配对编号:", msg.tool_call_id)
+# 和为：30 的配对编号: call_add1    ← 和第 1 次请求的 tool_calls[0]["id"] 一致
+# 和为：60 的配对编号: call_add2    ← 和第 2 次请求的 tool_calls[0]["id"] 一致
+```
+
+:::
+

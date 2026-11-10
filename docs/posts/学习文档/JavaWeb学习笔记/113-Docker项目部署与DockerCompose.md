@@ -16,7 +16,7 @@ cover: false
 
 这一篇（PPT 第 46～56 页）就是把这套东西**落到 tlias 项目上**：服务端打成镜像跑起来、前端交给一个 nginx 容器、最后用 **Docker Compose** 把一整套服务用一个 yml 文件管起来。它也是第 20 章的收官——[110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)讲的"为什么要 Docker"、[111 篇](/posts/编程学习/javaweb学习笔记/111-docker常见命令与数据卷/)讲的"日常命令和数据卷"、[112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)讲的"自定义镜像和网络"，都在这一篇里各就各位。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > **这一篇的实测边界（先说清楚）**：
 > - **Docker Compose 那一半做了本机实测**——用两个 `alpine` 服务把 `docker compose up -d` / `ps` / `logs` / `down` 全过了一遍，真实输出在下面专门有一节（本机 Docker Desktop，CLI 29.1.3 / Compose v2.40.3）。
 > - **"真实 tlias 项目打包成镜像部署"（PPT 第 47 页那六步）没有在本机做**——它要 JDK17 的 Linux 版安装包（180 MB+）、要拉 `mysql:8` 这个几百 MB 的大镜像、还要真起 MySQL 容器，成本太高；本篇按 **PPT 写**，同时把课程资料里的原文件（Dockerfile、容器命令、nginx.conf、docker-compose.yml）一条条读过，和 PPT 对得上。
@@ -121,7 +121,7 @@ spring:
 
 改完配置，在 **maven 父工程**上执行 **package** 生命周期打出 jar（和 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)第 68 页那一步一样，只是这次数据源指向的是**容器**而不是服务器上的 MySQL）。
 
-> [!TIP]
+> [!TIP] 提示
 > 这两处为什么"必须改"，可以反过来想一遍：如果不改会怎样？
 > - 数据库地址还是 `localhost:3306`——容器里的 `localhost` 指的是**容器自己**，那里根本没有数据库，应用启动就报连不上；
 > - 日志路径还是 Windows 上的 `D:/tlias/log` 一类——容器（Linux）里没有 `D:` 盘，日志写不出去。
@@ -377,7 +377,7 @@ networks:
 
 顶层那段 `networks: itheima: name: itheima` 为什么要写两遍？因为 **Compose 会给网络自动加项目名前缀**——不写 `name:` 时，网络会叫"项目名_itheima"（本机实测里那个自动网络就叫 `compose-demo_default`，项目名取的正是 compose 文件所在目录名 `compose-demo`）。课程想要的就是干净利落的 `itheima`（[112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)里那些容器也都在这个网络里），所以用 `name:` 把真实名字钉死。
 
-> [!TIP]
+> [!TIP] 提示
 > 那 yml 里的路径，到底传哪儿去？PPT 第 53 页的例子里是 `/usr/local/app/html` 和 `/usr/local/app/conf/nginx.conf`，课程资料里那份 yml 用的是 `/usr/local/app/nginx/html` 和 `/usr/local/app/nginx/conf/nginx.conf`——**两者只是"把文件传到哪个目录"的习惯不同**，谈不上谁对谁错。真正要保证的是一件事：**yml 里 `volumes:` 左边写的路径，就是你实际上传前端资源和 `nginx.conf` 的那个目录**；左右对不上，容器里就什么也挂不到（nginx 起来还是默认欢迎页）。
 
 ## 用 Compose 部署整套 tlias（PPT 第 54 页）
@@ -462,7 +462,7 @@ docker compose up -d
 
 它会**按顺序**做三件事：给 `tlias` 服务构建镜像（`build` 那段）、创建网络 `itheima`、把三个容器依次拉起来（顺序按 `depends_on`）。起来之后浏览器访问 `http://192.168.100.128`，"页面出来 + 数据出来"就全通了（[109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)的验收标准）。要收工就 `docker compose down`——**容器和网络一起清掉**（下面实测里有输出）。
 
-> [!WARNING]
+> [!WARNING] 警告
 > 两个容易踩的地方：
 > ① **`mysql`、`tlias-server` 这两个名字不能随手改**。应用配置里的 `jdbc:mysql://mysql:3306/tlias`、nginx 配置里的 `proxy_pass http://tlias-server:8080`，用的都是**容器名**——把 yml 里的 `container_name` 改了，这两个配置就找不到目标了（要改就两边一起改）。
 > ② **三个服务必须在同一个网络里**（这份 yml 里都写了 `networks: - tlias-net`，顶层又把它映射成 `itheima`）。少写一个，那个容器就"掉队"了：能跑，但谁也找不到谁。
@@ -639,71 +639,79 @@ $ docker compose down
   ⑥ 怎么验证"它真的活起来了"。
   （练习文件 `test_113_Compose与部署.md` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按"**环境 → 配置 → 打包 → 镜像 → 容器 → 验证**"六站走；每一站的产物是下一站的输入（配置改不完，打出来的 jar 就是废的；镜像没构建出来，容器起不来）
-  > **二级 · 方法**：MySQL 容器由 `docker run` 起、`tlias.sql` 挂在初始化目录上自动建库表；两处配置是 `spring.datasource.url`（用**容器名**写地址）和 logback 的日志路径（写成容器里的目录）；打包在 maven 父工程执行 `package`；Dockerfile 里用 `ENV` 传 OSS 密钥、用三条 `ENV` 统一 UTF-8 编码、目录用 `/tlias`；构建 `docker build -t tlias:1.0 .`；部署 `docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`；验证 `docker ps` / `docker logs` / 访问 `http://IP:8080/depts`
-  > **三级 · 骨架**：① MySQL 容器 + `____` 脚本建库表；② `url` 改成 `jdbc:mysql://____:____/tlias`、logback 的 `FileNamePattern` 改成 `____/tlias-....log`；③ 父工程 `____` → `tlias.jar`；④ Dockerfile：`ENV OSS_ACCESS_KEY____`、`ENV LANG=____`、`WORKDIR ____`；⑤ `docker build -t ____ .` + `docker run -d --name ____ --____ itheima -p 8080:8080 ____`；⑥ `docker ____` / `docker ____` / 浏览器 `http://____:8080/depts`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 【0】先确认第 1 步"已完成"的部分
-  >   · MySQL 容器在跑：docker ps 能看到 mysql 容器
-  >     （起法：docker run -d --name mysql -p 3307:3306 -e TZ=Asia/Shanghai
-  >            -e MYSQL_ROOT_PASSWORD=123 mysql:8）
-  >   · 库表由 tlias.sql 建好：把 sql 挂在 /docker-entrypoint-initdb.d 目录上，
-  >     容器第一次启动时自动执行（也可以是手动执行一遍）
-  >
-  > 【1】改配置（第 3 步，但要在打包前完成）
-  >   ① 数据库服务地址（application.yml）：
-  >        jdbc:mysql://mysql:3306/tlias
-  >      · 主机名 mysql 是"数据库容器的容器名"（不是 IP、不是 localhost）
-  >      · 3306 是"容器内的端口"（宿主机上映射出去的是 3307）
-  >      · 账号密码与起容器时一致（root / 123）
-  >      为什么必须改：程序跑在容器里，容器里的 localhost 是它自己，连不上数据库；
-  >      而用容器名互访的前提是两个容器在同一个自定义网络里。
-  >   ② logback 日志文件存放地址（logback.xml）：
-  >        <FileNamePattern>/tlias/tlias-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
-  >      · /tlias 是"容器里的应用目录"（下面 Dockerfile 里 mkdir + WORKDIR 的就是它）
-  >      为什么必须改：原来写的是 Windows 上的路径，容器（Linux）里没有那个盘
-  >
-  > 【2】打 jar
-  >   在 maven 父工程上执行 package 生命周期 → 得到 tlias.jar
-  >   （打包前先把上面两处配置改好——jar 里带的是打包那一刻的配置）
-  >
-  > 【3】写 Dockerfile（放到与 jdk17.tar.gz、tlias.jar 同一个目录）
-  >   FROM centos:7
-  >   COPY jdk17.tar.gz /usr/local/
-  >   RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
-  >   ENV JAVA_HOME=/usr/local/jdk-17.0.10
-  >   ENV PATH=$JAVA_HOME/bin:$PATH
-  >   ENV OSS_ACCESS_KEY_ID=你的AccessKeyId          # 密钥不能打进 jar
-  >   ENV OSS_ACCESS_KEY_SECRET=你的AccessKeySecret
-  >   ENV LANG=en_US.UTF-8                            # 统一编码，防中文乱码
-  >   ENV LANGUAGE=en_US:en
-  >   ENV LC_ALL=en_US.UTF-8
-  >   RUN mkdir -p /tlias
-  >   WORKDIR /tlias
-  >   COPY tlias.jar tlias.jar
-  >   EXPOSE 8080
-  >   ENTRYPOINT ["java","-jar","/tlias/tlias.jar"]
-  >
-  > 【4】构建镜像
-  >   docker build -t tlias:1.0 .
-  >   确认：docker images tlias 能看到 tlias:1.0
-  >
-  > 【5】部署容器（注意 --network）
-  >   docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
-  >   为什么要 --network itheima：
-  >     · 应用配置里用容器名 mysql 找数据库 → 必须在同一个自定义网络里才解析得了
-  >     · 后面 nginx 要用容器名 tlias-server 找它 → 也得在同一个网络里
-  >
-  > 【6】验证
-  >   docker ps --filter name=tlias-server        看状态与端口映射
-  >   docker logs tlias-server                    看启动日志（连库成功没有）
-  >   http://192.168.100.128:8080/depts           宿主机上直接访问，能拿到数据
-  >   失败时先看：日志里是不是 UnknownHostException: mysql（网络没接上）
-  > ```
-  > 检查点：① 两处配置改成了"容器名 + 容器内端口"和"容器内目录"；② 说清"为什么必须改"；③ Dockerfile 有密钥与编码那两组 ENV、目录用 `/tlias`；④ 构建命令的 `-t` 与 `.` 都对；⑤ 部署命令带 `--network itheima` 并且能解释原因；⑥ 验证用了 `docker ps` + `docker logs` + 实际访问。
+  **一级 · 思路**：按"**环境 → 配置 → 打包 → 镜像 → 容器 → 验证**"六站走；每一站的产物是下一站的输入（配置改不完，打出来的 jar 就是废的；镜像没构建出来，容器起不来）
+  **二级 · 方法**：MySQL 容器由 `docker run` 起、`tlias.sql` 挂在初始化目录上自动建库表；两处配置是 `spring.datasource.url`（用**容器名**写地址）和 logback 的日志路径（写成容器里的目录）；打包在 maven 父工程执行 `package`；Dockerfile 里用 `ENV` 传 OSS 密钥、用三条 `ENV` 统一 UTF-8 编码、目录用 `/tlias`；构建 `docker build -t tlias:1.0 .`；部署 `docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0`；验证 `docker ps` / `docker logs` / 访问 `http://IP:8080/depts`
+  **三级 · 骨架**：① MySQL 容器 + `____` 脚本建库表；② `url` 改成 `jdbc:mysql://____:____/tlias`、logback 的 `FileNamePattern` 改成 `____/tlias-....log`；③ 父工程 `____` → `tlias.jar`；④ Dockerfile：`ENV OSS_ACCESS_KEY____`、`ENV LANG=____`、`WORKDIR ____`；⑤ `docker build -t ____ .` + `docker run -d --name ____ --____ itheima -p 8080:8080 ____`；⑥ `docker ____` / `docker ____` / 浏览器 `http://____:8080/depts`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  【0】先确认第 1 步"已完成"的部分
+    · MySQL 容器在跑：docker ps 能看到 mysql 容器
+      （起法：docker run -d --name mysql -p 3307:3306 -e TZ=Asia/Shanghai
+             -e MYSQL_ROOT_PASSWORD=123 mysql:8）
+    · 库表由 tlias.sql 建好：把 sql 挂在 /docker-entrypoint-initdb.d 目录上，
+      容器第一次启动时自动执行（也可以是手动执行一遍）
+  
+  【1】改配置（第 3 步，但要在打包前完成）
+    ① 数据库服务地址（application.yml）：
+         jdbc:mysql://mysql:3306/tlias
+       · 主机名 mysql 是"数据库容器的容器名"（不是 IP、不是 localhost）
+       · 3306 是"容器内的端口"（宿主机上映射出去的是 3307）
+       · 账号密码与起容器时一致（root / 123）
+       为什么必须改：程序跑在容器里，容器里的 localhost 是它自己，连不上数据库；
+       而用容器名互访的前提是两个容器在同一个自定义网络里。
+    ② logback 日志文件存放地址（logback.xml）：
+         <FileNamePattern>/tlias/tlias-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+       · /tlias 是"容器里的应用目录"（下面 Dockerfile 里 mkdir + WORKDIR 的就是它）
+       为什么必须改：原来写的是 Windows 上的路径，容器（Linux）里没有那个盘
+  
+  【2】打 jar
+    在 maven 父工程上执行 package 生命周期 → 得到 tlias.jar
+    （打包前先把上面两处配置改好——jar 里带的是打包那一刻的配置）
+  
+  【3】写 Dockerfile（放到与 jdk17.tar.gz、tlias.jar 同一个目录）
+    FROM centos:7
+    COPY jdk17.tar.gz /usr/local/
+    RUN tar -xzf /usr/local/jdk17.tar.gz -C /usr/local/ && rm /usr/local/jdk17.tar.gz
+    ENV JAVA_HOME=/usr/local/jdk-17.0.10
+    ENV PATH=$JAVA_HOME/bin:$PATH
+    ENV OSS_ACCESS_KEY_ID=你的AccessKeyId          # 密钥不能打进 jar
+    ENV OSS_ACCESS_KEY_SECRET=你的AccessKeySecret
+    ENV LANG=en_US.UTF-8                            # 统一编码，防中文乱码
+    ENV LANGUAGE=en_US:en
+    ENV LC_ALL=en_US.UTF-8
+    RUN mkdir -p /tlias
+    WORKDIR /tlias
+    COPY tlias.jar tlias.jar
+    EXPOSE 8080
+    ENTRYPOINT ["java","-jar","/tlias/tlias.jar"]
+  
+  【4】构建镜像
+    docker build -t tlias:1.0 .
+    确认：docker images tlias 能看到 tlias:1.0
+  
+  【5】部署容器（注意 --network）
+    docker run -d --name tlias-server --network itheima -p 8080:8080 tlias:1.0
+    为什么要 --network itheima：
+      · 应用配置里用容器名 mysql 找数据库 → 必须在同一个自定义网络里才解析得了
+      · 后面 nginx 要用容器名 tlias-server 找它 → 也得在同一个网络里
+  
+  【6】验证
+    docker ps --filter name=tlias-server        看状态与端口映射
+    docker logs tlias-server                    看启动日志（连库成功没有）
+    http://192.168.100.128:8080/depts           宿主机上直接访问，能拿到数据
+    失败时先看：日志里是不是 UnknownHostException: mysql（网络没接上）
+  ```
+  检查点：① 两处配置改成了"容器名 + 容器内端口"和"容器内目录"；② 说清"为什么必须改"；③ Dockerfile 有密钥与编码那两组 ENV、目录用 `/tlias`；④ 构建命令的 `-t` 与 `.` 都对；⑤ 部署命令带 `--network itheima` 并且能解释原因；⑥ 验证用了 `docker ps` + `docker logs` + 实际访问。
+
+  :::
+
 
 - [ ] **2-2 用 compose 一次拉起 mysql + 应用（写 yml）**
   需求：请写一份 `docker-compose.yml`，把下面两个服务一次拉起：
@@ -713,47 +721,55 @@ $ docker compose down
   写完后再回答两个小问题：**`build` 那段为什么要求 Dockerfile 和 yml 在同一目录**？**`depends_on` 能保证"mysql 已经能连了"吗**？
   （练习文件 `test_113_docker-compose.yml` 里给了完整的写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"两条 `docker run`"翻译成 yml——最外层 `services:`，每个服务一项；`-e` → `environment`、`-v` → `volumes`、`-p` → `ports`、`--name` → `container_name`、`--network` → `networks`（网络还要在**文件顶层**声明一次）
-  > **二级 · 方法**：镜像用 `image:`；自己构建用 `build:` 下的 `context` 与 `dockerfile`；启动顺序用 `depends_on`；网络在顶层写 `networks: 网络key: name: itheima`；列表项用 `-` 开头
-  > **三级 · 骨架**：`services:` → `mysql:`（`image: ____` / `container_name: ____` / `ports: - "____:____"` / `environment:` / `volumes: - "____:/var/lib/mysql"` / `networks: - ____`）→ `tlias:`（`build: context: ____` / `dockerfile: ____` / `container_name: ____` / `ports:` / `networks:` / `depends_on: - ____`）→ 顶层 `networks: ____: name: ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```yaml
-  > services:
-  >   mysql:
-  >     image: mysql:8
-  >     container_name: mysql
-  >     ports:
-  >       - "3307:3306"
-  >     environment:
-  >       TZ: Asia/Shanghai
-  >       MYSQL_ROOT_PASSWORD: 123
-  >     volumes:
-  >       - "/usr/local/app/mysql/data:/var/lib/mysql"
-  >       - "/usr/local/app/mysql/init:/docker-entrypoint-initdb.d"
-  >       - "/usr/local/app/mysql/conf:/etc/mysql/conf.d"
-  >     networks:
-  >       - tlias-net
-  >   tlias:
-  >     build:
-  >       context: .
-  >       dockerfile: Dockerfile
-  >     container_name: tlias-server
-  >     ports:
-  >       - "8080:8080"
-  >     depends_on:
-  >       - mysql
-  >     networks:
-  >       - tlias-net
-  > networks:
-  >   tlias-net:
-  >     name: itheima
-  > ```
-  > **两个小问题**：
-  > ① `build` 里的 `context: .` 指的是 **compose 文件所在的那个目录**，Docker 会在这个目录里执行构建；而 Dockerfile 里的 `COPY jdk17.tar.gz` / `COPY tlias.jar` 只能拷到**这个目录里**的文件——所以三样东西必须放一起。
-  > ② **不能**。`depends_on` 只控制**启动顺序**（先起 mysql，再起 tlias），它不知道 mysql 里面"初始化完了没有、能不能接受连接"；应用启动太快时仍可能连不上（要可靠就配 `healthcheck` 之类的健康检查）。
-  > 检查点：① 两个服务都在 `services:` 下、缩进正确；② `-v` 的三条左右两边都写全（左宿主机绝对路径）；③ `build` 用 `context` + `dockerfile`；④ `depends_on` 写在应用服务里；⑤ 网络在服务里引用 + 顶层声明 `name: itheima`；⑥ 两个小问题答对。
+  **一级 · 思路**：把"两条 `docker run`"翻译成 yml——最外层 `services:`，每个服务一项；`-e` → `environment`、`-v` → `volumes`、`-p` → `ports`、`--name` → `container_name`、`--network` → `networks`（网络还要在**文件顶层**声明一次）
+  **二级 · 方法**：镜像用 `image:`；自己构建用 `build:` 下的 `context` 与 `dockerfile`；启动顺序用 `depends_on`；网络在顶层写 `networks: 网络key: name: itheima`；列表项用 `-` 开头
+  **三级 · 骨架**：`services:` → `mysql:`（`image: ____` / `container_name: ____` / `ports: - "____:____"` / `environment:` / `volumes: - "____:/var/lib/mysql"` / `networks: - ____`）→ `tlias:`（`build: context: ____` / `dockerfile: ____` / `container_name: ____` / `ports:` / `networks:` / `depends_on: - ____`）→ 顶层 `networks: ____: name: ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```yaml
+  services:
+    mysql:
+      image: mysql:8
+      container_name: mysql
+      ports:
+        - "3307:3306"
+      environment:
+        TZ: Asia/Shanghai
+        MYSQL_ROOT_PASSWORD: 123
+      volumes:
+        - "/usr/local/app/mysql/data:/var/lib/mysql"
+        - "/usr/local/app/mysql/init:/docker-entrypoint-initdb.d"
+        - "/usr/local/app/mysql/conf:/etc/mysql/conf.d"
+      networks:
+        - tlias-net
+    tlias:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: tlias-server
+      ports:
+        - "8080:8080"
+      depends_on:
+        - mysql
+      networks:
+        - tlias-net
+  networks:
+    tlias-net:
+      name: itheima
+  ```
+  **两个小问题**：
+  ① `build` 里的 `context: .` 指的是 **compose 文件所在的那个目录**，Docker 会在这个目录里执行构建；而 Dockerfile 里的 `COPY jdk17.tar.gz` / `COPY tlias.jar` 只能拷到**这个目录里**的文件——所以三样东西必须放一起。
+  ② **不能**。`depends_on` 只控制**启动顺序**（先起 mysql，再起 tlias），它不知道 mysql 里面"初始化完了没有、能不能接受连接"；应用启动太快时仍可能连不上（要可靠就配 `healthcheck` 之类的健康检查）。
+  检查点：① 两个服务都在 `services:` 下、缩进正确；② `-v` 的三条左右两边都写全（左宿主机绝对路径）；③ `build` 用 `context` + `dockerfile`；④ `depends_on` 写在应用服务里；⑤ 网络在服务里引用 + 顶层声明 `name: itheima`；⑥ 两个小问题答对。
+
+  :::
+
 
 - [ ] **2-3 部署前端：新建一个 nginx 容器把页面发出去**
   需求：前端打包好的静态资源（`index.html`、`assets/`、`favicon.ico`）和一份改好的 `nginx.conf` 都在你本机，要部署到服务器上，让**浏览器访问服务器 IP（80）**能看到页面、并且页面里的 `/api/xxx` 请求能打到后端容器 `tlias-server`（8080）。请写出：
@@ -763,39 +779,47 @@ $ docker compose down
   ④ `nginx.conf` 里 `location /` 和 `location ^~ /api/` 两段该怎么写（重点是那两个"和 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)不一样的地方"）；⑤ 怎么验证"页面出来了"和"接口也通了"。
   （练习文件 `test_113_Compose与部署.md` 的题目2-3 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：nginx 容器要"看到"两样东西才能干活——**发给用户的页面**（静态资源目录）和**它自己的配置**（`nginx.conf`）；所以要用两条挂在容器上的映射，把它们都指向宿主机上你实际放文件的目录
-  > **二级 · 方法**：起容器 `docker run -d --name nginx-tlias -v 宿主机html目录:/usr/share/nginx/html -v 宿主机nginx.conf:/etc/nginx/nginx.conf --network itheima -p 80:80 nginx:1.20.2`；资源传到宿主机侧 html 目录、配置文件放到宿主机侧那一条路径；`nginx.conf` 里 `root` 写容器里的绝对路径、`proxy_pass` 写 `http://tlias-server:8080`；验证：访问 80 看页面、点开有数据的列表看接口
-  > **三级 · 骨架**：① `docker run -d --name ____ -v ____:/usr/share/nginx/html -v ____:/etc/nginx/nginx.conf --____ itheima -p ____:____ nginx:____`；② 第一条映射解决 `____`，第二条解决 `____`（文件映射，左边是文件不是目录）；③ 先传 `____`，再起容器；④ `root /usr/share/nginx/html;` + `proxy_pass http://____:____;`；⑤ 访问 `http://____` 看页面，打开一个要查数据的页面看数据出不出来
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **① 起容器的命令**：
-  > ```bash
-  > docker run -d \
-  >  --name nginx-tlias \
-  >  -v /root/tlias-nginx/html:/usr/share/nginx/html \
-  >  -v /root/tlias-nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
-  >  --network itheima \
-  >  -p 80:80 \
-  > nginx:1.20.2
-  > ```
-  > **② 两条映射各干什么**：
-  > - `-v /root/tlias-nginx/html:/usr/share/nginx/html`——**目录映射**：把宿主机的 html 目录接到容器里 nginx 放网页的目录上，静态资源放宿主机这边，容器里的 nginx 直接对外发（改文件不用进容器）；
-  > - `-v /root/tlias-nginx/conf/nginx.conf:/etc/nginx/nginx.conf`——**文件映射**（左边是**文件**，不是目录）：用自己写好的配置替换容器里那份默认配置，让 nginx 按我们要的规则发页面、转 `/api`；映射出来的好处是**容器删了重建配置还在**（容器自己的文件系统是即用即弃的）。
-  > **③ 什么时候传、传到哪**：**起容器之后往宿主机的对应目录里传**（也可以先传好再起容器，效果一样）——资源传进 `/root/tlias-nginx/html`（注意传的是资源"里面的文件"，别多套一层文件夹），`nginx.conf` 放到 `/root/tlias-nginx/conf/nginx.conf`。传完不用重启容器，nginx 直接读；改了配置则要让它重新加载（进容器执行 `nginx -s reload`，或者 `docker restart nginx-tlias`）。
-  > **④ 两段 location**：
-  > ```nginx
-  > location / {
-  >     root   /usr/share/nginx/html;        # 容器里的绝对路径（109 篇是相对 nginx 安装目录的 html）
-  >     index  index.html index.htm;
-  >     try_files $uri $uri/ /index.html;
-  > }
-  > location ^~ /api/ {
-  >     rewrite ^/api/(.*)$ /$1 break;
-  >     proxy_pass http://tlias-server:8080; # 用容器名（两个容器在同一个自定义网络里）
-  > }
-  > ```
-  > **⑤ 怎么验证**：浏览器访问 `http://192.168.100.128`（80 可省）——看到 tlias 的页面说明 `location /` 那一路通了；打开一个要查数据的页面（部门管理/员工管理），表格里有数据说明 `/api` 那一路（`rewrite` + `proxy_pass` 到 `tlias-server:8080`）也通了。页面打不开先查 80 映射与容器状态（`docker ps`）；页面能开但没数据，先查 nginx 容器和 `tlias-server` **在不在同一个网络里**、`proxy_pass` 里的容器名对不对。
+  **一级 · 思路**：nginx 容器要"看到"两样东西才能干活——**发给用户的页面**（静态资源目录）和**它自己的配置**（`nginx.conf`）；所以要用两条挂在容器上的映射，把它们都指向宿主机上你实际放文件的目录
+  **二级 · 方法**：起容器 `docker run -d --name nginx-tlias -v 宿主机html目录:/usr/share/nginx/html -v 宿主机nginx.conf:/etc/nginx/nginx.conf --network itheima -p 80:80 nginx:1.20.2`；资源传到宿主机侧 html 目录、配置文件放到宿主机侧那一条路径；`nginx.conf` 里 `root` 写容器里的绝对路径、`proxy_pass` 写 `http://tlias-server:8080`；验证：访问 80 看页面、点开有数据的列表看接口
+  **三级 · 骨架**：① `docker run -d --name ____ -v ____:/usr/share/nginx/html -v ____:/etc/nginx/nginx.conf --____ itheima -p ____:____ nginx:____`；② 第一条映射解决 `____`，第二条解决 `____`（文件映射，左边是文件不是目录）；③ 先传 `____`，再起容器；④ `root /usr/share/nginx/html;` + `proxy_pass http://____:____;`；⑤ 访问 `http://____` 看页面，打开一个要查数据的页面看数据出不出来
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **① 起容器的命令**：
+  ```bash
+  docker run -d \
+   --name nginx-tlias \
+   -v /root/tlias-nginx/html:/usr/share/nginx/html \
+   -v /root/tlias-nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
+   --network itheima \
+   -p 80:80 \
+  nginx:1.20.2
+  ```
+  **② 两条映射各干什么**：
+  - `-v /root/tlias-nginx/html:/usr/share/nginx/html`——**目录映射**：把宿主机的 html 目录接到容器里 nginx 放网页的目录上，静态资源放宿主机这边，容器里的 nginx 直接对外发（改文件不用进容器）；
+  - `-v /root/tlias-nginx/conf/nginx.conf:/etc/nginx/nginx.conf`——**文件映射**（左边是**文件**，不是目录）：用自己写好的配置替换容器里那份默认配置，让 nginx 按我们要的规则发页面、转 `/api`；映射出来的好处是**容器删了重建配置还在**（容器自己的文件系统是即用即弃的）。
+  **③ 什么时候传、传到哪**：**起容器之后往宿主机的对应目录里传**（也可以先传好再起容器，效果一样）——资源传进 `/root/tlias-nginx/html`（注意传的是资源"里面的文件"，别多套一层文件夹），`nginx.conf` 放到 `/root/tlias-nginx/conf/nginx.conf`。传完不用重启容器，nginx 直接读；改了配置则要让它重新加载（进容器执行 `nginx -s reload`，或者 `docker restart nginx-tlias`）。
+  **④ 两段 location**：
+  ```nginx
+  location / {
+      root   /usr/share/nginx/html;        # 容器里的绝对路径（109 篇是相对 nginx 安装目录的 html）
+      index  index.html index.htm;
+      try_files $uri $uri/ /index.html;
+  }
+  location ^~ /api/ {
+      rewrite ^/api/(.*)$ /$1 break;
+      proxy_pass http://tlias-server:8080; # 用容器名（两个容器在同一个自定义网络里）
+  }
+  ```
+  **⑤ 怎么验证**：浏览器访问 `http://192.168.100.128`（80 可省）——看到 tlias 的页面说明 `location /` 那一路通了；打开一个要查数据的页面（部门管理/员工管理），表格里有数据说明 `/api` 那一路（`rewrite` + `proxy_pass` 到 `tlias-server:8080`）也通了。页面打不开先查 80 映射与容器状态（`docker ps`）；页面能开但没数据，先查 nginx 容器和 `tlias-server` **在不在同一个网络里**、`proxy_pass` 里的容器名对不对。
+
+  :::
+
 
 - [ ] **2-4 同一个 nginx 容器："`docker run` 写法"和"compose 写法"互译**
   需求：下面这条命令起的是一个 nginx 容器。请：
@@ -815,55 +839,63 @@ $ docker compose down
   nginx:1.20.2
   ```
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把 `run` 的每个"开关"当成一把钥匙，去 yml 里找对应的抽屉——**镜像、名字、卷、网络、端口**五样，一把一把对
-  > **二级 · 方法**：`image:` / `container_name:` / `volumes:`（列表） / `networks:`（列表，值写网络的 key） / `ports:`（列表）；顶层 `networks:` 声明 key 对应的**真实网络名**（`name:`）；`-d` 在 yml 里不需要（由 `docker compose up -d` 提供）
-  > **三级 · 骨架**：`services:` → `nginx-tlias:` → `image: "____"` / `container_name: ____` / `volumes: - "____:____"` / `networks: - ____` / `ports: - "____:____"` → 顶层 `networks: ____: name: ____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **① compose 写法**：
-  > ```yaml
-  > services:
-  >   nginx-tlias:
-  >     image: "nginx:1.20.2"
-  >     container_name: nginx-tlias
-  >     volumes:
-  >       - "/usr/local/app/html:/usr/share/nginx/html"
-  >       - "/usr/local/app/conf/nginx.conf:/etc/nginx/nginx.conf"
-  >     networks:
-  >       - itheima
-  >     ports:
-  >       - "80:80"
-  > networks:
-  >   itheima:
-  >     name: itheima
-  > ```
-  > **② 逐项对应**：
-  >
-  > | `docker run` 里 | yml 里 |
-  > | --- | --- |
-  > | `nginx:1.20.2` | `image: "nginx:1.20.2"` |
-  > | `--name nginx-tlias` | `container_name: nginx-tlias`（另外服务名本身也叫 `nginx-tlias`） |
-  > | `-v ...`（两条） | `volumes:` 下的两条（**写法完全一样**，左宿主机、右容器） |
-  > | `--network itheima` | 服务里的 `networks: - itheima` + 顶层 `networks: itheima: name: itheima` |
-  > | `-p 80:80` | `ports: - "80:80"` |
-  > | `-d` | 不用写，由 `docker compose up -d` 的 `-d` 提供 |
-  >
-  > **③ 为什么顶层还要声明一次**：服务里写的 `itheima` 是**网络的 key**（在这个文件里引用用的名字），它到底对应 Docker 里哪个网络，要在顶层说清楚。**不写 `name:` 的话**，Compose 会自动给网络加上项目名前缀（项目名默认取 compose 文件所在目录名），实测里那个自动网络就叫 `compose-demo_default`；课程想要的就是干干净净的 `itheima`（[112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)里那些容器也都在这个网络里），所以用 `name:` 钉死。
-  > **④ 反过来（yml 加环境变量 + 加一条映射）**：
-  > ```bash
-  > docker run -d \
-  >  --name nginx-tlias \
-  >  -e TZ=Asia/Shanghai \
-  >  -v /usr/local/app/html:/usr/share/nginx/html \
-  >  -v /usr/local/app/conf/nginx.conf:/etc/nginx/nginx.conf \
-  >  -v /usr/local/app/logs:/var/log/nginx \
-  >  --network itheima \
-  >  -p 80:80 \
-  > nginx:1.20.2
-  > ```
-  > （yml 那边就是多加 `environment:` 一项、`volumes:` 下多一行——**两边是一一对应的，没有魔法**。）
-  > 检查点：① yml 的缩进/列表写法正确；② 五样对应关系一个不漏（含 `-d` 由 `up -d` 承担）；③ 能解释"key 与真实网络名"和"项目名前缀"；④ 反写命令时 `-e`、`-v` 的位置与写法正确。
+  **一级 · 思路**：把 `run` 的每个"开关"当成一把钥匙，去 yml 里找对应的抽屉——**镜像、名字、卷、网络、端口**五样，一把一把对
+  **二级 · 方法**：`image:` / `container_name:` / `volumes:`（列表） / `networks:`（列表，值写网络的 key） / `ports:`（列表）；顶层 `networks:` 声明 key 对应的**真实网络名**（`name:`）；`-d` 在 yml 里不需要（由 `docker compose up -d` 提供）
+  **三级 · 骨架**：`services:` → `nginx-tlias:` → `image: "____"` / `container_name: ____` / `volumes: - "____:____"` / `networks: - ____` / `ports: - "____:____"` → 顶层 `networks: ____: name: ____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **① compose 写法**：
+  ```yaml
+  services:
+    nginx-tlias:
+      image: "nginx:1.20.2"
+      container_name: nginx-tlias
+      volumes:
+        - "/usr/local/app/html:/usr/share/nginx/html"
+        - "/usr/local/app/conf/nginx.conf:/etc/nginx/nginx.conf"
+      networks:
+        - itheima
+      ports:
+        - "80:80"
+  networks:
+    itheima:
+      name: itheima
+  ```
+  **② 逐项对应**：
+  
+  | `docker run` 里 | yml 里 |
+  | --- | --- |
+  | `nginx:1.20.2` | `image: "nginx:1.20.2"` |
+  | `--name nginx-tlias` | `container_name: nginx-tlias`（另外服务名本身也叫 `nginx-tlias`） |
+  | `-v ...`（两条） | `volumes:` 下的两条（**写法完全一样**，左宿主机、右容器） |
+  | `--network itheima` | 服务里的 `networks: - itheima` + 顶层 `networks: itheima: name: itheima` |
+  | `-p 80:80` | `ports: - "80:80"` |
+  | `-d` | 不用写，由 `docker compose up -d` 的 `-d` 提供 |
+  
+  **③ 为什么顶层还要声明一次**：服务里写的 `itheima` 是**网络的 key**（在这个文件里引用用的名字），它到底对应 Docker 里哪个网络，要在顶层说清楚。**不写 `name:` 的话**，Compose 会自动给网络加上项目名前缀（项目名默认取 compose 文件所在目录名），实测里那个自动网络就叫 `compose-demo_default`；课程想要的就是干干净净的 `itheima`（[112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)里那些容器也都在这个网络里），所以用 `name:` 钉死。
+  **④ 反过来（yml 加环境变量 + 加一条映射）**：
+  ```bash
+  docker run -d \
+   --name nginx-tlias \
+   -e TZ=Asia/Shanghai \
+   -v /usr/local/app/html:/usr/share/nginx/html \
+   -v /usr/local/app/conf/nginx.conf:/etc/nginx/nginx.conf \
+   -v /usr/local/app/logs:/var/log/nginx \
+   --network itheima \
+   -p 80:80 \
+  nginx:1.20.2
+  ```
+  （yml 那边就是多加 `environment:` 一项、`volumes:` 下多一行——**两边是一一对应的，没有魔法**。）
+  检查点：① yml 的缩进/列表写法正确；② 五样对应关系一个不漏（含 `-d` 由 `up -d` 承担）；③ 能解释"key 与真实网络名"和"项目名前缀"；④ 反写命令时 `-e`、`-v` 的位置与写法正确。
+
+  :::
+
 
 - [ ] **2-5 手动部署 vs Docker Compose：说清"痛点"和"解法"**
   需求：一个项目要起七个容器（`mysql`、`nginx`、`tlias-server`、`redis`、`mq`、`order-server`、`admin-server`）。请回答：
@@ -873,40 +905,48 @@ $ docker compose down
   ④ 写出从"第一次部署"到"全部停掉"你会用到的 Compose 命令（含格式与常用选项），并说清 `up` 和 `down` 各自把什么建起来、删掉了什么（用本机实测的输出作证）。
   （练习文件 `test_113_Compose与部署.md` 的题目2-5 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：从"**命令长、顺序要记、数量多、管理散、换机器要重来**"这几个角度说痛点；对应地，Compose 用**一个文件**把这些"命令、顺序、数量"都收进 `services` 里，用**一套命令**统一管理
-  > **二级 · 方法**：手动部署的账：一条 `docker run` 一长串参数、谁先谁后自己记、七个容器七条命令、日志/启停要一个个来、换机器要重抄；Compose：`docker-compose.yml` 定义一组服务（项目 = 一整套、服务 = 一个容器），`docker compose up -d` 一键起、`down` 一键停并删容器与网络、`ps`/`logs` 统一看
-  > **三级 · 骨架**：① 至少三条具体麻烦；② 两句 PPT 结论（`____` / `____`）；③ 对应到 `____`（Project）与 `____`（Service）；④ `docker compose [____] [____]`；`up` = 创建并启动所有 `____`；`down` = 停止并移除所有 `____` 和 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **① 手动部署的麻烦（具体表现）**：
-  > - **命令又长又多**：`docker run -d --name nginx-tlias -v ... -v ... --network itheima -p 80:80 nginx:1.20.2`——一条命令一长串参数，七个容器就是七条，抄错一个字母就是一个坑；
-  > - **先后顺序要自己记**：数据库要先起、应用再起、nginx 最后起（起反了就是启动报错）；
-  > - **想留痕还得自己加参数**：日志路径、目录挂载、环境变量（比如 OSS 密钥、`MYSQL_ROOT_PASSWORD`）都得在命令里带对；
-  > - **管理是散的**：看日志要一个个 `docker logs`、停要一个个 `docker stop`、删还得自己记着删网络；
-  > - **换台机器等于重来**：这一串命令要再抄一遍。
-  > **② PPT 第 50 页的两条结论**：**"手动部署 - 繁琐"**、**"不便于统一管理"**。
-  > **③ Compose 怎么解决**：
-  > - **"繁琐"** → 那七条 `docker run` 变成 `docker-compose.yml` 里的**七个服务（Service）**，参数各归各的字段（`image`/`container_name`/`ports`/`volumes`/`networks`/`environment`/`depends_on`），文件能存 Git、能改一处生效一处；
-  > - **"不便于统一管理"** → 它们同属一个**项目（Project）**，用**一套命令**统一操作：`docker compose up -d` 一起起（顺序按 `depends_on`）、`docker compose ps` 一起看、`docker compose logs` 一起看日志、`docker compose down` 一起停并删（连网络一起）；
-  > - **"换机器"** → 把 yml 和资源拷过去，一条 `up -d` 重来一遍。
-  > **④ 从部署到收工的 Compose 命令**（格式 `docker compose [OPTIONS] [COMMAND]`）：
-  > ```bash
-  > # 第一次部署（-f 指定文件、-p 指定项目名，默认可省）
-  > docker compose up -d
-  > # 看状态 / 看日志
-  > docker compose ps
-  > docker compose logs
-  > # 停 / 起 / 重启（不动容器与网络）
-  > docker compose stop
-  > docker compose start
-  > docker compose restart
-  > # 全部收工：停止并移除所有容器、网络
-  > docker compose down
-  > ```
-  > `up` 干的事（本机实测）：**Creating → Created → Starting → Started**——把服务逐个创建并启动（镜像要构建的顺手构建、网络不存在就建）；
-  > `down` 干的事（本机实测）：**Stopped → Removing → Removed**，最后还有 **`Network compose-demo_default Removing / Removed`**——**容器和网络一起清掉**（这也是那句"删要自己记着删网络"的对比：`down` 一步全包）。
-  > 检查点：① 至少三条具体麻烦且对得上命令；② 两条结论写对；③ 能落到 Project / Service 两个概念上；④ 命令格式与常用子命令齐全，`up`/`down` 各自"建什么/删什么"说得清（能引用实测输出更好）。
+  **一级 · 思路**：从"**命令长、顺序要记、数量多、管理散、换机器要重来**"这几个角度说痛点；对应地，Compose 用**一个文件**把这些"命令、顺序、数量"都收进 `services` 里，用**一套命令**统一管理
+  **二级 · 方法**：手动部署的账：一条 `docker run` 一长串参数、谁先谁后自己记、七个容器七条命令、日志/启停要一个个来、换机器要重抄；Compose：`docker-compose.yml` 定义一组服务（项目 = 一整套、服务 = 一个容器），`docker compose up -d` 一键起、`down` 一键停并删容器与网络、`ps`/`logs` 统一看
+  **三级 · 骨架**：① 至少三条具体麻烦；② 两句 PPT 结论（`____` / `____`）；③ 对应到 `____`（Project）与 `____`（Service）；④ `docker compose [____] [____]`；`up` = 创建并启动所有 `____`；`down` = 停止并移除所有 `____` 和 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **① 手动部署的麻烦（具体表现）**：
+  - **命令又长又多**：`docker run -d --name nginx-tlias -v ... -v ... --network itheima -p 80:80 nginx:1.20.2`——一条命令一长串参数，七个容器就是七条，抄错一个字母就是一个坑；
+  - **先后顺序要自己记**：数据库要先起、应用再起、nginx 最后起（起反了就是启动报错）；
+  - **想留痕还得自己加参数**：日志路径、目录挂载、环境变量（比如 OSS 密钥、`MYSQL_ROOT_PASSWORD`）都得在命令里带对；
+  - **管理是散的**：看日志要一个个 `docker logs`、停要一个个 `docker stop`、删还得自己记着删网络；
+  - **换台机器等于重来**：这一串命令要再抄一遍。
+  **② PPT 第 50 页的两条结论**：**"手动部署 - 繁琐"**、**"不便于统一管理"**。
+  **③ Compose 怎么解决**：
+  - **"繁琐"** → 那七条 `docker run` 变成 `docker-compose.yml` 里的**七个服务（Service）**，参数各归各的字段（`image`/`container_name`/`ports`/`volumes`/`networks`/`environment`/`depends_on`），文件能存 Git、能改一处生效一处；
+  - **"不便于统一管理"** → 它们同属一个**项目（Project）**，用**一套命令**统一操作：`docker compose up -d` 一起起（顺序按 `depends_on`）、`docker compose ps` 一起看、`docker compose logs` 一起看日志、`docker compose down` 一起停并删（连网络一起）；
+  - **"换机器"** → 把 yml 和资源拷过去，一条 `up -d` 重来一遍。
+  **④ 从部署到收工的 Compose 命令**（格式 `docker compose [OPTIONS] [COMMAND]`）：
+  ```bash
+  # 第一次部署（-f 指定文件、-p 指定项目名，默认可省）
+  docker compose up -d
+  # 看状态 / 看日志
+  docker compose ps
+  docker compose logs
+  # 停 / 起 / 重启（不动容器与网络）
+  docker compose stop
+  docker compose start
+  docker compose restart
+  # 全部收工：停止并移除所有容器、网络
+  docker compose down
+  ```
+  `up` 干的事（本机实测）：**Creating → Created → Starting → Started**——把服务逐个创建并启动（镜像要构建的顺手构建、网络不存在就建）；
+  `down` 干的事（本机实测）：**Stopped → Removing → Removed**，最后还有 **`Network compose-demo_default Removing / Removed`**——**容器和网络一起清掉**（这也是那句"删要自己记着删网络"的对比：`down` 一步全包）。
+  检查点：① 至少三条具体麻烦且对得上命令；② 两条结论写对；③ 能落到 Project / Service 两个概念上；④ 命令格式与常用子命令齐全，`up`/`down` 各自"建什么/删什么"说得清（能引用实测输出更好）。
+
+  :::
+
 
 ### 三、综合题
 
@@ -920,96 +960,104 @@ $ docker compose down
   6. **收工与重来**：全停掉用什么命令、它删掉了什么；如果只想停不想删，又该用什么。
   7. **收尾复盘**：把"服务端六步"和"这份 yml"之间的对应说一遍（六步里的哪几步，被 yml 里的哪几行"一句话带过"了）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：这一题就是"**把前三节做过的事，全部折叠进一个 yml 文件**"——资源先归位（都在一个目录）、再用三个服务把 mysql / 应用 / nginx 描述出来、最后一条 `up -d` 收口；验证按"**后端 → 前端 → 数据**"三层往外走，哪层断了就查哪层
-  > **二级 · 方法**：资源目录里放 `docker-compose.yml`、`Dockerfile`、`jdk17.tar.gz`、`tlias.jar`、`tlias.sql`、`nginx.conf`、静态资源目录；三个服务分别用 `image`（mysql、nginx）和 `build`（应用）；容器名 `mysql` / `tlias-server` / `nginx-tlias`；网络统一 `tlias-net`（顶层 `name: itheima`）；`depends_on` 串起"mysql → tlias → nginx"；`docker compose up -d` / `down` / `stop`
-  > **三级 · 骨架**：① 目录清单（说明 `build.context` 的范围）；② yml 三段，照 2-2 与 2-3 拼起来；③ 数据库地址写容器名 `____`、nginx 转发写容器名 `____`；④ `docker compose ____ -d`；⑤ 后端 `http://____:8080/depts`、前端 `http://____`、数据看一个要查数据的页面；⑥ `docker compose ____` / `docker compose ____`；⑦ 六步 ↔ yml 对应表
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```
-  > 【1】准备资源：全部放进同一个目录（比如 /usr/local/app）
-  >   docker-compose.yml      ← 这一份是"总指挥"
-  >   Dockerfile              ← 服务端构建用
-  >   jdk17.tar.gz            ← 服务端构建用
-  >   tlias.jar               ← 服务端构建用（已改好数据库地址与日志路径并打包）
-  >   tlias.sql               ← 数据库初始化用
-  >   nginx.conf              ← 前端配置
-  >   html/                   ← 前端静态资源（index.html、assets/、favicon.ico）
-  >   为什么服务端那三样必须同目录：yml 里 build.context 指的是 yml 所在目录，
-  >   Dockerfile 里的 COPY 只能拷这个目录里的文件。
-  >
-  > 【2】docker-compose.yml（三个服务）
-  >   services:
-  >     mysql:
-  >       image: mysql:8
-  >       container_name: mysql
-  >       ports: ["3307:3306"]
-  >       environment:
-  >         TZ: Asia/Shanghai
-  >         MYSQL_ROOT_PASSWORD: 123
-  >       volumes:
-  >         - "/usr/local/app/mysql/data:/var/lib/mysql"
-  >         - "/usr/local/app/mysql/init:/docker-entrypoint-initdb.d"   # tlias.sql 放这儿
-  >         - "/usr/local/app/mysql/conf:/etc/mysql/conf.d"
-  >       networks: [tlias-net]
-  >     tlias:
-  >       build:
-  >         context: .
-  >         dockerfile: Dockerfile
-  >       container_name: tlias-server
-  >       ports: ["8080:8080"]
-  >       networks: [tlias-net]
-  >       depends_on: [mysql]
-  >     nginx:
-  >       image: nginx:1.20.2
-  >       container_name: nginx-tlias
-  >       ports: ["80:80"]
-  >       volumes:
-  >         - "/usr/local/app/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
-  >         - "/usr/local/app/nginx/html:/usr/share/nginx/html"
-  >       depends_on: [tlias]
-  >       networks: [tlias-net]
-  >   networks:
-  >     tlias-net:
-  >       name: itheima
-  >
-  > 【3】名字的约束（不能随手改）
-  >   · 应用配置里：jdbc:mysql://mysql:3306/tlias → 用容器名 mysql
-  >   · nginx 配置里：proxy_pass http://tlias-server:8080 → 用容器名 tlias-server
-  >   改名的后果：容器名变了，这两处配置就找不到目标
-  >   （应用连不上库 / nginx 转发 502）；要改就两边一起改。
-  >   前提：三个容器都在同一个自定义网络（itheima）里 —— 只有这样才能用容器名互访。
-  >
-  > 【4】一次构建
-  >   docker compose up -d
-  >   它一次做了：
-  >     · 给 tlias 服务构建镜像（build 那段，等于在 context 目录里 docker build）
-  >     · 创建网络 itheima（不存在才建）
-  >     · 按 depends_on 的顺序依次创建并启动三个容器：mysql → tlias → nginx
-  >
-  > 【5】验证三个阶段
-  >   · 后端自己：宿主机访问 http://192.168.100.128:8080/depts 能拿到 JSON
-  >     （docker logs tlias-server 看启动日志有没有报错）
-  >   · 前端页面：浏览器访问 http://192.168.100.128（80）看到 tlias 页面
-  >   · 数据出来：打开部门管理/员工管理，表格有数据
-  >     背后的链路：浏览器 → nginx 容器 80 → location / 发页面
-  >     → 页面发 /api/depts → location ^~ /api/ rewrite 摘掉 /api
-  >     → proxy_pass http://tlias-server:8080 → 应用容器
-  >     → 连 mysql 容器的 3306 → 返回 JSON
-  >
-  > 【6】收工与重来
-  >   docker compose down      → 停止并移除所有容器 + 网络（本机实测：Stopped/Removing/Removed，
-  >                              最后 Network ... Removing/Removed）
-  >   docker compose stop      → 只停止容器，不删（下次 docker compose start 接着用）
-  >   重来：docker compose up -d（镜像/网络已存在的会复用）
-  >
-  > 【7】复盘：服务端六步 ↔ 这份 yml 的对应
-  >   PPT 第 1 步（准备 MySQL 容器与库表）  → mysql 服务那一段（image/ports/environment/volumes）
-  >   PPT 第 2 步（准备应用镜像、跑测试）    → tlias 服务的 build 段 + up 之后 up 起容器
-  >   PPT 第 3 步（改配置、打 jar）         → 不在 yml 里：这是"构建前"要做的准备工作
-  >   PPT 第 4 步（编写 Dockerfile）        → build.dockerfile 指向的那份文件
-  >   PPT 第 5 步（构建镜像）               → up -d 时自动完成（build 段）
-  >   PPT 第 6 步（部署容器）               → up -d 时自动完成（container_name/networks/ports/depends_on）
-  >   前端那两段（目录映射 + nginx.conf）    → nginx 服务那一段的 volumes
-  > ```
-  > 检查点：① 资源清单完整、说得出"为什么服务端三样要同目录"；② yml 三个服务字段齐全、缩进正确、网络顶层声明了 `name: itheima`；③ 两个容器名（`mysql`、`tlias-server`）与两处配置对得上；④ `up -d` 做了哪几件事说得清；⑤ 验证分三层且链路说得对（尤其 `/api` 那一段）；⑥ `down` 与 `stop` 的区别清楚；⑦ 六步与 yml 的对应表能列出来。
+  **一级 · 思路**：这一题就是"**把前三节做过的事，全部折叠进一个 yml 文件**"——资源先归位（都在一个目录）、再用三个服务把 mysql / 应用 / nginx 描述出来、最后一条 `up -d` 收口；验证按"**后端 → 前端 → 数据**"三层往外走，哪层断了就查哪层
+  **二级 · 方法**：资源目录里放 `docker-compose.yml`、`Dockerfile`、`jdk17.tar.gz`、`tlias.jar`、`tlias.sql`、`nginx.conf`、静态资源目录；三个服务分别用 `image`（mysql、nginx）和 `build`（应用）；容器名 `mysql` / `tlias-server` / `nginx-tlias`；网络统一 `tlias-net`（顶层 `name: itheima`）；`depends_on` 串起"mysql → tlias → nginx"；`docker compose up -d` / `down` / `stop`
+  **三级 · 骨架**：① 目录清单（说明 `build.context` 的范围）；② yml 三段，照 2-2 与 2-3 拼起来；③ 数据库地址写容器名 `____`、nginx 转发写容器名 `____`；④ `docker compose ____ -d`；⑤ 后端 `http://____:8080/depts`、前端 `http://____`、数据看一个要查数据的页面；⑥ `docker compose ____` / `docker compose ____`；⑦ 六步 ↔ yml 对应表
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```
+  【1】准备资源：全部放进同一个目录（比如 /usr/local/app）
+    docker-compose.yml      ← 这一份是"总指挥"
+    Dockerfile              ← 服务端构建用
+    jdk17.tar.gz            ← 服务端构建用
+    tlias.jar               ← 服务端构建用（已改好数据库地址与日志路径并打包）
+    tlias.sql               ← 数据库初始化用
+    nginx.conf              ← 前端配置
+    html/                   ← 前端静态资源（index.html、assets/、favicon.ico）
+    为什么服务端那三样必须同目录：yml 里 build.context 指的是 yml 所在目录，
+    Dockerfile 里的 COPY 只能拷这个目录里的文件。
+  
+  【2】docker-compose.yml（三个服务）
+    services:
+      mysql:
+        image: mysql:8
+        container_name: mysql
+        ports: ["3307:3306"]
+        environment:
+          TZ: Asia/Shanghai
+          MYSQL_ROOT_PASSWORD: 123
+        volumes:
+          - "/usr/local/app/mysql/data:/var/lib/mysql"
+          - "/usr/local/app/mysql/init:/docker-entrypoint-initdb.d"   # tlias.sql 放这儿
+          - "/usr/local/app/mysql/conf:/etc/mysql/conf.d"
+        networks: [tlias-net]
+      tlias:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        container_name: tlias-server
+        ports: ["8080:8080"]
+        networks: [tlias-net]
+        depends_on: [mysql]
+      nginx:
+        image: nginx:1.20.2
+        container_name: nginx-tlias
+        ports: ["80:80"]
+        volumes:
+          - "/usr/local/app/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
+          - "/usr/local/app/nginx/html:/usr/share/nginx/html"
+        depends_on: [tlias]
+        networks: [tlias-net]
+    networks:
+      tlias-net:
+        name: itheima
+  
+  【3】名字的约束（不能随手改）
+    · 应用配置里：jdbc:mysql://mysql:3306/tlias → 用容器名 mysql
+    · nginx 配置里：proxy_pass http://tlias-server:8080 → 用容器名 tlias-server
+    改名的后果：容器名变了，这两处配置就找不到目标
+    （应用连不上库 / nginx 转发 502）；要改就两边一起改。
+    前提：三个容器都在同一个自定义网络（itheima）里 —— 只有这样才能用容器名互访。
+  
+  【4】一次构建
+    docker compose up -d
+    它一次做了：
+      · 给 tlias 服务构建镜像（build 那段，等于在 context 目录里 docker build）
+      · 创建网络 itheima（不存在才建）
+      · 按 depends_on 的顺序依次创建并启动三个容器：mysql → tlias → nginx
+  
+  【5】验证三个阶段
+    · 后端自己：宿主机访问 http://192.168.100.128:8080/depts 能拿到 JSON
+      （docker logs tlias-server 看启动日志有没有报错）
+    · 前端页面：浏览器访问 http://192.168.100.128（80）看到 tlias 页面
+    · 数据出来：打开部门管理/员工管理，表格有数据
+      背后的链路：浏览器 → nginx 容器 80 → location / 发页面
+      → 页面发 /api/depts → location ^~ /api/ rewrite 摘掉 /api
+      → proxy_pass http://tlias-server:8080 → 应用容器
+      → 连 mysql 容器的 3306 → 返回 JSON
+  
+  【6】收工与重来
+    docker compose down      → 停止并移除所有容器 + 网络（本机实测：Stopped/Removing/Removed，
+                               最后 Network ... Removing/Removed）
+    docker compose stop      → 只停止容器，不删（下次 docker compose start 接着用）
+    重来：docker compose up -d（镜像/网络已存在的会复用）
+  
+  【7】复盘：服务端六步 ↔ 这份 yml 的对应
+    PPT 第 1 步（准备 MySQL 容器与库表）  → mysql 服务那一段（image/ports/environment/volumes）
+    PPT 第 2 步（准备应用镜像、跑测试）    → tlias 服务的 build 段 + up 之后 up 起容器
+    PPT 第 3 步（改配置、打 jar）         → 不在 yml 里：这是"构建前"要做的准备工作
+    PPT 第 4 步（编写 Dockerfile）        → build.dockerfile 指向的那份文件
+    PPT 第 5 步（构建镜像）               → up -d 时自动完成（build 段）
+    PPT 第 6 步（部署容器）               → up -d 时自动完成（container_name/networks/ports/depends_on）
+    前端那两段（目录映射 + nginx.conf）    → nginx 服务那一段的 volumes
+  ```
+  检查点：① 资源清单完整、说得出"为什么服务端三样要同目录"；② yml 三个服务字段齐全、缩进正确、网络顶层声明了 `name: itheima`；③ 两个容器名（`mysql`、`tlias-server`）与两处配置对得上；④ `up -d` 做了哪几件事说得清；⑤ 验证分三层且链路说得对（尤其 `/api` 那一段）；⑥ `down` 与 `stop` 的区别清楚；⑦ 六步与 yml 的对应表能列出来。
+
+  :::
+

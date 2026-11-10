@@ -79,7 +79,7 @@ axes1.set_yticks([i for i in range(0, 31, 3)])
 axes1.grid(linestyle='--', alpha=0.5)
 ```
 
-> [!TIP]
+> [!TIP] 提示
 > `year_count.get(i, 0)` 的作用是"取不到就记 0"：中间有些年份可能一部都没有，直接画会断档。
 
 ## 需求二：不同语言电影数量（柱状图）
@@ -160,7 +160,7 @@ plt.show()                            # 显示
 | `process_genre_data(data)` / `plot_genre_bar(...)` | 需求三 |
 | `process_score_data(data)` / `plot_score_pie(...)` | 需求四 |
 
-> [!TIP]
+> [!TIP] 提示
 > "数据处理"和"画图"分开写的好处：**统计逻辑可以单独测试**（对着数字检查对不对），画图只是最后一步。完整的分函数版本见课程文件 `10. TMDB-TOP300电影榜单数据统计.py`。
 
 ## 相关
@@ -189,77 +189,109 @@ plt.show()                            # 显示
 - [ ] **2-1 统计每年电影数量**
   用 `data/movies.csv` 统计出"每年上映电影数量"，打印 1994 年和 2000 年各有多少部（年份缺失的用上映时间补）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先补年份 → 按年份分组计数 → 取值
-  > **二级 · 方法**：`fillna(上映时间的前 4 位)` / `groupby('年份')['年份'].count()`
-  > **三级 · 骨架**：`year_count.get(1994, 0)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > import pandas as pd
-  >
-  > data = pd.read_csv('data/movies.csv',
-  >                    usecols=['电影名', '年份', '上映时间', '类型', '时长', '评分', '语言'],
-  >                    dtype={'年份': 'Int64'})
-  >
-  > # 2-1
-  > data['年份'] = data['年份'].fillna(data['上映时间'].str[:4])
-  > year_count = data.groupby('年份')['年份'].count()
-  > print('1994 年:', year_count.get(1994, 0), '部')
-  > print('2000 年:', year_count.get(2000, 0), '部')
-  > ```
+  **一级 · 思路**：先补年份 → 按年份分组计数 → 取值
+  **二级 · 方法**：`fillna(上映时间的前 4 位)` / `groupby('年份')['年份'].count()`
+  **三级 · 骨架**：`year_count.get(1994, 0)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  import pandas as pd
+  
+  data = pd.read_csv('data/movies.csv',
+                     usecols=['电影名', '年份', '上映时间', '类型', '时长', '评分', '语言'],
+                     dtype={'年份': 'Int64'})
+  
+  # 2-1
+  data['年份'] = data['年份'].fillna(data['上映时间'].str[:4])
+  year_count = data.groupby('年份')['年份'].count()
+  print('1994 年:', year_count.get(1994, 0), '部')
+  print('2000 年:', year_count.get(2000, 0), '部')
+  ```
+
+  :::
+
 
 - [ ] **2-2 统计不同语言的电影数量并排序**
   按语言分组统计数量，按数量从多到少排序，打印前 5 名。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：分组计数得到 Series，再排序切片
-  > **二级 · 方法**：`groupby('语言')['语言'].count().sort_values(ascending=False)`
-  > **三级 · 骨架**：`.head(5)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > language_count = data.groupby('语言')['语言'].count().sort_values(ascending=False)
-  > print(language_count.head(5))
-  > ```
+  **一级 · 思路**：分组计数得到 Series，再排序切片
+  **二级 · 方法**：`groupby('语言')['语言'].count().sort_values(ascending=False)`
+  **三级 · 骨架**：`.head(5)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  language_count = data.groupby('语言')['语言'].count().sort_values(ascending=False)
+  print(language_count.head(5))
+  ```
+
+  :::
+
 
 - [ ] **2-3 统计不同类型电影数量**
   `类型` 列是 `"剧情,犯罪"` 这种多值，拆开后统计每种题材各有多少部，打印数量前 5 的题材。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一行可能属于多个题材，要先拆再计数（字典计数）
-  > **二级 · 方法**：`data['类型'].str.split(',')` + 双重 for 循环
-  > **三级 · 骨架**：`if t in type_count: type_count[t] += 1`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3
-  > type_count = {}
-  > for types in data['类型'].str.split(','):
-  >     for t in types:
-  >         type_count[t] = type_count.get(t, 0) + 1
-  > type_series = pd.Series(type_count).sort_values(ascending=False)
-  > print(type_series.head(5))
-  > ```
+  **一级 · 思路**：一行可能属于多个题材，要先拆再计数（字典计数）
+  **二级 · 方法**：`data['类型'].str.split(',')` + 双重 for 循环
+  **三级 · 骨架**：`if t in type_count: type_count[t] += 1`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3
+  type_count = {}
+  for types in data['类型'].str.split(','):
+      for t in types:
+          type_count[t] = type_count.get(t, 0) + 1
+  type_series = pd.Series(type_count).sort_values(ascending=False)
+  print(type_series.head(5))
+  ```
+
+  :::
+
 
 - [ ] **2-4 统计评分占比（合并小数据）**
   统计各评分电影数量占比，把占比小于 2% 的合并成"其他"，打印合并后的结果。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先算总数，再按比例切两半（大的一块、小的一块）
-  > **二级 · 方法**：`score_count.loc[score_count >= total * 0.02]`
-  > **三级 · 骨架**：`large_scores['其他'] = small_scores.____()`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-4
-  > score_count = data.groupby('评分')['评分'].count()
-  > total = score_count.sum()
-  > large_scores = score_count.loc[score_count >= total * 0.02]
-  > small_scores = score_count.loc[score_count < total * 0.02]
-  > if small_scores.shape[0] > 0:
-  >     large_scores['其他'] = small_scores.sum()
-  > print(large_scores)
-  > ```
+  **一级 · 思路**：先算总数，再按比例切两半（大的一块、小的一块）
+  **二级 · 方法**：`score_count.loc[score_count >= total * 0.02]`
+  **三级 · 骨架**：`large_scores['其他'] = small_scores.____()`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-4
+  score_count = data.groupby('评分')['评分'].count()
+  total = score_count.sum()
+  large_scores = score_count.loc[score_count >= total * 0.02]
+  small_scores = score_count.loc[score_count < total * 0.02]
+  if small_scores.shape[0] > 0:
+      large_scores['其他'] = small_scores.sum()
+  print(large_scores)
+  ```
+
+  :::
+
 

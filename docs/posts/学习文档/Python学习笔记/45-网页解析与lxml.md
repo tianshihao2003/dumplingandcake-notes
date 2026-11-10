@@ -71,7 +71,7 @@ with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
 | `document.xpath("//table/tbody/tr")` | 定位 tbody 下的所有 tr（行），返回元素列表 |
 | `tr.xpath("./td/text()")` | 在**当前这一行**下找直接子元素 td 并取文本 |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > `./td` 和 `//td` 的区别：`./td` 是在**当前节点**下找直接子元素（只找这一行自己格子里的）；`//td` 是从**任意位置**找（会把整份文档里所有 td 都抓出来）。遍历行的时候必须用 `./`，否则每行拿到的都是全部数据。
 
 ## 相关
@@ -96,50 +96,74 @@ with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
 - [ ] **2-1 解析表头**
   读取 `resources/仙逆人物志.html`，解析出表格的表头并打印。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：读文件 → 变文档对象 → Xpath 定位表头
-  > **二级 · 方法**：`open(...)` / `html.fromstring` / `//table/thead/tr/th/text()`
-  > **三级 · 骨架**：`document = html.____(html_text)`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-1
-  > from lxml import html
-  >
-  > with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
-  >     html_text = f.read()
-  > document = html.fromstring(html_text)
-  > th_list = document.xpath("//table/thead/tr/th/text()")
-  > print(th_list)
-  > ```
+  **一级 · 思路**：读文件 → 变文档对象 → Xpath 定位表头
+  **二级 · 方法**：`open(...)` / `html.fromstring` / `//table/thead/tr/th/text()`
+  **三级 · 骨架**：`document = html.____(html_text)`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-1
+  from lxml import html
+  
+  with open("resources/仙逆人物志.html", "r", encoding="utf-8") as f:
+      html_text = f.read()
+  document = html.fromstring(html_text)
+  th_list = document.xpath("//table/thead/tr/th/text()")
+  print(th_list)
+  ```
+
+  :::
+
 
 - [ ] **2-2 解析所有行**
   把表格里**每一行**的数据都打印出来（每行是一个列表）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：先拿到所有行，再一行一行往里取格子
-  > **二级 · 方法**：`//table/tbody/tr` + 循环里 `./td/text()`
-  > **三级 · 骨架**：`for tr in tr_list:\n    print(tr.xpath("____/td/text()"))`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-2
-  > tr_list = document.xpath("//table/tbody/tr")
-  > for tr in tr_list:
-  >     print(tr.xpath("./td/text()"))
-  > ```
+  **一级 · 思路**：先拿到所有行，再一行一行往里取格子
+  **二级 · 方法**：`//table/tbody/tr` + 循环里 `./td/text()`
+  **三级 · 骨架**：`for tr in tr_list:\n    print(tr.xpath("____/td/text()"))`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-2
+  tr_list = document.xpath("//table/tbody/tr")
+  for tr in tr_list:
+      print(tr.xpath("./td/text()"))
+  ```
+
+  :::
+
 
 - [ ] **2-3 只要第二行**
   只解析 tbody 的**第 2 行**（提示：Xpath 里序号从 1 开始），打印它的数据。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：用序号过滤
-  > **二级 · 方法**：`//table/tbody/tr[2]/td/text()`
-  > **三级 · 骨架**：`tr[____]`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 2-3（Xpath 序号从 1 开始，第 2 行就是 tr[2]）
-  > td_list = document.xpath("//table/tbody/tr[2]/td/text()")
-  > print(td_list)
-  > ```
+  **一级 · 思路**：用序号过滤
+  **二级 · 方法**：`//table/tbody/tr[2]/td/text()`
+  **三级 · 骨架**：`tr[____]`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 2-3（Xpath 序号从 1 开始，第 2 行就是 tr[2]）
+  td_list = document.xpath("//table/tbody/tr[2]/td/text()")
+  print(td_list)
+  ```
+
+  :::
+

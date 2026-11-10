@@ -113,7 +113,7 @@ PPT 第 11 页把流程画成五步，第 12 页的问答页又重复了一遍�
 4. **测试**——前端测自己页面的渲染和交互，后端用自己的工具测接口能不能返回正确的数据；
 5. **前后端联调测试**——前端把请求真正打到后端上，跑通整条链路（这一步需要 Nginx 反向代理，59 篇讲）。
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > 前后端分离的关键词是"**分开**"：PPT 第 12 页的答案是——**前端项目、后端项目，开发和部署都是分开的**。所以后端程序员不需要会写 Vue，前端程序员也不需要懂 Java，两拨人靠接口文档对齐。本章我们只负责后端那一半。
 
 ## 开发规范三：Restful 风格的接口（PPT 第 13-17 页）
@@ -160,7 +160,7 @@ REST 的做法是**把两件事分开**：URL 只用来**定位资源**（`/user
 
 PPT 第 16 页还专门写了两条"注意"：
 
-> [!WARNING]
+> [!WARNING] 警告
 > 1. **REST 是风格，是约定方式，约定不是规定，可以打破**——它是团队共识，不是框架强制；真遇到 REST 表达不了的场景（比如批量删除），照样可以发明自己的写法。
 > 2. **描述功能模块通常使用复数形式（加 s）**，表示"此类资源"而不是单个资源，例如 `users`、`books`……所以本项目里部门那类资源叫 `/depts` 而不是 `/dept`。
 
@@ -212,7 +212,7 @@ PPT 第 21 页回答了"**为什么要用 Apifox**"：
 - 前端还没拿到后端接口时 → 用 Apifox 的 **Mock 服务**假装接口已经好了，先把页面渲染调通；
 - 接口文档本身也可以放在 Apifox 里**管理与分享**（课程资料 `02. 接口文档` 里的 OpenAPI JSON 就是可以直接导入 Apifox 的格式）。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：这台机器上就是用命令行工具（curl）按 Apifox 里同样的方式测通了本章的四个接口，响应就是下面「Result」一节里的真实格式。顺带踩到一个坑——在 Windows 命令行里直接发**中文** JSON 会 400（命令行参数是 GBK 编码，服务端按 UTF-8 解析失败），把 JSON 写进 UTF-8 文件再发、或者干脆用 Apifox 就没这个问题（这个坑在讲新增接口时会详细说）。
 
 ## 工程搭建（PPT 第 22-23 页）
@@ -416,7 +416,7 @@ public class Result {
 
 三个方法刚好覆盖三种场景：**只表示成功**（`success()`，响应里 `data` 为 null）、**成功并带回数据**（`success(data)`）、**失败并带回原因**（`error("部门不存在")`）。控制器里统一 `return Result.success(...)`，前端就永远只需要处理一种外壳。
 
-> [!TIP]
+> [!TIP] 提示
 > **本机实测**：工程跑起来后，`Result` 的真实响应长这样——
 >
 > ```json
@@ -490,20 +490,28 @@ public class Result {
   做完再回答：REST 里资源名用单数还是复数？"约定不是规定"是什么意思？
   （练习文件 `test_57_Result统一响应.java` 的题目2-1 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把 URL 里的"动作"全去掉，只留下"资源"（用户 → 复数）；动作交给请求方式表达，id 直接挂在路径后面
-  > **二级 · 方法**：资源用 `/users`；带 id 的资源写成 `/users/{id}` 这种路径；查询用 GET、新增用 POST、修改用 PUT、删除用 DELETE
-  > **三级 · 骨架**：`http://localhost:8080/____/1` + `____` ；`http://localhost:8080/____` + `____`（四个接口里有两个共用同一个 URL，靠请求方式区分）
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > | REST 风格 url | 请求方式 | 含义 |
-  > | --- | --- | --- |
-  > | `http://localhost:8080/users/1` | GET | 查询 id 为 1 的用户 |
-  > | `http://localhost:8080/users` | POST | 新增用户 |
-  > | `http://localhost:8080/users` | PUT | 修改用户 |
-  > | `http://localhost:8080/users/1` | DELETE | 删除 id 为 1 的用户 |
-  >
-  > 回答：① 资源名**通常用复数**（`users`），表示"此类资源"而不是单个资源；② "约定不是规定"意思是 REST 只是一套团队共识的**风格**，不是框架强制的规则，遇到表达不了的场景可以打破它。对比一下：原来"新增"能写出 `saveUser`/`addUser`/`insertUser`/`save`/`add`/`insert` 六种 URL，现在只有 `/users` 一个，动作由请求方式表达——这就是"简洁、规范、优雅"。
+  **一级 · 思路**：把 URL 里的"动作"全去掉，只留下"资源"（用户 → 复数）；动作交给请求方式表达，id 直接挂在路径后面
+  **二级 · 方法**：资源用 `/users`；带 id 的资源写成 `/users/{id}` 这种路径；查询用 GET、新增用 POST、修改用 PUT、删除用 DELETE
+  **三级 · 骨架**：`http://localhost:8080/____/1` + `____` ；`http://localhost:8080/____` + `____`（四个接口里有两个共用同一个 URL，靠请求方式区分）
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  | REST 风格 url | 请求方式 | 含义 |
+  | --- | --- | --- |
+  | `http://localhost:8080/users/1` | GET | 查询 id 为 1 的用户 |
+  | `http://localhost:8080/users` | POST | 新增用户 |
+  | `http://localhost:8080/users` | PUT | 修改用户 |
+  | `http://localhost:8080/users/1` | DELETE | 删除 id 为 1 的用户 |
+  
+  回答：① 资源名**通常用复数**（`users`），表示"此类资源"而不是单个资源；② "约定不是规定"意思是 REST 只是一套团队共识的**风格**，不是框架强制的规则，遇到表达不了的场景可以打破它。对比一下：原来"新增"能写出 `saveUser`/`addUser`/`insertUser`/`save`/`add`/`insert` 六种 URL，现在只有 `/users` 一个，动作由请求方式表达——这就是"简洁、规范、优雅"。
+
+  :::
+
 
 - [ ] **2-2 判断这四条接口设计得对不对**
   需求：某项目里有下面四条接口，请逐条判断它**是否符合 REST 风格**，不符合的说明理由，并给出改法（只改 URL 与请求方式，不用写代码）：
@@ -513,68 +521,84 @@ public class Result {
   4. `PUT http://localhost:8080/depts`
   （练习文件 `test_57_Result统一响应.java` 的题目2-2 里给了写作区。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：一条一条问自己两件事——URL 里还有没有"动作名"？这个动作该不该用这个请求方式？
-  > **二级 · 方法**：资源的"增删改查"分别对应 POST、DELETE、PUT、GET；删除应该把要删的那个 id 放进路径里而不是拼在查询串里
-  > **三级 · 骨架**：第 1 条要砍掉 `____` 这种动作名、资源名改复数；第 3 条把方式换成 `____`、参数写进 `____`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > 1. **不符合**。URL 里带着动作名 `getAllDeptList`，而且资源名 `dept` 用了单数。改为 `GET http://localhost:8080/depts`（"查询全部"这个语义由"GET 资源集合"表达，不需要额外的词）。
-  > 2. **符合**。`/depts` 定位"部门"资源集合，POST 表示新增。
-  > 3. **不符合**。URL 里有动作名 `delete`，还用 GET 表达删除。改为 `DELETE http://localhost:8080/depts/3`。
-  > 4. **符合**。`/depts` 配 PUT 表示修改（修改的数据放在请求体里）——这也说明为什么"新增"和"修改"可以是同一个 URL。
-  >
-  > 补一句：这不是"对错题"而是"风格题"，REST 是约定不是规定；但在团队里按这套来，接口就一眼能看懂，前后端也不用为"这个动作用哪个单词"扯皮。
+  **一级 · 思路**：一条一条问自己两件事——URL 里还有没有"动作名"？这个动作该不该用这个请求方式？
+  **二级 · 方法**：资源的"增删改查"分别对应 POST、DELETE、PUT、GET；删除应该把要删的那个 id 放进路径里而不是拼在查询串里
+  **三级 · 骨架**：第 1 条要砍掉 `____` 这种动作名、资源名改复数；第 3 条把方式换成 `____`、参数写进 `____`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  1. **不符合**。URL 里带着动作名 `getAllDeptList`，而且资源名 `dept` 用了单数。改为 `GET http://localhost:8080/depts`（"查询全部"这个语义由"GET 资源集合"表达，不需要额外的词）。
+  2. **符合**。`/depts` 定位"部门"资源集合，POST 表示新增。
+  3. **不符合**。URL 里有动作名 `delete`，还用 GET 表达删除。改为 `DELETE http://localhost:8080/depts/3`。
+  4. **符合**。`/depts` 配 PUT 表示修改（修改的数据放在请求体里）——这也说明为什么"新增"和"修改"可以是同一个 URL。
+  
+  补一句：这不是"对错题"而是"风格题"，REST 是约定不是规定；但在团队里按这套来，接口就一眼能看懂，前后端也不用为"这个动作用哪个单词"扯皮。
+
+  :::
+
 
 - [ ] **2-3 按需求写一个"统一响应结果"类**
   需求：写一个类，作为本项目**所有接口的统一返回外壳**，要求：① 三个属性——编码（整数，1 表示成功、0 表示失败）、提示信息（字符串）、数据（任意类型）；② 三种构造方式——只表示成功、成功且带回一份数据、失败并带回失败原因；③ 用 lombok 注解把 getter/setter 等生成出来。
   （练习文件 `test_57_Result统一响应.java` 的题目2-3 里给了类骨架。）
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：属性三个；再提供三个静态工厂方法，分别对应"成功/成功带数据/失败"三种场景，方法内部自己把 code 和 msg 填好，调用方只传它知道的东西
-  > **二级 · 方法**：类名 `Result`，属性 `code`/`msg`/`data`；方法 `success()`、`success(Object object)`、`error(String msg)`；lombok 用 `@Data`
-  > **三级 · 骨架**：`public class ____ { private Integer ____; private String ____; private Object ____; public static ____ success() {…} public static ____ success(Object object) {…} public static ____ error(String msg) {…} }`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```java
-  > package com.itheima.pojo;
-  >
-  > import lombok.Data;
-  >
-  > /**
-  >  * 后端统一返回结果
-  >  */
-  > @Data
-  > public class Result {
-  >
-  >     private Integer code; //编码：1成功，0为失败
-  >     private String msg; //错误信息
-  >     private Object data; //数据
-  >
-  >     public static Result success() {
-  >         Result result = new Result();
-  >         result.code = 1;
-  >         result.msg = "success";
-  >         return result;
-  >     }
-  >
-  >     public static Result success(Object object) {
-  >         Result result = new Result();
-  >         result.data = object;
-  >         result.code = 1;
-  >         result.msg = "success";
-  >         return result;
-  >     }
-  >
-  >     public static Result error(String msg) {
-  >         Result result = new Result();
-  >         result.msg = msg;
-  >         result.code = 0;
-  >         return result;
-  >     }
-  > }
-  > ```
-  > 说明：`data` 的类型写成 `Object` 才能同时装对象（查一个部门）和集合（查部门列表）；两个 `success` 是**方法重载**（参数列表不同）。这段代码与课程工程 `pojo/Result.java` 完全一致——**本机实测**跑出来的成功响应就是 `{"code":1,"msg":"success","data":null}`，也就是 `msg` 里写的是 `"success"`，不是 PPT 上写的"操作成功"。
+  **一级 · 思路**：属性三个；再提供三个静态工厂方法，分别对应"成功/成功带数据/失败"三种场景，方法内部自己把 code 和 msg 填好，调用方只传它知道的东西
+  **二级 · 方法**：类名 `Result`，属性 `code`/`msg`/`data`；方法 `success()`、`success(Object object)`、`error(String msg)`；lombok 用 `@Data`
+  **三级 · 骨架**：`public class ____ { private Integer ____; private String ____; private Object ____; public static ____ success() {…} public static ____ success(Object object) {…} public static ____ error(String msg) {…} }`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```java
+  package com.itheima.pojo;
+  
+  import lombok.Data;
+  
+  /**
+   * 后端统一返回结果
+   */
+  @Data
+  public class Result {
+  
+      private Integer code; //编码：1成功，0为失败
+      private String msg; //错误信息
+      private Object data; //数据
+  
+      public static Result success() {
+          Result result = new Result();
+          result.code = 1;
+          result.msg = "success";
+          return result;
+      }
+  
+      public static Result success(Object object) {
+          Result result = new Result();
+          result.data = object;
+          result.code = 1;
+          result.msg = "success";
+          return result;
+      }
+  
+      public static Result error(String msg) {
+          Result result = new Result();
+          result.msg = msg;
+          result.code = 0;
+          return result;
+      }
+  }
+  ```
+  说明：`data` 的类型写成 `Object` 才能同时装对象（查一个部门）和集合（查部门列表）；两个 `success` 是**方法重载**（参数列表不同）。这段代码与课程工程 `pojo/Result.java` 完全一致——**本机实测**跑出来的成功响应就是 `{"code":1,"msg":"success","data":null}`，也就是 `msg` 里写的是 `"success"`，不是 PPT 上写的"操作成功"。
+
+  :::
+
 
 ### 三、综合题
 
@@ -596,58 +620,66 @@ public class Result {
   | 统一响应结果 | 第 4、5 步——`Result` 外壳与 `Dept` 数据的关系 |
   | 接口文档 | 第 6 步——文档参数表 ⇄ 代码字段 |
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：把"接口文档的参数表"当成设计图纸——响应最外层三行就是 `Result` 的三个字段，`data` 里 `|-` 开头的四行就是 `Dept` 的四个属性；先把图纸翻译成类，再把类拼成工程
-  > **二级 · 方法**：依赖用 `spring-boot-starter-web`、`mybatis-spring-boot-starter`、`mysql-connector-j`、`lombok`；建表用 `int unsigned primary key auto_increment`、`varchar` 加 `not null unique`、`datetime`；yml 里数据源写在 `spring.datasource` 下、MyBatis 配置写在 `mybatis.configuration` 下；时间属性用 `LocalDateTime`
-  > **三级 · 骨架**：`Result`（`code`/`msg`/`data` + `success()`/`success(Object)`/`error(String)`）＋ `Dept`（`Integer id` / `String name` / `LocalDateTime createTime` / `LocalDateTime updateTime`）；两种响应：`{"code":1,"msg":"success","data":[…]}`、`{"code":0,"msg":"____","data":null}`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > **1. 依赖**（说明见本篇「工程搭建 第 1 步」）：`spring-boot-starter-web`（内嵌 Tomcat + SpringMVC + JSON 转换，接口能收能发全靠它）、`mybatis-spring-boot-starter`（MyBatis 与 SpringBoot 整合）、`mysql-connector-j`（MySQL 驱动）、`lombok`（`@Data` 等注解）。
-  > **2. 建表**：
-  >    ```sql
-  >    create table dept (
-  >      id int unsigned primary key auto_increment comment 'ID, 主键',
-  >      name varchar(10) not null unique comment '部门名称',
-  >      create_time datetime default null comment '创建时间',
-  >      update_time datetime default null comment '修改时间'
-  >    ) comment '部门表';
-  >
-  >    insert into dept values (1,'学工部','2024-09-25 09:47:40','2024-09-25 09:47:40'),
-  >                            (2,'教研部','2024-09-25 09:47:40','2024-09-09 15:17:04');
-  >    ```
-  >    （课程资料 `dept.sql` 里插了 6 条。）
-  > **3. yml**：
-  >    ```yaml
-  >    spring:
-  >      datasource:
-  >        url: jdbc:mysql://localhost:3306/tlias
-  >        driver-class-name: com.mysql.cj.jdbc.Driver
-  >        username: root
-  >        password: 1234
-  >
-  >    mybatis:
-  >      configuration:
-  >        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  >        map-underscore-to-camel-case: true
-  >    ```
-  >    （`password` 换成你自己 MySQL 的密码。）
-  > **4. 实体类**：
-  >    ```java
-  >    @Data
-  >    @NoArgsConstructor
-  >    @AllArgsConstructor
-  >    public class Dept {
-  >        private Integer id;
-  >        private String name;
-  >        private LocalDateTime createTime;
-  >        private LocalDateTime updateTime;
-  >    }
-  >    ```
-  >    时间用 `LocalDateTime`（对应 `datetime`），属性名用驼峰 `createTime`/`updateTime`。
-  > **5. `Result` 类**见 2-3 的参考答案。两种响应：
-  >    ```json
-  >    {"code":1,"msg":"success","data":[{"id":1,"name":"学工部","createTime":"2024-09-25T09:47:40","updateTime":"2024-09-25T09:47:40"}]}
-  >    {"code":0,"msg":"部门不存在","data":null}
-  >    ```
-  >    第二种由 `Result.error("部门不存在")` 生成（注意 `error` 方法没有给 `data` 赋值，所以 `data` 是 null）。
-  > **6. 对齐自查**：接口文档 1.1.3 里 `code`/`msg`/`data` 三行 ⇄ `Result` 的三个属性；`|- id`/`|- name`/`|- createTime`/`|- updateTime` 四行 ⇄ `Dept` 的四个属性，类型也一一对上（number → Integer、string → String、时间 string → LocalDateTime）。`msg` 这一栏**以代码为准写 `"success"`**——PPT 上写的是"操作成功"，但课程代码 `Result.success()` 里写死的就是 `"success"`（本机实测响应 `{"code":1,"msg":"success","data":null}` 印证）。接口文档是前后端的合同，**文档/代码没对齐时以跑得起来的那份为准**，靠记忆写字符串迟早对不上。
+  **一级 · 思路**：把"接口文档的参数表"当成设计图纸——响应最外层三行就是 `Result` 的三个字段，`data` 里 `|-` 开头的四行就是 `Dept` 的四个属性；先把图纸翻译成类，再把类拼成工程
+  **二级 · 方法**：依赖用 `spring-boot-starter-web`、`mybatis-spring-boot-starter`、`mysql-connector-j`、`lombok`；建表用 `int unsigned primary key auto_increment`、`varchar` 加 `not null unique`、`datetime`；yml 里数据源写在 `spring.datasource` 下、MyBatis 配置写在 `mybatis.configuration` 下；时间属性用 `LocalDateTime`
+  **三级 · 骨架**：`Result`（`code`/`msg`/`data` + `success()`/`success(Object)`/`error(String)`）＋ `Dept`（`Integer id` / `String name` / `LocalDateTime createTime` / `LocalDateTime updateTime`）；两种响应：`{"code":1,"msg":"success","data":[…]}`、`{"code":0,"msg":"____","data":null}`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  **1. 依赖**（说明见本篇「工程搭建 第 1 步」）：`spring-boot-starter-web`（内嵌 Tomcat + SpringMVC + JSON 转换，接口能收能发全靠它）、`mybatis-spring-boot-starter`（MyBatis 与 SpringBoot 整合）、`mysql-connector-j`（MySQL 驱动）、`lombok`（`@Data` 等注解）。
+  **2. 建表**：
+     ```sql
+     create table dept (
+       id int unsigned primary key auto_increment comment 'ID, 主键',
+       name varchar(10) not null unique comment '部门名称',
+       create_time datetime default null comment '创建时间',
+       update_time datetime default null comment '修改时间'
+     ) comment '部门表';
+  
+     insert into dept values (1,'学工部','2024-09-25 09:47:40','2024-09-25 09:47:40'),
+                             (2,'教研部','2024-09-25 09:47:40','2024-09-09 15:17:04');
+     ```
+     （课程资料 `dept.sql` 里插了 6 条。）
+  **3. yml**：
+     ```yaml
+     spring:
+       datasource:
+         url: jdbc:mysql://localhost:3306/tlias
+         driver-class-name: com.mysql.cj.jdbc.Driver
+         username: root
+         password: 1234
+  
+     mybatis:
+       configuration:
+         log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+         map-underscore-to-camel-case: true
+     ```
+     （`password` 换成你自己 MySQL 的密码。）
+  **4. 实体类**：
+     ```java
+     @Data
+     @NoArgsConstructor
+     @AllArgsConstructor
+     public class Dept {
+         private Integer id;
+         private String name;
+         private LocalDateTime createTime;
+         private LocalDateTime updateTime;
+     }
+     ```
+     时间用 `LocalDateTime`（对应 `datetime`），属性名用驼峰 `createTime`/`updateTime`。
+  **5. `Result` 类**见 2-3 的参考答案。两种响应：
+     ```json
+     {"code":1,"msg":"success","data":[{"id":1,"name":"学工部","createTime":"2024-09-25T09:47:40","updateTime":"2024-09-25T09:47:40"}]}
+     {"code":0,"msg":"部门不存在","data":null}
+     ```
+     第二种由 `Result.error("部门不存在")` 生成（注意 `error` 方法没有给 `data` 赋值，所以 `data` 是 null）。
+  **6. 对齐自查**：接口文档 1.1.3 里 `code`/`msg`/`data` 三行 ⇄ `Result` 的三个属性；`|- id`/`|- name`/`|- createTime`/`|- updateTime` 四行 ⇄ `Dept` 的四个属性，类型也一一对上（number → Integer、string → String、时间 string → LocalDateTime）。`msg` 这一栏**以代码为准写 `"success"`**——PPT 上写的是"操作成功"，但课程代码 `Result.success()` 里写死的就是 `"success"`（本机实测响应 `{"code":1,"msg":"success","data":null}` 印证）。接口文档是前后端的合同，**文档/代码没对齐时以跑得起来的那份为准**，靠记忆写字符串迟早对不上。
+
+  :::
+

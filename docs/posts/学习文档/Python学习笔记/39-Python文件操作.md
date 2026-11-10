@@ -45,7 +45,7 @@ f.write("低头思故乡。\n")
 f.close()
 ```
 
-> [!WARNING]
+> [!WARNING] 警告
 > 如果操作完文件并未调用 `close` 方法关闭文件，同时程序没有停止运行，那么这个文件将一直被 Python 程序占用，无法操作（比如在资源管理器里删除或改名会失败；写入的内容也可能还没真正落盘）。
 
 ## 编码是什么
@@ -61,7 +61,7 @@ f.close()
 | 相对路径 | 相对于当前工作目录的路径            | `resources/静夜思.txt`               |
 | 绝对路径 | 从文件系统的目录开始，完整地描述文件位置的路径 | `D:/python/第3章/resources/静夜思.txt` |
 
-> [!TIP]
+> [!TIP] 提示
 > 在项目开发中，推荐使用**相对路径**写法：可移植性更好、路径简洁、易于阅读。（换台电脑、换个目录，绝对路径就失效了）
 
 ## 操作模式
@@ -72,7 +72,7 @@ f.close()
 | `w` | 只写入模式，从头编辑，**原有内容会被删除**；文件不存在则创建新文件 |
 | `a` | 追加模式，新内容会被追加在原有内容之后；文件不存在则创建新文件 |
 
-> [!WARNING]
+> [!WARNING] 警告
 > `w` 模式最危险的地方是**打开的一瞬间原内容就没了**，即使后面一个字都没写。只想在末尾加内容就用 `a`。
 
 补充（本章未涉及但常用的模式）：`r+` 读写、`w+` 清空后读写、`a+` 追加读写；加 `b` 表示二进制模式（如 `rb`、`wb` 用于图片、音频）。
@@ -134,7 +134,7 @@ with open("resources/静夜思.txt", "w", encoding="utf-8") as f:
 | 可读性 | 繁琐 | 简洁 |
 | 是否自动释放 | 手动释放 | **即使发生异常，也会被正确释放** |
 
-> [!IMPORTANT]
+> [!IMPORTANT] 重要
 > `with` 语句（上下文管理器）的核心作用就是确保资源**总是被正确获取和释放**，也是项目开发中的推荐方式。本章项目里的文件读写全部用的是 `with open(...)`。
 
 ## 小结（复习自测）
@@ -167,70 +167,94 @@ with open("resources/静夜思.txt", "w", encoding="utf-8") as f:
 - [ ] **2-1 写文件**
   把《静夜思》四句诗写进 `poem.txt`（每句一行，标题单独一行），写完关闭文件。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：打开 → 写 → 关闭；每行末尾要自己加换行符
-  > **二级 · 方法**：`open(..., "w", encoding="utf-8")` / `f.write(...)` / `f.close()`
-  > **三级 · 骨架**：`f.write("疑是地上霜。\____")`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # 1. 打开文件
-  > f = open("poem.txt", "w", encoding="utf-8")
-  > 
-  > # 2. 写入内容（每行末尾要自己写 \n）
-  > f.write("静夜思(李白)\n")
-  > f.write("窗前明月光，\n")
-  > f.write("疑是地上霜。\n")
-  > f.write("举头望明月，\n")
-  > f.write("低头思故乡。\n")
-  > 
-  > # 3. 关闭文件
-  > f.close()
-  > ```
+  **一级 · 思路**：打开 → 写 → 关闭；每行末尾要自己加换行符
+  **二级 · 方法**：`open(..., "w", encoding="utf-8")` / `f.write(...)` / `f.close()`
+  **三级 · 骨架**：`f.write("疑是地上霜。\____")`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # 1. 打开文件
+  f = open("poem.txt", "w", encoding="utf-8")
+  
+  # 2. 写入内容（每行末尾要自己写 \n）
+  f.write("静夜思(李白)\n")
+  f.write("窗前明月光，\n")
+  f.write("疑是地上霜。\n")
+  f.write("举头望明月，\n")
+  f.write("低头思故乡。\n")
+  
+  # 3. 关闭文件
+  f.close()
+  ```
+
+  :::
+
 
 - [ ] **2-2 读文件**
   把上一步写出的 `poem.txt` 读出来，**逐行**打印（每行末尾不要多出空行）。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：按行读会得到带换行符的列表，打印前先把换行符去掉
-  > **二级 · 方法**：`f.readlines()` + `line.strip()`
-  > **三级 · 骨架**：`for line in f.readlines(): print(line.____())`
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > f = open("poem.txt", "r", encoding="utf-8")
-  > 
-  > content_list = f.readlines()
-  > for line in content_list:
-  >     print(line.strip())        # strip() 去掉每行末尾的换行符
-  > 
-  > print(f"共 {len(content_list)} 行")
-  > 
-  > f.close()
-  > ```
+  **一级 · 思路**：按行读会得到带换行符的列表，打印前先把换行符去掉
+  **二级 · 方法**：`f.readlines()` + `line.strip()`
+  **三级 · 骨架**：`for line in f.readlines(): print(line.____())`
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  f = open("poem.txt", "r", encoding="utf-8")
+  
+  content_list = f.readlines()
+  for line in content_list:
+      print(line.strip())        # strip() 去掉每行末尾的换行符
+  
+  print(f"共 {len(content_list)} 行")
+  
+  f.close()
+  ```
+
+  :::
+
 
 - [ ] **2-3 with 与三种模式**
   用 `with open(...)` 重写写文件；然后对比 `w` 和 `a`：先用 `w` 写一次，再用 `a` 追加一次，观察原内容有没有被保留。
 
-  > [!TIP]- 提示（先自己想，实在想不出再点开）
-  > **一级 · 思路**：`w` 打开的一瞬间原内容就没了，`a` 是在末尾接着写
-  > **二级 · 方法**：`with open(..., "a", encoding="utf-8") as f:`
-  > **三级 · 骨架**：跑两次程序，观察文件内容的变化
+  ::: details 提示（先自己想，实在想不出再点开）
 
-  > [!TIP]- 参考答案（做完再点开）
-  > ```python
-  > # with open：不用手动 close，出异常也会正确释放
-  > with open("poem.txt", "w", encoding="utf-8") as f:
-  >     f.write("第一行\n")
-  >     f.write("第二行\n")
-  > 
-  > # a 模式：追加，原内容保留
-  > with open("poem.txt", "a", encoding="utf-8") as f:
-  >     f.write("第三行（追加的）\n")
-  > 
-  > with open("poem.txt", "r", encoding="utf-8") as f:
-  >     print(f.read())
-  > 
-  > # 如果第二步也用 "w"，原内容会被清空，最后只剩"第三行"
-  > # 再试 "r" 模式写入会报错：io.UnsupportedOperation: not writable
-  > ```
+  **一级 · 思路**：`w` 打开的一瞬间原内容就没了，`a` 是在末尾接着写
+  **二级 · 方法**：`with open(..., "a", encoding="utf-8") as f:`
+  **三级 · 骨架**：跑两次程序，观察文件内容的变化
+
+  :::
+
+
+  ::: details 参考答案（做完再点开）
+
+  ```python
+  # with open：不用手动 close，出异常也会正确释放
+  with open("poem.txt", "w", encoding="utf-8") as f:
+      f.write("第一行\n")
+      f.write("第二行\n")
+  
+  # a 模式：追加，原内容保留
+  with open("poem.txt", "a", encoding="utf-8") as f:
+      f.write("第三行（追加的）\n")
+  
+  with open("poem.txt", "r", encoding="utf-8") as f:
+      print(f.read())
+  
+  # 如果第二步也用 "w"，原内容会被清空，最后只剩"第三行"
+  # 再试 "r" 模式写入会报错：io.UnsupportedOperation: not writable
+  ```
+
+  :::
+
