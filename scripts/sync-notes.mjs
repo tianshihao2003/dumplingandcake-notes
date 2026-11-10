@@ -683,11 +683,18 @@ if (!DRY_RUN) {
 			});
 
 		const dirName = path.basename(dirKey);
-		// 只有「聚合页」（下面还有子分类，等于导航里的「全部」）不显示左侧相关文章，
-		// 靠主题的 autoHideSidebar 自动收起；
-		// 叶子目录（自己直接装笔记）显式写 sidebar: true —— 否则那段逻辑会把它也收起来
-		// （规则：当前路径是导航项 + 本页自己被 hidden → 自动隐藏左侧栏）。
-		const isAggregate = node.dirs.size > 0;
+		// 右侧「相关文章」什么时候收起来？
+		// 主题的 autoHideSidebar 规则是：当前路径在导航里 + 这一页自己不是文章（落地页都 hidden）→ 收起。
+		// 但 frontmatter 只要写了 sidebar 就直接短路，不再收起。
+		//
+		// 站长的规则：**只有导航下拉里的「全部」那一页不显示，其余都要显示**。
+		// 「全部」= 顶层的那个分类落地页，且它下面确实有子分类（有子分类才会出现下拉，
+		// 没子分类时顶层页就是普通分类页，仍然要显示）。
+		//
+		// 别用「有没有子目录」判断 —— python/ 下面有 10-卡点本 之类的子目录，
+		// 但它不是「全部」，是下拉里的一个具体分类，必须显示。
+		const depth = dirKey.split(path.sep).length;
+		const isTopAggregate = depth === 1 && node.dirs.size > 0;
 		const frontmatter = [
 			"---",
 			`title: ${dirName}`,
@@ -697,7 +704,7 @@ if (!DRY_RUN) {
 			"cover: false",
 			"date: false",
 		];
-		if (!isAggregate) frontmatter.push("sidebar: true");
+		if (!isTopAggregate) frontmatter.push("sidebar: true");
 		frontmatter.push("---");
 		const out = [
 			...frontmatter,

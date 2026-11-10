@@ -4,6 +4,7 @@ hidden: true
 recommend: false
 cover: false
 date: false
+sidebar: true
 ---
 
 # Java笔记本

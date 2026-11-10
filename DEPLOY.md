@@ -101,6 +101,36 @@ pnpm build
 > 想在站点看手绘图，见下面「思维导图怎么放到站点上」。
 > 临时需要同步：`node scripts/sync-notes.mjs --keep-excalidraw`。
 
+### 右侧「相关文章」什么时候显示
+
+站长的规则：**只有导航下拉里的「全部」那一页不显示，其余落地页全部显示**。
+
+主题 `BlogApp.vue` 的原始判定是「当前页在导航里 + 这一页自己不是文章 → 收起侧栏」，
+落地页全是 `hidden: true`，所以默认会被全部收起。绕过办法是在落地页 frontmatter 写
+`sidebar: true`（主题里 `if (frontmatter.sidebar !== undefined) return false` 直接短路）。
+
+判断「是不是全部页」的正确条件是：
+
+```
+顶层目录（dirKey 只有一段）且有子目录  → 是「全部」→ 不写 sidebar: true
+其余所有情况（含顶层但没有子目录、以及所有二级以下目录）→ 写 sidebar: true
+```
+
+> ⚠️ **别用「有没有子目录」当判据**。`编程学习/python/` 下面有 `10-卡点本`、`20-代码片段`
+> 这些子目录，但它不是「全部」，是下拉里的一个具体分类，**必须显示**。
+> 2026-11-10 就因为用了 `node.dirs.size > 0` 把它误判成「全部」，导致 Java / python 右侧空白。
+>
+> 改完在本地验证：
+>
+> ```bash
+> # 顶层目录：有子目录的应该"隐藏"，没子目录的应该"显示"
+> for d in docs/posts/*/; do printf "%-16s " "$(basename "$d")"; grep -q "^sidebar: true" "$d/index.md" && echo 显示 || echo 隐藏; done
+>
+> # 二级及以下：应该全部"显示"
+> find docs/posts -mindepth 3 -name index.md -exec grep -L "^sidebar: true" {} \;
+> # 上面这条有输出就说明有漏的
+> ```
+
 ### 思维导图 / 手绘图怎么放到站点上
 
 | 方案 | 做法 | 取舍 |
