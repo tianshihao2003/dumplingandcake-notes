@@ -8,8 +8,9 @@ date: false
 
 # 项目学习
 
-共 1 篇
+共 4 篇
 
 ## 子分类
 
 - [AstrBot](<./AstrBot/>)
+- [Hello算法](<./Hello算法/>)

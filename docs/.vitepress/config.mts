@@ -2,6 +2,7 @@ import { readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 import { blogTheme } from "./blog-theme";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
@@ -88,7 +89,10 @@ const pinnedItems = pinnedNavDirs
 	.map(buildNavItem);
 const navItems = [...normalItems, ...pinnedItems];
 
-export default defineConfig({
+// 注意：主题只改了 mermaid 的 alias，**没有注册插件**
+//（@sugarat/theme 的 node.mjs 里 `cfg.mermaid ?? false`，默认关闭），
+// 所以最后要用 withMermaid 包一层；否则 ```mermaid 代码块只会被当成普通代码高亮。
+const config = defineConfig({
 	extends: blogTheme,
 	lang: "zh-cn",
 	title: "团子和蛋糕的笔记",
@@ -135,3 +139,5 @@ export default defineConfig({
 		],
 	},
 });
+
+export default withMermaid(config);

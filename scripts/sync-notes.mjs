@@ -22,6 +22,10 @@
 //   node scripts/sync-notes.mjs --keep-excalidraw  连 .excalidraw.md 一起同步（默认跳过）
 import { access, copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import lzString from "lz-string";
+
+// lz-string 是 CJS 包，默认导出本身就带 decompressFromBase64
+const LZString = lzString;
 import path from "node:path";
 
 const DEFAULT_SRC =
@@ -635,16 +639,178 @@ function makeImageResolver(noteRel) {
 	return { byName, fixPath };
 }
 
-// 这些文件只对 Obsidian 插件有意义，站点渲染出来是「源码」而非内容，直接不同步。
-// .excalidraw.md：Excalidraw 插件的原生格式 = 明文文本 + base64 压图数据。
-//   站点没有该插件，会把它当普通 markdown 渲染成「一堆散装文字 + 70KB JSON 代码块」。
-//   要在站点展示手绘图，请在 Obsidian 里导出 PNG/SVG 传图床，再用 ![](...) 引用。
-// 想临时看原文：删除下面的过滤或加 --keep-excalidraw。
+// ---- Excalidraw 手绘图 → 真思维导图 ----
+//
+// Excalidraw 插件的 .excalidraw.md = 明文文字 + base64(LZString) 压缩的画布数据，
+// 只有装了插件才能还原成图。站点没有插件，直接渲染只会得到「一堆散装文字 + 70KB JSON」。
+//
+// 但画布数据里其实有完整的结构：元素（矩形/文字）+ 箭头绑定（startBinding → endBinding），
+// 一次一张思维导图就是「n 个节点 + n-1 条边」的一棵树。所以解析出来重新画一遍：
+//   节点 = 矩形/文字元素（矩形取它绑定的那段文字）
+//   父子 = 箭头的 start → end
+//   兄弟顺序 = 先按 y 再按 x（和画布上的视觉顺序一致）
+// 输出 mermaid mindmap —— 矢量、可搜索、能跟主题，比截图强。
+
+const EXCALIDRAW_SHAPES = new Set(["rectangle", "ellipse", "diamond"]);
+
+/** mermaid mindmap 的标签要转义：引号会截断字符串，# 会当实体起始，[] 是形状语法 */
+function escapeMindmapLabel(s) {
+	return (
+		String(s)
+			.replace(/\r?\n/g, " ")
+			// 这几个字符会破坏 mermaid 语法，用实体码换掉
+			.replace(/#/g, "#35;")
+			.replace(/"/g, "'")
+			.replace(/\[/g, "#91;")
+			.replace(/\]/g, "#93;")
+			.replace(/\(/g, "#40;")
+			.replace(/\)/g, "#41;")
+			.replace(/\{/g, "#123;")
+			.replace(/\}/g, "#125;")
+			.replace(/\s+/g, " ")
+			.trim()
+	);
+}
+
+/** 从 .excalidraw.md 里取出画布 JSON；支持 compressed-json 和裸 json 两种 */
+function readExcalidrawScene(text) {
+	const comp = text.match(/```compressed-json\s*\n([\s\S]*?)\n```/);
+	if (comp) {
+		const b64 = comp[1].replace(/\s+/g, "");
+		try {
+			return JSON.parse(LZString.decompressFromBase64(b64));
+		} catch {
+			return null;
+		}
+	}
+	const plain = text.match(/```json\s*\n([\s\S]*?)\n```/);
+	if (plain) {
+		try {
+			return JSON.parse(plain[1]);
+		} catch {
+			return null;
+		}
+	}
+	return null;
+}
+
+/**
+ * 把画布元素还原成 mermaid mindmap 文本。
+ * 返回 null 表示这张图没法解析（元素为空、没有节点之类），调用方应跳过。
+ */
+function excalidrawToMindmap(scene, fallbackTitle) {
+	const els = (scene.elements ?? []).filter((e) => !e.isDeleted);
+	if (els.length === 0) return null;
+
+	const labelOf = (el) => {
+		if (el.type === "text") return el.text;
+		const bound = els.find((e) => e.type === "text" && e.containerId === el.id);
+		return bound ? bound.text : "";
+	};
+
+	const nodes = new Map();
+	for (const el of els) {
+		// 容器里的文字归容器，不单独成节点
+		if (el.type === "text" && el.containerId) continue;
+		if (el.type !== "text" && !EXCALIDRAW_SHAPES.has(el.type)) continue;
+		nodes.set(el.id, { id: el.id, label: labelOf(el), x: el.x, y: el.y, kids: [] });
+	}
+	if (nodes.size === 0) return null;
+
+	const hasParent = new Set();
+	for (const el of els) {
+		if (el.type !== "arrow") continue;
+		const s = el.startBinding?.elementId;
+		const t = el.endBinding?.elementId;
+		if (!s || !t || !nodes.has(s) || !nodes.has(t)) continue;
+		nodes.get(s).kids.push(nodes.get(t));
+		hasParent.add(t);
+	}
+
+	let roots = [...nodes.values()].filter((n) => !hasParent.has(n.id));
+	if (roots.length === 0) return null;
+	roots.sort((a, b) => a.y - b.y || a.x - b.x);
+
+	const lines = ["mindmap"];
+	let seq = 0;
+	let printed = 0;
+	const walk = (n, depth) => {
+		if (depth > 14) return; // 防环 / 防病态深图
+		lines.push(
+			`${"  ".repeat(depth + 1)}n${seq++}["${escapeMindmapLabel(n.label) || "(空)"}"]`,
+		);
+		printed++;
+		for (const k of [...n.kids].sort((a, b) => a.y - b.y || a.x - b.x)) walk(k, depth + 1);
+	};
+
+	if (roots.length === 1) {
+		walk(roots[0], 0);
+	} else {
+		// 多个根（画布上没连起来）：套一个虚拟根，别让 mermaid 报 "only one root"
+		lines.push(`  n${seq++}["${escapeMindmapLabel(fallbackTitle) || "思维导图"}"]`);
+		for (const r of roots) walk(r, 1);
+	}
+
+	if (printed === 0) return null;
+	return lines.join("\n");
+}
+
+/**
+ * 把一个 .excalidraw.md 变成一页真正的 markdown。
+ * 文件名：`X.excalidraw.md` → `X-思维导图.md`（加后缀避免和同名的文字笔记撞车）
+ */
+function buildMindmapPage(text, rel) {
+	const base = path.basename(rel).replace(/\.excalidraw\.md$/i, "");
+	const outRel = path.join(path.dirname(rel), `${base}-思维导图.md`);
+	const scene = readExcalidrawScene(text);
+	if (!scene) return null;
+	const mmd = excalidrawToMindmap(scene, base);
+	if (!mmd) return null;
+	const title = `${base}（思维导图）`;
+	const md = [
+		"---",
+		`title: ${title}`,
+		"cover: false",
+		"---",
+		"",
+		`# ${title}`,
+		"",
+		"> 由 Excalidraw 手绘图自动还原，改图请回 Obsidian 重画后重新同步。",
+		"",
+		"```mermaid",
+		mmd,
+		"```",
+		"",
+	].join("\n");
+	return { rel: outRel, text: md };
+}
+
+// .excalidraw.md 原件不直接同步（渲染出来是源码），改为生成 -思维导图.md
 const SKIP_SUFFIX = [".excalidraw.md", ".excalidraw"];
 
-const files = allFiles.filter(
+const keptFiles = allFiles.filter(
 	(f) => args.includes("--keep-excalidraw") || !SKIP_SUFFIX.some((s) => f.rel.endsWith(s)),
 );
+
+// 把每张手绘图转成一页 markdown，作为「虚拟文件」塞进列表：
+// 这样目录落地页、导航计数、残留清理都会自动把它当成正常笔记
+const generated = [];
+let mindmapFailed = 0;
+if (!args.includes("--keep-excalidraw")) {
+	for (const f of allFiles) {
+		if (!f.rel.endsWith(".excalidraw.md")) continue;
+		const page = buildMindmapPage(await readFile(f.full, "utf8"), f.rel);
+		if (page) generated.push(page);
+		else {
+			mindmapFailed++;
+			console.log(`  [跳过] 这张手绘图解析不出节点：${f.rel}`);
+		}
+	}
+}
+const files = [
+	...keptFiles,
+	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text })),
+];
 
 const stat = {
 	total: files.length,
@@ -670,7 +836,7 @@ const titles = new Map();
 
 if (!DRY_RUN) await mkdir(DEST, { recursive: true });
 
-for (const { full, rel } of files) {
+for (const { full, rel, text: generatedText } of files) {
 	const destFile = path.join(DEST, rel);
 
 	if (!rel.endsWith(".md")) {
@@ -682,7 +848,8 @@ for (const { full, rel } of files) {
 		continue;
 	}
 
-	const raw = await readFile(full, "utf8");
+	// 手绘图生成的页面没有源文件，直接用内存里的文本
+	const raw = generatedText ?? (await readFile(full, "utf8"));
 	// 源文件可能是 CRLF，副本统一用 LF，避免 git 在不同机器上抖
 	const normalized = raw.replace(/\r\n/g, "\n");
 	titles.set(rel, extractTitle(normalized, rel));
@@ -886,6 +1053,9 @@ console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
 console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
 console.log(`  折叠callout转换: ${stat.callout} 篇`);
+if (generated.length > 0 || mindmapFailed > 0) {
+	console.log(`  手绘图转导图  : ${generated.length} 张${mindmapFailed > 0 ? `（${mindmapFailed} 张解析失败）` : ""}`);
+}
 console.log(`  双链图片转换  : ${stat.wikiImg} 篇`);
 console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
 if (stat.wikiMiss > 0) {

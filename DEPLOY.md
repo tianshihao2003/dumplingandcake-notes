@@ -94,12 +94,50 @@ pnpm build
 > - 占位符用中文而**不是 `<用户名>`** —— 尖括号形态有被 markdown 当成 HTML 标签吞掉、页面上一片空白的风险
 > - 只改 `docs/posts` 这份副本，**不动 Obsidian 原库**
 
-**不同步的文件**：`*.excalidraw.md`（以及 `*.excalidraw`）。
+**Excalidraw 手绘图**：`*.excalidraw.md` 原件不同步（渲染出来是源码），改为**自动还原成 mermaid 思维导图**。
 
-> Excalidraw 插件的原生格式 = 明文文本 + base64 压图数据，只有装了插件才能还原成图。
-> 站点会把它当普通 markdown，渲染成「275 行散装文字（每行尾巴带 `^块ID`）+ 70KB JSON 代码块 + 原样的 `%%`」。
-> 想在站点看手绘图，见下面「思维导图怎么放到站点上」。
-> 临时需要同步：`node scripts/sync-notes.mjs --keep-excalidraw`。
+> 生成规则：`X.excalidraw.md` → `X-思维导图.md`，正文是一个 ```mermaid mindmap 代码块。
+> 加后缀是为了不和同名的文字笔记（`X.md`）撞车。
+>
+> 还原原理：画布数据里除了文字，还有**箭头绑定**（`startBinding → endBinding`），
+> 一张思维导图就是「n 个节点 + n-1 条边」的树，按绑定还原父子、按 y 坐标排兄弟顺序。
+>
+> ⚠️ 前提是**图里用箭头连起来了**。纯手绘摆放、没有箭头绑定的图还原不出层级，
+> 会退回「多根节点套一个虚拟根」的扁平结构，或者直接跳过并提示 `[跳过] 这张手绘图解析不出节点`。
+>
+> 临时想同步原件：`node scripts/sync-notes.mjs --keep-excalidraw`。
+
+### mermaid 是怎么开起来的（踩过的坑）
+
+主题 `@sugarat/theme` 的 `package.json` 里虽然依赖了 `mermaid`、`vitepress-plugin-mermaid`、
+`@mermaid-js/mermaid-mindmap`，但它的 `node.mjs` 里写着 `cfg.mermaid ?? false` —— **默认关闭**，
+而且那段代码只改 alias，**不注册插件**。所以光靠主题，```mermaid 只会被当成普通代码高亮。
+
+必须在 `docs/.vitepress/config.mts` 里自己包一层：
+
+```ts
+import { withMermaid } from "vitepress-plugin-mermaid";
+
+const config = defineConfig({ /* ... */ });
+
+export default withMermaid(config);
+```
+
+依赖版本要对齐：`vitepress-plugin-mermaid@2` 的 peer 是 **mermaid 10 || 11**，
+装成 12 会出问题。所以 `package.json` 里把 `mermaid` 钉在 `^10.9.x`。
+
+> 验证方式（不用开浏览器）：
+>
+> ```bash
+> # 1. 页面里有 class="mermaid" 说明插件接管了
+> grep -o 'class="mermaid"' "docs/.vitepress/dist/posts/…/X-思维导图.html"
+> # 2. 不能出现 language-mermaid（那是退回代码高亮的表现）
+> grep -c "language-mermaid" "docs/.vitepress/dist/posts/…/X-思维导图.html"   # → 0
+> # 3. 导图源码应该被注入页面的 chunk（graph:"mindmap%0A…"）
+> ```
+>
+> 真正的绘制发生在**浏览器里**（SSR 出来的 `<div class="mermaid">` 是空的），
+> 所以只看构建产物没法确认画得对不对，得开 dev 或部署后看页面。
 
 ### 笔记里的 HTML 样式（Editing Toolbar 上色 / 高亮）
 
@@ -191,15 +229,15 @@ VitePress **原生支持** GitHub 风格的 `> [!NOTE]` 告警（渲染成带颜
 
 ### 思维导图 / 手绘图怎么放到站点上
 
+**默认已经自动处理**：`.excalidraw.md` 会在同步时被还原成 mermaid 思维导图页（见上文）。
+只有图里**没连箭头**、还原不出层级时，才需要手动处理：
+
 | 方案 | 做法 | 取舍 |
 |---|---|---|
-| **A. 导出成图片**（推荐） | Obsidian 里 Excalidraw 图 → ⋯ → Export image → PNG 或 SVG → 拖进笔记（图床插件自动上传）→ `![](https://img.tsh520.cn/...)` | 视觉 100% 一致；但站点上是位图，不能搜索、不跟随暗色主题 |
-| **B. 改用 mermaid `mindmap`** | 笔记里写 ```` ```mermaid ```` + `mindmap` 语法 | 矢量、可搜索、自动适配主题；但自由布局/手绘风格会丢，要重新画 |
-| **C. 只在 Obsidian 看** | 不同步（默认行为） | 最省事，站点上看不到 |
+| **A. 在图上连箭头**（首选） | 回 Obsidian 把节点用箭头绑起来，重新同步 | 自动还原成可折叠的矢量导图 |
+| **B. 导出成图片** | Excalidraw 图 → ⋯ → Export image → PNG/SVG → 拖进笔记（图床插件自动上传） | 视觉 100% 一致；但位图不可搜、不跟暗色主题、放大糊 |
+| **C. 手写 mermaid** | 笔记里写 ```` ```mermaid ```` + `mindmap` 语法 | 矢量可搜；布局由 mermaid 决定，不是手绘的样子 |
 
-> 方案 B 的前提确认：主题依赖里带了 `mermaid@10`、`vitepress-plugin-mermaid` 和
-> `@mermaid-js/mermaid-mindmap`，所以 `mindmap` 图类型开箱可用（**尚未实测，要用先验一版**）。
->
 > **图片引用规则**（重要）：
 > - 非 `.md` 文件**会**被复制到 `docs/posts` 对应位置（`sync-notes.mjs` 里的 `copyFile` 分支），
 >   所以本地图片是能用的。

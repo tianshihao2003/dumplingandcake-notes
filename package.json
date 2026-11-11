@@ -14,12 +14,15 @@
     "serve": "vitepress serve docs"
   },
   "dependencies": {
-    "@sugarat/theme": "^0.5.31"
+    "@sugarat/theme": "^0.5.31",
+    "lz-string": "^1.5.0"
   },
   "devDependencies": {
+    "mermaid": "^10.9.8",
     "pagefind": "^1.5.2",
     "typescript": "^5.9.3",
     "vite": "^6.0.0",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
   }
 }
