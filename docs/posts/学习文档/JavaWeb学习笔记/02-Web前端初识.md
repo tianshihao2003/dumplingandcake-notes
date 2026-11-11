@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-02-web-frontend-intro
 order: 2
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇讲的是"Web 是什么"，这篇往下钻一层：**我们看到的网页由哪几部分组成、背后的本质是什么、前端代码怎么变成用户眼中的网页**，然后把前端的三门语言（HTML/CSS/JS）各自的职责分清楚。

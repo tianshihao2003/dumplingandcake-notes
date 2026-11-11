@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-43-requests.webp
 order: 43
 date: 2026-09-19
 cover: false
+hidden: true
 ---
 
 ## requests 是什么

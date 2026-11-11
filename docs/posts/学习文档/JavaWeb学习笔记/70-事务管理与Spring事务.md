@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-70-transaction-spring
 order: 70
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [69 篇](/posts/编程学习/javaweb学习笔记/69-新增员工/)的结尾留下了一个坑：新增员工要往 `emp` 和 `emp_expr` 两张表里写数据，如果**保存基本信息成功、保存工作经历失败**，数据库里就留下一个"缺胳膊少腿"的员工——数据的**不完整、不一致**。这一篇（PPT 第 12～22 页 + 第 27～28 页）就是来解决它的：**事务管理**。

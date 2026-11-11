@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/langchain-24-rag-basics.webp
 order: 24
 date: 2026-09-21
 cover: false
+hidden: true
 ---
 
 ## 大模型的三个局限

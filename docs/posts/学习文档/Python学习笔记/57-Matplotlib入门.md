@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-57-matplotlib-intro.we
 order: 57
 date: 2026-09-20
 cover: false
+hidden: true
 ---
 
 ## Matplotlib 是什么

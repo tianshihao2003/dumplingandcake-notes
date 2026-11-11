@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-13-js-intro.webp
 order: 13
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面 12 篇把网页的**结构**（HTML）和**表现**（CSS）都配齐了：页面能显示内容、也好看了，但它还是**"死的"**——点按钮没反应、数据不会变。让页面对用户的操作"活"起来，靠的是前端三件套里的第三门语言 **JavaScript**。这一篇先回答"JS 是什么、管什么"，再解决第一个动手问题：**JS 代码写在哪里**。

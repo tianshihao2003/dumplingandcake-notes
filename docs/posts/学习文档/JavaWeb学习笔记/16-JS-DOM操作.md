@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-16-js-dom(1).webp
 order: 16
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [15 篇](/posts/编程学习/javaweb学习笔记/15-js函数与自定义对象/)之前，JS 一直在控制台里"自己跟自己玩"：算数、打印、处理数据。这一篇起它能**伸手改页面**了——靠的就是 **DOM**。流程只有两步：**先拿元素，再改元素**；改的地方无非三处：**内容、属性、样式**。最后用课程案例"表格隔行换色"把这三步走一遍。

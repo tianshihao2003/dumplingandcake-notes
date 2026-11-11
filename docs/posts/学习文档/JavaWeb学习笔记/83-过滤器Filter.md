@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-83-filter.webp
 order: 83
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [82 篇](/posts/编程学习/javaweb学习笔记/82-会话技术与jwt令牌/)结尾，登录成功之后服务器用 `JwtUtils.generateToken` 生成了一个 JWT 令牌，前端拿到令牌后，之后每一次请求都会在请求头里带上它。新的问题马上来了：**这个令牌由谁来检查？** 如果让每个 Controller 方法自己写一遍"取令牌 → 校验令牌 → 不合格返回 401"，几十个接口就要抄几十遍。这一篇（PPT 第 29～42 页）讲登录校验里"**统一拦截**"的第一套方案——**过滤器 Filter**：一处配置，整条请求链都归它管。

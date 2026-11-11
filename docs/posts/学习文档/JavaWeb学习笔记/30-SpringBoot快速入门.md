@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-30-springboot-quickst
 order: 30
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前三章的 Maven 把"怎么管依赖、怎么跑测试"打通了（[23](/posts/编程学习/javaweb学习笔记/23-maven是什么与核心概念/)、[29](/posts/编程学习/javaweb学习笔记/29-maven依赖范围与常见问题/)），从这一篇开始正式写**后端程序**。

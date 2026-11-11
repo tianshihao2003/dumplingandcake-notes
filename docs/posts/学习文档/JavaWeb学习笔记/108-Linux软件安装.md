@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-108-linux-software-in
 order: 108
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [107 篇](/posts/编程学习/javaweb学习笔记/107-linux常用命令/)把 Linux 上的命令摸熟了，但那时候干的事还是"看目录、看文件、打包解压"——服务器上真正要跑的东西一样都还没有：**MySQL 要有人装、JDK 要有人装、Nginx 要有人装**。这一篇（PPT 第 52～62 页）就是给一台刚装好的 CentOS 7 **装软件环境**，也是 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)能部署项目的前提。

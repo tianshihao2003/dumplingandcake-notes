@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-46-xpath.webp
 order: 46
 date: 2026-09-19
 cover: false
+hidden: true
 ---
 
 ## Xpath 是什么

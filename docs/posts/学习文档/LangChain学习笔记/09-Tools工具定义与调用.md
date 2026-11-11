@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/langchain-09-tools.webp
 order: 9
 date: 2026-09-21
 cover: false
+hidden: true
 ---
 
 ## 为什么需要工具

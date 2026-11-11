@@ -8,6 +8,7 @@ description: SQL 通用语法与四大分类，DDL 库表操作、图形化界�
 order: 2
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 # MySQL-基础篇 · 2. SQL

@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-110-docker-quickstart
 order: 110
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [109 篇](/posts/编程学习/javaweb学习笔记/109-项目部署到linux/)把 Tlias 搬上了 Linux 服务器：前端静态资源进了 nginx 的 html 目录，后端 jar 用 nohup 跑起来。但回头看那台服务器上的东西是怎么来的——[108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)里 JDK、MySQL、Nginx 是一样一样**手工装上去**的：光 MySQL 就是"卸 mariadb → 解压改名 → 配环境变量 → 注册系统服务 → 初始化 → 启动 → 改密码授权"一长串，一步错了还得从头查。

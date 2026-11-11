@@ -8,6 +8,7 @@ description: 数据库、数据库管理系统与 SQL 三个核心概念，MySQL
 order: 1
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 # MySQL-基础篇 · 1. MySQL概述

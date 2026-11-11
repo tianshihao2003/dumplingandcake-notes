@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-73-aliyun-oss-config(
 order: 73
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [72 篇](/posts/编程学习/javaweb学习笔记/72-文件上传/)把文件存到了服务器自己的磁盘上，结尾留下三个问题：**无法直接访问**、**磁盘满了**、**磁盘坏了**。这一篇（PPT 第 39-53 页，第 53 页是结束页）就用**云存储**把它们一起解决——课程选的是**阿里云 OSS**；顺手还会治另一个毛病：把 OSS 的地址、bucket 名、密钥这些参数**写死在 Java 代码里**，一旦要换就得改代码重新打包，于是引出**参数配置化**的两种做法。

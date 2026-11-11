@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-95-frontend-vue-proje
 order: 95
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [94 篇](/posts/编程学习/javaweb学习笔记/94-后端web开发总结/)给后端课程收尾，从这里开始进入整个 JavaWeb 课程的**最后一块实战：Web 前端实战**——用 Vue 的工程化方案开发企业级前端项目，再配上组件库 ElementPlus。

@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-92-maven-inherit-aggr
 order: 92
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [91 篇](/posts/编程学习/javaweb学习笔记/91-maven分模块设计与开发/)把 tlias 拆成了 `tlias-pojo`、`tlias-utils`、`tlias-web-management` 三个模块，但拆完之后立刻冒出两个新问题：

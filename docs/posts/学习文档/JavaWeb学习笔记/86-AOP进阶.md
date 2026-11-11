@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-86-aop-advanced.webp
 order: 86
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [85 篇](/posts/编程学习/javaweb学习笔记/85-aop基础/)已经把 AOP 跑通了：一个切面类 + 一个 `@Around` 就能接管一批方法的耗时统计。但它只用了**一种通知**、表达式也只写了一种形式。这一篇（PPT 第 13～27 页）把 AOP 的四个细节一次讲透：**通知类型**（一共有五种，分别什么时候执行）、**通知顺序**（多个切面都匹配上时谁先谁后）、**切入点表达式**（`execution` 该怎么写、以及更省事的 `@annotation`）、**连接点**（怎么在通知里拿到"我正在通知谁"）。

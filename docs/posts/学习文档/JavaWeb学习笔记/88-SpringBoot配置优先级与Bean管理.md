@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-88-config-priority-be
 order: 88
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [87 篇](/posts/编程学习/javaweb学习笔记/87-aop案例-记录操作日志/)给 AOP 那章收了尾：切面记日志、ThreadLocal 传操作人，一条链路完整跑通。从这一篇开始进入新的章节——**第 14 章：后端 Web 进阶**。这一章不再写新的业务接口，而是回头把一直在用的 SpringBoot 本身**拆开看**：配置从哪儿来、Bean 由谁管、自动配置是怎么发生的、公共组件怎么打包成 starter 给别人用。

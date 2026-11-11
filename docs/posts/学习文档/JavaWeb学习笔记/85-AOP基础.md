@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-85-aop-basics.webp
 order: 85
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [84 篇](/posts/编程学习/javaweb学习笔记/84-拦截器interceptor/)收尾时，Filter 和 Interceptor 已经能把"登录校验"这套**重复逻辑**从每个业务方法里抽出来了——但那两套方案管的是"请求进来之前"。这一篇（PPT 第 1～12 页）换一个维度：**让一段公共逻辑在"指定的方法"执行前后自动跑起来**，而业务方法自己一行代码都不改。这就是 **AOP**。

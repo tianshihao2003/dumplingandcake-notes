@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-87-aop-oplog-case.web
 order: 87
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [86 篇](/posts/编程学习/javaweb学习笔记/86-aop进阶/)把 AOP 的四样"武器"备齐了：**通知类型**（`@Around` 前后都管）、**切入点表达式**（`execution` 与 `@annotation`）、**通知顺序**（`@Order`）、**连接点**（`JoinPoint` / `ProceedingJoinPoint` 能拿到类名、方法名、参数、返回值）。这一篇（PPT 第 28～34 页）就用它们做一件真实项目里天天要干的事——**记录操作日志**：谁、在什么时间、调了哪个类的哪个方法、传了什么参数、返回了什么、花了多久，全部落进数据库的 `operate_log` 表。这个案例还有一条暗线：**日志要记下"是谁操作的"，可这个"谁"是 [83 篇](/posts/编程学习/javaweb学习笔记/83-过滤器filter/)那个令牌校验过滤器解析出来的**——两段代码跑在不同位置、不在同一次方法调用里，中间靠 **ThreadLocal** 传值。

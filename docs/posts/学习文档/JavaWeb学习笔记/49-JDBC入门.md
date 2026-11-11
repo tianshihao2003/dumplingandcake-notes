@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-49-jdbc-intro.webp
 order: 49
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [48 篇](/posts/编程学习/javaweb学习笔记/48-dql排序与分页查询/)把 DQL 讲完，第 5 章的 SQL 就算练到手了——查、筛、分组、排序、分页都会写。但那些语句都是我们坐在客户端（DataGrip、命令行）前面**自己敲**的。

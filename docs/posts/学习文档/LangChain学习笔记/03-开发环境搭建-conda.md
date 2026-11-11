@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/langchain-03-conda-env.webp
 order: 3
 date: 2026-09-21
 cover: false
+hidden: true
 ---
 
 ## 版本要求

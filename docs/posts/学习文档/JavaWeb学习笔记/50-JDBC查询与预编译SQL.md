@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-50-jdbc-statement-pre
 order: 50
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/49-jdbc入门/)把五个步骤跑通了，但执行的是 **DML**——`executeUpdate` 交回来的只有一个数字（影响行数）。如果换成**查询**（DQL），数据库交回来的可不是数字，而是"**一堆行**"，得我们自己把它取出来、装进对象里。

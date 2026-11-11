@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-51-mybatis-intro(1).w
 order: 51
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [50 篇](/posts/编程学习/javaweb学习笔记/50-jdbc查询与预编译sql/)把 JDBC 的两件大事讲完了——**五步走完一次数据库操作**、**用预编译 SQL 防住注入**。但真要写业务代码，JDBC 那套还是得自己一段段拼：注册驱动、拿连接、写 SQL、解析 `ResultSet`、关资源……这一篇开始进入第 6 章的**下半场**，认识那个专门来收拾这套繁琐流程的框架：**MyBatis**。

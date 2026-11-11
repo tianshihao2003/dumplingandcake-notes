@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-03-data-types.webp
 order: 3
 date: 2026-09-13
 cover: false
+hidden: true
 ---
 
 Python 中的变量不需要声明。每个变量在使用前都必须赋值，变量赋值以后该变量才会被创建。

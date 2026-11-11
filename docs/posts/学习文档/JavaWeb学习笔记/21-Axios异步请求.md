@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-21-axios-request.webp
 order: 21
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [20 篇](/posts/编程学习/javaweb学习笔记/20-vue3常用指令/)的 `empList` 是**写在 `data` 里的死数据**——改一条员工就得改一次代码。可真实项目里数据在**服务器**上、在数据库里，页面上那些数字还会随时变。这一篇解决的就是"**怎么向服务器要数据**"：

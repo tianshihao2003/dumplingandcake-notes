@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-23-maven-what-is.webp
 order: 23
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面 22 篇做的都是**前端**（HTML/CSS/JS/Vue），页面写完就能在浏览器里看到。从这一篇起进入**后端 Web 基础**，第一件事不是写代码，而是先把"**管理和构建 Java 项目的工具**"装上——这就是 Maven。

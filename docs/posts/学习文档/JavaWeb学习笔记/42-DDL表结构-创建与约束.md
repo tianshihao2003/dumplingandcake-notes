@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-42-ddl-table-constrai
 order: 42
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/41-sql分类与数据库操作/)把"数据库"这一层练完了：建库、切库、删库。但库本身不存数据——**数据最终落在表里**，所以紧接着要会的一步是：**把表建出来**。

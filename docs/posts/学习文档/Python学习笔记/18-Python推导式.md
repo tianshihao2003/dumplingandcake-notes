@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-18-comprehension.webp
 order: 18
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 Python 推导式是一种独特的数据处理方式，可以从一个数据序列构建另一个新的数据序列的结构体。
 

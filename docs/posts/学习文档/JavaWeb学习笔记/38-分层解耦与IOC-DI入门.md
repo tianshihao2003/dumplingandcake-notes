@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-38-decouple-ioc-di(1)
 order: 38
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇（[三层架构](/posts/编程学习/javaweb学习笔记/37-三层架构/)）把代码按职责拆成了三层，接口没变、代码也清爽了。但拆完的三层之间还留着三处"焊死的接头"：

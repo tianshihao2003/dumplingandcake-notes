@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python3-intro.webp
 order: 1
 date: 2026-08-18
 cover: false
+hidden: true
 ---
 
 ## Python3 简介

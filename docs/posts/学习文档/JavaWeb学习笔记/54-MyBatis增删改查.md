@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-54-mybatis-crud(1).we
 order: 54
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)把 MyBatis 的入门程序跑通了（Mapper 接口里只有一条 `findAll`），[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)把连接交给谁管说清了。这一篇（PPT 第 30-37 页）就把那个接口**填满**——删除、新增、修改、条件查询四个操作一个个写过来，最后把 MyBatis 里最容易考也最容易错的 `#{}` 与 `${}` 钉死。

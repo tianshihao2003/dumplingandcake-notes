@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-03-html-quickstart(1)
 order: 3
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇说 HTML 负责网页的**结构**，这篇就把它拆开看：什么是 HTML、一个标签由哪几部分组成、一个 .html 文件最少要写什么，最后动手做出第一个页面。

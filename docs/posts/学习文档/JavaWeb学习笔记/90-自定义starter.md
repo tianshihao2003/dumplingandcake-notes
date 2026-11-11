@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-90-custom-starter.web
 order: 90
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [88 篇](/posts/编程学习/javaweb学习笔记/88-springboot配置优先级与bean管理/)讲了 bean 怎么声明（`@Component` / `@Bean`），[89 篇](/posts/编程学习/javaweb学习笔记/89-springboot自动配置原理/)把 SpringBoot 的自动配置拆到了源码级（`@Import` → `AutoConfigurationImportSelector` → `.imports` 文件 → `@Conditional` 条件装配）。这一篇（PPT 第 34～36 页）把这两样合起来用一次：**自己也做一个 starter**——让别的工程"引一行依赖 + 写几行配置"就能用上我们的公共组件。

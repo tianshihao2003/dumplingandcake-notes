@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-35-springboot-respons
 order: 35
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [34 篇](/posts/编程学习/javaweb学习笔记/34-http响应数据格式与状态码/)把响应报文的样子看清楚了（响应行、响应头、响应体，以及状态码怎么读）。这一篇（PPT 第 39～42 页）回答最后一个问题：**在代码里怎么把这三部分写出来**。答案有两种方式，而且——大多数时候你**什么都不用写**。

@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-26-maven-dependency-l
 order: 26
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/25-idea集成maven与项目坐标/)建好了项目、也弄清了坐标；这一篇回答两个每天都要用的问题：**项目要用别人写的 jar，怎么写上去？**（依赖管理）**写完之后"构建"到底怎么跑、跑哪些步骤？**（生命周期）。

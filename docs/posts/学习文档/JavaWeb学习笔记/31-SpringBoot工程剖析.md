@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-31-springboot-project
 order: 31
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/30-springboot快速入门/)跑通了第一个程序：建个工程、写个 `HelloController`、运行启动类，浏览器就能访问 `http://localhost:8080/hello?name=Heima`。但有个问题一直悬着——**我们既没有安装 Tomcat，也没有部署什么 war 包，为什么点了 `main` 方法，Web 服务器就起来了？**

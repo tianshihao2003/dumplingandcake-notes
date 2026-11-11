@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-24-maven-install-conf
 order: 24
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/23-maven是什么与核心概念/)说清了 Maven 是什么、仓库是什么；这一篇把 Maven **装到自己的电脑上**。

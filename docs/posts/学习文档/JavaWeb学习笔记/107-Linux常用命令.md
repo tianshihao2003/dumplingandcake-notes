@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-107-linux-commands.we
 order: 107
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [106 篇](/posts/编程学习/javaweb学习笔记/106-linux概述与系统安装/)把 CentOS 7 装进了 VMware、配好了 NAT 网络、用 FinalShell 从 Windows 连了上去——远程终端一开，迎面就是一个**黑窗口加一个提示符**，接下来所有事情都得靠**命令**跟这台机器说话。

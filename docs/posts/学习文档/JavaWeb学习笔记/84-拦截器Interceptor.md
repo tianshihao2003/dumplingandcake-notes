@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-84-interceptor.webp
 order: 84
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [83 篇](/posts/编程学习/javaweb学习笔记/83-过滤器filter/)用过滤器 Filter 把没带令牌的请求挡在了门外。这一篇（PPT 第 43～53 页）讲"统一拦截"的**第二套方案**——Spring 自己提供的**拦截器 Interceptor**：校验逻辑几乎一模一样，但换了一套写法（实现的是 Spring 的接口、靠配置类注册），而且能更精细地决定"拦哪些、不拦哪些"。最后把 Filter 与 Interceptor 摆在一起对比，并用一次本机实测修正 PPT 里那句容易读歪的话。

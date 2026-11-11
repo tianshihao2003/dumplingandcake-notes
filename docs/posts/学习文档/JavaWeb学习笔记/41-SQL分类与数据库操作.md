@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-41-sql-categories.web
 order: 41
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/40-数据库概述与mysql入门/)把 MySQL 装好、也连上了，但连上去之后呢？界面上只有一个 `mysql>` 提示符，**得会"说话"才行**——这门和数据库打交道的语言就是 SQL。

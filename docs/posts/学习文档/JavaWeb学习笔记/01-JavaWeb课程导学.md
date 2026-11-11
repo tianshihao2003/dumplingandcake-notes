@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-01-course-intro.webp
 order: 1
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 这篇是整套课程的"地图"：先讲清楚**为什么这门课叫 JavaWeb+AI**（AI 把哪几件事的效率拉开了），再讲**什么是 Web**、一个 Web 系统由哪三部分组成，最后是**6 大部分课程安排**、每部分对应哪个 AI 切入点，以及学完能拿到什么。

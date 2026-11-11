@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-32-http-protocol(1).w
 order: 32
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/31-springboot工程剖析/)知道了一件事：SpringBoot 工程里那个**内嵌 Tomcat** 在 8080 端口上等着接请求（日志里的 `Tomcat started on port 8080 (http)`）。这一篇（PPT 第 18-27 页）要回答的是：**浏览器到底"说"了什么，Tomcat 又在"听"什么？**

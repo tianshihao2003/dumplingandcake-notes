@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-46-dql-basic-query.we
 order: 46
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇 [45 篇](/posts/编程学习/javaweb学习笔记/45-dml数据的新增修改删除/)做的是 DML——往表里**加、改、删**数据；从这一篇开始进入 **DQL**，也就是"把数据**查**出来"。企业开发里 Dao 层的大部分方法干的都是这件事，所以 DQL 是 SQL 里用得最多、也最需要写到滚瓜烂熟的一部分。

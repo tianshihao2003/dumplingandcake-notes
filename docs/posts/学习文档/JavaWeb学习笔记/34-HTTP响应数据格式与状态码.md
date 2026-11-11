@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-34-http-response-stat
 order: 34
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [33 篇](/posts/编程学习/javaweb学习笔记/33-springboot获取请求数据/)讲的是请求方向——**服务器怎么拿到浏览器发来的数据**。这一篇（PPT 第 32～38 页）翻到另一半：**服务器回给浏览器的响应数据长什么样**，以及响应行里那个"状态码"到底怎么读。代码层面"怎么把响应写出来"是下一篇（35 篇）的事，这一篇先把**格式**看清楚。

@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-27-llm.webp
 order: 27
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 ## 三个概念的层次关系

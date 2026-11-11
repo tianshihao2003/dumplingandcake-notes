@@ -8,6 +8,7 @@ description: 系统数据库的作用与 mysqladmin、mysqlbinlog、mysqldump、
 order: 13
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 # MySQL-进阶篇 · 7. MySQL管理

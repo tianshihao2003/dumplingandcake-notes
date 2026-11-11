@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-33-openai.webp
 order: 33
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 ## pip 与 PyPI

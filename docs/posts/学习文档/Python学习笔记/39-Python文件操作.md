@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-39-file.webp
 order: 39
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 ## 三步法：打开 → 读/写 → 关闭

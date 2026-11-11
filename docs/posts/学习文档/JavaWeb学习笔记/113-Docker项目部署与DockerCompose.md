@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-113-docker-deploy-com
 order: 113
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [112 篇](/posts/编程学习/javaweb学习笔记/112-docker自定义镜像与网络/)把"自己的项目怎么变成镜像"这件事讲透了：`FROM` 定底座 → 一层层 `COPY`/`RUN`/`ENV` 搭起来 → `docker build` 出镜像 → `docker run` 跑成容器；还讲了容器默认挂在 bridge 网桥上、**只有加入同一个自定义网络的容器才能用容器名互相访问**。

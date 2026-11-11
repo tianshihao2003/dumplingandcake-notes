@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/langchain-16-agent-structured
 order: 16
 date: 2026-09-21
 cover: false
+hidden: true
 ---
 
 第 6 章学过**模型**的结构化输出（`with_structured_output`）。**Agent** 也能做结构化输出，但用法和时机都不一样——这一篇讲清楚区别，以及四种策略怎么选。

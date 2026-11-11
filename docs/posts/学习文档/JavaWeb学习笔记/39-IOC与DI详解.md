@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-39-ioc-di-detail(1).w
 order: 39
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇（[分层解耦与IOC-DI入门](/posts/编程学习/javaweb学习笔记/38-分层解耦与ioc-di入门/)）用 `@Component` + `@Autowired` 把三处 `new` 换掉了，页面照旧能跑。但还有三个问题没回答：

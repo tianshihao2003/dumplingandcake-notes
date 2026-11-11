@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-55-mybatis-xml-mappin
 order: 55
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)把增删改查四个操作都写在**注解**里了。这一篇（PPT 第 38-42 页）说的是另一种写法：**把 SQL 搬进 XML 映射文件**。两种方式在 MyBatis 里长期并存，选哪个不是风格问题，而是"这条 SQL 复杂到什么程度"的问题——[54 篇](/posts/编程学习/javaweb学习笔记/54-mybatis增删改查/)那种简单语句用注解就够，复杂 SQL 才是 XML 的主场。

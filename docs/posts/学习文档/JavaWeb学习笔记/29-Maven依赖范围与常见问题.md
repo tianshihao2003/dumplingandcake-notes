@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-29-maven-scope-faq.we
 order: 29
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 这是 Maven 这一章的最后一篇，收掉 [27](/posts/编程学习/javaweb学习笔记/27-junit单元测试入门/)、[28](/posts/编程学习/javaweb学习笔记/28-junit断言与常见注解/)两篇里一直留着的那个尾巴——**pom 里 junit 依赖后面那行 `<scope>test</scope>` 到底是干什么的**（PPT 第 66 页的"依赖范围"），再补上 PPT 第 69 页的 **Maven 常见问题**：依赖下载不完整留下的 `xxx.lastUpdated` 文件该怎么处理。

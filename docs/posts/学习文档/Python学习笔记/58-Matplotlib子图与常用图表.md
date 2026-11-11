@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-58-matplotlib-subplots
 order: 58
 date: 2026-09-20
 cover: false
+hidden: true
 ---
 
 ## 为什么要用子图

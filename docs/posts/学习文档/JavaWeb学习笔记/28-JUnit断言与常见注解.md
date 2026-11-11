@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-28-junit-assert-annot
 order: 28
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/27-junit单元测试入门/)跑通了第一个单元测试，但留了个坑：**测试跑绿了不代表结果是对的**——只打印不检查，JUnit 只知道"方法没抛异常"，不知道"结果对不对"。这一篇把坑填上，对应 PPT 第 53 页目录里的后两节：**断言**（判断结果对不对）和**常见注解**（参数化测试、显示名称、执行时机）。

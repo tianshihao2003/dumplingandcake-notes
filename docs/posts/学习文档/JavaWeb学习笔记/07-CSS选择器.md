@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-07-css-selectors.webp
 order: 7
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一节给日期上样式时，`span { color: #b2b2b2; }` 里的 `span` 就是**选择器**。这一篇把它讲透：页面元素那么多，样式到底怎么"点"到你要改的那一个身上。

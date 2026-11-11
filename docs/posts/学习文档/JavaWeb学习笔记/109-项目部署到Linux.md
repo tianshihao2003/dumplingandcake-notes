@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-109-deploy-to-linux.w
 order: 109
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [108 篇](/posts/编程学习/javaweb学习笔记/108-linux软件安装/)把 JDK、MySQL、Nginx 三样装进了服务器，环境齐了。这一篇（PPT 第 63～70 页）是**第 19 章的收官**：把 Tlias 这个项目真正**搬到服务器上跑起来**——前端那段静态页面交给 nginx，后端那个 jar 在服务器上跑起来，再让 nginx 把两者合成"一个入口"。

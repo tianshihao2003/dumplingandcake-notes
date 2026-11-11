@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-05-html-tags.webp
 order: 5
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前两篇把 HTML 骨架和标签语法讲清了，但骨架本身不显示任何内容——真正往页面上**装东西**的是一堆**常用标签**。这一篇用课程的主案例「央视新闻」把这些标签一个一个过一遍。

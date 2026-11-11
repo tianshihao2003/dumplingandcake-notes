@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-33-springboot-request
 order: 33
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 这是 HTTP 协议这一块的第 2 篇。[32 篇](/posts/编程学习/javaweb学习笔记/32-http协议与请求数据格式/)里看的是**报文长什么样**（请求行、请求头、请求体怎么写），这一篇（PPT 第 28～31 页）接着解决后面那半句——**在 SpringBoot 的代码里，怎么把这些数据拿出来用**。结论先说：不需要自己解析，Web 服务器已经把它整理成了一个对象，我们要做的只是把这个对象"要"过来。

@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-06-comments.webp
 order: 6
 date: 2026-09-14
 cover: false
+hidden: true
 ---
 Python 中，注释不会影响程序的执行，但是会使代码更易于阅读和理解。
 

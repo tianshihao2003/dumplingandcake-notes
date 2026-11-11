@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-97-elementplus-compon
 order: 97
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [96 篇](/posts/编程学习/javaweb学习笔记/96-vue项目开发流程与组合式api/)的案例页面里有一堆 `el-` 开头的标签（`<el-form>`、`<el-table>`、`<el-button>`……），当时只讲了 `<script setup>` 里的数据部分，故意把它们跳过了——因为那是 PPT 第 31 页以后的独立一节：

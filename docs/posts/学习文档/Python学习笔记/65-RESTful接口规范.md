@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-65-restful.webp
 order: 65
 date: 2026-09-20
 cover: false
+hidden: true
 ---
 
 ## RESTful 是什么

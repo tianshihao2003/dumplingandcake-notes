@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/langchain-15-system-prompt.we
 order: 15
 date: 2026-09-21
 cover: false
+hidden: true
 ---
 
 ## 系统提示词：给 Agent 定规矩

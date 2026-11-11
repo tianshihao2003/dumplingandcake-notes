@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-82-session-jwt.webp
 order: 82
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [81 篇](/posts/编程学习/javaweb学习笔记/81-登录功能/)把登录接口做完了：用户名密码一对，服务器就发一枚令牌（`data.token`）。可发出去之后呢？**前端带不带随它，服务端验不验也没人管**——直接请求 `/depts`、`/emps`、`/report/*` 照样拿得到数据。PPT 第 9 页把这个问题摆在台面上之后，第 10～13 页给出了解法：**登录校验**。

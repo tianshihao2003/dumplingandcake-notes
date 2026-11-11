@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-11-tuple.webp
 order: 11
 date: 2026-09-15
 cover: false
+hidden: true
 ---
 Python 的元组与列表类似，不同之处在于元组的元素不能修改。
 

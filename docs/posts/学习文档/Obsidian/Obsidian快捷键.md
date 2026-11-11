@@ -7,6 +7,7 @@ description: ""
 image: https://img.tsh520.cn/file/blog/post-covers/tips-obsidian-hotkeys.webp
 date: 2026-09-14
 cover: false
+hidden: true
 ---
 | 快捷键          | 用途    |
 | ------------ | ----- |

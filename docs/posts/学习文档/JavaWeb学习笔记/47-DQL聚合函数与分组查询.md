@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-47-dql-aggregate-grou
 order: 47
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [46 篇](/posts/编程学习/javaweb学习笔记/46-dql基本查询与条件查询/)解决了"查哪些列、筛哪些行"；但如果需求变成"**一共多少人**""**平均薪资是多少**""**每个职位各有多少人**"，用前两篇的写法就只能把数据全查出来、在程序里一行行数——**数据库本身就能算**。

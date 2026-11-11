@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-31-json.webp
 order: 31
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 ## JSON 是什么

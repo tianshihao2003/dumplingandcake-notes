@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-94-backend-summary.we
 order: 94
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [93 篇](/posts/编程学习/javaweb学习笔记/93-maven私服/)把 Maven 高级讲完，这一篇是**后端的收官篇**（总结 PPT 第 1~7 页）。它不讲任何新技术，只干一件事：**把整个后端课程串成一张知识地图**。

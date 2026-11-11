@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-52-jdbc-vs-mybatis.we
 order: 52
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)把 MyBatis 请进了门，一个 Mapper 接口加一行注解就把"查所有用户"跑通了。但只看到"新的能跑"，还不足以理解**为什么值得换**——这一篇把**同一件事的两种写法**摆在一起看：这才是 PPT 第 22-24 页那一节"**JDBC VS Mybatis**"真正想讲的东西。

@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-20-function.webp
 order: 20
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 ## 函数定义

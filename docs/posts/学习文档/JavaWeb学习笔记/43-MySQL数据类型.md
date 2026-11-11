@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-43-mysql-data-types(1
 order: 43
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇 [42 篇](/posts/编程学习/javaweb学习笔记/42-ddl表结构-创建与约束/)把建表语句的骨架（`create table` + 字段 + 约束 + 注释）搭好了，这一篇专讲骨架里**紧跟字段名的那一样东西——数据类型**。下一篇 [44 篇](/posts/编程学习/javaweb学习笔记/44-ddl表结构与建表案例/)就会拿"员工表"把约束和类型合起来用一遍。

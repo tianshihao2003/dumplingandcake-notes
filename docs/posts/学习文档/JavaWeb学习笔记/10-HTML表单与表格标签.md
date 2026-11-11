@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-10-html-form-table(1)
 order: 10
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 09 篇把顶部导航栏做好了。页面接下来要干两件事：**让用户填东西**（搜索条件、注册信息）和**把一堆数据摆整齐**（员工列表）——前者靠**表单标签**，后者靠**表格标签**。这一篇把这两类标签一次讲完。

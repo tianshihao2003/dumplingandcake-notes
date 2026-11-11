@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-14-container.webp
 order: 14
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 Python 提供了多种数据容器来存储和操作数据，理解它们的特性差异对于选择合适的数据结构至关重要。

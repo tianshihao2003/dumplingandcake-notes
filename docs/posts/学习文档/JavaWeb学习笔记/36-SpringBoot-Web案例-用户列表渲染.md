@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-36-springboot-web-cas
 order: 36
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面几篇都在拆零件：入门程序（[30 篇](/posts/编程学习/javaweb学习笔记/30-springboot快速入门/)）让 `/hello` 能回一句话，[32 篇](/posts/编程学习/javaweb学习笔记/32-http协议与请求数据格式/)认识了 HTTP 请求和响应的格式，[34](/posts/编程学习/javaweb学习笔记/34-http响应数据格式与状态码/)、[35 篇](/posts/编程学习/javaweb学习笔记/35-springboot设置响应数据/)学会了怎么设置响应数据。

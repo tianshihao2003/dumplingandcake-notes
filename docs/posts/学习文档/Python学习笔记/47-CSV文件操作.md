@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-47-csv.webp
 order: 47
 date: 2026-09-19
 cover: false
+hidden: true
 ---
 
 ## CSV 是什么

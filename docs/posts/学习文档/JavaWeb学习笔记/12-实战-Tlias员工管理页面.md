@@ -11,6 +11,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-12-case-tlias-page.we
 order: 12
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 第一个案例（[央视新闻页面](/posts/编程学习/javaweb学习笔记/11-实战-央视新闻页面/)）是"一步一步手写出来"的；这第二个案例换个做法——**用 AI 提示词生成**，一次让 AI 做一个区域，最后拼成完整的"Tlias 员工管理页面"。这一篇把**四段提示词原文**、每个区域用到的技术、以及"生成之后要看得懂、会手改"的要点都留下来。

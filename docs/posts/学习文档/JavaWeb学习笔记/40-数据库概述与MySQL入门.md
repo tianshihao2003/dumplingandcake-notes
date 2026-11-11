@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-40-mysql-intro.webp
 order: 40
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一章的结尾（[39-IOC与DI详解](/posts/编程学习/javaweb学习笔记/39-ioc与di详解/)）把 Tlias 案例的 Controller、Service、Dao 三层都写通了，IOC 容器也配好了。但有个问题一直绕过去没回答：**Dao 层返回的那些数据，是从哪儿来的？**课程里的用户数据是写在 `UserDaoImpl` 代码里 `new` 出来的假数据——真实的项目里，数据要落到**数据库**。

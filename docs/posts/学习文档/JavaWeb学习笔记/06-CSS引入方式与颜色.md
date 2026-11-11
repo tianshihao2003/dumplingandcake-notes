@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-06-css-include-color.
 order: 6
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 上一篇把央视新闻的内容用标签摆好了，但页面还是"白底黑字"的默认样子。从这一篇开始给页面**上样式**——先弄清 CSS 怎么引进页面、颜色怎么写，再动手把标题区那行日期调成灰色。

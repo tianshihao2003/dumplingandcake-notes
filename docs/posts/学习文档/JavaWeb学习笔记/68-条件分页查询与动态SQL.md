@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-68-conditional-page-d
 order: 68
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [67 篇](/posts/编程学习/javaweb学习笔记/67-分页查询的两种实现方式/)把分页做出来了，但页面顶部的搜索栏还没人管：用户填了"姓名=张、性别=男、入职时间 2007-09-01 到 2022-09-01"，接口得照着这些条件去查。这一篇（PPT 第 54-65 页）要解决的就是"**条件 + 分页**"这两件事怎么合到一起。

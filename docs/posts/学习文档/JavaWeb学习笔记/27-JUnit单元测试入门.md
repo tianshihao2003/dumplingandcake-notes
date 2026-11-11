@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-27-junit-intro.webp
 order: 27
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/26-maven依赖管理与生命周期/)把 Maven 的**依赖管理**和**生命周期**都讲完了，里面那个 `test` 阶段的定义是"**使用合适的单元测试框架运行测试（junit）**"——这一篇就来把这个"单元测试框架"补上，也是这一章（PPT 第 49 页的目录）最后一块：**单元测试**。

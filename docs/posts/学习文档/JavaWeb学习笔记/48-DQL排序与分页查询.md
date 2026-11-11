@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-48-dql-order-limit(1)
 order: 48
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 到这一篇，DQL 的七段结构就凑齐了：前两篇讲了**查哪些列、筛哪些行**（[46 篇](/posts/编程学习/javaweb学习笔记/46-dql基本查询与条件查询/)）和**分组统计**（[47 篇](/posts/编程学习/javaweb学习笔记/47-dql聚合函数与分组查询/)），这一篇补上最后两段——**排序**与**分页**。这两段正好就是后台页面里"点表头排序""翻页"背后的东西。

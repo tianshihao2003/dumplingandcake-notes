@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-64-fastapi-intro.webp
 order: 64
 date: 2026-09-20
 cover: false
+hidden: true
 ---
 
 ## Web 初识

@@ -8,6 +8,7 @@ description: 插入数据、主键设计、order by、group by、limit、count �
 order: 9
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 # MySQL-进阶篇 · 3. SQL优化

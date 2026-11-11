@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-106-linux-intro-insta
 order: 106
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [105 篇](/posts/编程学习/javaweb学习笔记/105-前端打包部署/)把前端工程打包成 `dist`、交给 nginx 从 80 端口发出去——但那台 nginx 还在**自己的 Windows 电脑**上。真正上线时，这一堆东西（前端静态文件、后端 jar、MySQL、Redis）要放到**机房里的一台服务器**上，而服务器上跑的操作系统，绝大多数是 **Linux**。

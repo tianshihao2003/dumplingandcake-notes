@@ -11,6 +11,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-22-case-vue-axios-emp
 order: 22
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 这是第 2 章的收尾案例，也是前几篇的**合体**：

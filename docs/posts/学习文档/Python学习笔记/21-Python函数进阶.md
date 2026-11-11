@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-21-advanced-function.w
 order: 21
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 ## 变量作用域

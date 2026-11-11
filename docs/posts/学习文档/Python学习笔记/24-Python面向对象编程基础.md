@@ -11,6 +11,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-24-oop.webp
 order: 24
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 ## 面向过程编程

@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-111-docker-commands-v
 order: 111
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [110 篇](/posts/编程学习/javaweb学习笔记/110-docker快速入门/)用一条 `docker run` 把 MySQL 跑起来了，但那只是"起一个容器"。真到干活的时候，问题会一个接一个冒出来：容器起来了怎么看它在不在跑？日志在哪看？想进去改个文件怎么办？**容器删掉之后里面的数据还在吗**？

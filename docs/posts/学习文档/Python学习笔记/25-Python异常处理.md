@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-25-exception.webp
 order: 25
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 ## 什么是异常

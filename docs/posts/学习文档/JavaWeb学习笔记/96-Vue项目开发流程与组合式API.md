@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-96-vue-composition-ap
 order: 96
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [95 篇](/posts/编程学习/javaweb学习笔记/95-前端工程化与vue项目/)把工程建起来、跑到 `http://localhost:5173` 上了，但当时页面上显示的是**脚手架自带的欢迎页**——那份页面是谁写的？我们自己的代码又要写在哪、怎么被加载出来？这一篇回答的就是这件事。

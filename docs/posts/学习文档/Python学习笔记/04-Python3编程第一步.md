@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-04-first-program.webp
 order: 4
 date: 2026-09-15
 cover: false
+hidden: true
 ---
 在前面的教程中我们已经学习了一些 Python3 的基本语法知识，接下来我们来尝试一些实例。
 

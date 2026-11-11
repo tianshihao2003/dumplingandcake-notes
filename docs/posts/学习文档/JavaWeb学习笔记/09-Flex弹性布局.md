@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-09-flex-layout.webp
 order: 9
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 08 篇把"一个盒子"的里里外外都调明白了。但页面是**一排排盒子**：怎么让"标题靠左、退出登录靠右"在同一行里自动分开？靠 `margin` 一个个算也可以，但很难算准——这一篇用 **flex 弹性布局**一次性解决。

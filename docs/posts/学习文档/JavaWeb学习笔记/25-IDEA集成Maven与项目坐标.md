@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-25-idea-maven-coordin
 order: 25
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [上一篇](/posts/编程学习/javaweb学习笔记/24-maven的安装与配置/)把 Maven 装到了电脑上、settings.xml 也配好了；但**真正写代码是在 IDEA 里**——所以这一篇要解决"**让 IDEA 用上我装的这份 Maven**"，然后**亲手建一个 Maven 项目跑起来**，再搞清 IDEA 里到处都能看到的"**坐标**"是什么。

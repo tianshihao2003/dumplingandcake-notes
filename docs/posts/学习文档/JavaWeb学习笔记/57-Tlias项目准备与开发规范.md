@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-57-tlias-project-prep
 order: 57
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面 15 篇（[40 篇](/posts/编程学习/javaweb学习笔记/40-数据库概述与mysql入门/)到 [56 篇](/posts/编程学习/javaweb学习笔记/56-springboot配置文件/)）一直在打"后端基础"：MySQL → JDBC → MyBatis → SpringBoot 配置。到这一篇，基础部分结束了，正式进入 **Web 后端实战**——用前面学的所有东西做一个完整项目：**Tlias 智能学习辅助系统**。

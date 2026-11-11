@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-91-maven-multi-module
 order: 91
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [90 篇](/posts/编程学习/javaweb学习笔记/90-自定义starter/)把"公共组件怎么封装成起步依赖"这条线走完了，接下来进入本章的第二个 PPT —— **Maven 高级**（`14. 后端Web进阶(Maven高级).pptx`，36 页）。这个 PPT 在**第 2 页**就把内容交代清楚了，一共三块：

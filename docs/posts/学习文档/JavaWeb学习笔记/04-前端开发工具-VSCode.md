@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-04-vscode-setup.webp
 order: 4
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前一篇用记事本也能写出 HTML，但真写起页面来要一个趁手的编辑器。这篇讲课程的开发工具 **VS Code**：它是什么、装在哪、装完还要做什么，以及课程配套的另外两个小软件。

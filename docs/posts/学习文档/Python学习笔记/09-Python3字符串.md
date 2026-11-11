@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-09-strings.webp
 order: 9
 date: 2026-09-14
 cover: false
+hidden: true
 ---
 字符串是 Python 中最常用的数据类型。我们可以使用引号( ' 或 " )来创建字符串。
 

@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-08-css-box-model(1).w
 order: 8
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面几篇都在改"盒子里面"的东西（文字颜色、行高、缩进）。这一篇换个视角：**页面上的每一个元素（标签）都是一个矩形盒子**，把元素当盒子看，才能调它的大小、边框和四周的留白——这才是页面布局真正在做的事。

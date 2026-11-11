@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-44-ddl-table-case.web
 order: 44
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [42 篇](/posts/编程学习/javaweb学习笔记/42-ddl表结构-创建与约束/)给了建表语法和五类约束，[43 篇](/posts/编程学习/javaweb学习笔记/43-mysql数据类型/)把字段类型讲完了——但这两样东西**单独看都会用，合起来落在一张真实的表上就未必**。这一篇就是干这件事的：

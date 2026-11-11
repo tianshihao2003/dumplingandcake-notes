@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-08-numbers.webp
 order: 8
 date: 2026-09-14
 cover: false
+hidden: true
 ---
 Python 数字数据类型用于存储数值。
 

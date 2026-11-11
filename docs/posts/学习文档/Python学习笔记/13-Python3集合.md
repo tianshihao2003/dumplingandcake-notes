@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-13-set.webp
 order: 13
 date: 2026-09-15
 cover: false
+hidden: true
 ---
 ## Python3 集合
 

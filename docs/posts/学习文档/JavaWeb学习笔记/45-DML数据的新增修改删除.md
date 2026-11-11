@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-45-dml-insert-update-
 order: 45
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [44 篇](/posts/编程学习/javaweb学习笔记/44-ddl表结构与建表案例/)把员工表 `emp` 的结构（字段、类型、约束）搭好了，但那时候表还是**空的**——就像一个刚做好的书架，上面一本书都没有。这一篇开始往里**放书、换书、撤书**。

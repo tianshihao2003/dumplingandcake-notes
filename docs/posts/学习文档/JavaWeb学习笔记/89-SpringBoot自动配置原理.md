@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-89-auto-configuration
 order: 89
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [88 篇](/posts/编程学习/javaweb学习笔记/88-springboot配置优先级与bean管理/)解决了两个"配置层面"的问题：配置写在哪里、谁说了算（优先级），以及 bean 由谁声明（`@Component` 还是 `@Bean`）。这一篇（PPT 第 14～33 页）换一个问法，去回答一个更根本的问题——**我们从第 30 篇起就一直在用的 SpringBoot，凭什么"引一个依赖、写一个 main 方法"就能跑起来？**

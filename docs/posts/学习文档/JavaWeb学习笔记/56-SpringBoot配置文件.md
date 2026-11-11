@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-56-springboot-config-
 order: 56
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 前面几篇一直在"用"配置文件：[51 篇](/posts/编程学习/javaweb学习笔记/51-mybatis入门与辅助配置/)用它配数据源、[53 篇](/posts/编程学习/javaweb学习笔记/53-数据库连接池/)用它切连接池、[55 篇](/posts/编程学习/javaweb学习笔记/55-mybatis-xml映射配置/)用它指定 XML 位置——用的都是 `application.properties`。这一篇（PPT 第 43-49 页，**本章最后一篇**）把这个天天在改的文件说清：它还能叫什么名字、换成另一种格式怎么写，以及一个踩过才知道的坑（`0` 开头）。

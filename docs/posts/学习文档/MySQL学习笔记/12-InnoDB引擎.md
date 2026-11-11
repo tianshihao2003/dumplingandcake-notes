@@ -8,6 +8,7 @@ description: InnoDB 逻辑存储结构、内存与磁盘架构、事务实现原
 order: 12
 date: 2026-09-18
 cover: false
+hidden: true
 ---
 
 # MySQL-进阶篇 · 6. InnoDB引擎

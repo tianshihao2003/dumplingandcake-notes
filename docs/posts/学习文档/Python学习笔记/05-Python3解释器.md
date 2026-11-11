@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-05-interpreter.webp
 order: 5
 date: 2026-09-14
 cover: false
+hidden: true
 ---
 Linux/Unix的系统上，一般默认的 python 版本为 2.x，我们可以将 python3.x 安装在 **/usr/local/python3** 目录中。
 

@@ -9,6 +9,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-22-typing.webp
 order: 22
 date: 2026-09-16
 cover: false
+hidden: true
 ---
 
 ## 类型注解基本介绍

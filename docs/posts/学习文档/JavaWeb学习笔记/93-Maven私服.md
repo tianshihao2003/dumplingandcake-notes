@@ -10,6 +10,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/javaweb-93-maven-private-serv
 order: 93
 date: 2026-09-29
 cover: false
+hidden: true
 ---
 
 [92 篇](/posts/编程学习/javaweb学习笔记/92-maven继承与聚合/)把多模块工程的"配置"和"构建"都收进了父工程：依赖走继承、版本走 `<dependencyManagement>`、构建走聚合。但还剩最后一个问题没答 —— **这些自己写出来的模块，怎么给别人用？**

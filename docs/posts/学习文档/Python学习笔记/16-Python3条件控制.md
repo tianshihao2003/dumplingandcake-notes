@@ -8,6 +8,7 @@ image: https://img.tsh520.cn/file/blog/post-covers/python-16-condition.webp
 order: 16
 date: 2026-09-15
 cover: false
+hidden: true
 ---
 Python 条件语句是通过一条或多条语句的执行结果（True 或者 False）来决定执行的代码块。
 
