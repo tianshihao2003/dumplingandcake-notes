@@ -55,7 +55,10 @@ const FIELD_ALIAS = [["published", "date"]];
 
 // 这些目录下的笔记不进首页列表（导航、分类页、直接链接仍可访问）。
 // 加新目录只要在这里补一项，比如 ["已弃用", "草稿"]
-const HIDDEN_FROM_HOME = ["已弃用"];
+// 首页不展示的目录（按**前缀**匹配顶层目录名）。
+// 用前缀而不是全名：目录名带 emoji 时，`🗑️` 其实是 U+1F5D1 + 变体选择符 U+FE0F 两个码点，
+// 写死全名很容易对不上（踩过：目录从「已弃用」改名成「回收站🗑️」后，首页全漏出来了）。
+const HIDDEN_FROM_HOME = ["已弃用", "回收站"];
 
 // 允许保留的 HTML 标签（其余 <xxx 都当纯文本转义）
 const ALLOWED_TAGS = new Set(
@@ -1298,8 +1301,8 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 		coverAdded,
 		hiddenAdded,
 	} = sanitize(normalized, {
-		hideFromHome: HIDDEN_FROM_HOME.some(
-			(dir) => rel === dir || rel.startsWith(`${dir}${path.sep}`),
+		hideFromHome: HIDDEN_FROM_HOME.some((prefix) =>
+			rel.split(path.sep)[0].startsWith(prefix),
 		),
 		resolveImage: imgResolver.byName,
 		fixImagePath: imgResolver.fixPath,
