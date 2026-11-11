@@ -766,14 +766,85 @@ async function embedHandwriteFont(svg, text) {
 	return svg.replace(/<svg[^>]*>/, (m) => `${m}${css}`);
 }
 
-function excalidrawToSvg(scene) {
+/** 图片扩展名 -> MIME，用于把画布里的图片转成 data URI */
+const imageIssues = []; // 画布图片解析失败的原因，进报告
+
+const IMAGE_MIME = {
+	".png": "image/png",
+	".jpg": "image/jpeg",
+	".jpeg": "image/jpeg",
+	".gif": "image/gif",
+	".webp": "image/webp",
+	".svg": "image/svg+xml",
+	".bmp": "image/bmp",
+	".avif": "image/avif",
+};
+
+/**
+ * 解析 .excalidraw.md 里的 `## Embedded Files` 段：
+ *   c00216...: [[file-20261111163501069.png]]
+ * 得到 fileId -> 文件名。画布 JSON 里 image 元素的 files 是空的（status=pending），
+ * 真正的图片只以这种双链形式存在 md 里，得按文件名去库里找实际文件。
+ */
+function parseEmbeddedFiles(text) {
+	const map = new Map();
+	const block = text.match(/##\s*Embedded Files\s*\n([\s\S]*?)(?:\n%%|\n##\s|$)/);
+	if (!block) return map;
+	for (const line of block[1].split("\n")) {
+		const hit = line.match(/^\s*([0-9a-f]{16,64})\s*:\s*\[\[([^\]]+)\]\]/i);
+		if (hit) map.set(hit[1].toLowerCase(), hit[2].trim());
+	}
+	return map;
+}
+
+/** 返回 fileId -> data URI 的解析器；找不到就返回 null，并把原因记进 imageIssues */
+function makeEmbeddedImageResolver(text, scene, rel) {
+	const byId = parseEmbeddedFiles(text);
+	const sceneFiles = scene?.files ?? {};
+	const cache = new Map();
+	return (fileId) => {
+		if (!fileId) return null;
+		const key = String(fileId).toLowerCase();
+		if (cache.has(key)) return cache.get(key);
+
+		let href = null;
+		// 1) 图片数据就在画布 JSON 的 files 里（直接粘进画布的那种）
+		const inline = sceneFiles[fileId] ?? sceneFiles[key];
+		if (inline?.dataURL) href = inline.dataURL;
+
+		// 2) 存成库里文件的：## Embedded Files 里写的是 [[文件名]]
+		if (!href) {
+			const name = byId.get(key);
+			const hit = name ? assetIndex.get(path.basename(name)) : null;
+			if (hit) {
+				const mime = IMAGE_MIME[path.extname(hit).toLowerCase()];
+				if (mime) {
+					try {
+						href = `data:${mime};base64,${readFileSync(path.join(SRC, hit)).toString("base64")}`;
+					} catch {
+						href = null;
+					}
+				}
+			} else if (!name) {
+				imageIssues.push(`${rel}：有一个「markdown-image」占位图，Obsidian 没把图片存进文件`);
+			} else {
+				imageIssues.push(`${rel}：找不到图片文件 ${name}`);
+			}
+		}
+		cache.set(key, href);
+		return href;
+	};
+}
+
+function excalidrawToSvg(scene, resolveImage) {
 	const els = (scene.elements ?? []).filter((e) => !e.isDeleted);
 	const shapes = els.filter(
 		(e) => e.type === "rectangle" || e.type === "ellipse" || e.type === "diamond",
 	);
 	const texts = els.filter((e) => e.type === "text");
 	const arrows = els.filter((e) => e.type === "arrow");
-	if (shapes.length + texts.length + arrows.length === 0) return null;
+	const images = els.filter((e) => e.type === "image");
+	if (shapes.length + texts.length + arrows.length + images.length === 0) return null;
 
 	// 画布范围：元素自带的 bbox 已经覆盖箭头折点
 	let minX = Number.POSITIVE_INFINITY;
@@ -803,6 +874,37 @@ function excalidrawToSvg(scene) {
 	out.push(
 		`<rect x="${round2(minX)}" y="${round2(minY)}" width="${round2(maxX - minX)}" height="${round2(maxY - minY)}" fill="${bg.hex}"${bg.alpha < 1 ? ` fill-opacity="${round2(bg.alpha)}"` : ""}/>`,
 	);
+
+	// 画布里的图片（截图/示意图）：<img> 引的 SVG 是隔离文档，外部图片一律加载不到，
+	// 所以必须把图片本身转成 data URI 内嵌进来。
+	for (const e of images) {
+		const href = resolveImage ? resolveImage(e.fileId) : null;
+		const w = e.width || 0;
+		const h = e.height || 0;
+		if (!href || w <= 0 || h <= 0) {
+			missingImages++;
+			continue;
+		}
+		const cx = e.x + w / 2;
+		const cy = e.y + h / 2;
+		const tf = [];
+		if (e.angle) {
+			tf.push(`rotate(${round2((e.angle * 180) / Math.PI)} ${round2(cx)} ${round2(cy)})`);
+		}
+		const [sx, sy] = e.scale ?? [1, 1];
+		if (sx < 0 || sy < 0) {
+			tf.push(
+				`translate(${round2(cx)} ${round2(cy)}) scale(${sx} ${sy}) translate(${round2(-cx)} ${round2(-cy)})`,
+			);
+		}
+		if (typeof e.opacity === "number" && e.opacity < 100) {
+			tf.push(`opacity(${round2(e.opacity / 100)})`);
+		}
+		out.push(
+			`<image x="${round2(e.x)}" y="${round2(e.y)}" width="${round2(w)}" height="${round2(h)}" preserveAspectRatio="none" href="${href}"${tf.length > 0 ? ` transform="${tf.filter((t) => !t.startsWith("opacity")).join(" ")}"` : ""}/>`,
+		);
+		embeddedImages++;
+	}
 
 	// 形状
 	for (const e of shapes) {
@@ -961,7 +1063,7 @@ async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null) {
 				imgSrc = `./${encodeMdUrl(sibling)}`;
 			} else {
 			const scene = readExcalidrawScene(text);
-			svgText = scene ? excalidrawToSvg(scene) : null;
+			svgText = scene ? excalidrawToSvg(scene, makeEmbeddedImageResolver(text, scene, rel)) : null;
 			if (svgText && scene) {
 				const allText = (scene.elements ?? [])
 					.filter((e) => e.type === "text" && e.text)
@@ -1043,6 +1145,8 @@ const generated = [];
 const svgSourceRels = new Set(); // 本身就是 SVG 的 .md，不能再当普通笔记渲染
 let drawingFailed = 0;
 let drawingFonts = 0; // 成功内嵌手写体的张数
+let embeddedImages = 0; // 内嵌进 SVG 的画布图片数
+let missingImages = 0; // 画布里图片找不到文件的次数
 let mergedExports = 0;
 if (!args.includes("--keep-excalidraw")) {
 	const baseOf = (rel) =>
@@ -1398,6 +1502,12 @@ if (generated.length > 0 || drawingFailed > 0) {
 		if (drawingFonts === 0) {
 			console.log("  ⚠ 没找到 scripts/fonts/*.woff2 → 手绘图会用系统字体，和 Obsidian 里不一样");
 			console.log("     修复：python scripts/fonts-tools/prepare-fonts.py（一次性，需联网）");
+		}
+		if (embeddedImages > 0 || missingImages > 0) {
+			console.log(
+				`  内嵌画布图片  : ${embeddedImages} 张${missingImages > 0 ? `（${missingImages} 张找不到）` : ""}`,
+			);
+			for (const issue of imageIssues.slice(0, 3)) console.log(`     ⚠ ${issue}`);
 		}
 	}
 }

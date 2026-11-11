@@ -171,6 +171,23 @@ python scripts/fonts-tools/prepare-fonts.py
 > 逐字比对轮廓坐标 —— 9/9 个汉字完全一致；再用 Chrome 无头截图做有/无字体对照，
 > 差异 2.78% 像素集中在文字区域，说明字体确实生效。
 
+**画布里的图片**（截图、示意图）也一样内嵌进来，同样是 `<img>` 隔离文档的限制：
+外部图片加载不到，只能转成 `data:` URI 放进 `<image href>`。
+
+图片来源有两种，都会被解析：
+
+| 来源 | `.excalidraw.md` 里的形态 | 处理 |
+|---|---|---|
+| 存成库内文件 | `## Embedded Files` 段：`<fileId>: [[file-xxx.png]]` | 按文件名去 `assets/` 找，读进来 base64 |
+| 直接粘进画布 | 画布 JSON 的 `files[fileId].dataURL` | 直接用它 |
+
+代价：图片会被 base64 塞进 SVG（体积 ×1.33）。注意 `status: pending` 是正常的 ——
+它只表示 Obsidian 还没把外部图片加载成 blob，不代表数据缺失。
+
+> ⚠️ 有一种情况救不了：`## Embedded Files` 里写着 `<fileId>: markdown-image`（不是双链）。
+> 这是 Obsidian 没把图片真正存进文件的占位，画布上就是空白 —— 同步报告会点名哪个文件。
+> 修法：在 Obsidian 里把那张图删掉重新粘贴一次。
+
 ### mermaid 是怎么开起来的（踩过的坑）
 
 主题 `@sugarat/theme` 的 `package.json` 里虽然依赖了 `mermaid`、`vitepress-plugin-mermaid`、
