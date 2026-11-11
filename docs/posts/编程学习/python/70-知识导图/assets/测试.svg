@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="795.88 -519.89 1594.78 245.98" width="100%" style="height:auto;max-width:100%;border-radius:8px" font-family="system-ui,'PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+<rect x="795.88" y="-519.89" width="1594.78" height="245.98" fill="#ffffff"/>
+<rect x="1142.65" y="-435.69" width="416" height="65" fill="#ffffff" stroke="rgba(0, 0, 0, 1)" stroke-width="6"/>
+<path d="M1566.65 -405.66 L1608.89 -418.62 L1659.13 -449.47 L1702.05 -462.64" fill="none" stroke="#AD1010" stroke-width="4.65" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1884.7 -465.74 L1917.38 -469.52 L1957.38 -478.77 L1990.73 -482.62" fill="none" stroke="#AD1010" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1884.7 -464.04 L1917.38 -460.27 L1957.38 -451.02 L1990.73 -447.16" fill="none" stroke="#AD1010" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M2140.05 -446.5 L2173.4 -447.02 L2213.4 -448.27 L2247.42 -449.56" fill="none" stroke="#AD1010" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1566.65 -400.97 L1609.21 -389.25 L1659.78 -361.36 L1703.02 -349.44" fill="none" stroke="#0A5C52" stroke-width="4.65" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1885.67 -349.11 L1918.35 -356.66 L1958.35 -375.16 L1991.7 -382.87" fill="none" stroke="#0A5C52" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1885.67 -347.41 L1918.35 -347.41 L1958.35 -347.41 L1991.7 -347.41" fill="none" stroke="#0A5C52" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1885.67 -345.71 L1918.35 -338.16 L1958.35 -319.66 L1991.7 -311.95" fill="none" stroke="#0A5C52" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1134.65 -404.36 L1091.06 -410.69 L1039.47 -425.67 L995.21 -432.09" fill="none" stroke="#3914B3" stroke-width="4.65" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1134.65 -401.52 L1091.47 -392.59 L1040.3 -371.39 L996.45 -362.31" fill="none" stroke="#3B5A0C" stroke-width="4.65" stroke-linecap="round" stroke-linejoin="round"/>
+<text font-size="36" fill="#000000" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="1350.65" y="-403.19">思维导图测试：层级演示</tspan></text>
+<text font-size="28" fill="#AD1010" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="1793.38" y="-464.89">一、准备工作</tspan></text>
+<text font-size="20" fill="#AD1010" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2052.66" y="-483.39">1.1 安装脚本</tspan></text>
+<text font-size="20" fill="#AD1010" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2065.39" y="-446.39">1.2 绑定快捷键</tspan></text>
+<text font-size="17.42" fill="#AD1010" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2310.03" y="-449.78">1.2.1 冲突检查</tspan></text>
+<text font-size="28" fill="#0A5C52" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="1794.35" y="-347.41">二、生成导图</tspan></text>
+<text font-size="20" fill="#0A5C52" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2076.36" y="-384.41">2.1 标题层级模式</tspan></text>
+<text font-size="20" fill="#0A5C52" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2069.09" y="-347.41">2.2 文件夹模式</tspan></text>
+<text font-size="20" fill="#0A5C52" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="2058.17" y="-310.41">2.3 常见问题</tspan></text>
+<text font-size="28" fill="#3914B3" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="903.88" y="-433.16">三、验证清单</tspan></text>
+<text font-size="28" fill="#3B5A0C" text-anchor="middle" dominant-baseline="central" xml:space="preserve"><tspan x="933.12" y="-360.79">四、附录</tspan></text>
+</svg>

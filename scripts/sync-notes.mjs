@@ -881,9 +881,13 @@ async function buildDrawingPage(text, rel, allRelSet) {
 		imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
 	} else if (isExcalidraw) {
 		// 优先用插件导出的同名 SVG：直接引用它，不再复制一份（省一半空间）
-		const sibling = [`${base}.svg`, `${base}.excalidraw.svg`].find((cand) =>
-			allRelSet.has(path.join(dir, cand)),
-		);
+		// 名字回退：`基础知识（大纲笔记）.excalidraw.md` 对应的导出图常被命名成
+		// `基础知识.svg`（去掉末尾括号注释）。先精确匹配，再去括号试一次，
+		// 否则会退回到「自己按坐标画」的粗版 —— 线条和字体都对不上。
+		const cands = [`${base}.svg`, `${base}.excalidraw.svg`];
+		const alias = base.replace(/[（(][^）)]*[）)]\s*$/, "").trim();
+		if (alias && alias !== base) cands.push(`${alias}.svg`, `${alias}.excalidraw.svg`);
+		const sibling = cands.find((cand) => allRelSet.has(path.join(dir, cand)));
 		if (sibling) {
 			imgSrc = `./${encodeMdUrl(sibling)}`;
 		} else {
