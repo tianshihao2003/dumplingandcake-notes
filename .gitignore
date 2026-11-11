@@ -14,3 +14,18 @@ Thumbs.db
 
 # 调试时截的预览图（项目根目录下的 png 不入库；站点自己的图片放 docs/public/）
 /*.png
+
+# 大体积附件：sync 已经会挡掉（见 SKIP_ASSET_EXT / MAX_ASSET_BYTES），
+# 这里再拦一道，防止手动把教材 PDF 拖进 docs/posts 后又把仓库撑爆。
+# 教训：111MB 的 PDF 进过一次仓库，push 卡在 20% 反复超时。
+docs/posts/**/*.pdf
+docs/posts/**/*.doc
+docs/posts/**/*.docx
+docs/posts/**/*.ppt
+docs/posts/**/*.pptx
+docs/posts/**/*.xls
+docs/posts/**/*.xlsx
+docs/posts/**/*.zip
+docs/posts/**/*.7z
+docs/posts/**/*.rar
+docs/posts/**/*.exe

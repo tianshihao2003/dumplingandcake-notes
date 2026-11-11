@@ -117,6 +117,24 @@ pnpm build
 > 存到 `.excalidraw.md` 旁边并**保持同名**（`基础知识（大纲笔记）.excalidraw.md` → `基础知识（大纲笔记）.svg`）
 > → `pnpm sync`。这样站点上和 Obsidian 里一模一样，还带内嵌字体。
 
+### 哪些附件不会同步（大文件闸门）
+
+站点是笔记站，不是网盘。`sync-notes.mjs` 会在**建文件清单时**就剔掉这些，副本里也不会留：
+
+| 规则 | 内容 |
+|---|---|
+| 扩展名黑名单 | `pdf` `doc(x)` `ppt(x)` `xls(x)` `zip` `7z` `rar` `gz` `tar` `exe` `msi` `iso` `dmg` `psd` `ai` `sketch` `fig` |
+| 体积上限 | 单个资源 **> 8MB** 一律跳过（图片同理） |
+
+同步报告会打印「跳过附件：N 个（共 xx MB）」并列出文件名，别误以为同步漏了东西。
+
+> ⚠️ **为什么要有这条**（血的教训）：4 个新概念英语教材 PDF（111MB）跟着笔记一起进了仓库，
+> `git push` 卡在 `Writing objects: 20%` 反复超时 —— 858 KiB/s 下 95MB 的 pack 传不完。
+> GitHub 也警告 `初级语法.pdf is 69.71 MB`。清掉后仓库回到 MB 级，push 秒过。
+>
+> 想让某个分类页存在但里面只有 PDF，是做不到的 —— **目录里一个 `.md` 都没有，这个分类就不会生成**。
+> 要保留分类就往里放一篇笔记；PDF 用外链或图床。
+
 ### mermaid 是怎么开起来的（踩过的坑）
 
 主题 `@sugarat/theme` 的 `package.json` 里虽然依赖了 `mermaid`、`vitepress-plugin-mermaid`、
@@ -515,6 +533,31 @@ push 后到 Vercel 的 Deployments 页面看构建状态。失败了点进去看
 | `gh repo create --push` | ❌ schannel TLS 握手失败 |
 
 **结论：本机推 GitHub 一律用 `git push`，别让 `gh` 代劳推送。** 代理挂了才试直连。
+
+#### 当前的推送通道：自建 Cloudflare Worker 反代（2026-11-11 起）
+
+代理节点挂掉、直连和 SSH（22/443）都在上传 pack 时被重置，所以换成了自建反代：
+
+```
+origin = https://gh.0824.uk/p-<随机前缀>/tianshihao2003/dumplingandcake-notes.git
+```
+
+- Worker 脚本：桌面 `gh-proxy-worker.js`（改 `PREFIX` 后粘到 Cloudflare 重新 Deploy）
+- 该域名必须**单独关掉 git 全局代理**，否则 7890 会把流量又带回去：
+  ```bash
+  git config --global "http.https://gh.0824.uk.proxy" ""
+  ```
+- Worker 踩过的 bug：把 `request.method === GET` 当成「响应要不要 body」，
+  导致所有响应 **200 但 size 0**。判断响应是否无 body 只看 `HEAD / 204 / 304`。
+
+⚠️ **副作用**：remote 域名不是 `github.com`，`gh` 会报
+`none of the git remotes ... point to a known GitHub host`。要用 gh 就显式带仓库名：
+
+```bash
+gh repo view tianshihao2003/dumplingandcake-notes --json diskUsage,visibility
+```
+
+想切回直连：`git remote set-url origin https://github.com/tianshihao2003/dumplingandcake-notes.git`
 
 ### 退出码 3221226505 的自救流程
 
