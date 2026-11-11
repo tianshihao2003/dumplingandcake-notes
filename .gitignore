@@ -29,3 +29,7 @@ docs/posts/**/*.zip
 docs/posts/**/*.7z
 docs/posts/**/*.rar
 docs/posts/**/*.exe
+
+# 手写体字体原件（由 scripts/fonts-tools/prepare-fonts.py 生成，不入库）
+scripts/fonts/*.woff2
+scripts/fonts/.work/

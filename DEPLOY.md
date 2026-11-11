@@ -139,6 +139,38 @@ pnpm build
 > 想让某个分类页存在但里面只有 PDF，是做不到的 —— **目录里一个 `.md` 都没有，这个分类就不会生成**。
 > 要保留分类就往里放一篇笔记；PDF 用外链或图床。
 
+### 手绘图为什么能长得和 Obsidian 一样（字体内嵌）
+
+站点里手绘图是 `<img src="xxx.svg">`，**SVG 通过 `<img>` 加载时是隔离文档** ——
+外部 CSS、外部字体一律不生效。所以「把 font-family 写成 Excalifont，再在站点里引一份字体」
+是行不通的，字体必须**以 base64 内嵌进 SVG 自己**（官方插件导出也是这么干的）。
+
+Excalidraw 的手写体是两套：**Excalifont**（拉丁）+ **Xiaolai SC**（中文手写，LXGW 2020）。
+官方把它们拆成 216 个 woff2 分片（Xiaolai 209 + Excalifont 7，共 12MB）。
+这里的做法是：合并成单字体 → 裁到常用字 → 同步时再按「这张图实际用到的字」裁一次，
+所以每张图只多几 KB：
+
+| 文件 | 大小 | 说明 |
+|---|---|---|
+| `scripts/fonts/Xiaolai-subset.woff2` | ~1.4 MB | 合并 209 分片后裁到 GB2312 + 符号 + 笔记里的字 |
+| `scripts/fonts/Excalifont-subset.woff2` | ~43 KB | 拉丁手写体，整份保留 |
+| 生成的 `assets/xxx.svg` | +5~80 KB | 只嵌这张图用到的字 |
+
+**这两个字体文件不进仓库**（Excalifont 的 name 表写的是 "All rights reserved"，
+再分发要单独看授权），只让 SVG 里带裁剪后的字形子集。换机器或删掉了就重跑：
+
+```bash
+# 一次性，需联网；依赖 pip install fonttools brotli
+python scripts/fonts-tools/prepare-fonts.py
+```
+
+缺字体文件时 `pnpm sync` 不会报错，只会打一行 `⚠ 没找到 scripts/fonts/*.woff2`
+并退回系统字体（手绘图还能看，就是字形变印刷体）。
+
+> 验证方式（不依赖眼睛）：从生成的 SVG 里取出内嵌字体，和插件导出的 SVG 里的字体
+> 逐字比对轮廓坐标 —— 9/9 个汉字完全一致；再用 Chrome 无头截图做有/无字体对照，
+> 差异 2.78% 像素集中在文字区域，说明字体确实生效。
+
 ### mermaid 是怎么开起来的（踩过的坑）
 
 主题 `@sugarat/theme` 的 `package.json` 里虽然依赖了 `mermaid`、`vitepress-plugin-mermaid`、

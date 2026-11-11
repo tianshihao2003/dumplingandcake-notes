@@ -21,7 +21,7 @@
 //   node scripts/sync-notes.mjs --dest <目录>    换输出目录（测试用，别指到 docs/posts）
 //   node scripts/sync-notes.mjs --keep-excalidraw  连 .excalidraw.md 一起同步（默认跳过）
 import { access, copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import lzString from "lz-string";
 
 // lz-string 是 CJS 包，默认导出本身就带 decompressFromBase64
@@ -703,6 +703,69 @@ const round2 = (v) => Math.round(v * 100) / 100;
  *
  * 返回 null 表示没有可画的元素。
  */
+// 手写体字体：Excalidraw 用的是 Excalifont（拉丁）+ Xiaolai（中文手写）。
+// 站点上 SVG 是 <img> 引的，属于**隔离文档** —— 外部 CSS/字体一律不生效，
+// 所以字体只能以 data URI 内嵌进 SVG 本身（官方插件导出也是这么做的）。
+// 完整字体不入库（体积 + 授权），只放 scripts/fonts/ 下由
+// scripts/fonts-tools/prepare-fonts.py 生成的裁剪版；缺文件时自动退回系统字体。
+const HAND_FONT_STACK = "Excalifont, Xiaolai, sans-serif, 'Segoe UI Emoji'";
+const FONT_DIR = path.join(import.meta.dirname, "fonts");
+const FONT_FACES = [
+	{ family: "Xiaolai", file: "Xiaolai-subset.woff2" },
+	{ family: "Excalifont", file: "Excalifont-subset.woff2" },
+];
+let fontBuffersCache; // undefined = 未加载；null = 没有字体文件
+const fontCssCache = new Map(); // 去重后字符集 -> <style> 片段
+
+function loadFontBuffers() {
+	if (fontBuffersCache !== undefined) return fontBuffersCache;
+	const bufs = [];
+	for (const f of FONT_FACES) {
+		try {
+			bufs.push({ family: f.family, buf: readFileSync(path.join(FONT_DIR, f.file)) });
+		} catch {
+			/* 缺文件就跳过这一类 */
+		}
+	}
+	fontBuffersCache = bufs.length > 0 ? bufs : null;
+	return fontBuffersCache;
+}
+
+/** 把图里用到的字裁成极小 woff2 后内嵌进 SVG；失败就原样返回（退回系统字体） */
+async function embedHandwriteFont(svg, text) {
+	const chars = [...new Set(String(text).replace(/\s+/g, ""))].sort().join("");
+	if (!chars) return svg;
+	const bufs = loadFontBuffers();
+	if (!bufs) return svg;
+
+	let css = fontCssCache.get(chars);
+	if (css === undefined) {
+		let subsetFont;
+		try {
+			({ default: subsetFont } = await import("subset-font"));
+		} catch {
+			fontBuffersCache = null; // 没装依赖，本进程内别再试
+			return svg;
+		}
+		const faces = [];
+		for (const { family, buf } of bufs) {
+			try {
+				const out = await subsetFont(buf, chars, { targetFormat: "woff2" });
+				faces.push(
+					`@font-face{font-family:"${family}";src:url(data:font/woff2;base64,${out.toString("base64")}) format("woff2")}`,
+				);
+			} catch {
+				/* 单个字体失败不影响另一个 */
+			}
+		}
+		css = faces.length > 0 ? `<defs><style>${faces.join("")}</style></defs>` : "";
+		fontCssCache.set(chars, css);
+	}
+	if (!css) return svg;
+	// 插在根 <svg ...> 标签之后
+	return svg.replace(/<svg[^>]*>/, (m) => `${m}${css}`);
+}
+
 function excalidrawToSvg(scene) {
 	const els = (scene.elements ?? []).filter((e) => !e.isDeleted);
 	const shapes = els.filter(
@@ -734,7 +797,7 @@ function excalidrawToSvg(scene) {
 	const bg = svgColor(scene.appState?.viewBackgroundColor) ?? { hex: "#ffffff", alpha: 1 };
 	const out = [];
 	out.push(
-		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${round2(minX)} ${round2(minY)} ${round2(maxX - minX)} ${round2(maxY - minY)}" width="100%" style="height:auto;max-width:100%;border-radius:8px" font-family="system-ui,'PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif">`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${round2(minX)} ${round2(minY)} ${round2(maxX - minX)} ${round2(maxY - minY)}" width="100%" style="height:auto;max-width:100%;border-radius:8px" font-family="${HAND_FONT_STACK}">`,
 	);
 	// 铺一层画布底色：暗色主题下白底/浅底才看得清，也还原 Obsidian 里的观感
 	out.push(
@@ -897,9 +960,20 @@ async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null) {
 			if (sibling) {
 				imgSrc = `./${encodeMdUrl(sibling)}`;
 			} else {
-				const scene = readExcalidrawScene(text);
-				svgText = scene ? excalidrawToSvg(scene) : null;
-				imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
+			const scene = readExcalidrawScene(text);
+			svgText = scene ? excalidrawToSvg(scene) : null;
+			if (svgText && scene) {
+				const allText = (scene.elements ?? [])
+					.filter((e) => e.type === "text" && e.text)
+					.map((e) => e.text)
+					.join("");
+				const withFont = await embedHandwriteFont(svgText, allText);
+				if (withFont !== svgText) {
+					svgText = withFont;
+					drawingFonts++;
+				}
+			}
+			imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
 			}
 		}
 	}
@@ -968,6 +1042,7 @@ const allRelSet = new Set(allFiles.map((f) => f.rel));
 const generated = [];
 const svgSourceRels = new Set(); // 本身就是 SVG 的 .md，不能再当普通笔记渲染
 let drawingFailed = 0;
+let drawingFonts = 0; // 成功内嵌手写体的张数
 let mergedExports = 0;
 if (!args.includes("--keep-excalidraw")) {
 	const baseOf = (rel) =>
@@ -1318,6 +1393,13 @@ console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
 console.log(`  折叠callout转换: ${stat.callout} 篇`);
 if (generated.length > 0 || drawingFailed > 0) {
 	console.log(`  手绘图导 SVG  : ${generated.length} 张${drawingFailed > 0 ? `（${drawingFailed} 张失败）` : ""}`);
+	if (generated.length > 0) {
+		console.log(`  内嵌手写字体  : ${drawingFonts} / ${generated.length} 张`);
+		if (drawingFonts === 0) {
+			console.log("  ⚠ 没找到 scripts/fonts/*.woff2 → 手绘图会用系统字体，和 Obsidian 里不一样");
+			console.log("     修复：python scripts/fonts-tools/prepare-fonts.py（一次性，需联网）");
+		}
+	}
 }
 console.log(`  双链图片转换  : ${stat.wikiImg} 篇`);
 console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
