@@ -1,5 +1,5 @@
 ---
-title: vibcoding基础班
+title: "vibcoding基础班"
 date: 2026-11-05
 cover: false
 ---

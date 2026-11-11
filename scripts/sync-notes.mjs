@@ -499,6 +499,7 @@ function sanitize(text, opts = {}) {
 	}
 
 	// frontmatter 补字段
+	let titleAdded = false;
 	let dateAdded = false;
 	let coverAdded = false;
 	let hiddenAdded = false;
@@ -530,6 +531,15 @@ function sanitize(text, opts = {}) {
 			additions.push(`date: ${opts.fallbackDate}`);
 			dateAdded = true;
 		}
+		// 主题右栏「相关文章」和首页列表都要求有 title：
+		// `BlogRecommendArticle.vue` 里 `.filter((v) => !!v.meta.title)`，
+		// 没 title 的文章会被直接过滤掉（踩过：基础知识.md 有 date 没 title，
+		// 于是同目录 4 篇只显示 2 篇）。正文没有标题、frontmatter 也没写的情况，
+		// 用文件名兜底。
+		if (!getField(fmLines, "title") && opts.fallbackTitle) {
+			additions.push(`title: ${yamlStr(opts.fallbackTitle)}`);
+			titleAdded = true;
+		}
 		// 指定目录（默认「已弃用」）的笔记不进首页列表
 		if (opts.hideFromHome && !getField(fmLines, "hidden")) {
 			additions.push("hidden: true");
@@ -548,7 +558,7 @@ function sanitize(text, opts = {}) {
 		// 补一个最小可用的块，标题优先用正文第一个标题，其次用文件名。
 		head = [
 			"---",
-			`title: ${opts.fallbackTitle || "未命名"}`,
+			`title: ${yamlStr(opts.fallbackTitle || "未命名")}`,
 			`date: ${opts.fallbackDate}`,
 			"cover: false",
 			...(opts.hideFromHome ? ["hidden: true"] : []),
@@ -570,6 +580,7 @@ function sanitize(text, opts = {}) {
 		wikiImg,
 		wikiMiss,
 		pathFixed,
+		titleAdded,
 		dateAdded,
 		coverAdded,
 		hiddenAdded,
@@ -797,6 +808,11 @@ async function embedHandwriteFont(svg, text) {
 }
 
 /** 图片扩展名 -> MIME，用于把画布里的图片转成 data URI */
+/** 写进 YAML 的字符串：一律加双引号，避免标题里的冒号/井号把 frontmatter 弄坏 */
+function yamlStr(v) {
+	return `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
 /** 源文件的修改日期（本地时区，YYYY-MM-DD）：主题首页要求有 date，缺了就不显示 */
 function fileDate(file) {
 	const d = statSync(file).mtime;
@@ -1292,6 +1308,7 @@ const stat = {
 	wikiImg: 0,
 	wikiMiss: 0,
 	pathFixed: 0,
+	title: 0,
 	date: 0,
 	cover: 0,
 	hidden: 0,
@@ -1340,6 +1357,7 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 		wikiImg,
 		wikiMiss,
 		pathFixed,
+		titleAdded,
 		dateAdded,
 		coverAdded,
 		hiddenAdded,
@@ -1362,6 +1380,7 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 	if (wikiImg > 0) stat.wikiImg++;
 	if (wikiMiss > 0) stat.wikiMiss++;
 	if (pathFixed > 0) stat.pathFixed++;
+	if (titleAdded) stat.title++;
 	if (dateAdded) stat.date++;
 	if (coverAdded) stat.cover++;
 	if (hiddenAdded) stat.hidden++;
@@ -1565,6 +1584,7 @@ console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
 if (stat.wikiMiss > 0) {
 	console.log(`  ⚠ 双链图片失配: ${stat.wikiMiss} 篇（文件名在库里找不到，已原样保留）`);
 }
+console.log(`  补 title      : ${stat.title} 篇`);
 console.log(`  补 date       : ${stat.date} 篇`);
 console.log(`  补 cover      : ${stat.cover} 篇`);
 console.log(`  首页隐藏      : ${stat.hidden} 篇`);
