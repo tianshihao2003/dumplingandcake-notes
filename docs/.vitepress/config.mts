@@ -101,6 +101,8 @@ const config = defineConfig({
 	lastUpdated: false,
 	// 笔记里大量 Obsidian 风格的相对链接，指向的页面在本站不一定存在，不做死链检查
 	ignoreDeadLinks: true,
+	// 标签页图标 = 首页个人卡片的头像（/public/logo.webp，与博客 about 卡片同图）
+	head: [["link", { rel: "icon", href: "/logo.webp", type: "image/webp" }]],
 	vite: {
 		// @sugarat/theme 依赖的 vitepress-plugin-product-card，dist 里直接放的是 .vue 源码。
 		// SSR 构建若把它外部化交给 Node，Node 会以原生 ESM 加载 .vue 并报
