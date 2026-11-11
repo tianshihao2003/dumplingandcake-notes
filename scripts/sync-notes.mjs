@@ -639,38 +639,17 @@ function makeImageResolver(noteRel) {
 	return { byName, fixPath };
 }
 
-// ---- Excalidraw 手绘图 → 真思维导图 ----
+// ---- Excalidraw 手绘图 → 按原坐标导出 SVG ----
 //
-// Excalidraw 插件的 .excalidraw.md = 明文文字 + base64(LZString) 压缩的画布数据，
-// 只有装了插件才能还原成图。站点没有插件，直接渲染只会得到「一堆散装文字 + 70KB JSON」。
+// .excalidraw.md = 明文文字 + base64(LZString) 压缩的画布数据，只有装了插件才能还原成图。
+// 站点没有插件，直接渲染只会得到「一堆散装文字 + 70KB JSON」。
 //
-// 但画布数据里其实有完整的结构：元素（矩形/文字）+ 箭头绑定（startBinding → endBinding），
-// 一次一张思维导图就是「n 个节点 + n-1 条边」的一棵树。所以解析出来重新画一遍：
-//   节点 = 矩形/文字元素（矩形取它绑定的那段文字）
-//   父子 = 箭头的 start → end
-//   兄弟顺序 = 先按 y 再按 x（和画布上的视觉顺序一致）
-// 输出 mermaid mindmap —— 矢量、可搜索、能跟主题，比截图强。
-
-const EXCALIDRAW_SHAPES = new Set(["rectangle", "ellipse", "diamond"]);
-
-/** mermaid mindmap 的标签要转义：引号会截断字符串，# 会当实体起始，[] 是形状语法 */
-function escapeMindmapLabel(s) {
-	return (
-		String(s)
-			.replace(/\r?\n/g, " ")
-			// 这几个字符会破坏 mermaid 语法，用实体码换掉
-			.replace(/#/g, "#35;")
-			.replace(/"/g, "'")
-			.replace(/\[/g, "#91;")
-			.replace(/\]/g, "#93;")
-			.replace(/\(/g, "#40;")
-			.replace(/\)/g, "#41;")
-			.replace(/\{/g, "#123;")
-			.replace(/\}/g, "#125;")
-			.replace(/\s+/g, " ")
-			.trim()
-	);
-}
+// 画布数据里有全部绘制信息：每个元素的 x/y/width/height、文字颜色字号、箭头的折点。
+// 所以这里**不做重新布局**，直接按原坐标画一份 SVG —— 效果和 Obsidian 里看到的一致，
+// 只是没有 Excalidraw 的手绘抖动效果（那是它自己算的 roughjs 随机偏移，没有存进文件）。
+//
+// ⚠️ 教训：上一版用箭头绑定还原成树、再交给 mermaid 画 mindmap，
+// 结果变成缩进文字树，和放射状手绘图完全不像 —— 布局算法换掉了原图的信息。
 
 /** 从 .excalidraw.md 里取出画布 JSON；支持 compressed-json 和裸 json 两种 */
 function readExcalidrawScene(text) {
@@ -694,79 +673,230 @@ function readExcalidrawScene(text) {
 	return null;
 }
 
+/** Excalidraw 的颜色是 "#RRGGBB" / "#RRGGBBAA" / "transparent"；SVG 要拆成颜色+透明度 */
+function svgColor(raw) {
+	if (!raw || raw === "transparent") return null;
+	const m = /^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?$/.exec(raw);
+	if (m) {
+		const alpha = m[2] ? Number.parseInt(m[2], 16) / 255 : 1;
+		if (alpha === 0) return null;
+		return { hex: `#${m[1]}`, alpha };
+	}
+	return { hex: raw, alpha: 1 };
+}
+
+const escXml = (s) =>
+	String(s)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
+
+const round2 = (v) => Math.round(v * 100) / 100;
+
 /**
- * 把画布元素还原成 mermaid mindmap 文本。
- * 返回 null 表示这张图没法解析（元素为空、没有节点之类），调用方应跳过。
+ * 把 Excalidraw 画布**按原坐标**导出成 SVG。
+ *
+ * 不做「重新布局」——上一版用 mermaid mindmap 重画，出来是缩进文字树，
+ * 和手绘的放射状导图完全两个东西。这里直接用元素自带的 x/y/width/height、
+ * 文字颜色字号、箭头折点，所以效果和 Obsidian 里看到的一致（手绘粗糙感除外）。
+ *
+ * 返回 null 表示没有可画的元素。
  */
-function excalidrawToMindmap(scene, fallbackTitle) {
+function excalidrawToSvg(scene) {
 	const els = (scene.elements ?? []).filter((e) => !e.isDeleted);
-	if (els.length === 0) return null;
+	const shapes = els.filter(
+		(e) => e.type === "rectangle" || e.type === "ellipse" || e.type === "diamond",
+	);
+	const texts = els.filter((e) => e.type === "text");
+	const arrows = els.filter((e) => e.type === "arrow");
+	if (shapes.length + texts.length + arrows.length === 0) return null;
 
-	const labelOf = (el) => {
-		if (el.type === "text") return el.text;
-		const bound = els.find((e) => e.type === "text" && e.containerId === el.id);
-		return bound ? bound.text : "";
-	};
-
-	const nodes = new Map();
-	for (const el of els) {
-		// 容器里的文字归容器，不单独成节点
-		if (el.type === "text" && el.containerId) continue;
-		if (el.type !== "text" && !EXCALIDRAW_SHAPES.has(el.type)) continue;
-		nodes.set(el.id, { id: el.id, label: labelOf(el), x: el.x, y: el.y, kids: [] });
+	// 画布范围：元素自带的 bbox 已经覆盖箭头折点
+	let minX = Number.POSITIVE_INFINITY;
+	let minY = Number.POSITIVE_INFINITY;
+	let maxX = Number.NEGATIVE_INFINITY;
+	let maxY = Number.NEGATIVE_INFINITY;
+	for (const e of els) {
+		if (typeof e.x !== "number" || typeof e.y !== "number") continue;
+		minX = Math.min(minX, e.x);
+		minY = Math.min(minY, e.y);
+		maxX = Math.max(maxX, e.x + (e.width || 0));
+		maxY = Math.max(maxY, e.y + (e.height || 0));
 	}
-	if (nodes.size === 0) return null;
+	if (!Number.isFinite(minX)) return null;
+	const pad = 24;
+	minX -= pad;
+	minY -= pad;
+	maxX += pad;
+	maxY += pad;
 
-	const hasParent = new Set();
-	for (const el of els) {
-		if (el.type !== "arrow") continue;
-		const s = el.startBinding?.elementId;
-		const t = el.endBinding?.elementId;
-		if (!s || !t || !nodes.has(s) || !nodes.has(t)) continue;
-		nodes.get(s).kids.push(nodes.get(t));
-		hasParent.add(t);
+	const bg = svgColor(scene.appState?.viewBackgroundColor) ?? { hex: "#ffffff", alpha: 1 };
+	const out = [];
+	out.push(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${round2(minX)} ${round2(minY)} ${round2(maxX - minX)} ${round2(maxY - minY)}" width="100%" style="height:auto;max-width:100%;border-radius:8px" font-family="system-ui,'PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif">`,
+	);
+	// 铺一层画布底色：暗色主题下白底/浅底才看得清，也还原 Obsidian 里的观感
+	out.push(
+		`<rect x="${round2(minX)}" y="${round2(minY)}" width="${round2(maxX - minX)}" height="${round2(maxY - minY)}" fill="${bg.hex}"${bg.alpha < 1 ? ` fill-opacity="${round2(bg.alpha)}"` : ""}/>`,
+	);
+
+	// 形状
+	for (const e of shapes) {
+		const fill = svgColor(e.backgroundColor);
+		const stroke = svgColor(e.strokeColor);
+		const attrs = [
+			`x="${round2(e.x)}"`,
+			`y="${round2(e.y)}"`,
+			`width="${round2(e.width || 0)}"`,
+			`height="${round2(e.height || 0)}"`,
+			`fill="${fill ? fill.hex : "none"}"`,
+		];
+		if (fill && fill.alpha < 1) attrs.push(`fill-opacity="${round2(fill.alpha)}"`);
+		if (stroke) {
+			attrs.push(`stroke="${stroke.hex}"`, `stroke-width="${round2(e.strokeWidth || 2)}"`);
+		}
+		if (e.roundness) attrs.push(`rx="8" ry="8"`);
+		if (typeof e.opacity === "number" && e.opacity < 100) {
+			attrs.push(`opacity="${round2(e.opacity / 100)}"`);
+		}
+		const tag = e.type === "ellipse" ? "ellipse" : e.type === "diamond" ? "polygon" : "rect";
+		if (tag === "ellipse") {
+			const cx = e.x + (e.width || 0) / 2;
+			const cy = e.y + (e.height || 0) / 2;
+			out.push(
+				`<ellipse cx="${round2(cx)}" cy="${round2(cy)}" rx="${round2((e.width || 0) / 2)}" ry="${round2((e.height || 0) / 2)}"${attrs.filter((a) => !a.startsWith("x=") && !a.startsWith("y=") && !a.startsWith("width=") && !a.startsWith("height=") && !a.startsWith("rx=") && !a.startsWith("ry=")).map((a) => ` ${a}`).join("")}/>`,
+			);
+		} else if (tag === "polygon") {
+			const cx = e.x + (e.width || 0) / 2;
+			const cy = e.y + (e.height || 0) / 2;
+			const pts = [
+				[cx, e.y],
+				[e.x + (e.width || 0), cy],
+				[cx, e.y + (e.height || 0)],
+				[e.x, cy],
+			]
+				.map(([x, y]) => `${round2(x)},${round2(y)}`)
+				.join(" ");
+			out.push(
+				`<polygon points="${pts}"${attrs.filter((a) => !a.startsWith("x=") && !a.startsWith("y=") && !a.startsWith("width=") && !a.startsWith("height=") && !a.startsWith("rx=") && !a.startsWith("ry=")).map((a) => ` ${a}`).join("")}/>`,
+			);
+		} else {
+			out.push(`<rect ${attrs.join(" ")}/>`);
+		}
 	}
 
-	let roots = [...nodes.values()].filter((n) => !hasParent.has(n.id));
-	if (roots.length === 0) return null;
-	roots.sort((a, b) => a.y - b.y || a.x - b.x);
-
-	const lines = ["mindmap"];
-	let seq = 0;
-	let printed = 0;
-	const walk = (n, depth) => {
-		if (depth > 14) return; // 防环 / 防病态深图
-		lines.push(
-			`${"  ".repeat(depth + 1)}n${seq++}["${escapeMindmapLabel(n.label) || "(空)"}"]`,
+	// 箭头：points 是相对元素 x/y 的折点
+	for (const e of arrows) {
+		const pts = (e.points ?? []).map(([dx, dy]) => [
+			e.x + dx,
+			e.y + dy,
+		]);
+		if (pts.length < 2) continue;
+		const stroke = svgColor(e.strokeColor) ?? { hex: "#1e1e1e", alpha: 1 };
+		const d = pts
+			.map(([x, y], i) => `${i === 0 ? "M" : "L"}${round2(x)} ${round2(y)}`)
+			.join(" ");
+		out.push(
+			`<path d="${d}" fill="none" stroke="${stroke.hex}" stroke-width="${round2(e.strokeWidth || 2)}" stroke-linecap="round" stroke-linejoin="round"/>`,
 		);
-		printed++;
-		for (const k of [...n.kids].sort((a, b) => a.y - b.y || a.x - b.x)) walk(k, depth + 1);
-	};
-
-	if (roots.length === 1) {
-		walk(roots[0], 0);
-	} else {
-		// 多个根（画布上没连起来）：套一个虚拟根，别让 mermaid 报 "only one root"
-		lines.push(`  n${seq++}["${escapeMindmapLabel(fallbackTitle) || "思维导图"}"]`);
-		for (const r of roots) walk(r, 1);
+		// 箭头头部：只有真的设置了才画
+		if (e.endArrowhead && e.endArrowhead !== "none") {
+			const [x2, y2] = pts[pts.length - 1];
+			const [x1, y1] = pts[pts.length - 2];
+			const ang = Math.atan2(y2 - y1, x2 - x1);
+			const len = 6 + (e.strokeWidth || 2) * 2;
+			const a1 = ang + Math.PI - 0.4;
+			const a2 = ang + Math.PI + 0.4;
+			out.push(
+				`<path d="M${round2(x2)} ${round2(y2)} L${round2(x2 + Math.cos(a1) * len)} ${round2(y2 + Math.sin(a1) * len)} L${round2(x2 + Math.cos(a2) * len)} ${round2(y2 + Math.sin(a2) * len)} Z" fill="${stroke.hex}" stroke="none"/>`,
+			);
+		}
 	}
 
-	if (printed === 0) return null;
-	return lines.join("\n");
+	// 文字（最后画，保证压在箭头/形状上面）
+	for (const e of texts) {
+		if (!e.text) continue;
+		const fill = svgColor(e.strokeColor) ?? { hex: "#1e1e1e", alpha: 1 };
+		const fs = e.fontSize || 20;
+		const lh = fs * (e.lineHeight || 1.25);
+		const lines = String(e.text).split("\n");
+		const anchor =
+			e.textAlign === "left" ? "start" : e.textAlign === "right" ? "end" : "middle";
+		const x =
+			anchor === "start"
+				? e.x
+				: anchor === "end"
+					? e.x + (e.width || 0)
+					: e.x + (e.width || 0) / 2;
+		const attrs = [
+			`font-size="${round2(fs)}"`,
+			`fill="${fill.hex}"`,
+			`text-anchor="${anchor}"`,
+			`dominant-baseline="central"`,
+			`xml:space="preserve"`,
+		];
+		if (fill.alpha < 1) attrs.push(`fill-opacity="${round2(fill.alpha)}"`);
+		if (typeof e.opacity === "number" && e.opacity < 100) {
+			attrs.push(`opacity="${round2(e.opacity / 100)}"`);
+		}
+		const tspans = lines
+			.map(
+				(line, i) =>
+					`<tspan x="${round2(x)}" y="${round2(e.y + lh * (i + 0.5))}">${escXml(line)}</tspan>`,
+			)
+			.join("");
+		out.push(`<text ${attrs.join(" ")}>${tspans}</text>`);
+	}
+
+	out.push("</svg>");
+	return out.join("\n");
 }
 
 /**
- * 把一个 .excalidraw.md 变成一页真正的 markdown。
- * 文件名：`X.excalidraw.md` → `X-思维导图.md`（加后缀避免和同名的文字笔记撞车）
+ * 把一张手绘图变成一页 markdown：SVG 单独落成 `assets/<base>.svg`，页面只引用它。
+ * 不走内联 SVG —— 插件导出的 SVG 带内嵌字体（200KB+），内联进 HTML 太重，
+ * 而且让 Vue 去编译一大堆 `<style>/<path>` 没必要。
+ *
+ * 取图优先级：
+ *   1. 内容本身就是 SVG（插件"导出 SVG"后存成 .md 的那种）
+ *   2. 同目录下同名的导出文件：`X.svg` / `X.excalidraw.svg`
+ *   3. 都没有 → 用画布坐标自己画一份（excalidrawToSvg）
  */
-function buildMindmapPage(text, rel) {
-	const base = path.basename(rel).replace(/\.excalidraw\.md$/i, "");
-	const outRel = path.join(path.dirname(rel), `${base}-思维导图.md`);
-	const scene = readExcalidrawScene(text);
-	if (!scene) return null;
-	const mmd = excalidrawToMindmap(scene, base);
-	if (!mmd) return null;
-	const title = `${base}（思维导图）`;
+async function buildDrawingPage(text, rel, allRelSet) {
+	const isExcalidraw = /\.excalidraw\.md$/i.test(rel);
+	const looksSvg = /^\s*<svg[\s>]/i.test(text);
+	const base = path
+		.basename(rel)
+		.replace(/\.excalidraw\.md$/i, "")
+		.replace(/\.md$/i, "");
+	const dir = path.dirname(rel);
+	const title = `${base}（手绘图）`;
+
+	let svgText = null; // 需要我们自己落盘的内容（null = 直接引用源库里已有的 .svg）
+	let imgSrc = null; // 页面里 ![](...) 的地址
+
+	if (looksSvg) {
+		svgText = text.trim();
+		imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
+	} else if (isExcalidraw) {
+		// 优先用插件导出的同名 SVG：直接引用它，不再复制一份（省一半空间）
+		const sibling = [`${base}.svg`, `${base}.excalidraw.svg`].find((cand) =>
+			allRelSet.has(path.join(dir, cand)),
+		);
+		if (sibling) {
+			imgSrc = `./${encodeMdUrl(sibling)}`;
+		} else {
+			const scene = readExcalidrawScene(text);
+			svgText = scene ? excalidrawToSvg(scene) : null;
+			imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
+		}
+	}
+	if (!imgSrc || (svgText !== null && !svgText.startsWith("<svg"))) return null;
+	if (svgText === null && !imgSrc) return null;
+
+	const assetRel = path.join(dir, "assets", `${base}.svg`);
+	const pageRel = path.join(dir, `${base}-手绘图.md`);
 	const md = [
 		"---",
 		`title: ${title}`,
@@ -775,41 +905,59 @@ function buildMindmapPage(text, rel) {
 		"",
 		`# ${title}`,
 		"",
-		"> 由 Excalidraw 手绘图自动还原，改图请回 Obsidian 重画后重新同步。",
+		"> 手绘图由 Obsidian 插件导出（矢量，可放大），改图请回 Obsidian 重画后重新同步。",
 		"",
-		"```mermaid",
-		mmd,
-		"```",
+		`![](${imgSrc})`,
 		"",
 	].join("\n");
-	return { rel: outRel, text: md };
+	// svgText 为 null 说明用的是源库里已有的 .svg（会被 copyFile 正常复制），不需要额外落盘
+	return {
+		rel: pageRel,
+		text: md,
+		assets: svgText === null ? [] : [{ rel: assetRel, text: svgText }],
+	};
 }
 
-// .excalidraw.md 原件不直接同步（渲染出来是源码），改为生成 -思维导图.md
+// .excalidraw.md 原件不直接同步（渲染出来是源码），改为生成 -手绘图.md
 const SKIP_SUFFIX = [".excalidraw.md", ".excalidraw"];
 
-const keptFiles = allFiles.filter(
-	(f) => args.includes("--keep-excalidraw") || !SKIP_SUFFIX.some((s) => f.rel.endsWith(s)),
-);
+const allRelSet = new Set(allFiles.map((f) => f.rel));
 
 // 把每张手绘图转成一页 markdown，作为「虚拟文件」塞进列表：
 // 这样目录落地页、导航计数、残留清理都会自动把它当成正常笔记
 const generated = [];
-let mindmapFailed = 0;
+const svgSourceRels = new Set(); // 本身就是 SVG 的 .md，不能再当普通笔记渲染
+let drawingFailed = 0;
 if (!args.includes("--keep-excalidraw")) {
 	for (const f of allFiles) {
-		if (!f.rel.endsWith(".excalidraw.md")) continue;
-		const page = buildMindmapPage(await readFile(f.full, "utf8"), f.rel);
-		if (page) generated.push(page);
-		else {
-			mindmapFailed++;
-			console.log(`  [跳过] 这张手绘图解析不出节点：${f.rel}`);
+		if (!f.rel.endsWith(".md")) continue;
+		const isExcalidraw = f.rel.endsWith(".excalidraw.md");
+		let looksSvg = false;
+		if (!isExcalidraw) {
+			// 只看开头一小段，别为判断类型读 200KB
+			const head = (await readFile(f.full, "utf8")).slice(0, 200);
+			looksSvg = /^\s*<svg[\s>]/i.test(head);
+			if (!looksSvg) continue;
+		}
+		const page = await buildDrawingPage(await readFile(f.full, "utf8"), f.rel, allRelSet);
+		if (page) {
+			generated.push(page);
+			if (looksSvg) svgSourceRels.add(f.rel);
+		} else {
+			drawingFailed++;
+			console.log(`  [跳过] 这张手绘图解析不出来：${f.rel}`);
 		}
 	}
 }
+
+const keptFiles0 = allFiles.filter(
+	(f) =>
+		args.includes("--keep-excalidraw") ||
+		(!SKIP_SUFFIX.some((s) => f.rel.endsWith(s)) && !svgSourceRels.has(f.rel)),
+);
 const files = [
-	...keptFiles,
-	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text })),
+	...keptFiles0,
+	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text, assets: g.assets })),
 ];
 
 const stat = {
@@ -836,8 +984,17 @@ const titles = new Map();
 
 if (!DRY_RUN) await mkdir(DEST, { recursive: true });
 
-for (const { full, rel, text: generatedText } of files) {
+for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 	const destFile = path.join(DEST, rel);
+
+	// 生成的页面可能带附属文件（比如手绘图的 .svg），和页面一起落盘
+	if (genAssets?.length && !DRY_RUN) {
+		for (const a of genAssets) {
+			const assetFile = path.join(DEST, a.rel);
+			await mkdir(path.dirname(assetFile), { recursive: true });
+			await writeIfChanged(assetFile, a.text);
+		}
+	}
 
 	if (!rel.endsWith(".md")) {
 		if (!DRY_RUN) {
@@ -898,7 +1055,11 @@ for (const { full, rel, text: generatedText } of files) {
 // 清理副本里源目录已经删掉的残留（只动 DEST）
 if (!DRY_RUN) {
 	const existing = await walk(DEST);
-	const keep = new Set(files.map((f) => f.rel));
+	// 生成的附属文件（手绘图 .svg）也要保，否则会被当成"源库已删"清理掉
+	const keep = new Set([
+		...files.map((f) => f.rel),
+		...generated.flatMap((g) => (g.assets ?? []).map((a) => a.rel)),
+	]);
 	// 源目录树里还存在的目录集合：它们的落地页 index.md 是脚本生成的，必须留
 	const sourceDirs = new Set();
 	for (const { rel } of files) {
@@ -1053,8 +1214,8 @@ console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
 console.log(`  脱敏本机路径  : ${stat.redacted} 篇`);
 console.log(`  折叠callout转换: ${stat.callout} 篇`);
-if (generated.length > 0 || mindmapFailed > 0) {
-	console.log(`  手绘图转导图  : ${generated.length} 张${mindmapFailed > 0 ? `（${mindmapFailed} 张解析失败）` : ""}`);
+if (generated.length > 0 || drawingFailed > 0) {
+	console.log(`  手绘图导 SVG  : ${generated.length} 张${drawingFailed > 0 ? `（${drawingFailed} 张失败）` : ""}`);
 }
 console.log(`  双链图片转换  : ${stat.wikiImg} 篇`);
 console.log(`  图片路径修正  : ${stat.pathFixed} 篇`);
