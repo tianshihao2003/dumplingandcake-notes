@@ -1,0 +1,20 @@
+import { ssrRenderAttrs } from "vue/server-renderer";
+import { useSSRContext } from "vue";
+import { _ as _export_sfc } from "./plugin-vue_export-helper.1tPrXgE0.js";
+const __pageData = JSON.parse('{"title":"VSCode 问题与技巧","description":"VSCode 使用中遇到的问题和技巧","frontmatter":{"title":"VSCode 问题与技巧","published":"2026-09-14T00:00:00.000Z","tags":["vscode"],"description":"VSCode 使用中遇到的问题和技巧","image":"https://img.tsh520.cn/file/blog/post-covers/tips-vscode-tips.webp","date":"2026-09-14T00:00:00.000Z","cover":false},"headers":[],"relativePath":"posts/开发工具/VSCode/问题与技巧.md","filePath":"posts/开发工具/VSCode/问题与技巧.md"}');
+const _sfc_main = { name: "posts/开发工具/VSCode/问题与技巧.md" };
+function _sfc_ssrRender(_ctx, _push, _parent, _attrs, $props, $setup, $data, $options) {
+  Object.assign(_attrs, { "data-pagefind-body": true, "data-pagefind-meta": "date:1789344000000" });
+  _push(`<div${ssrRenderAttrs(_attrs)}><h1 id="vscode-问题与技巧" tabindex="-1">VSCode 问题与技巧 <a class="header-anchor" href="#vscode-问题与技巧" aria-label="Permalink to &quot;VSCode 问题与技巧&quot;">​</a></h1><h2 id="快捷键按了没反应" tabindex="-1">快捷键按了没反应 <a class="header-anchor" href="#快捷键按了没反应" aria-label="Permalink to &quot;快捷键按了没反应&quot;">​</a></h2><h3 id="常见原因排查" tabindex="-1">常见原因排查 <a class="header-anchor" href="#常见原因排查" aria-label="Permalink to &quot;常见原因排查&quot;">​</a></h3><table tabindex="0"><thead><tr><th>原因</th><th>判断方法</th><th>解决办法</th></tr></thead><tbody><tr><td>输入法抢键</td><td>切英文输入法再试</td><td>关闭中文输入法的快捷键拦截，或给VSCode单独配英文输入模式</td></tr><tr><td>快捷键冲突</td><td><code>Ctrl + K Ctrl + S</code> 搜索按键，看有无警告图标</td><td>修改冲突的快捷键</td></tr><tr><td>焦点不在编辑器</td><td>检查快捷键的 <code>when</code> 条件</td><td>用鼠标点击编辑器区域再试</td></tr><tr><td>插件接管按键</td><td>刚装插件后失灵</td><td>在快捷键面板搜索插件名，禁用或修改</td></tr><tr><td>笔记本F键问题</td><td>需要按住 <code>Fn</code> 键</td><td>检查Fn锁定状态（<code>Fn + Esc</code> 锁定）</td></tr></tbody></table><h3 id="when-条件不满足" tabindex="-1">When 条件不满足 <a class="header-anchor" href="#when-条件不满足" aria-label="Permalink to &quot;When 条件不满足&quot;">​</a></h3><p>VSCode 很多快捷键有 <code>when</code> 条件限制，比如 <code>workbench.editor.activeGroupCenter</code> 表示焦点必须在编辑器中心标签页。焦点在侧边栏、终端、通知栏时，这些快捷键不会响应（静默不执行）。</p><p><strong>验证方法</strong>：在快捷键面板（<code>Ctrl + K Ctrl + S</code>）搜索按键，查看 <code>when</code> 列，确认当前焦点状态是否匹配。</p><h2 id="快捷键面板使用" tabindex="-1">快捷键面板使用 <a class="header-anchor" href="#快捷键面板使用" aria-label="Permalink to &quot;快捷键面板使用&quot;">​</a></h2><p><code>Ctrl + K</code> 再按 <code>Ctrl + S</code> 打开快捷键面板：</p><ul><li>搜索框支持按按键名称搜索（如输入 <code>ctrl+d</code>）</li><li>每行右侧显示 <code>when</code> 条件，可查看何时生效</li><li>右键可修改、禁用、导出快捷键配置</li><li>出现黄色警告图标表示有冲突</li></ul><h2 id="python-格式化程序" tabindex="-1">Python 格式化程序 <a class="header-anchor" href="#python-格式化程序" aria-label="Permalink to &quot;Python 格式化程序&quot;">​</a></h2><h3 id="问题表现" tabindex="-1">问题表现 <a class="header-anchor" href="#问题表现" aria-label="Permalink to &quot;问题表现&quot;">​</a></h3><p>按 <code>Shift + Alt + F</code> 格式化Python代码时弹窗提示：<code>没有安装用于&quot;python&quot;文件的格式化程序</code></p><h3 id="解决方案" tabindex="-1">解决方案 <a class="header-anchor" href="#解决方案" aria-label="Permalink to &quot;解决方案&quot;">​</a></h3><p>推荐安装 <strong>Black Formatter</strong>（最流行的Python格式化工具）：</p><ul><li>点击弹窗的「安装格式化程序...」→ 选择 Black Formatter</li><li>或手动安装：<code>Ctrl + Shift + X</code> → 搜索 <code>Black Formatter</code> → 安装 <code>ms-python.black-formatter</code></li></ul><p>安装后按 <code>Shift + Alt + F</code> 即可格式化Python代码。</p></div>`);
+}
+const _sfc_setup = _sfc_main.setup;
+_sfc_main.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("posts/开发工具/VSCode/问题与技巧.md");
+  return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
+};
+const _____ = /* @__PURE__ */ _export_sfc(_sfc_main, [["ssrRender", _sfc_ssrRender]]);
+export {
+  __pageData,
+  _____ as default
+};

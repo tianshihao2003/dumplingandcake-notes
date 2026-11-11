@@ -518,6 +518,18 @@ function sanitize(text, opts = {}) {
 			additions.push("cover: false");
 			coverAdded = true;
 		}
+		// 主题首页的列表要求文章必须有 date：
+		// `BlogList.vue` 里是 `v.meta.date && v.meta.title && !v.meta.hidden`。
+		// 少了 date 就会静默消失（踩过：9 篇没 frontmatter + 4 篇有 frontmatter 但没 date）。
+		// 这里用源文件的修改时间兜底，等于「最近改过的排前面」。
+		// 注意要排除上面 FIELD_ALIAS 刚刚补出来的 date（published → date），
+		// 否则会写出两个 date 键，YAML 直接报 duplicated mapping key。
+		const willHaveDate =
+			!!getField(fmLines, "date") || additions.some((a) => a.startsWith("date:"));
+		if (!willHaveDate && opts.fallbackDate) {
+			additions.push(`date: ${opts.fallbackDate}`);
+			dateAdded = true;
+		}
 		// 指定目录（默认「已弃用」）的笔记不进首页列表
 		if (opts.hideFromHome && !getField(fmLines, "hidden")) {
 			additions.push("hidden: true");
@@ -531,6 +543,20 @@ function sanitize(text, opts = {}) {
 				...headLines.slice(-1),
 			].join("\n");
 		}
+	} else if (opts.fallbackDate) {
+		// 完全没有 frontmatter 的笔记：主题不认为它是「文章」，首页也不会列。
+		// 补一个最小可用的块，标题优先用正文第一个标题，其次用文件名。
+		head = [
+			"---",
+			`title: ${opts.fallbackTitle || "未命名"}`,
+			`date: ${opts.fallbackDate}`,
+			"cover: false",
+			...(opts.hideFromHome ? ["hidden: true"] : []),
+			"---",
+		].join("\n");
+		dateAdded = true;
+		coverAdded = true;
+		if (opts.hideFromHome) hiddenAdded = true;
 	}
 
 	return {
@@ -771,6 +797,13 @@ async function embedHandwriteFont(svg, text) {
 }
 
 /** 图片扩展名 -> MIME，用于把画布里的图片转成 data URI */
+/** 源文件的修改日期（本地时区，YYYY-MM-DD）：主题首页要求有 date，缺了就不显示 */
+function fileDate(file) {
+	const d = statSync(file).mtime;
+	const p = (n) => String(n).padStart(2, "0");
+	return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 const imageIssues = []; // 画布图片解析失败的原因，进报告
 
 const IMAGE_MIME = {
@@ -1032,7 +1065,7 @@ function excalidrawToSvg(scene, resolveImage) {
  *   2. 同目录下同名的导出文件：`X.svg` / `X.excalidraw.svg`
  *   3. 都没有 → 用画布坐标自己画一份（excalidrawToSvg）
  */
-async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null) {
+async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null, dateStr = null) {
 	const isExcalidraw = /\.excalidraw\.md$/i.test(rel);
 	const looksSvg = /^\s*<svg[\s>]/i.test(text);
 	const base = path
@@ -1091,6 +1124,8 @@ async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null) {
 	const md = [
 		"---",
 		`title: ${title}`,
+		// 生成页没有源 md，日期取画布文件的修改时间；缺了 date 首页不会列它
+		...(dateStr ? [`date: ${dateStr}`] : []),
 		"cover: false",
 		"---",
 		"",
@@ -1190,6 +1225,7 @@ if (!args.includes("--keep-excalidraw")) {
 			f.rel,
 			allRelSet,
 			svgMdExport.get(f.rel) ?? null,
+			fileDate(f.full),
 		);
 		if (page) generated.push(page);
 		else {
@@ -1200,7 +1236,13 @@ if (!args.includes("--keep-excalidraw")) {
 
 	// 没有对应画布的「SVG 内容 md」→ 自己单独开一页
 	for (const f of svgMdOwnPage) {
-		const page = await buildDrawingPage(await readFile(f.full, "utf8"), f.rel, allRelSet);
+		const page = await buildDrawingPage(
+			await readFile(f.full, "utf8"),
+			f.rel,
+			allRelSet,
+			null,
+			fileDate(f.full),
+		);
 		if (page) {
 			generated.push(page);
 			svgSourceRels.add(f.rel);
@@ -1307,6 +1349,9 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 		),
 		resolveImage: imgResolver.byName,
 		fixImagePath: imgResolver.fixPath,
+		// 缺 date 时用源文件的修改时间兜底（生成的手绘图没有源文件，日期在生成时就写好）
+		fallbackDate: full ? fileDate(full) : undefined,
+		fallbackTitle: extractTitle(normalized, rel),
 	});
 
 	if (zeroWidth > 0) stat.zeroWidth++;

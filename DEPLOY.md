@@ -87,8 +87,23 @@ pnpm build
 
 同步脚本顺带做**隐私脱敏**：把 `C:\Users\xxx\...`、`/Users/xxx/...` 里的用户名段换成 `你的用户名`。
 
-**哪些目录不上首页**：`HIDDEN_FROM_HOME = ["已弃用", "回收站"]`，按**顶层目录名前缀**匹配，
+**哪些目录不上首页**：`HIDDEN_FROM_HOME = ["已弃用", "回收站", "学习文档"]`，按**顶层目录名前缀**匹配，
 命中的笔记会被补上 `hidden: true`（主题据此从首页列表里过滤掉），但页面本身仍可直接访问。
+
+**上首页还需要 `date`**：主题 `BlogList.vue` 的条件是
+`v.meta.date && v.meta.title && !v.meta.top && !v.meta.hidden` —— **没有 date 会被静默丢弃**。
+同步时这样兜底：
+
+| 情况 | 处理 |
+|---|---|
+| 有 `published` 没 `date` | 复制成 `date`（FIELD_ALIAS） |
+| 有 frontmatter 但没两者 | 补 `date: <源文件修改日期>` |
+| **完全没有 frontmatter** | 合成一个：`title`（正文首个标题，没有就用文件名）+ `date` + `cover: false` |
+
+> 踩过的坑：一开始只在「有 frontmatter」时补，结果 9 篇压根没 frontmatter 的笔记
+> 加 4 篇有 frontmatter 没 date 的（含 3 张自动生成的手绘图）从首页消失，却没有任何报错。
+> 另外补 date 时要避开 `published → date` 别名已经加过的那条，否则会写出两个 `date` 键，
+> YAML 直接 `duplicated mapping key` 把构建搞挂。
 
 > 为什么用前缀而不是全名：目录名里的 emoji 是不可靠的 —— `🗑️` 其实是
 > U+1F5D1 + 变体选择符 U+FE0F 两个码点，写死全名很容易对不上。
