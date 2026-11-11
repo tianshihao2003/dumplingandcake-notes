@@ -863,7 +863,7 @@ function excalidrawToSvg(scene) {
  *   2. 同目录下同名的导出文件：`X.svg` / `X.excalidraw.svg`
  *   3. 都没有 → 用画布坐标自己画一份（excalidrawToSvg）
  */
-async function buildDrawingPage(text, rel, allRelSet) {
+async function buildDrawingPage(text, rel, allRelSet, exportedSvgText = null) {
 	const isExcalidraw = /\.excalidraw\.md$/i.test(rel);
 	const looksSvg = /^\s*<svg[\s>]/i.test(text);
 	const base = path
@@ -880,20 +880,27 @@ async function buildDrawingPage(text, rel, allRelSet) {
 		svgText = text.trim();
 		imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
 	} else if (isExcalidraw) {
-		// 优先用插件导出的同名 SVG：直接引用它，不再复制一份（省一半空间）
-		// 名字回退：`基础知识（大纲笔记）.excalidraw.md` 对应的导出图常被命名成
-		// `基础知识.svg`（去掉末尾括号注释）。先精确匹配，再去括号试一次，
-		// 否则会退回到「自己按坐标画」的粗版 —— 线条和字体都对不上。
-		const cands = [`${base}.svg`, `${base}.excalidraw.svg`];
-		const alias = base.replace(/[（(][^）)]*[）)]\s*$/, "").trim();
-		if (alias && alias !== base) cands.push(`${alias}.svg`, `${alias}.excalidraw.svg`);
-		const sibling = cands.find((cand) => allRelSet.has(path.join(dir, cand)));
-		if (sibling) {
-			imgSrc = `./${encodeMdUrl(sibling)}`;
-		} else {
-			const scene = readExcalidrawScene(text);
-			svgText = scene ? excalidrawToSvg(scene) : null;
+		// 最高优先：同目录里那份「内容是 SVG 的 .md」（导出图被存成了 md 后缀，
+		// 常见命名 Xsvg.md）。已经由调用方配对好并读进来了，直接落盘成 assets/X.svg。
+		if (exportedSvgText && /^\s*<svg[\s>]/i.test(exportedSvgText)) {
+			svgText = exportedSvgText.trim();
 			imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
+		} else {
+			// 其次：插件导出的同名 SVG：直接引用它，不再复制一份（省一半空间）
+			// 名字回退：`基础知识（大纲笔记）.excalidraw.md` 对应的导出图常被命名成
+			// `基础知识.svg`（去掉末尾括号注释）。先精确匹配，再去括号试一次，
+			// 否则会退回到「自己按坐标画」的粗版 —— 线条和字体都对不上。
+			const cands = [`${base}.svg`, `${base}.excalidraw.svg`];
+			const alias = base.replace(/[（(][^）)]*[）)]\s*$/, "").trim();
+			if (alias && alias !== base) cands.push(`${alias}.svg`, `${alias}.excalidraw.svg`);
+			const sibling = cands.find((cand) => allRelSet.has(path.join(dir, cand)));
+			if (sibling) {
+				imgSrc = `./${encodeMdUrl(sibling)}`;
+			} else {
+				const scene = readExcalidrawScene(text);
+				svgText = scene ? excalidrawToSvg(scene) : null;
+				imgSrc = `./assets/${encodeMdUrl(base)}.svg`;
+			}
 		}
 	}
 	if (!imgSrc || (svgText !== null && !svgText.startsWith("<svg"))) return null;
@@ -961,21 +968,59 @@ const allRelSet = new Set(allFiles.map((f) => f.rel));
 const generated = [];
 const svgSourceRels = new Set(); // 本身就是 SVG 的 .md，不能再当普通笔记渲染
 let drawingFailed = 0;
+let mergedExports = 0;
 if (!args.includes("--keep-excalidraw")) {
+	const baseOf = (rel) =>
+		path.basename(rel).replace(/\.excalidraw\.md$/i, "").replace(/\.md$/i, "");
+
+	// 先扫一遍：哪些 .md 的内容其实是整段 SVG（Obsidian「导出 SVG」后被存成 md 的那种，
+	// 常见命名 Xsvg.md）。如果它和同目录的 X.excalidraw.md 是同一张图，就把它当成
+	// 那张画布的导出图，**不再单独开一页** —— 否则会出现两张一模一样的手绘图，
+	// 而且画布那页用的是脚本自绘的近似版，反而不如导出图准。
+	const svgMdOwnPage = [];
+	/** canvas rel -> 该画布的导出 SVG 文本 */
+	const svgMdExport = new Map();
 	for (const f of allFiles) {
-		if (!f.rel.endsWith(".md")) continue;
-		const isExcalidraw = f.rel.endsWith(".excalidraw.md");
-		let looksSvg = false;
-		if (!isExcalidraw) {
-			// 只看开头一小段，别为判断类型读 200KB
-			const head = (await readFile(f.full, "utf8")).slice(0, 200);
-			looksSvg = /^\s*<svg[\s>]/i.test(head);
-			if (!looksSvg) continue;
+		if (!f.rel.endsWith(".md") || f.rel.endsWith(".excalidraw.md")) continue;
+		// 只看开头一小段，别为判断类型读 300KB
+		const head = (await readFile(f.full, "utf8")).slice(0, 200);
+		if (!/^\s*<svg[\s>]/i.test(head)) continue;
+
+		const base = baseOf(f.rel);
+		const alias = base.replace(/[-_ ]?svg$/i, "").trim();
+		const canvasRel = path.join(path.dirname(f.rel), `${alias}.excalidraw.md`);
+		if (alias && alias !== base && allRelSet.has(canvasRel)) {
+			svgMdExport.set(canvasRel, await readFile(f.full, "utf8"));
+			svgSourceRels.add(f.rel); // 别当普通笔记复制过去
+			mergedExports++;
+			console.log(`  [合并] ${f.rel} → ${path.basename(canvasRel)} 的导出图`);
+			continue;
 		}
+		svgMdOwnPage.push(f);
+	}
+
+	// 画布页：优先用配对到的导出图，其次同名 .svg，最后才按坐标自绘
+	for (const f of allFiles) {
+		if (!f.rel.endsWith(".excalidraw.md")) continue;
+		const page = await buildDrawingPage(
+			await readFile(f.full, "utf8"),
+			f.rel,
+			allRelSet,
+			svgMdExport.get(f.rel) ?? null,
+		);
+		if (page) generated.push(page);
+		else {
+			drawingFailed++;
+			console.log(`  [跳过] 这张手绘图解析不出来：${f.rel}`);
+		}
+	}
+
+	// 没有对应画布的「SVG 内容 md」→ 自己单独开一页
+	for (const f of svgMdOwnPage) {
 		const page = await buildDrawingPage(await readFile(f.full, "utf8"), f.rel, allRelSet);
 		if (page) {
 			generated.push(page);
-			if (looksSvg) svgSourceRels.add(f.rel);
+			svgSourceRels.add(f.rel);
 		} else {
 			drawingFailed++;
 			console.log(`  [跳过] 这张手绘图解析不出来：${f.rel}`);
