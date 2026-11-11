@@ -21,7 +21,7 @@
 //   node scripts/sync-notes.mjs --dest <目录>    换输出目录（测试用，别指到 docs/posts）
 //   node scripts/sync-notes.mjs --keep-excalidraw  连 .excalidraw.md 一起同步（默认跳过）
 import { access, copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import lzString from "lz-string";
 
 // lz-string 是 CJS 包，默认导出本身就带 decompressFromBase64
@@ -921,6 +921,35 @@ async function buildDrawingPage(text, rel, allRelSet) {
 // .excalidraw.md 原件不直接同步（渲染出来是源码），改为生成 -手绘图.md
 const SKIP_SUFFIX = [".excalidraw.md", ".excalidraw"];
 
+// 站点是笔记站，不是网盘。资源文件（图片之外的附件）超过这个大小就不复制：
+// GitHub 单文件建议 ≤50MB，而 100MB 级的包在差链路上根本推不上去
+// （实测：4 个教材 PDF 共 111MB，push 卡在 20% 反复超时）。
+const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+// 这些扩展名一律不复制：教材 PDF、课件、压缩包、安装包……站点上用不到，
+// 进 Git 只会把仓库撑大，而且笔记里通常也没有引用它们。
+const SKIP_ASSET_EXT = new Set([
+	".pdf",
+	".doc",
+	".docx",
+	".ppt",
+	".pptx",
+	".xls",
+	".xlsx",
+	".zip",
+	".7z",
+	".rar",
+	".gz",
+	".tar",
+	".exe",
+	".msi",
+	".iso",
+	".dmg",
+	".psd",
+	".ai",
+	".sketch",
+	".fig",
+]);
+
 const allRelSet = new Set(allFiles.map((f) => f.rel));
 
 // 把每张手绘图转成一页 markdown，作为「虚拟文件」塞进列表：
@@ -950,11 +979,27 @@ if (!args.includes("--keep-excalidraw")) {
 	}
 }
 
-const keptFiles0 = allFiles.filter(
-	(f) =>
-		args.includes("--keep-excalidraw") ||
-		(!SKIP_SUFFIX.some((s) => f.rel.endsWith(s)) && !svgSourceRels.has(f.rel)),
-);
+// 被跳过的附件（PDF/Office/超大文件），报告里列出来，免得以为同步丢了东西
+const skippedAssets = [];
+
+const keptFiles0 = allFiles.filter((f) => {
+	// excalidraw 开关只管 excalidraw，附件闸门是独立的一条，不受它影响
+	const isExcalidrawLike =
+		SKIP_SUFFIX.some((s) => f.rel.endsWith(s)) || svgSourceRels.has(f.rel);
+	if (isExcalidrawLike && !args.includes("--keep-excalidraw")) return false;
+
+	// 附件闸门放在**建清单**这一步，而不是复制那一步：
+	// 清单同时决定「谁要同步」和「残留清理时谁能留下」。
+	// 只在复制时跳过的话，副本里已经存在的 PDF 永远清不掉。
+	if (f.rel.endsWith(".md")) return true;
+	const ext = path.extname(f.rel).toLowerCase();
+	const size = statSync(f.full).size;
+	if (SKIP_ASSET_EXT.has(ext) || size > MAX_ASSET_BYTES) {
+		skippedAssets.push({ rel: f.rel, size });
+		return false;
+	}
+	return true;
+});
 const files = [
 	...keptFiles0,
 	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text, assets: g.assets })),
@@ -1209,6 +1254,14 @@ if (!DRY_RUN) {
 
 console.log(`${DRY_RUN ? "[dry-run] " : ""}源 ${SRC}`);
 console.log(`  同步文件      : ${stat.copied} / ${stat.total}`);
+if (skippedAssets.length > 0) {
+	const mb = skippedAssets.reduce((s, a) => s + a.size, 0) / 1048576;
+	console.log(`  跳过附件      : ${skippedAssets.length} 个（共 ${mb.toFixed(1)} MB）`);
+	for (const a of skippedAssets.slice(0, 5)) {
+		console.log(`     - ${(a.size / 1048576).toFixed(1)}MB  ${a.rel}`);
+	}
+	if (skippedAssets.length > 5) console.log(`     …另外 ${skippedAssets.length - 5} 个`);
+}
 console.log(`  删零宽字符    : ${stat.zeroWidth} 篇`);
 console.log(`  转义尖括号    : ${stat.escaped} 篇`);
 console.log(`  改图片尺寸    : ${stat.img} 篇`);
