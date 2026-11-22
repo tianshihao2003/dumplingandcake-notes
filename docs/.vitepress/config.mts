@@ -101,6 +101,12 @@ const config = defineConfig({
 	lastUpdated: false,
 	// 笔记里大量 Obsidian 风格的相对链接，指向的页面在本站不一定存在，不做死链检查
 	ignoreDeadLinks: true,
+	markdown: {
+		// VitePress 自带 markdown-it-attrs：行尾的 `{...}` 会被当成 HTML 属性。
+		// 笔记里的 `- 集合名 = {元素1，元素2，元素3}` 因此编译成非法 JS，构建直接失败。
+		// 笔记从不使用 {#id}/{.class} 语法，直接关掉这个规则。
+		config: (md) => md.core.ruler.disable("curly_attributes"),
+	},
 	// 标签页图标 = 首页个人卡片的头像（/public/logo.webp，与博客 about 卡片同图）
 	head: [["link", { rel: "icon", href: "/logo.webp", type: "image/webp" }]],
 	vite: {

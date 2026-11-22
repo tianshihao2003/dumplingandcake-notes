@@ -1294,6 +1294,9 @@ const files = [
 	...keptFiles0,
 	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text, assets: g.assets })),
 ];
+// 超过体积上限的图片不进副本，但笔记里的引用还在；VitePress 解析不到资源会直接构建失败。
+// 同步时把这类引用换成文字（只按文件名判断，和图片双链的解析口径一致）。
+const skippedAssetNames = new Set(skippedAssets.map((a) => path.basename(a.rel)));
 
 const stat = {
 	total: files.length,
@@ -1348,7 +1351,7 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 	titles.set(rel, extractTitle(normalized, rel));
 	const imgResolver = makeImageResolver(rel);
 	const {
-		text,
+		text: sanitizedText,
 		zeroWidth,
 		escapedBlocks,
 		imgFixed,
@@ -1371,6 +1374,23 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 		fallbackDate: full ? fileDate(full) : undefined,
 		fallbackTitle: extractTitle(normalized, rel),
 	});
+
+	// 超大图片被闸门挡掉后，把正文里对它的引用改成文字，否则构建会因找不到资源而失败
+	const text =
+		skippedAssetNames.size === 0
+			? sanitizedText
+			: transformOutsideCode(sanitizedText, (line) =>
+					line.replace(MD_IMG, (whole, alt, url) => {
+						let name = url;
+						try {
+							name = decodeURIComponent(url);
+						} catch {}
+						name = path.basename(name);
+						return skippedAssetNames.has(name)
+							? `*（图片已跳过：${name}，超过大小上限）*`
+							: whole;
+					}),
+				);
 
 	if (zeroWidth > 0) stat.zeroWidth++;
 	if (escapedBlocks > 0) stat.escaped++;

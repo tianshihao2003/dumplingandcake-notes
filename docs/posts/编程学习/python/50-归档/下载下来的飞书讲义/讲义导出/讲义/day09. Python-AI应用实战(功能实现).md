@@ -326,21 +326,21 @@ if __name__ == '__main__':
 
 代码编写完毕后，我们就可以启动服务来做一个测试了。 我们可以先打开Swagger接口文档（`http://localhost:8000/docs`），进行测试。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-czPQLnze.png)
+![[day09-Python-AI应用实战(功能实现)-czPQLnze.png]]
 
 通过接口测试，我们可以看到数据已经可以正常查询出来了，说明我们的接口开发的说没有问题的，接下来，我们再直接来打开前端页面进行联调测试。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cr8RcnZd.png)
+![[day09-Python-AI应用实战(功能实现)-cr8RcnZd.png]]
 
 最终，我们可以看到进入项目后，自动帮我们创建了一个新的会话，并在页面中展示出了这个会话的名称 。 当然在服务端，我们也可以看到在项目的sessions目录下，多了一个json文件，这个json文件就是当前会话信息的存储文件。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cR3v4npb.png)
+![[day09-Python-AI应用实战(功能实现)-cR3v4npb.png]]
 
 ## 与AI交互
 
 ### 分析
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cMRcXn9n.png)
+![[day09-Python-AI应用实战(功能实现)-cMRcXn9n.png]]
 
 创建完会话之后，我们就可以与AI大模型交互了，如果说默认选中的伴侣信息不能满足我们的需求，我们可以在伴侣信息栏去做调整即可，然后就可以在下方的输入框中输入要提问的问题。
 

@@ -19,7 +19,7 @@ date: 2026-11-21
 
 **思考：如下页面的轮播图，每一个图片轮播一遍后，就停止了吗？**
 
-![](./static/day02-Python-流程控制-cwPBvnjc.gif)
+*（图片已跳过：day02-Python-流程控制-cwPBvnjc.gif，超过大小上限）*
 
 # 条件判断
 
