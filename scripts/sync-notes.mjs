@@ -102,7 +102,7 @@ function getField(fmLines, key) {
 	return null;
 }
 
-/** 取文章标题：frontmatter title > 文件名（去掉 01- 这类序号） */
+/** 取文章标题：frontmatter title > 文件名（保留 01- 这类序号） */
 function extractTitle(text, rel) {
 	const lines = text.split("\n");
 	const fm = splitFrontmatter(lines);
@@ -110,7 +110,7 @@ function extractTitle(text, rel) {
 		const t = getField(lines.slice(1, fm.end), "title");
 		if (t) return t;
 	}
-	const fromFile = path.basename(rel, ".md").replace(/^\d+[-_.]\s*/, "");
+	const fromFile = path.basename(rel, ".md");
 	// 文件名本身没有语义（INDEX / _errors 这类内部页）才退回正文第一个标题
 	if (/^(INDEX|_)/i.test(fromFile)) {
 		const h1 = lines.find((l) => /^#\s+\S/.test(l));
