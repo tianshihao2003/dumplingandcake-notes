@@ -9,7 +9,13 @@ sidebar: true
 
 # 80-练习题
 
-共 2 篇
+共 3 篇
+
+## 子分类
+
+- [作业题](<./作业题/>)
+
+## 文章
 
 - [AttributeError: 'FuelCar' object has no …](<./05-面向对象.md>)
 - [出题方法](<./出题方法.md>)

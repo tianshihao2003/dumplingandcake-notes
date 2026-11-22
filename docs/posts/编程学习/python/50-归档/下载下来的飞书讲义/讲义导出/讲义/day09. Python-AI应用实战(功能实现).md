@@ -26,7 +26,7 @@ date: 2026-11-21
 
 准备前端程序的运行环境，需要将资料中准备的前端程序的运行环境(`nginx-ai-partner.zip`)，解压到一个**没有中文不带空格的目录**下。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cczZMnmb.png)
+![[day09-Python-AI应用实战(功能实现)-cczZMnmb.png]]
 
 解压到一个**没有中文不带空格的目录**下。
 
@@ -37,18 +37,18 @@ date: 2026-11-21
 - 停止：
   - 方式一：（在Nginx解压目录下，打开cmd，执行命令 `nginx.exe -s stop`）
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-c6xTgnue.png)
+![[day09-Python-AI应用实战(功能实现)-c6xTgnue.png]]
 
   - 方式二：（在任务管理器中找到对应的nginx进程，直接右键结束进程）
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cvF5knLg.png)
+![[day09-Python-AI应用实战(功能实现)-cvF5knLg.png]]
 
 > [!tip] 🍀
 > **提示：这个案例的前端Nginx服务，并不会开机自动启动，因此需要每次电脑关机重新打开后，要启动这个Nginx。**
 
 前端服务启动完毕后，我们就可以直接在浏览器地址栏来访问前端页面了。 直接访问：`http://localhost:88`
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cR4uDnXe.png)
+![[day09-Python-AI应用实战(功能实现)-cR4uDnXe.png]]
 
 ### 服务端环境准备
 
@@ -56,7 +56,7 @@ date: 2026-11-21
 
 ![](./static/day09-Python-AI应用实战%28功能实现%29-cvpDvnAf.png)
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cw0UrnYd.png)
+![[day09-Python-AI应用实战(功能实现)-cw0UrnYd.png]]
 
 一旦我们选择创建的是一个 `FastAPI` 项目，那么IDE会自动帮我们安装 `fastapi`**、**`uvicorn` 的依赖库，并且自动给我们创建好 `FastAPI`实例，准备好样例代码，如下：
 
@@ -192,11 +192,11 @@ if __name__ == '__main__':
 
 代码编写完毕后，我们就可以启动服务来做一个测试了。 我们可以先打开Swagger接口文档（`http://localhost:8000/docs`），进行测试。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cjzsGnle.png)
+![[day09-Python-AI应用实战(功能实现)-cjzsGnle.png]]
 
 通过接口测试，我们可以看到数据已经可以正常查询出来了，说明我们的接口开发的说没有问题的，接下来，我们再直接来打开前端页面进行联调测试。
 
-![](./static/day09-Python-AI应用实战%28功能实现%29-cOtJ3nuh.png)
+![[day09-Python-AI应用实战(功能实现)-cOtJ3nuh.png]]
 
 最终，我们可以看到预设的模板全部可以正常加载并展示出来。
 

@@ -5,14 +5,16 @@ obj_token: G49ZdHZWpoq8CvxHlOHcIyVmnzf
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/PI4Zwgf5Ai77WokfXFOcRvaYnRd
-edited_at: "1786326346"
-exported_at: "2026-11-21T13:24:18.742Z"
+edited_at: "1795316368"
+exported_at: "2026-11-22T03:16:25.678Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-22
 ---
 # 作业一：优先完成课程中案例的所有代码【必做】
 
-# 作业二：基于FastAPI完成书籍管理系统开发【选做】
+# 作业二: 预习day10
+
+# 作业三：基于FastAPI完成书籍管理系统开发【选做-自习时间可以尝试做一下】
 
 ## 需求
 
