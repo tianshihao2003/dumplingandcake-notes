@@ -17,5 +17,5 @@ sidebar: true
 
 ## 文章
 
-- [AttributeError: 'FuelCar' object has no …](<./05-面向对象.md>)
+- [面向对象](<./05-面向对象.md>)
 - [出题方法](<./出题方法.md>)
