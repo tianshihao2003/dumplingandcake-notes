@@ -1,0 +1,113 @@
+---
+title: "网络协议与FastAPI"
+date: 2026-11-21
+cover: false
+---
+- 网络协议与 FastAPI
+  - Web 应用三大组成
+    - 前端：布局、渲染、交互
+      - HTML 结构
+      - CSS 表现
+      - JavaScript 动作
+    - 服务端：业务逻辑
+      - Django / Flask / `FastAPI`
+    - 数据库：MySQL
+    - HTTP：数据传输规则
+    - AI 大模型：DeepSeek
+  - 网络基础
+    - IP
+      - IPv4：32 位，十进制四段，`0~255`
+      - IPv6：128 位，解决地址不足
+      - `127.0.0.1`：本机回环地址
+      - `localhost`：本机域名，等价
+    - 域名
+      - IP 不便记忆
+      - DNS 做域名与 IP 映射
+      - 流程：域名 → DNS 查 IP → 访问服务器
+    - 端口
+      - `0-65535`，标识运行中的程序
+      - HTTP 默认 `80`
+      - HTTPS 默认 `443`
+  - HTTP 协议
+    - 定义：`Hyper Text Transfer Protocol`
+    - 请求报文
+      - 请求行：方式 + 路径 + 协议
+        - GET：参数在请求行，长度受限
+        - POST：参数在请求体，协议层无限制
+      - 请求头：`key: value`
+        - 无状态 → 头里带身份与期望
+        - Host
+        - User-Agent
+        - Accept / Accept-Language / Accept-Encoding
+        - Content-Type / Content-Length
+      - 空行：标记请求头结束
+      - 请求体：存请求参数
+    - 响应报文
+      - 响应行：版本 + 状态码 + 描述
+        - 200 成功
+        - 400 参数错误
+        - 404 资源不存在
+        - 500 服务器错误
+      - 响应头
+        - `Content-Type`
+        - `Content-Length`
+        - `Content-Encoding`
+        - `Cache-Control`
+        - `Set-Cookie`
+      - 空行：标记响应头结束
+      - 响应体：响应数据
+  - 大模型 API
+    - 必填参数
+      - `model`
+      - `messages`
+    - 可选参数
+      - `stream`：流式输出
+      - `reasoning_effort`：推理强度
+      - `thinking`：思考模式
+    - messages 三种角色
+      - system：设定人设
+      - user：用户输入
+      - assistant：模型回复
+    - 会话记忆
+      - 模型无状态，历史靠客户端拼接
+      - 缺点：Token 膨胀
+      - 优化：滑窗截断
+      - 优化：摘要压缩
+      - 优化：RAG 检索
+    - 依赖管理
+      - `pip`：官方包管理
+      - `uv`：更快，兼容 pip
+      - `uv add` / `uv remove`
+    - 调用代码
+      - `OpenAI(api_key, base_url)`
+      - `chat.completions.create`
+      - key 放环境变量
+  - FastAPI
+    - 特点：现代、快速、高性能
+    - 基于类型提示
+    - 入门四步
+      - `uv add fastapi uvicorn`
+      - `app = FastAPI()`
+      - `@app.get("/路径")`
+      - `uvicorn 模块:实例 --reload`
+    - 装饰器：不改原函数加功能
+    - Pydantic
+      - 继承 `BaseModel`
+      - 类型注解定义属性
+      - 自动校验、转换、序列化
+      - 构造必须关键字传参
+      - 可选属性给默认值
+    - Swagger 文档
+      - 路径 `/docs`
+      - 基于 OpenAPI 自动生成
+      - `title` / `description` / `version`
+      - `summary` / `tags` / `response_model`
+    - 异步编程
+      - 同步：阻塞、等待、串行
+      - 异步：非阻塞、并发
+      - 进程：独立资源
+      - 线程：干活的最小单位
+      - 协程：用户态，遇 I/O 让出
+      - `async def` + `await`
+      - `asyncio.gather` 并发调度
+      - 协程函数不 await 不执行

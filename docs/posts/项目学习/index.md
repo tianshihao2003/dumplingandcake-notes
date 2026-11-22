@@ -8,9 +8,10 @@ date: false
 
 # 项目学习
 
-共 6 篇
+共 8 篇
 
 ## 子分类
 
 - [AstrBot](<./AstrBot/>)
 - [Hello算法](<./Hello算法/>)
+- [RuoYi AI](<./RuoYi AI/>)

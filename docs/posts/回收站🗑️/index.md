@@ -4,12 +4,25 @@ hidden: true
 recommend: false
 cover: false
 date: false
-sidebar: true
 ---
 
 # 回收站🗑️
 
-共 11 篇
+共 253 篇
+
+## 子分类
+
+- [Java笔记本](<./Java笔记本/>)
+- [JavaWeb学习笔记](<./JavaWeb学习笔记/>)
+- [LangChain学习笔记](<./LangChain学习笔记/>)
+- [MySQL数据库](<./MySQL数据库/>)
+- [MySQL学习笔记](<./MySQL学习笔记/>)
+- [Obsidian](<./Obsidian/>)
+- [Python学习笔记](<./Python学习笔记/>)
+- [电脑使用](<./电脑使用/>)
+- [学习方法](<./学习方法/>)
+
+## 文章
 
 - [2027事业单位备考·单周计划表 v2（W1–W3）](<./2027事业单位备考单周计划表-v2-W1-W3.md>)
 - [2027事业单位备考·单周计划表 v3（W1–W3）](<./2027事业单位备考单周计划表-v3-W1-W3.md>)

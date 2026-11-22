@@ -1,0 +1,345 @@
+---
+title: "day06. Python-面向对象"
+node_token: FT54wbINViozxOkN1H7cqafInzf
+obj_token: Er35daxcyolioNxp83scynOdnEd
+obj_type: docx
+space_id: ""
+url: https://wcn4b8bw7lqr.feishu.cn/wiki/FT54wbINViozxOkN1H7cqafInzf
+edited_at: "1795051398"
+exported_at: "2026-11-21T13:24:18.020Z"
+cover: false
+date: 2026-11-21
+---
+## 掌握课堂案例/代码【必做】
+
+## 在今日课堂代码案例【学生管理系统】基础上，完成新功能的补充
+
+采用面向对象思想
+
+```
+功能7：
+    统计班级成绩：统计班级语文、数学、英语成绩的最高分、最低分、平均分，以及语文、数学、英语最高分和     最低分的学员姓名。 打印结果
+```
+
+## 图书管理系统开发
+
+```python
+"""
+【需求说明】
+1. 业务背景
+   使用面向对象思想，开发一个图书管理系统，对图书信息进行统一管理，
+   支持添加、修改、删除、查询单本、查询所有等功能。
+
+2. 涉及到的类
+   2.1 Book（图书类）
+       - 实例属性：书名(title)、作者(author)、价格(price)、库存(stock)
+       - 方法：
+           * __init__：初始化方法，创建图书对象时设置所有属性
+           * __repr__：返回图书的字符串表示，格式为：
+               "书名: xxx | 作者: xxx | 价格: xxx | 库存: xxx"
+
+   2.2 BookSystem（图书管理系统类）
+       - 类属性：system_name（系统名称）、system_version（系统版本号）
+       - 实例属性：book_dict（用于存放所有图书对象的字典）   【 提示: 字典类型 {"书名1": book对象, "书名2": book对象} 】
+       - 方法：
+           * __init__：初始化方法，创建一个空的 book_dict
+           * add_book：添加一本新图书
+           * update_book：修改指定图书的信息
+           * delete_book：删除指定图书
+           * query_book：查询指定图书
+           * list_books：展示所有图书
+           * run：显示菜单并循环接收用户操作
+
+3. 业务规则
+   3.1 添加图书时：
+       - 依次输入书名、作者、价格、库存
+       - 书名不能重复（已存在则提示并返回）
+       - 价格必须大于 0，库存必须大于等于 0，否则提示并返回
+   3.2 修改图书时：
+       - 输入要修改的书名
+       - 若不存在则提示"未找到该图书"
+       - 找到后依次输入新的作者、价格、库存，并更新
+   3.3 删除图书时：
+       - 输入要删除的书名
+       - 若不存在则提示"未找到该图书"
+   3.4 查询图书时：
+       - 输入书名进行精确查询
+   3.5 展示所有图书时：
+       - 遍历 book_dict 中维护的书籍信息，依次输出每一本图书的信息
+
+4. 菜单
+       1. 添加图书   2. 修改图书   3. 删除图书
+       4. 查询指定图书  5. 查询所有图书  6. 退出系统
+"""
+```
+
+> [!tip] 🍀
+> 与课上的案例代码是类似的，可以参照实现。
+
+## 拓展作业-选做-不讲、可问  【有点难度-可借助答案完成】
+
+### 需求
+
+基于面向对象的编程思想完成如下系统开发
+
+- 需求：某社区图书馆需要开发一个简单的图书管理系统。系统需要支持会员登录、图书借阅、图书归还等功能。系统中有两种类型的会员：普通会员和VIP会员，他们的借书权限不同。你需要使用**面向对象编程**的思想，设计并实现这个图书管理系统。
+  - **核心功能：**
+    - 会员登录：会员通过账号和密码登录系统
+    - 借书：会员可以借阅库存中有余量的图书，输入图书的编号后，就可以借阅图书
+    - 还书：会员可以归还借阅的图书，输入图书编号后，就可以归还该图书
+    - 查看我的借阅：展示当前会员已经借阅的图书列表，展示出书籍的编号、书名
+    - 退出系统
+  - **借阅规则：**
+    - 普通会员最多可借3本
+    - VIP会员最多可借 6+VIP等级 本 （VIP等级，默认为1）
+  - **注意：**
+    - 登录成功（卡号和密码均正确）后，才可以访问该系统
+    - 图书库存不足，或当前会员借书数量达到最大借书数量，不能再借新书
+
+- 图书系统中的提供的已有数据：
+  - books: 表示系统中的图书信息
+  - members: 表示系统中的已注册过的会员信息
+
+```json
+books = [
+   {"book_id": "1001", "title": "Python 教程", "author": "Python", "total_num": 5},
+   {"book_id": "1002", "title": "C++ 教程", "author": "C++", "total_num": 3},
+   {"book_id": "1003", "title": "Java 教程", "author": "Java", "total_num": 2},
+   {"book_id": "1004", "title": "C 教程", "author": "C", "total_num": 1},
+   {"book_id": "1005", "title": "JavaScript 教程", "author": "JavaScript", "total_num": 4}
+]
+
+members = [
+   {"member_id": "N001", "name": "张三", "password": "668001"},
+   {"member_id": "N002", "name": "李四", "password": "668002"},
+   {"member_id": "N003", "name": "王五", "password": "668003"},
+   {"member_id": "V001", "name": "赵六", "password": "669001", "vip_level": 1},
+   {"member_id": "V002", "name": "孙七", "password": "669002", "vip_level": 2},
+   {"member_id": "V003", "name": "周八", "password": "669003", "vip_level": 3},
+   {"member_id": "V004", "name": "吴九", "password": "669004", "vip_level": 4}
+]
+```
+
+### 分析
+
+我们拿到需求之后，首先要分析一下在当前系统开发中会涉及到哪些数据模型，也就是哪些类，然后再考虑类中有哪些数据、有哪些方法。
+
+- 首先，图书管理系统中，核心功能就是图书借阅、归还图书，那么在借阅、归还的时候，都是根据图书的编号操作的，而且查看我的借阅时，还需要将图书的信息展示出来。所以，这里必然会涉及到一个图书类 - Book。
+
+- 而在进行图书借阅时，首先需要会员先登录才可以，通过账号和密码登录到系统之后，才可以进行书籍的借阅及归还，而且不同的会员借阅书籍的数量限制也不一样，分为普通会员 和 VIP会员。所以，这里我们可以将会员的基本信息，封装到会员类中 - Member。 然后针对于，普通会员 和 VIP会员，可以再单独声明两个Member类的子类，分别是：普通会员类 - NormalMember 与 VIP会员类 - VipMember ，这样就可以把所有会员共有的一些属性和功能（方法）都统一定义在父类中，简化我们的代码书写。
+
+- 还需要声明一个类，就是图书管理系统类 - LibrarySystem，包括登录、借书、还书、查看借阅 这些功能，都是图书管理系统这个类中的功能。
+
+### 代码实现
+
+- 书籍类`Book`:
+
+```python
+"""
+基于面向对象的编程思想完成如下系统开发
+- 需求：某社区图书馆需要开发一个简单的图书管理系统。系统需要支持会员登录、图书借阅、图书归还等功能。系统中有两种类型的会员：普通会员和VIP会员，他们的借书权限不同。你需要使用面向对象编程的思想，设计并实现这个图书管理系统。
+  - 核心功能：
+    - 会员登录：会员通过账号和密码登录系统
+    - 借书：会员可以借阅库存中有余量的图书，输入图书的编号后，就可以借阅图书 (借阅前, 先将所有图书信息展示出来)
+    - 还书：会员可以归还借阅的图书，输入图书编号后，就可以归还该图书 (还书前, 先将当前已借阅的图书信息展示出来)
+    - 查看我的借阅：展示当前会员已经借阅的图书列表，展示出书籍的编号、书名
+  - 借阅规则：
+    - 普通会员最多可借3本
+    - VIP会员最多可借 6+VIP等级 本 （VIP等级，默认为1）
+  - 注意：
+    - 登录成功（卡号和密码均正确）后，才可以访问该系统
+    - 图书库存不足，或当前会员借书数量达到最大借书数量，不能再借新书
+"""
+# 书籍类
+class Book:
+    def __init__(self, book_id, title, author, total_num):
+        self.book_id = book_id      # 书籍编号
+        self.title = title          # 书籍标题
+        self.author = author        # 作者
+        self.total_num = total_num  # 总数量
+        self.__available_num = total_num    # 可用数量
+
+    def decrease_stock(self): # 借阅书籍时, 扣减库存
+        if self.__available_num > 0:
+            self.__available_num -= 1
+            return True
+        return False
+
+    def increase_stock(self): # 归还书籍时, 增加库存
+        self.__available_num += 1
+
+    def get_available_num(self): # 获取可用数量
+        return self.__available_num
+```
+
+- 会员类`Member`：
+
+```python
+
+# 会员类
+class Member:
+    def __init__(self, member_id, name, password):
+        self.member_id = member_id      # 会员卡号
+        self.name = name                # 会员姓名
+        self.__password = password      # 会员密码
+        self.__borrowed_books = []      # 借阅书籍列表
+    
+    def get_password(self):
+        return self.__password
+
+    def get_borrowed_books(self):
+        return self.__borrowed_books
+
+    # 获取会员最大借阅数量(需要在子类中实现)
+    def get_max_books(self) -> int:
+        pass
+    
+    def borrow_book(self, book: Book):  # 借阅书籍
+        # 判断当前会员借阅数量是否达到最大限制
+        if len(self.__borrowed_books) >= self.get_max_books():
+            print("借阅失败，您的借阅数量已达到最大限制！")
+            return False
+
+        # 判断书籍是否可借阅
+        if book.decrease_stock():
+            self.__borrowed_books.append(book)
+            print(f"{self.name} 已成功借阅图书 {book.title}")
+            return True
+        else:
+            print(f"借阅失败，图书 {book.title} 已被借完！")
+            return False
+
+    def return_book(self, book: Book): # 归还书籍
+        # 判断当前会员是否借阅了该书籍
+        if book in self.__borrowed_books:
+            # 还书
+            book.increase_stock()
+            self.__borrowed_books.remove(book)
+            print(f"{self.name} 已成功归还图书 {book.title}")
+        else:
+            print(f"归还失败，您没有借阅图书 {book.title}")
+
+# 普通会员类
+class NormalMember(Member):
+    def get_max_books(self) -> int:
+        return 3
+
+# VIP会员类
+class VIPMember(Member):
+    def __init__(self, member_id, name, password, vip_level):
+        super().__init__(member_id, name, password)
+        self.vip_level = vip_level          # 会员等级
+
+    def get_max_books(self) -> int:
+        return 6 + self.vip_level
+```
+
+- 图书管理系统`LibrarySystem`：
+
+```python
+# 图书馆管理系统
+class LibrarySystem:
+    def __init__(self):
+        self.books = {
+            "1001": Book("1001", "《Python 教程》", "王林", 5),
+            "1002": Book("1002", "《C++ 教程》", "李慕婉", 3),
+            "1003": Book("1003", "《Java 教程》", "莫厉海", 2),
+            "1004": Book("1004", "《C 教程》", "三毛", 1),
+            "1005": Book("1005", "《JavaScript 教程》", "张三", 4)
+        }
+        self.members = {
+            "N001": NormalMember("N001", "张三", "668001"),
+            "N002": NormalMember("N002", "李四", "668002"),
+            "N003": NormalMember("N003", "王五", "668003"),
+            "V001": VIPMember("V001", "赵六", "669001", 1),
+            "V002": VIPMember("V002", "孙七", "669002", 2),
+            "V003": VIPMember("V003", "周八", "669003", 3),
+            "V004": VIPMember("V004", "吴九", "669004", 4)
+        }
+        self.current_member: Member|None = None     # 当前登录会员
+
+    def login(self):    # 登录
+        while True:
+            print("\n【登录】")
+            member_id = input("请输入会员卡号: ")
+            password = input("请输入会员密码: ")
+
+            # 判断会员卡号是否存在
+            if member_id not in self.members:
+                print("登录失败，会员卡号不存在！")
+                continue
+
+            # 判断密码是否正确
+            member = self.members[member_id]
+            if member.get_password() == password:
+                print(f"登录成功, 欢迎您, {member.name}")
+                self.current_member = member
+                return True
+            else:
+                print("登录失败，密码错误！")
+                continue
+
+    def handle_borrow_book(self):  # 借阅图书
+        # 1. 展示出当前图书馆的图书列表
+        for book in self.books.values():
+            print(f"编号: {book.book_id}, 标题: {book.title}, 作者: {book.author}, 总数: {book.total_num}, 可用: {book.get_available_num()}")
+
+        # 2. 获取用户输入的图书编号, 执行借书操作
+        book_id = input("请输入要借阅的图书编号: ")
+        if book_id not in self.books:
+            print("借阅失败，图书编号不存在！")
+            return
+        self.current_member.borrow_book(self.books[book_id])
+
+    def handle_return_book(self):  # 归还图书
+        # 1. 展示出当前会员的借阅列表
+        borrowed_books = self.current_member.get_borrowed_books()
+        print("【已经借阅的图书列表:】")
+        for book in borrowed_books:
+            print(f"编号: {book.book_id}, 标题: {book.title}")
+
+        # 2. 获取用户输入的图书编号, 执行还书操作
+        book_id = input("请输入图书的编号: ")
+        for book in borrow_books:
+            if book.book_id == book_id: # 如果借阅过这本书 , 还书
+                self.current_member.return_book(book)
+                print("还书成功~")
+                return
+        
+        print("您输入的编号有误!")
+
+    def show_borrowed_books(self):  # 查看借阅
+        borrowed_books = self.current_member.get_borrowed_books()
+        if len(borrowed_books) > 0:
+            print("【已经借阅的图书列表:】")
+            for book in borrowed_books:
+                print(f"编号: {book.book_id}, 标题: {book.title}")
+        else:
+            print("您没有借阅任何图书！")
+
+    def run(self):  # 运行系统
+        if self.login():
+            while True:
+                print("\n1. 借阅图书")
+                print("2. 归还图书")
+                print("3. 查看借阅")
+                print("4. 退出系统")
+
+                choice = input("请选择操作(1-4): ")
+                match choice:
+                    case "1":
+                        self.handle_borrow_book()
+                    case "2":
+                        self.handle_return_book()
+                    case "3":
+                        self.show_borrowed_books()
+                    case "4":
+                        print("退出系统, Bye Bye ~")
+                        break
+                    case _:
+                        print("无效的选项，请重新选择！")
+
+if __name__ == "__main__":
+    library_system = LibrarySystem()
+    library_system.run()
+```
