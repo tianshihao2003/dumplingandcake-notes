@@ -17,6 +17,18 @@ const blogTheme = getThemeConfig({
 	// 搜索：默认开启 pagefind 离线全文搜索
 	// search: false,
 
+	// 右侧「相关文章」：先按文件名（00-、01-…）升序，同名再按日期从新到旧
+	recommend: {
+		sort: (a, b) => {
+			const name = (p) => decodeURIComponent(p.route.split("/").pop() ?? "");
+			const byName = name(a).localeCompare(name(b), "zh");
+			if (byName !== 0) return byName;
+			const at = a.meta.date ? +new Date(a.meta.date) : 0;
+			const bt = b.meta.date ? +new Date(b.meta.date) : 0;
+			return bt - at;
+		},
+	},
+
 	// 关闭公告弹窗（默认模板带一个，这里不需要）
 	popover: false,
 });
