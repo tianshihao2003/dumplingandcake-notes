@@ -5,11 +5,15 @@ obj_token: OBXfdWLU5ok19fxCPtGcHzh1nwh
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/Xx1Yw6cxFiuHgpkZQX2cpdMtnHf
-edited_at: "1786326346"
-exported_at: "2026-11-21T13:24:19.547Z"
+edited_at: "1795440413"
+exported_at: "2026-11-24T10:10:27.660Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
+# 再回顾一下《AI智能伴侣》案例的逻辑
+
+** 必须理解透彻**
+
 # 完成如下SQL练习
 
 测试数据准备:
@@ -125,5 +129,3 @@ SQL需求:
 
 -- 29. 查询性别为女 , 职位为班主任的员工信息, 并且根据入职时间升序排序, 入职时间相同, 再按照薪资降序排序
 ```
-
-# 再回顾一下《AI智能伴侣》案例的逻辑

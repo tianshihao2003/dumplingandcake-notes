@@ -5,10 +5,10 @@ obj_token: QSvRd6YyZoEaOexdCcncHKDVnJd
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/PXYpwXif0izG8okbSnRcv5h1nU1
-edited_at: "1788002381"
-exported_at: "2026-11-21T13:24:22.587Z"
+edited_at: "1795440292"
+exported_at: "2026-11-24T10:10:28.196Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 ```sql
 -- 1. 插入数据, 员工信息：张明明，男，薪资12000，职位讲师

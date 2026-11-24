@@ -8,14 +8,12 @@ date: false
 
 # 编程学习
 
-共 116 篇
+共 118 篇
 
 ## 子分类
 
-- [Git](<./Git/>)
 - [langchain4j](<./langchain4j/>)
 - [python](<./python/>)
-- [文档收藏](<./文档收藏/>)
 
 ## 文章
 

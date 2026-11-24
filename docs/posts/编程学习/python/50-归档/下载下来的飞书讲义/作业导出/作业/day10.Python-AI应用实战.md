@@ -5,11 +5,21 @@ obj_token: QRwxdQHcdoTKUcxAijhc3XdCnTb
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/YYcrwBI6OiZMPGky7JncTSzwntd
-edited_at: "1786326346"
-exported_at: "2026-11-21T13:24:19.300Z"
+edited_at: "1795514803"
+exported_at: "2026-11-24T10:10:27.663Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
+# 作业一:
+
+## (1)完成课堂上AI智能伴侣接口开发
+
+## (2)完成AI智能伴侣异常处理器定义
+
+## (3)完成日志的优化
+
+# 作业二: SQL建表语句练习
+
 ```sql
 -- ==========================================
 -- SQL 建表语句作业题（共 3 题）
@@ -22,9 +32,9 @@ date: 2026-11-21
 --   2. stu_no      学号，字符串（最长 20），非空 且 唯一
 --   3. name        姓名，字符串（最长 20），非空
 --   4. age         年龄，整型，可为空
---   5. gender      性别，固定长度 1 个字符，默认值 '男'
+--   5. gender      性别，字符串，默认值 '男'
 --   6. class_name  班级，字符串（最长 30），非空
---   7. phone       手机号，字符串（固定11位），唯一
+--   7. phone       手机号，字符串（，唯一
 --   8. 表注释：'学生表'
 
 -- 第 2 题：员工表 employee
@@ -35,7 +45,7 @@ date: 2026-11-21
 --   4. gender      性别，固定长度 1 个字符，默认值 '男'
 --   5. department  部门，字符串（最长 30），非空，默认值 '未分配'
 --   6. position    职位，字符串（最长 30），非空
---   7. hire_date   入职日期，可为空
+--   7. hire_date   入职日期，可为空    datetime
 --   8. salary      薪资（单位：元，整型），可为空
 --   9. status      在职状态，字符串（最长 10），默认值 '在职'
 --   10. email      邮箱，字符串（最长 50），唯一

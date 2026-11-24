@@ -9,7 +9,7 @@ sidebar: true
 
 # 作业
 
-共 23 篇
+共 24 篇
 
 ## 子分类
 
@@ -28,4 +28,5 @@ sidebar: true
 - [day09.Python-AI应用实战](<./day09.Python-AI应用实战.md>)
 - [day10.Python-AI应用实战](<./day10.Python-AI应用实战.md>)
 - [day11.Python-AI应用实战](<./day11.Python-AI应用实战.md>)
+- [day12 Python-AI应用实战](<./day12 Python-AI应用实战.md>)
 - [作业参考答案](<./作业参考答案.md>)

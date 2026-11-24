@@ -1,5 +1,5 @@
 ---
-title: 文档收藏
+title: AI
 hidden: true
 recommend: false
 cover: false
@@ -7,8 +7,10 @@ date: false
 sidebar: true
 ---
 
-# 文档收藏
+# AI
 
 共 1 篇
 
-- [vibcoding基础班](<./vibcoding基础班.md>)
+## 子分类
+
+- [DeepSeekHarness](<./DeepSeekHarness/>)

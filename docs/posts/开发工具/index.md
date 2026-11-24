@@ -8,11 +8,11 @@ date: false
 
 # 开发工具
 
-共 6 篇
+共 7 篇
 
 ## 子分类
 
-- [DeepSeekHarness](<./DeepSeekHarness/>)
-- [GitHubDesktop](<./GitHubDesktop/>)
+- [AI](<./AI/>)
+- [Git](<./Git/>)
 - [PyCharm](<./PyCharm/>)
 - [VSCode](<./VSCode/>)

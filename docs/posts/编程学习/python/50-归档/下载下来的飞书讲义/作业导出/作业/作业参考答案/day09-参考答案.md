@@ -5,25 +5,20 @@ obj_token: VuRud5d19osBh8xgrNRctDHcnKb
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/OrQwwatoOiAcl2knTQccFi7xnkh
-edited_at: "1786326349"
-exported_at: "2026-11-21T13:24:22.239Z"
+edited_at: "1795413568"
+exported_at: "2026-11-24T10:10:28.021Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 ```python
 import os
 import json
 from typing import Any
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 # 实例化FastAPI
 app = FastAPI(title="书籍管理系统", description="书籍管理系统的练习案例", version="V0.1")
-
-# 静态文件挂载
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ==================== Pydantic数据模型 ====================
 class ApiResponse(BaseModel):
@@ -40,15 +35,7 @@ class BookModel(BaseModel):
     total_pages: int    # 书籍总页数
     price: float        # 书籍价格
 
-# ==================== FastAPI 实例 ====================
-
 # ==================== API接口-操作函数(绑定路径与函数) ====================
-# 1. 访问首页 ("static/index.html") ---------> http://localhost:8000/
-@app.get("/")
-def root():
-    print("访问首页")
-    return FileResponse("static/index.html")
-
 # 2. 查询全部书籍 --> 请求参数、路径、请求方式、响应数据 ， 参照接口文档 【逻辑： 加载 data/books.json 中的数据, 组装并返回】
 @app.get("/api/books")
 def load_books() -> ApiResponse:
@@ -56,7 +43,7 @@ def load_books() -> ApiResponse:
 
     # 判断文件是否存在
     if not os.path.exists("data/books.json"):
-        return ApiResponse(code=500, message="数据文件不存在")
+        return ApiResponse(code=200, message="数据文件不存在")
 
     # 读取文件
     with open("data/books.json", "r", encoding="utf-8") as f:
