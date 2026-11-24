@@ -1,0 +1,137 @@
+---
+tags:
+  - 日志
+date: 2026-11-19
+cover: false
+title: "Boss直聘技术记录"
+---
+
+- 01
+	- 技术
+	- Java
+	- MySQL
+	- Spring
+	- Spring Ai Alibaba
+	- Langchain4j
+	- 分布式
+	- 微服务架构
+	- Reids
+	- 数据库的索引设计与分区策略
+	- 熟悉Elasticsearch、Clickhouse、Kafka技术栈。
+	- 具备 Vue 相关技术基础和使用经验。
+	- 了解数据可视化工具(如ELK Stack)或自动化部署工具(Docker/K8S）。
+	- 参与过开源数据工具贡献。
+- 02
+	- Java
+	- MySQL
+	- MyBatis
+	- Python
+	- AI应用开发
+	- SpringCloud
+	- MySQL/TDSQL
+	- 掌握Redis、ES等NOSQL数据库和Kafka等消息中间件；
+- 03
+	- Java
+	- MySQL
+- 04
+	- Java
+	- MySQL
+	- MyBatis
+	- Redis
+	- Spring
+	- Vibe Coding / AI 辅助开发（Claude Code、Codex、Cursor）
+	- 分布式开发基础
+	- 消息队列
+	- 事务、缓存、幂等、并发控制及数据一致性
+	- 架构设计经验
+	- 后端 + 全栈成长方向
+- 05
+	- Java
+	- C++ / C
+	- Python
+	- Spring、SpringBoot、SpringCloud
+	- MyBatis
+	- Hibernate
+	- MySQL
+	- Oracle
+	- MongoDB
+	- Redis
+	- HBase
+	- Kafka
+	- 微服务架构、分布式经验
+	- 云计算经验
+	- 架构设计经验
+	- 团队管理经验
+	- 熟练在 Linux 上维护部署服务
+- 06
+	- Java
+	- Spring
+	- SpringCloud
+	- Redis
+	- 架构设计经验
+	- AI Coding 经验（研发 harness 工具）
+	- IO、多线程、集合等基础框架
+	- 常用设计模式
+	- 充电交易 / 资金链路、高并发稳定性
+	- 端到端 Owner 意识
+- 07
+	- Java
+	- MySQL
+	- Spring
+	- AI 编程能力（Vibe Coding）
+	- Claude、ChatGPT、Cursor、GitHub Copilot
+	- AI 幻觉治理、代码校验与优化
+	- 可信数据空间核心系统
+	- 隐私计算、数据沙箱、区块链确权、访问控制
+	- 数据安全法、个人信息保护法合规
+- 08
+	- Java / Python / C / C++ / PHP / C# / Go
+	- MySQL
+	- Spring
+	- 微服务、高并发、分布式
+	- 大数据量、低访问时延
+	- SVN、Git
+	- 部署运维、系统高可用
+	- 前端开发经验（优先）
+- 09
+	- Java
+	- JVM
+	- 并发
+	- Spring Boot / Spring Cloud / Spring AI
+	- MySQL
+	- Redis
+	- MQ
+	- Dubbo
+	- Oracle
+	- 微服务、分布式
+	- 分库分表、缓存、任务调度
+	- 智能体 / AI 中台 / 图片巡检 / RAG 知识库
+	- 大模型工程化集成（自研封装、结构化输出、提示词管理、RAG 切片与量化评估）
+	- vLLM / Ollama 部署排障
+	- Agent 基本落地方式
+	- CI/CD、代码审查、自动化测试
+	- 团队管理 / 技术负责人经验
+- 10
+	- Java
+	- Python
+	- MySQL
+	- Nginx
+	- XR 智能体平台、代码生成平台
+	- 生成式 AI / 大模型原理
+	- Dify、Coze、百炼等智能体平台
+	- Mem0、MemGPT 记忆框架
+	- LangGraph、Langchain 等 Agent 调用框架
+	- 算法工程背景（优先）
+- 11
+	- Java
+	- MySQL
+	- MyBatis
+	- Spring
+	- SpringMVC
+	- Hibernate
+	- 大数据经验
+	- IO/NIO、多线程、设计模式、通信协议
+	- JVM 原理、性能优化
+	- Tomcat、MQ、Kafka
+	- 单元测试、接口与开发技术文档
+	- 代码规范、工程化开发标准
