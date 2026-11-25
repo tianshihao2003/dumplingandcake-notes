@@ -1,5 +1,5 @@
 ---
-title: 70-知识导图
+title: 知识导图
 hidden: true
 recommend: false
 cover: false
@@ -7,11 +7,12 @@ date: false
 sidebar: true
 ---
 
-# 70-知识导图
+# 知识导图
 
-共 18 篇
+共 19 篇
 
-- [00-Mermaid](<./00-Mermaid.md>)
+- [Drawing 2026-11-25 15.43.12（手绘图）](<./Drawing 2026-11-25 15.43.12-手绘图.md>)
+- [MySQL数据库的操作](<./MySQL数据库的操作.md>)
 - [01-基础知识（手绘图）](<./01-基础知识-手绘图.md>)
 - [01-基础知识](<./01-基础知识.md>)
 - [02-流程控制（手绘图）](<./02-流程控制-手绘图.md>)

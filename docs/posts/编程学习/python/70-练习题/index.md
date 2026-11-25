@@ -1,5 +1,5 @@
 ---
-title: 80-练习题
+title: 70-练习题
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# 80-练习题
+# 70-练习题
 
 共 13 篇
 

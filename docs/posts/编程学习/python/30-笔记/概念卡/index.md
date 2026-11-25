@@ -1,5 +1,5 @@
 ---
-title: 30-概念卡
+title: 概念卡
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# 30-概念卡
+# 概念卡
 
 共 6 篇
 

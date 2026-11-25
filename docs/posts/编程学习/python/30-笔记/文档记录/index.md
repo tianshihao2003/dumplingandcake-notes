@@ -1,5 +1,5 @@
 ---
-title: 90-文档记录
+title: 文档记录
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# 90-文档记录
+# 文档记录
 
 共 12 篇
 

@@ -1,6 +1,6 @@
 ---
 title: "07-调用LLM对话API"
-date: 2026-11-23
+date: 2026-11-25
 cover: false
 ---
 [opencodeAPI文档](https://opencode.ai/docs/console/api/inference/)
@@ -87,7 +87,7 @@ print(response.choices[0].message.content)
 ```
 
 `api_key`建议写进环境变量中
-![](assets/07-调用LLM对话API/file-20261121194250824.png)
+![](./assets/07-调用LLM对话API/file-20261121194250824.png)
 
 ### opencode代码编写测试
 

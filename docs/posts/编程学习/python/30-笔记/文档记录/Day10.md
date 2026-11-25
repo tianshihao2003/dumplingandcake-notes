@@ -3,17 +3,6 @@ title: "Day10"
 date: 2026-11-25
 cover: false
 ---
-```mermaid
-mindmap
-	新学的方法
-		新建文件夹
-		判断文件是否存在
-		过去当前时间字符串
-		获取某一个目录下的文件名
-		降序方法
-		删除文件
-```
-
 # 新建文件夹
 
 ```py
@@ -169,7 +158,7 @@ def exception_handle(request:Request,e:Exception):
 
 **十大主流数据库:**
 
-![](assets/Day10/file-20261124212925514.png)
+![](./assets/Day10/file-20261124212925514.png)
 
 ## 数据模型
 
@@ -235,7 +224,7 @@ drop database [ if exists ] 数据库名 ;
 
 # PyCharm连接数据库
 
-![401](assets/Day10/file-20261124214438324.png)
+![401](./assets/Day10/file-20261124214438324.png)
 
 - 测试连接可以测试是否连通
 - 展示左右数据库按钮
