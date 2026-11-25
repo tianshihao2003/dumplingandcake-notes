@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/STO0wZpqTib4jEkmEC2cgIhonVc
 edited_at: "1786326349"
-exported_at: "2026-11-21T13:24:20.271Z"
+exported_at: "2026-11-24T12:38:49.871Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 ```python
 # 需求1：在控制台中输出一首古诗，分为8行输出

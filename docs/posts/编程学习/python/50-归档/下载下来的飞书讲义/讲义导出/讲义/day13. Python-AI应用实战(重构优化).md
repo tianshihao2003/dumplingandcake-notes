@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/JIoLw0couiOS8rkW86dcgnxFnxv
 edited_at: "1794726044"
-exported_at: "2026-11-21T13:24:05.075Z"
+exported_at: "2026-11-24T12:36:43.387Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 操作优化
 
@@ -1251,7 +1251,7 @@ app=FastAPI(title="AI智能伴侣", description="AI智能伴侣演示的案例",
 
 具体的执行流程如下：
 
-> 画板（v1 不导出视觉内容），token: Wj4kwxEnRhd1embCmqScjwbinrg
+![](./static/day13-Python-AI应用实战%28重构优化%29-画板-cjwbinrg.jpg)
 
 ## 案例优化
 

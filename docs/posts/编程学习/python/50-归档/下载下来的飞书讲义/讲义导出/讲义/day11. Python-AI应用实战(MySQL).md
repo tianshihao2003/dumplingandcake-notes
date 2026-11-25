@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/NVU6wkufOirBuVkAjSRchx6un5d
 edited_at: "1794726044"
-exported_at: "2026-11-21T13:24:00.094Z"
+exported_at: "2026-11-24T12:36:33.563Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 1.DDL语句
 
@@ -18,7 +18,16 @@ MySQL中的数据类型有很多，主要分为三类：数值类型、字符串
 
 **1). 数值类型**
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_pzUaeX
+| 类型 | 大小 | 有符号(SIGNED)范围 | 无符号(UNSIGNED)范围 | 描述 | 示例 |
+| --- | --- | --- | --- | --- | --- |
+| tinyint | 1byte | (-128，127) | (0，255) | 小整数值 |  |
+| smallint | 2bytes | (-32768，32767) | (0，65535) | 大整数值 |  |
+| mediumint | 3bytes | (-8388608，8388607) | (0，16777215) | 大整数值 |  |
+| int/integer | 4bytes | (-2147483648，2147483647) | (0，4294967295) | 大整数值 |  |
+| bigint | 8bytes | (-2^63，2^63-1) | (0，2^64-1) | 极大整数值 |  |
+| float | 4bytes | (-3.402823466 E+38，3.402823466351 E+38) | 0 和 (1.175494351 E-38，3.402823466 E+38) | 单精度浮点数值 | float(5,2) |
+| double | 8bytes | (-1.7976931348623157 E+308，1.7976931348623157 E+308) | 0 和 (2.2250738585072014 E-308，1.7976931348623157 E+308) | 双精度浮点数值 | double(5,2) |
+| decimal |  | 依赖于M(精度)和D(标度)的值 | 依赖于M(精度)和D(标度)的值 | 小数值(精确定点数) | decimal(5,2) :5表示整个数值长度,2表示小数位个数 |
 
 - 示例:
 
@@ -32,7 +41,10 @@ MySQL中的数据类型有很多，主要分为三类：数值类型、字符串
 
 **2). 字符串类型**
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_4iwJ95
+| 类型 | 大小 | 描述 |
+| --- | --- | --- |
+| char | 0-255 (个字符) | 定长字符串(需要指定长度)  5 |
+| varchar | 0-65535 bytes | 变长字符串(需要指定长度)  5 |
 
 **char和varchar区别:**
 char是定长字符串，指定长度多长，就占用多少个字符
@@ -55,7 +67,13 @@ varchar是变长字符串，指定的长度为最大占用长度
 
 **3). 日期时间类型**
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_DZmiYH
+| 类型 | 大小 | 范围 | 格式 | 描述 |
+| --- | --- | --- | --- | --- |
+| date | 3 | 1000-01-01 至 9999-12-31 | YYYY-MM-DD | 日期值 |
+| time | 3 | -838:59:59 至 838:59:59 | HH:MM:SS | 时间值或持续时间 |
+| year | 1 | 1901 至 2155 | YYYY | 年份值 |
+| datetime | 8 | 1000-01-01 00:00:00 至 9999-12-31 23:59:59 | YYYY-MM-DD HH:MM:SS | 混合日期和时间值 |
+| timestamp | 4 | 1970-01-01 00:00:01 至 2038-01-19 03:14:07 | YYYY-MM-DD HH:MM:SS | 混合日期和时间值，时间戳 |
 
 ```sql
 示例: 
@@ -473,11 +491,26 @@ select  字段列名  from   表名   where   条件列表 ; -- 条件列表：�
 
 常用的比较运算符如下:
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_Sx8UrA
+| 比较运算符 | 功能 |
+| --- | --- |
+| > | 大于 |
+| >= | 大于等于 |
+| < | 小于 |
+| <= | 小于等于 |
+| = | 等于 |
+| <> 或 != | 不等于 |
+| between ... and ... | 在某个范围之内(含最小、最大值) |
+| in(...) | 在in之后的列表中的值，多选一 |
+| like 占位符 | 模糊匹配(_匹配单个字符, %匹配任意个字符) |
+| is null /is not null | 是null |
 
 常用的逻辑运算符如下:
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_8wGUmM
+| 逻辑运算符 | 功能 |
+| --- | --- |
+| and 或 && | 并且 (多个条件同时成立) |
+| or 或 \|\| | 或者 (多个条件任意一个成立)     jon = 2 or job = 3   job in (2,3)     name = '张三' or gender = 1 |
+| not 或 ! | 非 , 不是 |
 
 - 案例1：查询 姓名 为 '莫山山' 的员工
 
@@ -565,7 +598,13 @@ SELECT id, name, gender, job, salary, entry_date, create_time, update_time FROM 
 
 常用聚合函数：
 
-> 内嵌电子表格（v1 不转换），token: HXRtsH2Ash8CJutQAMCcyfXmnju_IYNx9e
+| 函数 | 功能 |
+| --- | --- |
+| count() | 统计数量   count(*) |
+| max() | 最大值 |
+| min() | 最小值 |
+| avg() | 平均值 |
+| sum() | 求和 |
 
 > [!danger] 📌
 > 注意 : 聚合函数会忽略空值，对NULL值不作为统计。

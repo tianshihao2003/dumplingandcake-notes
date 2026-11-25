@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/UUfPw0f3Vi4TdLkCe5KctlY2nmZ
 edited_at: "1794726044"
-exported_at: "2026-11-21T13:23:56.070Z"
+exported_at: "2026-11-24T12:36:28.959Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 准备工作
 
@@ -26,7 +26,7 @@ date: 2026-11-21
 
 准备前端程序的运行环境，需要将资料中准备的前端程序的运行环境(`nginx-ai-partner.zip`)，解压到一个**没有中文不带空格的目录**下。
 
-![[day09-Python-AI应用实战(功能实现)-cczZMnmb.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cczZMnmb.png)
 
 解压到一个**没有中文不带空格的目录**下。
 
@@ -37,18 +37,18 @@ date: 2026-11-21
 - 停止：
   - 方式一：（在Nginx解压目录下，打开cmd，执行命令 `nginx.exe -s stop`）
 
-![[day09-Python-AI应用实战(功能实现)-c6xTgnue.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-c6xTgnue.png)
 
   - 方式二：（在任务管理器中找到对应的nginx进程，直接右键结束进程）
 
-![[day09-Python-AI应用实战(功能实现)-cvF5knLg.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cvF5knLg.png)
 
 > [!tip] 🍀
 > **提示：这个案例的前端Nginx服务，并不会开机自动启动，因此需要每次电脑关机重新打开后，要启动这个Nginx。**
 
 前端服务启动完毕后，我们就可以直接在浏览器地址栏来访问前端页面了。 直接访问：`http://localhost:88`
 
-![[day09-Python-AI应用实战(功能实现)-cR4uDnXe.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cR4uDnXe.png)
 
 ### 服务端环境准备
 
@@ -56,7 +56,7 @@ date: 2026-11-21
 
 ![](./static/day09-Python-AI应用实战%28功能实现%29-cvpDvnAf.png)
 
-![[day09-Python-AI应用实战(功能实现)-cw0UrnYd.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cw0UrnYd.png)
 
 一旦我们选择创建的是一个 `FastAPI` 项目，那么IDE会自动帮我们安装 `fastapi`**、**`uvicorn` 的依赖库，并且自动给我们创建好 `FastAPI`实例，准备好样例代码，如下：
 
@@ -123,7 +123,16 @@ if __name__ == "__main__":
   - **接口描述**: 获取所有AI伴侣预设数据，前端用于渲染预设选择下拉框
   - **请求参数**: 无
   - **响应参数**: 
-> 内嵌电子表格（v1 不转换），token: QdO8szN5ThJlBktQZjXczguanod_sEjzcn
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | object[] | 预设列表数据 |
+| \|- id | integer | 预设ID |
+| \|- name | string | 预设名称 (如: 东北甜妹) |
+| \|- nick_name | string | 伴侣昵称 (如: 小甜甜) |
+| \|- nature | string | 伴侣性格描述 |
+| \|- sort_order | integer | 排序序号 |
   - **响应示例**:
 ```json
 {
@@ -192,11 +201,11 @@ if __name__ == '__main__':
 
 代码编写完毕后，我们就可以启动服务来做一个测试了。 我们可以先打开Swagger接口文档（`http://localhost:8000/docs`），进行测试。
 
-![[day09-Python-AI应用实战(功能实现)-cjzsGnle.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cjzsGnle.png)
 
 通过接口测试，我们可以看到数据已经可以正常查询出来了，说明我们的接口开发的说没有问题的，接下来，我们再直接来打开前端页面进行联调测试。
 
-![[day09-Python-AI应用实战(功能实现)-cOtJ3nuh.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cOtJ3nuh.png)
 
 最终，我们可以看到预设的模板全部可以正常加载并展示出来。
 
@@ -217,7 +226,10 @@ if __name__ == '__main__':
 - **接口描述**: 创建一个新的聊天会话，自动生成会话ID
 
 - **请求参数**:
-> 内嵌电子表格（v1 不转换），token: QdO8szN5ThJlBktQZjXczguanod_7p9BVW
+| 参数名称 | 参数说明 | 是否必须 | 数据类型 | 默认值 |
+| --- | --- | --- | --- | --- |
+| nick_name | 伴侣昵称 | 否 | string | 小甜甜 |
+| nature | 伴侣性格 | 否 | string | 活泼开朗的东北姑娘 |
 
 - **请求示例**:
 ```python
@@ -228,7 +240,11 @@ if __name__ == '__main__':
 ```
 
 - **响应参数**:
-> 内嵌电子表格（v1 不转换），token: QdO8szN5ThJlBktQZjXczguanod_1q39vH
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | object | 会话名称 |
 
 - **响应示例**:
 ```python
@@ -326,21 +342,21 @@ if __name__ == '__main__':
 
 代码编写完毕后，我们就可以启动服务来做一个测试了。 我们可以先打开Swagger接口文档（`http://localhost:8000/docs`），进行测试。
 
-![[day09-Python-AI应用实战(功能实现)-czPQLnze.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-czPQLnze.png)
 
 通过接口测试，我们可以看到数据已经可以正常查询出来了，说明我们的接口开发的说没有问题的，接下来，我们再直接来打开前端页面进行联调测试。
 
-![[day09-Python-AI应用实战(功能实现)-cr8RcnZd.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cr8RcnZd.png)
 
 最终，我们可以看到进入项目后，自动帮我们创建了一个新的会话，并在页面中展示出了这个会话的名称 。 当然在服务端，我们也可以看到在项目的sessions目录下，多了一个json文件，这个json文件就是当前会话信息的存储文件。
 
-![[day09-Python-AI应用实战(功能实现)-cR3v4npb.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cR3v4npb.png)
 
 ## 与AI交互
 
 ### 分析
 
-![[day09-Python-AI应用实战(功能实现)-cMRcXn9n.png]]
+![](./static/day09-Python-AI应用实战%28功能实现%29-cMRcXn9n.png)
 
 创建完会话之后，我们就可以与AI大模型交互了，如果说默认选中的伴侣信息不能满足我们的需求，我们可以在伴侣信息栏去做调整即可，然后就可以在下方的输入框中输入要提问的问题。
 
@@ -350,7 +366,7 @@ if __name__ == '__main__':
 
 因此，在与AI大模型交互时，我们的思路如下：
 
-> 画板（v1 不导出视觉内容），token: TWxqwZ3izhcHiJb7AAAc0gWynUg
+![](./static/day09-Python-AI应用实战%28功能实现%29-画板-c0gWynUg.jpg)
 
 **接口文档如下：**
 
@@ -361,7 +377,12 @@ if __name__ == '__main__':
 - **接口描述**: 与AI伴侣进行对话，服务端会自动加载该会话的历史消息，并调用DeepSeek大模型生成回复。每次对话会自动保存到会话文件中。
 
 - **请求参数**:
-> 内嵌电子表格（v1 不转换），token: QdO8szN5ThJlBktQZjXczguanod_fVwvSw
+| 参数名称 | 参数说明 | 是否必须 | 数据类型 |
+| --- | --- | --- | --- |
+| session_name | 会话名称 | 是 | string |
+| message | 用户消息 | 是 | string |
+| nick_name | 伴侣昵称 | 是 | string |
+| nature | 伴侣性格 | 是 | string |
 
 - **请求示例**:
 ```json
@@ -374,7 +395,11 @@ if __name__ == '__main__':
 ```
 
 - **响应参数**:
-> 内嵌电子表格（v1 不转换），token: QdO8szN5ThJlBktQZjXczguanod_bFhpCZ
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | string | AI伴侣的回复内容 |
 
 - **响应示例**:
 ```python

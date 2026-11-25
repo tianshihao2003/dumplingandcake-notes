@@ -1,5 +1,5 @@
 ---
-title: AI生成题
+title: AI作业补充题
 hidden: true
 recommend: false
 cover: false
@@ -7,7 +7,7 @@ date: false
 sidebar: true
 ---
 
-# AI生成题
+# AI作业补充题
 
 共 1 篇
 

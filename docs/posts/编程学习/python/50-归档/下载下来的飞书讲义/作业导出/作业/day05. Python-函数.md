@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/BlRNwALLvilMHFkQLX7czdxfnHe
 edited_at: "1794835464"
-exported_at: "2026-11-21T13:24:17.963Z"
+exported_at: "2026-11-24T12:38:47.901Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 函数基础作业 [必做]
 

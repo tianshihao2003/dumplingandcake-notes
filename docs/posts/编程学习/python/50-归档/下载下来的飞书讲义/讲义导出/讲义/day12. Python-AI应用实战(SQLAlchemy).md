@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/UX7XwPSSdibIOdkx4bech7yfnug
 edited_at: "1794726045"
-exported_at: "2026-11-21T13:24:02.623Z"
+exported_at: "2026-11-24T12:36:40.348Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 **思考：昨天讲解的操作数据库，都是基于图形化工具 / SQL 来操作数据库，如果后续需要在PY代码中操作**
 
@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
 客户端连接数据库服务器时，一次数据库连接创建的过程：
 
-> 画板（v1 不导出视觉内容），token: V7kPwCrMyhNZmMbnNuDc6vlGnGe
+![](./static/day12-Python-AI应用实战%28SQLAlchemy%29-画板-c6vlGnGe.jpg)
 
 - 第一步：客户端在连接MySQL数据库服务器的时候，底层是基于TCP网络协议的，首先要进行三次握手，确认连接建立。
 
@@ -194,13 +194,13 @@ if __name__ == '__main__':
 
 - 第三步：MySQL数据库服务器为当前这个连接分配内存、分配线程资源等 。
 
-> 画板（v1 不导出视觉内容），token: OoqXwW8mKh3f1lbsdhocyKpdnef
+![](./static/day12-Python-AI应用实战%28SQLAlchemy%29-画板-cyKpdnef.jpg)
 
 ### 数据库连接池
 
 数据库连接池的思路非常简单，就是提前创建好一批连接，存放在一个池子里，用完后不销毁，而是归还给池子，留着下次接着用（复用）。（存放连接的池子，就称之为连接池）
 
-> 画板（v1 不导出视觉内容），token: M7n4wJcnwhbggObQQIscoA9CnJd
+![](./static/day12-Python-AI应用实战%28SQLAlchemy%29-画板-coA9CnJd.jpg)
 
 在SQLAlchemy中默认就已经采用了数据库连接池技术，来提高性能。 当我们在创建引擎，调用如下代码时，其实底层已经使用了连接池技术。
 

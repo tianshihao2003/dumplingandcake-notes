@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/NTJfwl8VNiksLekXuOrc8f1dnDy
 edited_at: "1794726044"
-exported_at: "2026-11-21T13:24:01.757Z"
+exported_at: "2026-11-24T12:36:42.514Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 功能开发
 
@@ -35,7 +35,11 @@ date: 2026-11-21
 - **请求示例**: `/api/sessions`
 
 - **响应参数**:
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_PHq424
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | string[] |  |
 
 - **响应示例**:
 ```json
@@ -239,12 +243,24 @@ if __name__ == '__main__':
 - **接口描述**: 获取指定会话的详细信息，包括聊天记录、伴侣设置等
 
 - **请求参数**: 
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_6RmYaV
+| 参数名称 | 参数说明 | 是否必须 | 数据类型 |
+| --- | --- | --- | --- |
+| session_name | 会话ID | 是 | string |
 
 - **请求示例**: `/api/sessions/2026-05-25_10-47-15`
 
 - **响应参数**:
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_mLHjKp
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | object | 会话完整数据 |
+| \|- nick_name | string | 伴侣昵称 |
+| \|- nature | string | 伴侣性格 |
+| \|- session_name | string | 当前会话名称 |
+| \|- messages | object[] | 聊天消息列表 |
+| \|- role | string | 消息角色 (user / assistant) |
+| \|- content | string | 消息内容 |
 
 **响应示例**:
 
@@ -469,12 +485,18 @@ if __name__ == '__main__':
 - **接口描述**: 删除指定的会话及其所有聊天记录
 
 - **请求参数**:
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_51merV
+| 参数名称 | 参数说明 | 是否必须 | 数据类型 |
+| --- | --- | --- | --- |
+| session_name | 会话ID | 是 | string |
 
 - **请求示例**: `DELETE /api/sessions/2026-05-25_10-47-15`
 
 - **响应参数**:
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_3DNwxH
+| 参数名称 | 类型 | 备注 |
+| --- | --- | --- |
+| code | integer | 状态码, 200: 成功 |
+| message | string | 提示信息 |
+| data | null | 无返回数据 |
 
 - **响应示例**:
 ```python
@@ -1360,7 +1382,12 @@ MySQL的安装包官网下载地址：https://dev.mysql.com/downloads/mysql/
 
 SQL：结构化查询语言。一门操作关系型数据库的编程语言，定义操作所有关系型数据库的统一标准。SQL语句根据其功能被分为四大类：DDL、DML、DQL、DCL 。
 
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_JUfGCt
+| 分类 | 全称 | 说明 |
+| --- | --- | --- |
+| DDL | Data Definition Language | 数据定义语言，用来定义数据库对象(数据库，表，字段) |
+| DML | Data Manipulation Language | 数据操作语言，用来对数据库表中的数据进行增删改 |
+| DQL | Data Query Language | 数据查询语言，用来查询数据库中表的记录 |
+| DCL | Data Control Language | 数据控制语言，用来创建数据库用户、控制数据库的访问权限 |
 
 ### DDL语句
 
@@ -1548,7 +1575,13 @@ create table tb_user (
 
 - 在MySQL数据库当中，提供了以下5种约束：
 
-> 内嵌电子表格（v1 不转换），token: OA2TsJBv2hFiiIt0tajcPYTcnfg_jomB4a
+| 约束 | 描述 | 关键字 |
+| --- | --- | --- |
+| 非空约束 | 限制该字段值不能为null | not null |
+| 唯一约束 | 保证字段的所有数据都是唯一、不重复的 | unique |
+| 主键约束 | 主键是一行数据的唯一标识，要求非空且唯一 | primary key |
+| 默认约束 | 保存数据时，如果未指定该字段值，则采用默认值 | default |
+| 外键约束 | 让两张表的数据建立连接，保证数据的一致性和完整性 | foreign key |
 
 > [!danger] 📌
 > 注意：约束是作用于表中字段上的，可以在创建表/修改表的时候添加约束。

@@ -8,7 +8,7 @@ date: false
 
 # 编程学习
 
-共 118 篇
+共 120 篇
 
 ## 子分类
 
@@ -19,4 +19,5 @@ date: false
 
 - [Boss直聘技术记录](<./Boss直聘技术记录.md>)
 - [Boss直聘技术总结](<./Boss直聘技术总结.md>)
+- [note-organizer 使用说明](<./note-organizer 使用说明.md>)
 - [黑马学习路线](<./黑马学习路线.md>)

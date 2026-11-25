@@ -6,9 +6,9 @@ obj_type: docx
 space_id: ""
 url: https://ocn0tgqr5oz2.feishu.cn/wiki/J2hWwnUdgiDdLlk4ZprcOPzBn3b
 edited_at: "1794726046"
-exported_at: "2026-11-21T13:23:43.279Z"
+exported_at: "2026-11-24T12:36:19.157Z"
 cover: false
-date: 2026-11-21
+date: 2026-11-24
 ---
 # 流程控制
 
@@ -124,7 +124,7 @@ else:
 
 - **流程：**
 
-> 画板（v1 不导出视觉内容），token: C7guwyAXLhvUoKboFNAc6YxanNb
+![](./static/day02-Python-流程控制-画板-c6YxanNb.jpg)
 
 - **演示：**
 
@@ -204,7 +204,7 @@ else:
 
 - 流程：
 
-> 画板（v1 不导出视觉内容），token: Lo4xwqKeHhPixxbZjz9chtEun7f
+![](./static/day02-Python-流程控制-画板-chtEun7f.jpg)
 
 > [!tip] 🍀
 > **提示：**
@@ -397,7 +397,7 @@ while 条件表达式:
 while循环是通过条件表达式，来控制是否要进行下一次循环的。如果条件表达式为True，则执行循环体中的语句；如果条件表达式为False，则结束循环。
 
 - **流程：**
-> 画板（v1 不导出视觉内容），token: WvKqwhXZ2hziTObgneec1BYfnYf
+![](./static/day02-Python-流程控制-画板-c1BYfnYf.jpg)
 
 - **语法2：**
 ```python
@@ -500,7 +500,7 @@ for循环，本质是一种轮询遍历机制，可以对一批内容进行逐�
 
 - **处理流程：**
 
-> 画板（v1 不导出视觉内容），token: CcaYwBppyh0Ujwb5M28cEgLZnNb
+![](./static/day02-Python-流程控制-画板-cEgLZnNb.jpg)
 
 - **语法：**
 
