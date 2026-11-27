@@ -5,10 +5,10 @@ obj_token: OBXfdWLU5ok19fxCPtGcHzh1nwh
 obj_type: docx
 space_id: ""
 url: https://wcn4b8bw7lqr.feishu.cn/wiki/Xx1Yw6cxFiuHgpkZQX2cpdMtnHf
-edited_at: "1795440413"
-exported_at: "2026-11-24T12:38:49.256Z"
+edited_at: "1795596787"
+exported_at: "2026-11-27T00:36:57.861Z"
 cover: false
-date: 2026-11-24
+date: 2026-11-27
 ---
 # 再回顾一下《AI智能伴侣》案例的逻辑
 
