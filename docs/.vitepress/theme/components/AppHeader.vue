@@ -60,7 +60,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 				class="kb-icon-btn kb-desktop-only"
 				type="button"
 				:aria-expanded="open"
-				aria-label="折叠目录"
+				:aria-label="open ? '折叠目录栏' : '展开目录栏'"
+				:title="open ? '折叠目录栏' : '展开目录栏'"
 				@click="toggleSidebar"
 			>
 				<Icon name="panel-left" />
