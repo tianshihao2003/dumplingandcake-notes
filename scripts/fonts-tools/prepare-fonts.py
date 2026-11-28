@@ -102,7 +102,7 @@ def build_charset():
 
     vault = os.environ.get(
         "NOTES_SRC",
-        r"E:\GithubProgect\MyRunProject\dumplingandcakeblog\src\content\学习笔记",
+        r"B:\Obsidian Vault Collection\Obsidian Vault content\学习笔记",
     )
     for md in glob.glob(os.path.join(vault, "**", "*.excalidraw.md"), recursive=True):
         try:

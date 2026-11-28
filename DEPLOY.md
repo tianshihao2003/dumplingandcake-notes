@@ -2,7 +2,7 @@
 
 > 目录约定：
 > - 笔记站点（本项目）：`E:\GithubProgect\MyRunProject\dumplingandcake-notes`
-> - 笔记真相（Obsidian 库）：`E:\GithubProgect\MyRunProject\dumplingandcakeblog\src\content\学习笔记`
+> - 笔记真相（Obsidian 库）：`B:\Obsidian Vault Collection\Obsidian Vault content\学习笔记`
 >
 > 命令里的路径用的是正斜杠，PowerShell 和 Git Bash 都能直接粘。
 > PowerShell 下 `cd "E:/xxx"` 可用；Git Bash 下同样可用。
@@ -11,7 +11,7 @@
 
 ## 第一步：私人内容备份仓库（已建好，只剩推送）
 
-仓库位置是 Obsidian 库根本身：`E:\GithubProgect\MyRunProject\dumplingandcakeblog\src\content`
+仓库位置是 Obsidian 库根本身：`B:\Obsidian Vault Collection\Obsidian Vault content`
 （在里面 `git init` 过了，首次提交 `chore: 私人内容首次归档`，448 个文件 / .git 约 12M）。
 
 **备份范围**：博客主仓库不上传的那部分 —— 学习笔记 269 篇、笔记本归档 91 篇、notes、临时收集、
@@ -34,7 +34,7 @@
 推送（在当前目录建私有仓库）：
 
 ```bash
-cd "E:/GithubProgect/MyRunProject/dumplingandcakeblog/src/content"
+cd "B:/Obsidian Vault Collection/Obsidian Vault content"
 gh repo create content-backup --private --source=. --remote=origin --push
 ```
 
@@ -43,7 +43,7 @@ gh repo create content-backup --private --source=. --remote=origin --push
 日常备份：
 
 ```bash
-cd "E:/GithubProgect/MyRunProject/dumplingandcakeblog/src/content"
+cd "B:/Obsidian Vault Collection/Obsidian Vault content"
 git status --short          # 先看一眼，别把不该备份的也带上
 git add -A && git commit -m "update: 今日笔记" && git push
 ```
@@ -431,7 +431,7 @@ gh repo edit tianshihao2003/dumplingandcake-notes --visibility public --accept-v
 >
 > 注意：**这一步不可逆**。公开后别人的 fork / 存档不会被你后续转回私有删掉。
 
-**没跟着转公开的：`content-backup`**（`src/content` 里那个备份仓库）—— 那里除了笔记还有别的不上传内容，保持私有。
+**没跟着转公开的：`content-backup`**（Obsidian 库根 `B:\Obsidian Vault Collection\Obsidian Vault content` 里那个备份仓库）—— 那里除了笔记还有别的不上传内容，保持私有。
 
 ### 3.3 部署到 Vercel
 

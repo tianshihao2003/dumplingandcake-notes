@@ -29,7 +29,7 @@ const LZString = lzString;
 import path from "node:path";
 
 const DEFAULT_SRC =
-	"E:/GithubProgect/MyRunProject/dumplingandcakeblog/src/content/学习笔记";
+	"B:/Obsidian Vault Collection/Obsidian Vault content/学习笔记";
 const args = process.argv.slice(2);
 const getArg = (name) => {
 	const i = args.indexOf(`--${name}`);

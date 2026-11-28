@@ -5,7 +5,7 @@ VitePress + `@sugarat/theme` 笔记站。`docs/posts` 是从外部 Obsidian 库�
 
 ## 内容来源（最容易踩）
 
-- 笔记真相：`E:/GithubProgect/MyRunProject/dumplingandcakeblog/src/content/学习笔记`（`scripts/sync-notes.mjs` 里硬编码 `DEFAULT_SRC`）。
+- 笔记真相：`B:/Obsidian Vault Collection/Obsidian Vault content/学习笔记`（`scripts/sync-notes.mjs` 里硬编码 `DEFAULT_SRC`）。
 - 改内容去源库改，再 `pnpm sync`。直接改 `docs/posts` 会被下次同步覆盖，源库里已删除的文件还会被清理。
 - `docs/posts` **必须提交**：CI 没有源库，`pnpm build` 里的 sync 会打印 `[跳过]` 后直接用仓库里的副本。
 - 源库不在默认位置时用 `--src <目录>`；验证转换效果用 `--dest <临时目录>`，别指向 `docs/posts`。
