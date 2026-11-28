@@ -8,7 +8,7 @@ import type { TreeNode } from "../types";
 import { useSidebarState } from "../composables/useSidebarState";
 
 const route = useRoute();
-const { open, mobileOpen, closeMobile, expandDirs } = useSidebarState();const query = ref("");
+const { open, mobileOpen, closeMobile, expandDirs, collapseAll } = useSidebarState();const query = ref("");
 
 function createRoot(): TreeNode {
 	return { name: "", path: "", dirs: [], notes: [] };
@@ -92,9 +92,20 @@ onMounted(() => {
 				<Icon name="folder" :size="15" />
 				<span>目录</span>
 			</div>
-			<button class="kb-icon-btn kb-mobile-only" type="button" aria-label="关闭目录" @click="closeMobile">
-				<Icon name="x" />
-			</button>
+			<div class="kb-sidebar-head-actions">
+				<button
+					class="kb-icon-btn kb-sidebar-collapse"
+					type="button"
+					title="折叠全部目录"
+					aria-label="折叠全部目录"
+					@click="collapseAll"
+				>
+					<Icon name="chevrons-up-down" :size="20" />
+				</button>
+				<button class="kb-icon-btn kb-mobile-only" type="button" aria-label="关闭目录" @click="closeMobile">
+					<Icon name="x" />
+				</button>
+			</div>
 		</div>
 
 		<label class="kb-sidebar-filter">

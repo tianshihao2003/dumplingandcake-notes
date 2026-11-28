@@ -10,6 +10,7 @@ const paths: Record<string, string[]> = {
 	"chevron-right": ["m9 18 6-6-6-6"],
 	"chevron-down": ["m6 9 6 6 6-6"],
 	"chevrons-left": ["m11 17-5-5 5-5", "m18 17-5-5 5-5"],
+	"chevrons-up-down": ["m7 3 5 5 5-5", "m7 21 5-5 5 5"],
 	sun: [
 		"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z",
 		"M12 1v2",

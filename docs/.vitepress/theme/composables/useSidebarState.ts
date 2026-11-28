@@ -73,6 +73,11 @@ export function useSidebarState() {
 		}
 	}
 
+	function collapseAll() {
+		expanded.value = new Set();
+		persist();
+	}
+
 	return {
 		open,
 		mobileOpen,
@@ -83,5 +88,6 @@ export function useSidebarState() {
 		isExpanded,
 		toggleDir,
 		expandDirs,
+		collapseAll,
 	};
 }

@@ -115,7 +115,7 @@ html.kb-no-scroll {
 	}
 }
 
-@media (max-width: 860px) {
+@media (max-width: 768px) {
 	.kb-mobile-only {
 		display: inline-flex;
 	}

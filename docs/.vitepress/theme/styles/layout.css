@@ -183,6 +183,16 @@
 	font-weight: 600;
 }
 
+.kb-sidebar-head-actions {
+	display: flex;
+	align-items: center;
+	gap: 1px;
+}
+
+.kb-sidebar-collapse {
+	color: var(--kb-text-3);
+}
+
 .kb-sidebar-filter {
 	display: flex;
 	align-items: center;
@@ -940,7 +950,7 @@ html.dark .kb-hero {
 	}
 }
 
-@media (max-width: 860px) {
+@media (max-width: 768px) {
 	.kb-sidebar {
 		position: fixed;
 		top: var(--kb-header-h);
