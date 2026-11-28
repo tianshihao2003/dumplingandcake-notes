@@ -1,5 +1,9 @@
 # 上线三步走（给站长自己操作）
 
+> 2026-11-28：主题已换成 `docs/.vitepress/theme` 下的自定义知识库主题（目录树 + 左大纲 + 知识库首页），
+> 本文里关于 `@sugarat/theme`、导航自动生成、右侧「相关文章」的段落已过时；命令和部署配置仍有效，
+> 主题结构以 `AGENTS.md` 和当前代码为准。
+
 > 目录约定：
 > - 笔记站点（本项目）：`E:\GithubProgect\MyRunProject\dumplingandcake-notes`
 > - 笔记真相（Obsidian 库）：`B:\Obsidian Vault Collection\Obsidian Vault content\学习笔记`
