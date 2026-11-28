@@ -1450,6 +1450,8 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 	if (path.basename(rel) !== "index.md") {
 		const meta = readMeta(text);
 		const noteDir = path.dirname(rel).split(path.sep).join("/");
+		// 粗略字数：去掉 frontmatter 和围栏代码，再按非空白字符计数
+		const body = text.replace(/^---\n[\s\S]*?\n---\n?/, "").replace(/```[\s\S]*?```/g, "");
 		noteMetas.push({
 			url: `/posts/${rel.split(path.sep).join("/").replace(/\.md$/, ".html")}`,
 			title: titles.get(rel) ?? path.basename(rel, ".md"),
@@ -1459,6 +1461,7 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 			hidden: meta.hidden === true || meta.hidden === "true",
 			dir: noteDir === "." ? "" : noteDir,
 			filename: path.basename(rel, ".md"),
+			words: body.replace(/\s+/g, "").length,
 		});
 	}
 

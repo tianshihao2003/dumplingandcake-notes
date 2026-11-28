@@ -11,7 +11,8 @@
 		"description": "介绍我在 Claude Code 中安装和使用的 18 个 Skills，涵盖创意构思、代码审查、前端设计、Vercel 部署优化、系统化调试、并行开发等工作流，来自 Anthropic、Vercel 和 Superpowers 三个来源。",
 		"hidden": false,
 		"dir": "AI",
-		"filename": "Claude Code Skills 介绍"
+		"filename": "Claude Code Skills 介绍",
+		"words": 5480
 	},
 	{
 		"url": "/posts/AI/claude code命令.html",
@@ -24,7 +25,8 @@
 		"description": "Claude Code 常用命令速查：恢复会话、压缩上下文、切换模型、调整努力程度、权限模式……按用途分组整理成表格，随用随查。",
 		"hidden": false,
 		"dir": "AI",
-		"filename": "claude code命令"
+		"filename": "claude code命令",
+		"words": 992
 	},
 	{
 		"url": "/posts/AI/DeepSeek加图片识别.html",
@@ -40,7 +42,8 @@
 		"description": "DeepSeek 是纯文本模型看不了图，用 OpenCode Go 订阅里支持视觉的 qwen3.6-plus 模型，写一个脚本 + 配一个 Skill，让 AI 编码工具自动获得图片识别能力。",
 		"hidden": false,
 		"dir": "AI",
-		"filename": "DeepSeek加图片识别"
+		"filename": "DeepSeek加图片识别",
+		"words": 1221
 	},
 	{
 		"url": "/posts/AI/opencode-go接入cc-switch配置教程.html",
@@ -56,7 +59,8 @@
 		"description": "想用 Claude Code 又不想碰官方 API 的定价？OpenCode Go 订阅自带 Anthropic 原生格式端点，配合 CC Switch 桌面端，填一个 Base URL 加 API Key 就能把 Claude Code 切到 Go 的模型上，Qwen3.8 Max、MiniMax M3 随便切。",
 		"hidden": false,
 		"dir": "AI",
-		"filename": "opencode-go接入cc-switch配置教程"
+		"filename": "opencode-go接入cc-switch配置教程",
+		"words": 2107
 	},
 	{
 		"url": "/posts/AI/用AI批量生成高密度拼贴风博客封面.html",
@@ -70,7 +74,8 @@
 		"description": "《Python 学习笔记》封面工程的完整方法论（v3，截至第 68 篇 +《羊毛分享》2 篇）：设计规范、提示词模板、表情池、变量速查表、工具链、后处理脚本和全部踩过的坑。把这篇文章原样交给任何 AI 智能体，配上素材，就能生成同样的效果。",
 		"hidden": false,
 		"dir": "AI",
-		"filename": "用AI批量生成高密度拼贴风博客封面"
+		"filename": "用AI批量生成高密度拼贴风博客封面",
+		"words": 10238
 	},
 	{
 		"url": "/posts/其他学习/英语/48个音标.html",
@@ -82,7 +87,8 @@
 		"description": "哎，学英语音标是不是总卡在“知道但念不准”的阶段？别硬啃PDF了，我直接给你整了个超清爽的48个音标小课堂——视频里每个音都带口型特写+对比纠音，连/j/和/w/这种易混音都帮你拎清楚了～边看边跟读，10分钟就能找回开口的信心！",
 		"hidden": false,
 		"dir": "其他学习/英语",
-		"filename": "48个音标"
+		"filename": "48个音标",
+		"words": 477
 	},
 	{
 		"url": "/posts/其他学习/英语/日常编程英语单词积累.html",
@@ -94,7 +100,8 @@
 		"description": "日常编程英语单词积累",
 		"hidden": false,
 		"dir": "其他学习/英语",
-		"filename": "日常编程英语单词积累"
+		"filename": "日常编程英语单词积累",
+		"words": 4334
 	},
 	{
 		"url": "/posts/其他学习/英语/英语学习方法.html",
@@ -104,7 +111,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "其他学习/英语",
-		"filename": "英语学习方法"
+		"filename": "英语学习方法",
+		"words": 19
 	},
 	{
 		"url": "/posts/其他学习/英语/软件英语记录.html",
@@ -114,7 +122,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "其他学习/英语",
-		"filename": "软件英语记录"
+		"filename": "软件英语记录",
+		"words": 642
 	},
 	{
 		"url": "/posts/如何整理笔记.html",
@@ -124,7 +133,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "",
-		"filename": "如何整理笔记"
+		"filename": "如何整理笔记",
+		"words": 161
 	},
 	{
 		"url": "/posts/学习文档/Python相关.html",
@@ -134,7 +144,8 @@
 		"description": "",
 		"hidden": true,
 		"dir": "学习文档",
-		"filename": "Python相关"
+		"filename": "Python相关",
+		"words": 118
 	},
 	{
 		"url": "/posts/学习文档/vibcoding基础班.html",
@@ -144,7 +155,8 @@
 		"description": "",
 		"hidden": true,
 		"dir": "学习文档",
-		"filename": "vibcoding基础班"
+		"filename": "vibcoding基础班",
+		"words": 71
 	},
 	{
 		"url": "/posts/对于复习的看法.html",
@@ -156,7 +168,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "",
-		"filename": "对于复习的看法"
+		"filename": "对于复习的看法",
+		"words": 54
 	},
 	{
 		"url": "/posts/已掌握的内容.html",
@@ -166,7 +179,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "",
-		"filename": "已掌握的内容"
+		"filename": "已掌握的内容",
+		"words": 33
 	},
 	{
 		"url": "/posts/开发工具/AI/DeepSeekHarness/安装的插件.html",
@@ -176,7 +190,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "开发工具/AI/DeepSeekHarness",
-		"filename": "安装的插件"
+		"filename": "安装的插件",
+		"words": 0
 	},
 	{
 		"url": "/posts/开发工具/Git/GitHubDesktop/汉化方法.html",
@@ -186,7 +201,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "开发工具/Git/GitHubDesktop",
-		"filename": "汉化方法"
+		"filename": "汉化方法",
+		"words": 68
 	},
 	{
 		"url": "/posts/开发工具/Git/Git的命令学习记录.html",
@@ -198,7 +214,8 @@
 		"description": "记录Git的命令使用的学习日常",
 		"hidden": false,
 		"dir": "开发工具/Git",
-		"filename": "Git的命令学习记录"
+		"filename": "Git的命令学习记录",
+		"words": 40
 	},
 	{
 		"url": "/posts/开发工具/PyCharm/PyCharm快捷键.html",
@@ -210,7 +227,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "开发工具/PyCharm",
-		"filename": "PyCharm快捷键"
+		"filename": "PyCharm快捷键",
+		"words": 1002
 	},
 	{
 		"url": "/posts/开发工具/PyCharm/我的插件.html",
@@ -220,7 +238,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "开发工具/PyCharm",
-		"filename": "我的插件"
+		"filename": "我的插件",
+		"words": 40
 	},
 	{
 		"url": "/posts/开发工具/VSCode/快捷键.html",
@@ -232,7 +251,8 @@
 		"description": "VSCode 快捷键整理",
 		"hidden": false,
 		"dir": "开发工具/VSCode",
-		"filename": "快捷键"
+		"filename": "快捷键",
+		"words": 158
 	},
 	{
 		"url": "/posts/开发工具/VSCode/问题与技巧.html",
@@ -244,7 +264,8 @@
 		"description": "VSCode 使用中遇到的问题和技巧",
 		"hidden": false,
 		"dir": "开发工具/VSCode",
-		"filename": "问题与技巧"
+		"filename": "问题与技巧",
+		"words": 874
 	},
 	{
 		"url": "/posts/编程学习/Boss直聘技术总结.html",
@@ -256,7 +277,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习",
-		"filename": "Boss直聘技术总结"
+		"filename": "Boss直聘技术总结",
+		"words": 2126
 	},
 	{
 		"url": "/posts/编程学习/Boss直聘技术记录.html",
@@ -268,7 +290,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习",
-		"filename": "Boss直聘技术记录"
+		"filename": "Boss直聘技术记录",
+		"words": 1407
 	},
 	{
 		"url": "/posts/编程学习/langchain4j/50-归档/学习文档.html",
@@ -278,7 +301,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/langchain4j/50-归档",
-		"filename": "学习文档"
+		"filename": "学习文档",
+		"words": 42
 	},
 	{
 		"url": "/posts/编程学习/langchain4j/50-归档/快速开始.html",
@@ -288,7 +312,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/langchain4j/50-归档",
-		"filename": "快速开始"
+		"filename": "快速开始",
+		"words": 1067
 	},
 	{
 		"url": "/posts/编程学习/note-organizer 使用说明.html",
@@ -300,7 +325,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习",
-		"filename": "note-organizer 使用说明"
+		"filename": "note-organizer 使用说明",
+		"words": 1588
 	},
 	{
 		"url": "/posts/编程学习/python/10-卡点本/对0.0.0.0的认识不足.html",
@@ -312,7 +338,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/10-卡点本",
-		"filename": "对0.0.0.0的认识不足"
+		"filename": "对0.0.0.0的认识不足",
+		"words": 432
 	},
 	{
 		"url": "/posts/编程学习/python/10-卡点本/直接将对象append进列表的值中了.html",
@@ -324,7 +351,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/10-卡点本",
-		"filename": "直接将对象append进列表的值中了"
+		"filename": "直接将对象append进列表的值中了",
+		"words": 116
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/00-场景名.html",
@@ -336,7 +364,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "00-场景名"
+		"filename": "00-场景名",
+		"words": 0
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/01-收集数据和寻找对应值.html",
@@ -348,7 +377,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "01-收集数据和寻找对应值"
+		"filename": "01-收集数据和寻找对应值",
+		"words": 40
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/02-对文件的操作.html",
@@ -360,7 +390,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "02-对文件的操作"
+		"filename": "02-对文件的操作",
+		"words": 0
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/app.mount()静态文件挂载.html",
@@ -372,7 +403,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "app.mount()静态文件挂载"
+		"filename": "app.mount()静态文件挂载",
+		"words": 206
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/FileResponse()返回磁盘文件.html",
@@ -384,7 +416,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "FileResponse()返回磁盘文件"
+		"filename": "FileResponse()返回磁盘文件",
+		"words": 180
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/切片.html",
@@ -396,7 +429,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "切片"
+		"filename": "切片",
+		"words": 123
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/列表推导式.html",
@@ -408,7 +442,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "列表推导式"
+		"filename": "列表推导式",
+		"words": 52
 	},
 	{
 		"url": "/posts/编程学习/python/20-代码片段/组包与解包.html",
@@ -420,7 +455,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/20-代码片段",
-		"filename": "组包与解包"
+		"filename": "组包与解包",
+		"words": 101
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/00-必看.html",
@@ -430,7 +466,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "00-必看"
+		"filename": "00-必看",
+		"words": 18
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/01-常用基本语法.html",
@@ -442,7 +479,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "01-常用基本语法"
+		"filename": "01-常用基本语法",
+		"words": 613
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/02-数据容器.html",
@@ -454,7 +492,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "02-数据容器"
+		"filename": "02-数据容器",
+		"words": 3285
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/03-函数.html",
@@ -466,7 +505,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "03-函数"
+		"filename": "03-函数",
+		"words": 2986
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/04-模块.html",
@@ -478,7 +518,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "04-模块"
+		"filename": "04-模块",
+		"words": 915
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/05-面向对象.html",
@@ -490,7 +531,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "05-面向对象"
+		"filename": "05-面向对象",
+		"words": 3767
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/06-网络协议.html",
@@ -500,7 +542,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "06-网络协议"
+		"filename": "06-网络协议",
+		"words": 2765
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/07-调用LLM对话API.html",
@@ -510,7 +553,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "07-调用LLM对话API"
+		"filename": "07-调用LLM对话API",
+		"words": 1479
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/08-FastAPI基础.html",
@@ -520,7 +564,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "08-FastAPI基础"
+		"filename": "08-FastAPI基础",
+		"words": 2356
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/09-AI智能伴侣功能实现.html",
@@ -534,7 +579,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "09-AI智能伴侣功能实现"
+		"filename": "09-AI智能伴侣功能实现",
+		"words": 2117
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/Day10.html",
@@ -544,7 +590,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "Day10"
+		"filename": "Day10",
+		"words": 3231
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/Day11.html",
@@ -554,7 +601,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "Day11"
+		"filename": "Day11",
+		"words": 5
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/Day12.html",
@@ -564,7 +612,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "Day12"
+		"filename": "Day12",
+		"words": 1948
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/文档记录/Day13.html",
@@ -574,7 +623,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/文档记录",
-		"filename": "Day13"
+		"filename": "Day13",
+		"words": 2048
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/case匹配多个值.html",
@@ -586,7 +636,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "case匹配多个值"
+		"filename": "case匹配多个值",
+		"words": 63
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/对浮点数的操作方式.html",
@@ -598,7 +649,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "对浮点数的操作方式"
+		"filename": "对浮点数的操作方式",
+		"words": 9
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/常用函数.html",
@@ -610,7 +662,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "常用函数"
+		"filename": "常用函数",
+		"words": 441
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/常用方法.html",
@@ -622,7 +675,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "常用方法"
+		"filename": "常用方法",
+		"words": 1567
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/常用模块.html",
@@ -634,7 +688,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "常用模块"
+		"filename": "常用模块",
+		"words": 460
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/概念卡/常用的关键字.html",
@@ -646,7 +701,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/概念卡",
-		"filename": "常用的关键字"
+		"filename": "常用的关键字",
+		"words": 599
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/01-基础知识.html",
@@ -658,7 +714,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "01-基础知识"
+		"filename": "01-基础知识",
+		"words": 1171
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/02-流程控制.html",
@@ -668,7 +725,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "02-流程控制"
+		"filename": "02-流程控制",
+		"words": 251
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/03-数据容器.html",
@@ -678,7 +736,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "03-数据容器"
+		"filename": "03-数据容器",
+		"words": 925
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/04-函数.html",
@@ -688,7 +747,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "04-函数"
+		"filename": "04-函数",
+		"words": 484
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/05-模块.html",
@@ -698,7 +758,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "05-模块"
+		"filename": "05-模块",
+		"words": 453
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/06-面向对象.html",
@@ -708,7 +769,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "06-面向对象"
+		"filename": "06-面向对象",
+		"words": 826
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/07-网络协议与FastAPI.html",
@@ -718,7 +780,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "07-网络协议与FastAPI"
+		"filename": "07-网络协议与FastAPI",
+		"words": 1398
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/08-AI智能伴侣功能实现.html",
@@ -728,7 +791,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "08-AI智能伴侣功能实现"
+		"filename": "08-AI智能伴侣功能实现",
+		"words": 1312
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/09-AI应用实战功能实现.html",
@@ -740,7 +804,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "09-AI应用实战功能实现"
+		"filename": "09-AI应用实战功能实现",
+		"words": 1156
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/MySQL数据库的操作.html",
@@ -750,7 +815,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "MySQL数据库的操作"
+		"filename": "MySQL数据库的操作",
+		"words": 529
 	},
 	{
 		"url": "/posts/编程学习/python/40-日志/代码片段和概念卡.html",
@@ -762,7 +828,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/40-日志",
-		"filename": "代码片段和概念卡"
+		"filename": "代码片段和概念卡",
+		"words": 35
 	},
 	{
 		"url": "/posts/编程学习/python/40-日志/卡点本.html",
@@ -774,7 +841,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/40-日志",
-		"filename": "卡点本"
+		"filename": "卡点本",
+		"words": 5
 	},
 	{
 		"url": "/posts/编程学习/python/40-日志/复习记录.html",
@@ -786,7 +854,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/40-日志",
-		"filename": "复习记录"
+		"filename": "复习记录",
+		"words": 182
 	},
 	{
 		"url": "/posts/编程学习/python/40-日志/对于长代码思路的总结.html",
@@ -798,7 +867,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/40-日志",
-		"filename": "对于长代码思路的总结"
+		"filename": "对于长代码思路的总结",
+		"words": 42
 	},
 	{
 		"url": "/posts/编程学习/python/40-日志/每日学习安排.html",
@@ -810,7 +880,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/40-日志",
-		"filename": "每日学习安排"
+		"filename": "每日学习安排",
+		"words": 33
 	},
 	{
 		"url": "/posts/编程学习/python/50-归档/hm相关文档.html",
@@ -820,7 +891,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/50-归档",
-		"filename": "hm相关文档"
+		"filename": "hm相关文档",
+		"words": 110
 	},
 	{
 		"url": "/posts/编程学习/python/60-面试题/每日中午分享课题.html",
@@ -830,7 +902,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/60-面试题",
-		"filename": "每日中午分享课题"
+		"filename": "每日中午分享课题",
+		"words": 14280
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/05-面向对象.html",
@@ -840,7 +913,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题",
-		"filename": "05-面向对象"
+		"filename": "05-面向对象",
+		"words": 1242
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/AI作业补充题/08-AI应用实战.html",
@@ -850,7 +924,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/AI作业补充题",
-		"filename": "08-AI应用实战"
+		"filename": "08-AI应用实战",
+		"words": 1185
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/AI作业补充题/12-AI应用实战.html",
@@ -860,7 +935,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/AI作业补充题",
-		"filename": "12-AI应用实战"
+		"filename": "12-AI应用实战",
+		"words": 1522
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/01-数据存储与运算.html",
@@ -870,7 +946,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "01-数据存储与运算"
+		"filename": "01-数据存储与运算",
+		"words": 3489
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/02-流程控制语句.html",
@@ -880,7 +957,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "02-流程控制语句"
+		"filename": "02-流程控制语句",
+		"words": 4137
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/03-数据容器.html",
@@ -890,7 +968,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "03-数据容器"
+		"filename": "03-数据容器",
+		"words": 1840
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/04-数据容器.html",
@@ -900,7 +979,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "04-数据容器"
+		"filename": "04-数据容器",
+		"words": 1047
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/05-函数.html",
@@ -910,7 +990,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "05-函数"
+		"filename": "05-函数",
+		"words": 2448
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/06-面向对象.html",
@@ -920,7 +1001,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "06-面向对象"
+		"filename": "06-面向对象",
+		"words": 1338
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/07-面向对象.html",
@@ -930,7 +1012,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "07-面向对象"
+		"filename": "07-面向对象",
+		"words": 361
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/08-AI应用实战.html",
@@ -940,7 +1023,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "08-AI应用实战"
+		"filename": "08-AI应用实战",
+		"words": 300
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/09-AI智能伴侣功能实现.html",
@@ -950,7 +1034,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "09-AI智能伴侣功能实现"
+		"filename": "09-AI智能伴侣功能实现",
+		"words": 3146
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/10-AI应用实战.html",
@@ -960,7 +1045,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "10-AI应用实战"
+		"filename": "10-AI应用实战",
+		"words": 2695
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/11-AI应用实战.html",
@@ -970,7 +1056,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "11-AI应用实战"
+		"filename": "11-AI应用实战",
+		"words": 2447
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/作业题/12-AI应用实战.html",
@@ -980,7 +1067,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题/作业题",
-		"filename": "12-AI应用实战"
+		"filename": "12-AI应用实战",
+		"words": 1617
 	},
 	{
 		"url": "/posts/编程学习/python/70-练习题/出题方法.html",
@@ -990,7 +1078,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/70-练习题",
-		"filename": "出题方法"
+		"filename": "出题方法",
+		"words": 26
 	},
 	{
 		"url": "/posts/编程学习/黑马学习路线.html",
@@ -1002,7 +1091,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习",
-		"filename": "黑马学习路线"
+		"filename": "黑马学习路线",
+		"words": 15120
 	},
 	{
 		"url": "/posts/要学习的内容.html",
@@ -1012,7 +1102,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "",
-		"filename": "要学习的内容"
+		"filename": "要学习的内容",
+		"words": 9
 	},
 	{
 		"url": "/posts/项目学习/AstrBot/AstrBot.html",
@@ -1022,7 +1113,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/AstrBot",
-		"filename": "AstrBot"
+		"filename": "AstrBot",
+		"words": 0
 	},
 	{
 		"url": "/posts/项目学习/Hello算法/介绍.html",
@@ -1032,7 +1124,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/Hello算法",
-		"filename": "介绍"
+		"filename": "介绍",
+		"words": 131
 	},
 	{
 		"url": "/posts/项目学习/Hello算法/复杂度分析.html",
@@ -1042,7 +1135,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/Hello算法",
-		"filename": "复杂度分析"
+		"filename": "复杂度分析",
+		"words": 14
 	},
 	{
 		"url": "/posts/项目学习/Hello算法/学习目的.html",
@@ -1052,7 +1146,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/Hello算法",
-		"filename": "学习目的"
+		"filename": "学习目的",
+		"words": 503
 	},
 	{
 		"url": "/posts/项目学习/Hello算法/数据结构.html",
@@ -1062,7 +1157,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/Hello算法",
-		"filename": "数据结构"
+		"filename": "数据结构",
+		"words": 110
 	},
 	{
 		"url": "/posts/项目学习/RuoYi AI/用到的命令.html",
@@ -1072,7 +1168,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/RuoYi AI",
-		"filename": "用到的命令"
+		"filename": "用到的命令",
+		"words": 0
 	},
 	{
 		"url": "/posts/项目学习/RuoYi AI/项目文档.html",
@@ -1082,7 +1179,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/RuoYi AI",
-		"filename": "项目文档"
+		"filename": "项目文档",
+		"words": 0
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/01-基础知识-手绘图.html",
@@ -1092,7 +1190,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "01-基础知识-手绘图"
+		"filename": "01-基础知识-手绘图",
+		"words": 84
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/02-流程控制-手绘图.html",
@@ -1102,7 +1201,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "02-流程控制-手绘图"
+		"filename": "02-流程控制-手绘图",
+		"words": 84
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/03-数据容器-手绘图.html",
@@ -1112,7 +1212,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "03-数据容器-手绘图"
+		"filename": "03-数据容器-手绘图",
+		"words": 84
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/04-函数-手绘图.html",
@@ -1122,7 +1223,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "04-函数-手绘图"
+		"filename": "04-函数-手绘图",
+		"words": 80
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/05-模块-手绘图.html",
@@ -1132,7 +1234,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "05-模块-手绘图"
+		"filename": "05-模块-手绘图",
+		"words": 80
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/06-面向对象-手绘图.html",
@@ -1142,7 +1245,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "06-面向对象-手绘图"
+		"filename": "06-面向对象-手绘图",
+		"words": 84
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/07-网络协议与FastAPI-手绘图.html",
@@ -1152,7 +1256,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "07-网络协议与FastAPI-手绘图"
+		"filename": "07-网络协议与FastAPI-手绘图",
+		"words": 100
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/08-AI智能伴侣功能实现-手绘图.html",
@@ -1162,7 +1267,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "08-AI智能伴侣功能实现-手绘图"
+		"filename": "08-AI智能伴侣功能实现-手绘图",
+		"words": 96
 	},
 	{
 		"url": "/posts/编程学习/python/30-笔记/知识导图/Drawing 2026-11-25 15.43.12-手绘图.html",
@@ -1172,7 +1278,8 @@
 		"description": "",
 		"hidden": false,
 		"dir": "编程学习/python/30-笔记/知识导图",
-		"filename": "Drawing 2026-11-25 15.43.12-手绘图"
+		"filename": "Drawing 2026-11-25 15.43.12-手绘图",
+		"words": 115
 	},
 	{
 		"url": "/posts/项目学习/Hello算法/复杂度分析-手绘图.html",
@@ -1182,6 +1289,7 @@
 		"description": "",
 		"hidden": false,
 		"dir": "项目学习/Hello算法",
-		"filename": "复杂度分析-手绘图"
+		"filename": "复杂度分析-手绘图",
+		"words": 80
 	}
 ]

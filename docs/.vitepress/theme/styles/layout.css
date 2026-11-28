@@ -521,64 +521,153 @@ html.dark .kb-tree-row.active {
 	padding-top: 4px;
 }
 
-.kb-hero {
-	position: relative;
-	padding: 42px 44px 36px;
-	border: 1px solid var(--kb-border);
-	border-radius: var(--kb-radius-lg);
-	background:
-		radial-gradient(900px 300px at 100% -20%, rgba(51, 112, 255, 0.16), transparent 60%),
-		radial-gradient(600px 260px at 0% 100%, rgba(120, 180, 255, 0.14), transparent 60%),
-		linear-gradient(135deg, #eef4ff 0%, #f7f9ff 48%, #ffffff 100%);
-	box-shadow: var(--kb-shadow);
-	overflow: hidden;
+.kb-home-head {
+	padding: 4px 0 6px;
 }
 
-html.dark .kb-hero {
-	background:
-		radial-gradient(900px 300px at 100% -20%, rgba(92, 141, 255, 0.22), transparent 60%),
-		radial-gradient(600px 260px at 0% 100%, rgba(92, 141, 255, 0.12), transparent 60%),
-		linear-gradient(135deg, #1b2233 0%, #1b1d22 55%, #1d1e20 100%);
-}
-
-.kb-hero-eyebrow {
-	margin: 0 0 8px;
-	color: var(--kb-accent);
-	font-size: 12px;
-	font-weight: 600;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-}
-
-.kb-hero-title {
-	margin: 0 0 10px;
-	font-size: 36px;
-	font-weight: 700;
-	line-height: 1.25;
-	letter-spacing: -0.03em;
-}
-
-.kb-hero-desc {
-	max-width: 560px;
-	margin: 0;
-	color: var(--kb-text-2);
-	font-size: 15px;
-}
-
-.kb-hero-stats {
+.kb-home-title-row {
 	display: flex;
-	gap: 22px;
-	margin-top: 22px;
-	color: var(--kb-text-2);
-	font-size: 13px;
+	align-items: center;
+	gap: 12px;
 }
 
-.kb-hero-stats strong {
-	margin-right: 3px;
+.kb-home-icon {
+	font-size: 30px;
+	line-height: 1;
+}
+
+.kb-home-title-row h1 {
+	margin: 0;
+	font-size: 32px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+.kb-home-stats {
+	display: flex;
+	gap: 26px;
+	margin: 10px 0 18px;
+	color: var(--kb-text-2);
+	font-size: 14px;
+}
+
+.kb-home-stats strong {
+	margin-right: 4px;
 	color: var(--kb-text);
-	font-size: 19px;
+	font-size: 20px;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
+}
+
+.kb-home-avatar {
+	display: block;
+	width: 36px;
+	height: 36px;
+	margin-bottom: 18px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.kb-home-welcome {
+	margin: 4px 0 0;
+}
+
+.kb-home-welcome h2 {
+	margin: 0 0 8px;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.kb-home-welcome p {
+	margin: 0;
+	color: var(--kb-text-2);
+	font-size: 14px;
+}
+
+.kb-home-tree,
+.kb-home-children {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.kb-home-tree {
+	margin-top: 30px;
+}
+
+.kb-home-dir {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	width: 100%;
+	height: 38px;
+	padding: 0 8px;
+	border-radius: var(--kb-radius-sm);
+	color: var(--kb-text);
+	font-size: 15px;
+	text-align: left;
+}
+
+.kb-home-note {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	height: 38px;
+	border-radius: var(--kb-radius-sm);
+	color: var(--kb-text-2);
+	font-size: 14px;
+}
+
+.kb-home-dir:hover,
+.kb-home-note:hover {
+	background: var(--kb-panel-soft);
+}
+
+.kb-home-chevron,
+.kb-home-file {
+	color: var(--kb-text-3);
+}
+
+.kb-home-folder {
+	color: #7b9cff;
+}
+
+.kb-home-dir-name {
+	flex: 0 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.kb-home-dir-count {
+	color: var(--kb-text-3);
+	font-size: 11.5px;
+	font-variant-numeric: tabular-nums;
+}
+
+.kb-home-note-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.kb-home-leader {
+	flex: 1;
+	min-width: 16px;
+	margin: 0 10px;
+	border-bottom: 1px dotted var(--kb-border-strong);
+	transform: translateY(-4px);
+}
+
+.kb-home-note-date {
+	flex-shrink: 0;
+	color: var(--kb-text-3);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.kb-home-note-root {
+	padding-left: 8px;
 }
 
 .kb-section {
@@ -1005,22 +1094,27 @@ html.dark .kb-hero {
 		font-size: 26px;
 	}
 
-	.kb-hero {
-		padding: 30px 24px 26px;
+	.kb-home-title-row h1 {
+		font-size: 26px;
 	}
 
-	.kb-hero-title {
-		font-size: 29px;
+	.kb-home-stats {
+		gap: 16px;
+		font-size: 13px;
+	}
+
+	.kb-home-stats strong {
+		font-size: 18px;
+	}
+
+	.kb-home-tree {
+		margin-top: 22px;
 	}
 }
 
 @media (max-width: 560px) {
 	.kb-breadcrumb {
 		display: none;
-	}
-
-	.kb-hero-stats {
-		gap: 16px;
 	}
 
 	.kb-search-panel {

@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
+import taskLists from "markdown-it-task-lists";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const postsDir = fileURLToPath(new URL("../posts", import.meta.url));
@@ -24,7 +25,10 @@ const config = defineConfig({
 		// VitePress 自带 markdown-it-attrs：行尾的 `{...}` 会被当成 HTML 属性。
 		// 笔记里的 `- 集合名 = {元素1，元素2，元素3}` 因此编译成非法 JS，构建直接失败。
 		// 笔记从不使用 {#id}/{.class} 语法，直接关掉这个规则。
-		config: (md) => md.core.ruler.disable("curly_attributes"),
+		config: (md) => {
+			md.core.ruler.disable("curly_attributes");
+			md.use(taskLists, { enabled: false });
+		},
 	},
 	head: [
 		["link", { rel: "icon", href: "/logo.webp", type: "image/webp" }],
@@ -53,6 +57,8 @@ const config = defineConfig({
 		tagline: "把每一次点亮都记下来",
 		author: "团子和蛋糕",
 		github: "https://github.com/tianshihao2003",
+		welcomeTitle: "👋 欢迎来到知识库",
+		welcomeText: "知识库就像书一样，让多篇文档结构化，方便知识的创作与沉淀",
 		outline: [2, 3],
 		comment: {
 			serverURL: "https://waline.tsh520.cn",

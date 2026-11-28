@@ -7,6 +7,8 @@ export interface Note {
 	tags: string[];
 	description: string;
 	hidden: boolean;
+	/** 粗略字数（非空白字符） */
+	words: number;
 	/** 笔记所在目录，相对 posts/，例如 编程学习/python/50-归档 */
 	dir: string;
 	filename: string;

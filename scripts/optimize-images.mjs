@@ -100,6 +100,8 @@ function encodeUrl(url) {
 async function optimize(absFile, url) {
 	const ext = path.extname(absFile).toLowerCase();
 	if (!IMAGE_EXT.has(ext)) return { url, local: false };
+	// 已经是 WebP 的副本不再重复编码；CI 上没有源库时这一步会自然跳过
+	if (ext === ".webp" || ext === ".avif") return { url, local: false };
 	const buffer = await readFile(absFile);
 	const hash = createHash("sha256").update(buffer).digest("hex");
 	stats.images++;

@@ -83,6 +83,43 @@
 	margin: 0.3em 0;
 }
 
+.kb-doc-body .contains-task-list {
+	padding-left: 1.3em;
+}
+
+.kb-doc-body .task-list-item {
+	list-style: none;
+}
+
+.kb-doc-body .task-list-item-checkbox {
+	margin: 0 0.45em 0 -1.3em;
+	vertical-align: -0.1em;
+	accent-color: var(--kb-accent);
+}
+
+.kb-doc-body .footnotes {
+	margin-top: 2.2em;
+	padding-top: 1em;
+	border-top: 1px solid var(--kb-border);
+	color: var(--kb-text-2);
+	font-size: 13px;
+}
+
+.kb-doc-body .footnotes ol {
+	padding-left: 1.4em;
+}
+
+.kb-doc-body .footnote-ref a {
+	padding: 0 2px;
+	font-size: 0.8em;
+	vertical-align: super;
+}
+
+.kb-doc-body .footnote-backref {
+	margin-left: 4px;
+	text-decoration: none;
+}
+
 .kb-doc-body hr {
 	margin: 2em 0;
 	border: 0;
@@ -202,6 +239,32 @@ html.dark .kb-doc-body mark {
 
 .kb-doc-body .header-anchor::before {
 	content: "#";
+}
+
+.kb-doc-body .line.highlighted {
+	display: inline-block;
+	width: 100%;
+	background: var(--vp-code-line-highlight-color);
+}
+
+.kb-doc-body .line.diff.add {
+	display: inline-block;
+	width: 100%;
+	background: color-mix(in srgb, var(--kb-success) 12%, transparent);
+}
+
+.kb-doc-body .line.diff.remove {
+	display: inline-block;
+	width: 100%;
+	background: color-mix(in srgb, var(--kb-danger) 12%, transparent);
+}
+
+.kb-doc-body .line.error {
+	background: color-mix(in srgb, var(--kb-danger) 14%, transparent);
+}
+
+.kb-doc-body .line.warning {
+	background: color-mix(in srgb, var(--kb-warning) 14%, transparent);
 }
 
 /* VitePress 的 GitHub 风格提示块 */

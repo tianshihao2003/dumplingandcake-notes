@@ -49,6 +49,20 @@ html.dark .kb-doc-body code {
 	line-height: 1.65;
 }
 
+/* Shiki 输出的是 CSS 变量，必须显式取用，否则代码全是单色 */
+.kb-doc-body .shiki span {
+	color: var(--shiki-light);
+}
+
+html.dark .kb-doc-body .shiki span {
+	color: var(--shiki-dark);
+}
+
+/* VitePress 自带的空复制按钮交给主题自己的 .kb-copy */
+.kb-doc-body .copy {
+	display: none;
+}
+
 .kb-doc-body div[class*="language-"] .lang {
 	position: absolute;
 	top: 8px;
