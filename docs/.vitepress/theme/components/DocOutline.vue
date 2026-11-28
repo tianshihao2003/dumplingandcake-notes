@@ -58,28 +58,29 @@ function toggle() {
 
 <template>
 	<aside v-if="headers.length" class="kb-outline" :class="{ 'is-closed': !open }" aria-label="本页目录" data-pagefind-ignore>
-		<div v-if="open" class="kb-outline-inner">
-			<div class="kb-outline-head">
-				<span class="kb-outline-title"><Icon name="hash" :size="14" />本页目录</span>
-				<button class="kb-icon-btn" type="button" aria-label="折叠大纲" @click="toggle">
-					<Icon name="chevron-right" />
-				</button>
-			</div>
-			<nav>
-				<ul class="kb-outline-list">
-					<li
-						v-for="header in headers"
-						:key="header.slug"
-						:class="[`level-${header.level}`, { active: active === header.slug }]"
-					>
-						<a :href="header.link" @click="active = header.slug">{{ header.title }}</a>
-					</li>
-				</ul>
-			</nav>
+		<div class="kb-outline-top">
+			<button
+				class="kb-outline-toggle"
+				type="button"
+				:title="open ? '收起目录' : '展开目录'"
+				:aria-label="open ? '收起目录' : '展开目录'"
+				:aria-expanded="open"
+				@click="toggle"
+			>
+				<Icon :name="open ? 'chevrons-left' : 'menu'" :size="16" />
+			</button>
+			<span v-if="open" class="kb-outline-title">本页目录</span>
 		</div>
-		<button v-else class="kb-outline-open" type="button" aria-label="展开大纲" @click="toggle">
-			<Icon name="hash" :size="15" />
-			<span>目录</span>
-		</button>
+		<nav v-if="open">
+			<ul class="kb-outline-list">
+				<li
+					v-for="header in headers"
+					:key="header.slug"
+					:class="[`level-${header.level}`, { active: active === header.slug }]"
+				>
+					<a :href="header.link" @click="active = header.slug">{{ header.title }}</a>
+				</li>
+			</ul>
+		</nav>
 	</aside>
 </template>

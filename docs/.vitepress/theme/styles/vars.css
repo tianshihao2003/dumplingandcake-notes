@@ -1,8 +1,8 @@
 :root {
-	--kb-bg: #f7f8fa;
+	--kb-bg: #ffffff;
 	--kb-panel: #ffffff;
 	--kb-panel-soft: #fafbfc;
-	--kb-sidebar-bg: #f5f6f7;
+	--kb-sidebar-bg: #eef0f3;
 	--kb-border: #e5e6eb;
 	--kb-border-strong: #d9dbe0;
 	--kb-text: #1f2329;
@@ -44,10 +44,10 @@
 }
 
 html.dark {
-	--kb-bg: #151618;
+	--kb-bg: #1d1e20;
 	--kb-panel: #1d1e20;
 	--kb-panel-soft: #232427;
-	--kb-sidebar-bg: #1a1b1d;
+	--kb-sidebar-bg: #101113;
 	--kb-border: #2e3034;
 	--kb-border-strong: #3a3d42;
 	--kb-text: #e8e9eb;

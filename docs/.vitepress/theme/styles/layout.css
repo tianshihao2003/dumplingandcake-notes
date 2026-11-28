@@ -330,7 +330,8 @@ html.dark .kb-tree-row.active {
 	align-self: flex-start;
 	width: var(--kb-outline-w);
 	height: calc(100vh - var(--kb-header-h));
-	padding: 30px 12px 24px 22px;
+	padding: 22px 14px 24px 18px;
+	background: var(--kb-bg);
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: var(--kb-border-strong) transparent;
@@ -339,18 +340,46 @@ html.dark .kb-tree-row.active {
 
 .kb-outline.is-closed {
 	display: flex;
-	flex: 0 0 44px;
+	flex: 0 0 40px;
 	justify-content: center;
-	width: 44px;
-	padding: 26px 0;
+	width: 40px;
+	padding: 20px 0;
+	overflow: visible;
 }
 
-.kb-outline-head {
+.kb-outline-top {
+	position: sticky;
+	top: 0;
+	z-index: 1;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 6px;
-	margin-bottom: 10px;
+	gap: 5px;
+	margin-bottom: 8px;
+	padding: 2px 0 4px;
+	background: var(--kb-bg);
+}
+
+.kb-outline.is-closed .kb-outline-top {
+	position: static;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+}
+
+.kb-outline-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--kb-radius-sm);
+	color: var(--kb-text-2);
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.kb-outline-toggle:hover {
+	background: var(--kb-accent-soft);
+	color: var(--kb-accent);
 }
 
 .kb-outline-title {
@@ -358,7 +387,7 @@ html.dark .kb-tree-row.active {
 	align-items: center;
 	gap: 5px;
 	color: var(--kb-text-3);
-	font-size: 11.5px;
+	font-size: 12px;
 	font-weight: 600;
 	letter-spacing: 0.02em;
 }
@@ -398,23 +427,6 @@ html.dark .kb-tree-row.active {
 }
 
 .kb-outline-list li.level-3.active a {
-	color: var(--kb-accent);
-}
-
-.kb-outline-open {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 6px;
-	padding: 8px 4px;
-	border-radius: var(--kb-radius);
-	color: var(--kb-text-3);
-	font-size: 12px;
-	writing-mode: vertical-rl;
-}
-
-.kb-outline-open:hover {
-	background: var(--kb-accent-soft);
 	color: var(--kb-accent);
 }
 

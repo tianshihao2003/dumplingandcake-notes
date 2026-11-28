@@ -9,6 +9,7 @@ const paths: Record<string, string[]> = {
 	search: ["M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z", "m21 21-4.35-4.35"],
 	"chevron-right": ["m9 18 6-6-6-6"],
 	"chevron-down": ["m6 9 6 6 6-6"],
+	"chevrons-left": ["m11 17-5-5 5-5", "m18 17-5-5 5-5"],
 	sun: [
 		"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z",
 		"M12 1v2",
