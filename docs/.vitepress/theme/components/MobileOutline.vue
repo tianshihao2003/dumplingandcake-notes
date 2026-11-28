@@ -11,6 +11,7 @@ interface Header {
 
 const route = useRoute();
 const headers = ref<Header[]>([]);
+const open = ref(false);
 
 function scan() {
 	if (typeof document === "undefined") return;
@@ -22,6 +23,16 @@ function scan() {
 	}));
 }
 
+function close() {
+	open.value = false;
+	document.documentElement.classList.remove("kb-no-scroll");
+}
+
+function show() {
+	open.value = true;
+	document.documentElement.classList.add("kb-no-scroll");
+}
+
 onMounted(() => {
 	scan();
 	watch(
@@ -29,6 +40,7 @@ onMounted(() => {
 		async () => {
 			await nextTick();
 			scan();
+			close();
 		},
 		{ flush: "post" },
 	);
@@ -36,17 +48,36 @@ onMounted(() => {
 </script>
 
 <template>
-	<details v-if="headers.length" class="kb-mobile-outline">
-		<summary>
-			<span><Icon name="hash" :size="14" />本页目录</span>
+	<template v-if="headers.length">
+		<button
+			class="kb-mobile-toc-btn"
+			type="button"
+			aria-label="打开本页目录"
+			@click="show"
+		>
+			<Icon name="hash" :size="15" />
+			<span>目录</span>
 			<em>{{ headers.length }}</em>
-		</summary>
-		<nav>
-			<ul>
-				<li v-for="header in headers" :key="header.slug" :class="`level-${header.level}`">
-					<a :href="`#${header.slug}`">{{ header.title }}</a>
-				</li>
-			</ul>
-		</nav>
-	</details>
+		</button>
+
+		<Teleport to="body">
+			<div v-if="open" class="kb-mobile-toc-mask" @click.self="close">
+				<div class="kb-mobile-toc-sheet" role="dialog" aria-modal="true" aria-label="本页目录">
+					<div class="kb-mobile-toc-head">
+						<strong><Icon name="hash" :size="15" />本页目录</strong>
+						<button class="kb-icon-btn" type="button" aria-label="关闭目录" @click="close">
+							<Icon name="x" />
+						</button>
+					</div>
+					<nav>
+						<ul>
+							<li v-for="header in headers" :key="header.slug" :class="`level-${header.level}`">
+								<a :href="`#${header.slug}`" @click="close">{{ header.title }}</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</Teleport>
+	</template>
 </template>

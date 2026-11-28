@@ -8,8 +8,7 @@ import type { TreeNode } from "../types";
 import { useSidebarState } from "../composables/useSidebarState";
 
 const route = useRoute();
-const { open, mobileOpen, closeMobile, expandDirs } = useSidebarState();
-const query = ref("");
+const { open, mobileOpen, closeMobile, expandDirs } = useSidebarState();const query = ref("");
 
 function createRoot(): TreeNode {
 	return { name: "", path: "", dirs: [], notes: [] };
@@ -79,10 +78,6 @@ function ancestorsOfCurrent(): string[] {
 onMounted(() => {
 	expandDirs(ancestorsOfCurrent());
 });
-
-function onNavigate() {
-	closeMobile();
-}
 </script>
 
 <template>
@@ -107,13 +102,14 @@ function onNavigate() {
 			<input v-model="query" type="search" placeholder="筛选笔记" aria-label="筛选笔记" />
 		</label>
 
-		<nav class="kb-tree" @click="onNavigate">
+		<nav class="kb-tree">
 			<ul class="kb-tree-root">
 				<li>
 					<a
 						class="kb-tree-row kb-tree-home"
 						:class="{ active: route.path === '/' }"
 						:href="withBase('/')"
+						@click="closeMobile"
 					>
 						<Icon name="home" :size="15" />
 						<span class="kb-tree-label">首页</span>
@@ -132,6 +128,7 @@ function onNavigate() {
 						:class="{ active: decodeURIComponent(route.path) === decodeURIComponent(note.url) }"
 						:href="note.url"
 						:style="{ paddingLeft: '24px' }"
+						@click="closeMobile"
 					>
 						<Icon name="file" :size="14" class="kb-tree-file" />
 						<span class="kb-tree-label">{{ note.title }}</span>

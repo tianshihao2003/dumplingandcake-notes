@@ -8,7 +8,7 @@ import type { TreeNode } from "../types";
 
 const props = defineProps<{ node: TreeNode; level: number; forceOpen?: boolean }>();
 const route = useRoute();
-const { isExpanded, toggleDir } = useSidebarState();
+const { isExpanded, toggleDir, closeMobile } = useSidebarState();
 
 const expanded = computed(() => props.forceOpen || isExpanded(props.node.path));
 const count = computed(() => {
@@ -58,6 +58,7 @@ function isActive(note: Note) {
 					:href="note.url"
 					:style="{ paddingLeft: `${24 + level * 14}px` }"
 					:title="note.filename"
+					@click="closeMobile"
 				>
 					<Icon name="file" :size="14" class="kb-tree-file" />
 					<span class="kb-tree-label">{{ note.title }}</span>
