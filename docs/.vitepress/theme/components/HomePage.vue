@@ -1,37 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useData, withBase } from "vitepress";
+import { useData } from "vitepress";
 import { notes } from "../data/notes";
-import Icon from "./Icon.vue";
 
 const { site, theme } = useData();
 
-const visible = computed(() =>
-	notes.filter((note) => !note.hidden && note.date),
-);
-
-const categories = computed(() => {
-	const map = new Map<string, number>();
-	for (const note of visible.value) {
-		if (!note.dir) continue;
-		const top = note.dir.split("/")[0];
-		map.set(top, (map.get(top) ?? 0) + 1);
-	}
-	const icons = (theme.value.categoryIcons ?? {}) as Record<string, string>;
-	return [...map.entries()]
-		.sort((a, b) => b[1] - a[1])
-		.map(([name, count]) => ({
-			name,
-			count,
-			icon: icons[name] || "📁",
-			link: withBase(`/posts/${encodeURIComponent(name)}/`),
-		}));
-});
+const visible = computed(() => notes.filter((note) => !note.hidden && note.date));
 
 const recent = computed(() =>
 	[...visible.value]
 		.sort((a, b) => +new Date(b.date) - +new Date(a.date))
-		.slice(0, 8),
+		.slice(0, 10),
 );
 
 function formatDate(value: string) {
@@ -51,29 +30,6 @@ function formatDate(value: string) {
 			<p class="kb-hero-desc">{{ theme.tagline || site.description }}</p>
 			<div class="kb-hero-stats">
 				<span><strong>{{ visible.length }}</strong> 篇笔记</span>
-				<span><strong>{{ categories.length }}</strong> 个分类</span>
-			</div>
-		</section>
-
-		<section v-if="categories.length" class="kb-section">
-			<div class="kb-section-head">
-				<h2>分类</h2>
-				<span>按目录自动生成</span>
-			</div>
-			<div class="kb-category-grid">
-				<a
-					v-for="category in categories"
-					:key="category.name"
-					class="kb-category-card"
-					:href="category.link"
-				>
-					<span class="kb-category-icon">{{ category.icon }}</span>
-					<span class="kb-category-body">
-						<strong>{{ category.name }}</strong>
-						<small>{{ category.count }} 篇</small>
-					</span>
-					<Icon name="chevron-right" :size="15" class="kb-category-arrow" />
-				</a>
 			</div>
 		</section>
 

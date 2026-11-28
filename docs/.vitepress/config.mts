@@ -57,15 +57,6 @@ const config = defineConfig({
 		comment: {
 			serverURL: "https://waline.tsh520.cn",
 		},
-		// 目录名 → 首页分类图标；没有配置的用 📁
-		categoryIcons: {
-			AI: "🤖",
-			编程学习: "💻",
-			其他学习: "📚",
-			项目学习: "🚀",
-			学习路线: "🗺️",
-			回收站: "🗑️",
-		},
 	},
 });
 

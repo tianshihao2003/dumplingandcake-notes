@@ -5,6 +5,7 @@ import AppHeader from "./components/AppHeader.vue";
 import SidebarTree from "./components/SidebarTree.vue";
 import DocOutline from "./components/DocOutline.vue";
 import DocMeta from "./components/DocMeta.vue";
+import MobileOutline from "./components/MobileOutline.vue";
 import HomePage from "./components/HomePage.vue";
 import ReadingProgress from "./components/ReadingProgress.vue";
 import ImageLightbox from "./components/ImageLightbox.vue";
@@ -58,6 +59,7 @@ const dropFirstH1 = computed(() => {
 							<h1 class="kb-doc-title">{{ page.title }}</h1>
 							<DocMeta />
 						</header>
+						<MobileOutline />
 						<div class="kb-doc-body" :class="{ 'kb-drop-first-h1': dropFirstH1 }">
 							<Content />
 						</div>

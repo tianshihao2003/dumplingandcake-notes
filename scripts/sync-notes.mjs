@@ -1240,7 +1240,7 @@ const SKIP_ASSET_EXT = new Set([
 const allRelSet = new Set(allFiles.map((f) => f.rel));
 
 // 把每张手绘图转成一页 markdown，作为「虚拟文件」塞进列表：
-// 这样目录落地页、导航计数、残留清理都会自动把它当成正常笔记
+// 这样目录树、导航计数、残留清理都会自动把它当成正常笔记
 const generated = [];
 const svgSourceRels = new Set(); // 本身就是 SVG 的 .md，不能再当普通笔记渲染
 let drawingFailed = 0;
@@ -1365,10 +1365,9 @@ const stat = {
 	date: 0,
 	cover: 0,
 	hidden: 0,
-	pages: 0,
 };
 
-// rel -> 标题，生成目录落地页时用
+// rel -> 标题
 const titles = new Map();
 // 主题用的笔记元数据（不把正文打进客户端）
 const noteMetas = [];
@@ -1492,21 +1491,8 @@ if (!DRY_RUN) {
 		...files.map((f) => f.rel),
 		...generated.flatMap((g) => (g.assets ?? []).map((a) => a.rel)),
 	]);
-	// 源目录树里还存在的目录集合：它们的落地页 index.md 是脚本生成的，必须留
-	const sourceDirs = new Set();
-	for (const { rel } of files) {
-		const segs = rel.split(path.sep);
-		for (let i = 1; i < segs.length; i++) sourceDirs.add(segs.slice(0, i).join(path.sep));
-	}
 	let pruned = 0;
 	for (const { full, rel } of existing) {
-		// 目录落地页不在源目录里，但**只在它所属的目录还存在于源树时**才保留。
-		// 否则文件夹改名/挪走后，旧目录会剩一个只有 index.md 的空壳，
-		// 顶部导航会把「0 篇」的旧分类当成真实分类列出来（ai使用 / English笔记本 那类）。
-		if (path.basename(rel) === "index.md") {
-			const parent = path.dirname(rel);
-			if (parent === "." || sourceDirs.has(parent)) continue;
-		}
 		if (!keep.has(rel)) {
 			await rm(full, { force: true });
 			pruned++;
@@ -1535,108 +1521,6 @@ if (!DRY_RUN) {
 		}
 	}
 	if (removedDirs > 0) console.log(`  清理空目录    : ${removedDirs} 个`);
-}
-
-// —— 给每个「装笔记的目录」生成一个落地页（顶部导航的入口就是这些页面）——
-// 只给含 md 的目录生成，链接用相对路径，VitePress 自动转成路由。
-if (!DRY_RUN) {
-	/** 目录相对路径("" 表示 posts 根) -> { files: [{name,title}], dirs: Set<name> } */
-	const nodes = new Map();
-	const ensure = (key) => {
-		if (!nodes.has(key)) nodes.set(key, { files: [], dirs: new Set() });
-		return nodes.get(key);
-	};
-
-	for (const { rel } of files) {
-		if (!rel.endsWith(".md")) continue;
-		const segs = rel.split(path.sep);
-		const name = segs.pop();
-		if (name === "index.md") continue; // 源目录自带落地页就让位
-		const dirKey = segs.join(path.sep);
-		ensure(dirKey).files.push({ name, title: titles.get(rel) ?? name });
-		// 逐级登记子目录
-		for (let i = 1; i <= segs.length; i++) {
-			const parent = segs.slice(0, i - 1).join(path.sep);
-			ensure(parent).dirs.add(segs[i - 1]);
-		}
-	}
-
-	for (const [dirKey, node] of nodes) {
-		if (dirKey === "" || (node.files.length === 0 && node.dirs.size === 0)) continue;
-
-		// 篇数含所有下级目录
-		const countAll = (key) => {
-			const n = nodes.get(key);
-			if (!n) return 0;
-			let total = n.files.length;
-			for (const sub of n.dirs) {
-				total += countAll(path.join(key, sub));
-			}
-			return total;
-		};
-		// 拉丁字母开头的排前面，中文按拼音；两组内部各自排序
-		const sortNames = (list) =>
-			[...list].sort((a, b) => {
-				const aLatin = /^[A-Za-z]/.test(a) ? 0 : 1;
-				const bLatin = /^[A-Za-z]/.test(b) ? 0 : 1;
-				return aLatin - bLatin || a.localeCompare(b, "zh");
-			});
-
-		const dirName = path.basename(dirKey);
-		// 右侧「相关文章」什么时候收起来？
-		// 主题的 autoHideSidebar 规则是：当前路径在导航里 + 这一页自己不是文章（落地页都 hidden）→ 收起。
-		// 但 frontmatter 只要写了 sidebar 就直接短路，不再收起。
-		//
-		// 站长的规则：**只有导航下拉里的「全部」那一页不显示，其余都要显示**。
-		// 「全部」= 顶层的那个分类落地页，且它下面确实有子分类（有子分类才会出现下拉，
-		// 没子分类时顶层页就是普通分类页，仍然要显示）。
-		//
-		// 别用「有没有子目录」判断 —— python/ 下面有 10-卡点本 之类的子目录，
-		// 但它不是「全部」，是下拉里的一个具体分类，必须显示。
-		const depth = dirKey.split(path.sep).length;
-		const isTopAggregate = depth === 1 && node.dirs.size > 0;
-		const frontmatter = [
-			"---",
-			`title: ${dirName}`,
-			"hidden: true",
-			// 别把自己列进「相关文章」列表里
-			"recommend: false",
-			"cover: false",
-			"date: false",
-		];
-		if (!isTopAggregate) frontmatter.push("sidebar: true");
-		frontmatter.push("---");
-		const out = [
-			...frontmatter,
-			"",
-			`# ${dirName}`,
-			"",
-			`共 ${countAll(dirKey)} 篇`,
-			"",
-		];
-		const subs = sortNames(node.dirs);
-		if (subs.length > 0) {
-			out.push("## 子分类", "");
-			for (const sub of subs) {
-				// 相对目录链接；名字里有中文/空格，用 <> 包起来即可，不要 URL 编码
-				out.push(`- [${sub}](<./${sub}/>)`);
-			}
-			out.push("");
-		}
-		if (node.files.length > 0) {
-			if (subs.length > 0) out.push("## 文章", "");
-			// 标题太长会撑破列表，截断到 40 字
-			const short = (t) => (t.length > 40 ? `${t.slice(0, 40)}…` : t);
-			for (const f of sortNames(node.files.map((x) => x.name)).map((name) =>
-				node.files.find((x) => x.name === name),
-			)) {
-				out.push(`- [${short(f.title)}](<./${f.name}>)`);
-			}
-			out.push("");
-		}
-		await writeIfChanged(path.join(DEST, dirKey, "index.md"), out.join("\n"));
-		stat.pages++;
-	}
 }
 
 // 主题数据：同步时生成，构建和 CI 都直接读这份，不依赖源库
@@ -1686,7 +1570,6 @@ console.log(`  补 title      : ${stat.title} 篇`);
 console.log(`  补 date       : ${stat.date} 篇`);
 console.log(`  补 cover      : ${stat.cover} 篇`);
 console.log(`  首页隐藏      : ${stat.hidden} 篇`);
-console.log(`  目录落地页    : ${stat.pages} 个`);
 if (!DRY_RUN) {
 	console.log(`  实际写入      : ${stat.written} 个（未变 ${stat.unchanged} 个）`);
 }

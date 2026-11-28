@@ -29,8 +29,8 @@ pnpm images      # 只跑图片压缩/上传
 
 - 主题在 `docs/.vitepress/theme`，是完全自定义 Layout：左目录树 + 左文章大纲 + 正文，不再使用 `@sugarat/theme`。
 - `docs/.vitepress/theme/data/notes.json` 由 `pnpm sync` 生成，目录树/首页/搜索共用；**不要手改**。
-- `docs/posts` 里每层目录的 `index.md` 也由 sync 生成，不要手写。
-- 主题配置在 `config.mts` 的 `themeConfig`：`siteTitle`、`tagline`、`author`、`github`、`comment.serverURL`、`categoryIcons`。
+- `docs/posts` 里不再生成分类落地页 `index.md`，目录树负责分组；首页只展示简介和最近更新。
+- 主题配置在 `config.mts` 的 `themeConfig`：`siteTitle`、`tagline`、`author`、`github`、`comment.serverURL`。
 - mermaid 依赖 `config.mts` 里的 `withMermaid()`，版本钉在 `^10`，别升 12。
 - 首页只显示 `hidden !== true` 且有 `date` 的笔记；回收站/已弃用目录不会出现在首页，但目录树里仍可访问。
 - 搜索用 Pagefind：`pnpm build` 会生成 `dist/pagefind`，`pnpm dev` 下搜索退化为标题/标签过滤。

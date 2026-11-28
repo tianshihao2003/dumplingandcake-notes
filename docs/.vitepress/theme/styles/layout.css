@@ -248,13 +248,13 @@
 .kb-tree-row {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 7px;
 	width: 100%;
-	height: 32px;
-	padding: 0 8px;
+	height: 34px;
+	padding: 0 9px;
 	border-radius: var(--kb-radius-sm);
 	color: var(--kb-text-2);
-	font-size: 13px;
+	font-size: 14px;
 	text-align: left;
 }
 
@@ -373,10 +373,10 @@ html.dark .kb-tree-row.active {
 .kb-outline-list a {
 	display: block;
 	margin-left: -1px;
-	padding: 4px 6px 4px 11px;
+	padding: 5px 7px 5px 12px;
 	border-left: 2px solid transparent;
 	color: var(--kb-text-2);
-	font-size: 12.5px;
+	font-size: 13.5px;
 	line-height: 1.55;
 	transition: color 0.15s ease, border-color 0.15s ease;
 }
@@ -392,8 +392,8 @@ html.dark .kb-tree-row.active {
 }
 
 .kb-outline-list li.level-3 a {
-	padding-left: 22px;
-	font-size: 12px;
+	padding-left: 24px;
+	font-size: 12.5px;
 	color: var(--kb-text-3);
 }
 
@@ -581,64 +581,6 @@ html.dark .kb-hero {
 	font-size: 12px;
 }
 
-.kb-category-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-	gap: 12px;
-}
-
-.kb-category-card {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 14px 16px;
-	border: 1px solid var(--kb-border);
-	border-radius: var(--kb-radius-lg);
-	background: var(--kb-panel);
-	box-shadow: 0 1px 1px rgba(31, 35, 41, 0.03);
-	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-
-.kb-category-card:hover {
-	border-color: color-mix(in srgb, var(--kb-accent) 40%, var(--kb-border));
-	box-shadow: var(--kb-shadow);
-	transform: translateY(-2px);
-}
-
-.kb-category-icon {
-	display: grid;
-	place-items: center;
-	width: 42px;
-	height: 42px;
-	border-radius: 11px;
-	background: var(--kb-panel-soft);
-	font-size: 22px;
-}
-
-.kb-category-body {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-width: 0;
-}
-
-.kb-category-body strong {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-size: 14px;
-	font-weight: 600;
-}
-
-.kb-category-body small {
-	color: var(--kb-text-3);
-	font-size: 11.5px;
-}
-
-.kb-category-arrow {
-	color: var(--kb-text-3);
-}
-
 .kb-recent-list {
 	margin: 0;
 	padding: 0;
@@ -685,6 +627,62 @@ html.dark .kb-hero {
 	margin-top: 2px;
 	color: var(--kb-text-3);
 	font-size: 11.5px;
+}
+
+/* ============ 移动端文章目录 ============ */
+.kb-mobile-outline {
+	display: none;
+	margin: 0 0 22px;
+	border: 1px solid var(--kb-border);
+	border-radius: var(--kb-radius);
+	background: var(--kb-panel-soft);
+}
+
+.kb-mobile-outline summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 14px;
+	color: var(--kb-text-2);
+	font-size: 13px;
+	cursor: pointer;
+	list-style: none;
+}
+
+.kb-mobile-outline summary::-webkit-details-marker {
+	display: none;
+}
+
+.kb-mobile-outline summary span {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 600;
+}
+
+.kb-mobile-outline summary em {
+	color: var(--kb-text-3);
+	font-size: 11.5px;
+	font-style: normal;
+}
+
+.kb-mobile-outline ul {
+	margin: 0;
+	padding: 4px 14px 12px;
+	list-style: none;
+}
+
+.kb-mobile-outline li a {
+	display: block;
+	padding: 4px 0;
+	color: var(--kb-text-2);
+	font-size: 13px;
+}
+
+.kb-mobile-outline li.level-3 a {
+	padding-left: 16px;
+	color: var(--kb-text-3);
+	font-size: 12.5px;
 }
 
 /* ============ 404 ============ */
@@ -895,9 +893,13 @@ html.dark .kb-hero {
 	}
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
 	.kb-outline {
 		display: none;
+	}
+
+	.kb-mobile-outline {
+		display: block;
 	}
 }
 
@@ -906,8 +908,8 @@ html.dark .kb-hero {
 		position: fixed;
 		top: var(--kb-header-h);
 		left: 0;
-		width: 286px;
-		flex-basis: 286px;
+		width: 300px;
+		flex-basis: 300px;
 		transform: translateX(-100%);
 		transition: transform 0.22s ease;
 		box-shadow: var(--kb-shadow-lg);
@@ -915,8 +917,8 @@ html.dark .kb-hero {
 	}
 
 	.kb-sidebar.is-collapsed {
-		width: 286px;
-		flex-basis: 286px;
+		width: 300px;
+		flex-basis: 300px;
 		border-right: 1px solid var(--kb-border);
 	}
 
@@ -966,10 +968,6 @@ html.dark .kb-hero {
 }
 
 @media (max-width: 560px) {
-	.kb-category-grid {
-		grid-template-columns: 1fr;
-	}
-
 	.kb-breadcrumb {
 		display: none;
 	}
