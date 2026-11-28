@@ -66,7 +66,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 				<Icon name="panel-left" />
 			</button>
 
-			<a class="kb-brand" href="/">
+			<a class="kb-brand" href="/" :aria-label="theme.siteTitle || site.title">
 				<img class="kb-brand-logo" :src="withBase('/logo.webp')" alt="" width="26" height="26" />
 				<span class="kb-brand-name">{{ theme.siteTitle || site.title }}</span>
 			</a>
@@ -82,7 +82,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 		</div>
 
 		<div class="kb-header-right">
-			<button class="kb-search-trigger" type="button" @click="searchOpen = true">
+			<button class="kb-search-trigger" type="button" aria-label="搜索笔记" @click="searchOpen = true">
 				<Icon name="search" :size="15" />
 				<span>搜索笔记</span>
 				<kbd>Ctrl K</kbd>
