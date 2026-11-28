@@ -102,6 +102,47 @@ function getField(fmLines, key) {
 	return null;
 }
 
+/** 只解析主题需要的少量 frontmatter 字段（title/date/tags/description/hidden）。 */
+function readMeta(text) {
+	const lines = text.split("\n");
+	const fm = splitFrontmatter(lines);
+	if (!fm) return {};
+	const fmLines = lines.slice(1, fm.end);
+	const meta = {};
+	for (let i = 0; i < fmLines.length; i++) {
+		const line = fmLines[i];
+		const m = line.match(/^([A-Za-z_][\w-]*)\s*:\s*(.*)$/);
+		if (!m) continue;
+		const key = m[1];
+		let value = m[2].trim();
+		if (value === "") {
+			const list = [];
+			let j = i + 1;
+			while (j < fmLines.length && /^\s+-\s+/.test(fmLines[j])) {
+				list.push(fmLines[j].replace(/^\s+-\s+/, "").trim().replace(/^["']|["']$/g, ""));
+				j++;
+			}
+			if (list.length) {
+				meta[key] = list;
+				i = j - 1;
+			} else {
+				meta[key] = true;
+			}
+			continue;
+		}
+		if (value.startsWith("[") && value.endsWith("]")) {
+			meta[key] = value
+				.slice(1, -1)
+				.split(",")
+				.map((item) => item.trim().replace(/^["']|["']$/g, ""))
+				.filter(Boolean);
+			continue;
+		}
+		meta[key] = value.replace(/^["']|["']$/g, "");
+	}
+	return meta;
+}
+
 /** 取文章标题：frontmatter title > 文件名（保留 01- 这类序号） */
 function extractTitle(text, rel) {
 	const lines = text.split("\n");
@@ -1298,9 +1339,14 @@ const files = [
 	...keptFiles0,
 	...generated.map((g) => ({ rel: g.rel, full: null, text: g.text, assets: g.assets })),
 ];
-// 超过体积上限的图片不进副本，但笔记里的引用还在；VitePress 解析不到资源会直接构建失败。
-// 同步时把这类引用换成文字（只按文件名判断，和图片双链的解析口径一致）。
-const skippedAssetNames = new Set(skippedAssets.map((a) => path.basename(a.rel)));
+// 同步后真正会落盘的文件（相对 DEST）。正文里指向其它路径的图片一律视为失配，
+// 因为 VitePress 打包时会尝试解析这些资源，找不到就直接构建失败。
+const outputRel = new Set([
+	...files.map((f) => f.rel.split(path.sep).join("/")),
+	...generated.flatMap((g) =>
+		(g.assets ?? []).map((a) => a.rel.split(path.sep).join("/")),
+	),
+]);
 
 const stat = {
 	total: files.length,
@@ -1324,6 +1370,8 @@ const stat = {
 
 // rel -> 标题，生成目录落地页时用
 const titles = new Map();
+// 主题用的笔记元数据（不把正文打进客户端）
+const noteMetas = [];
 
 if (!DRY_RUN) await mkdir(DEST, { recursive: true });
 
@@ -1379,22 +1427,41 @@ for (const { full, rel, text: generatedText, assets: genAssets } of files) {
 		fallbackTitle: extractTitle(normalized, rel),
 	});
 
-	// 超大图片被闸门挡掉后，把正文里对它的引用改成文字，否则构建会因找不到资源而失败
-	const text =
-		skippedAssetNames.size === 0
-			? sanitizedText
-			: transformOutsideCode(sanitizedText, (line) =>
-					line.replace(MD_IMG, (whole, alt, url) => {
-						let name = url;
-						try {
-							name = decodeURIComponent(url);
-						} catch {}
-						name = path.basename(name);
-						return skippedAssetNames.has(name)
-							? `*（图片已跳过：${name}，超过大小上限）*`
-							: whole;
-					}),
-				);
+	// 图片引用指向的文件不在副本里（被体积闸门挡掉 / 源库本来就缺图）时改成文字，
+	// 否则 VitePress 解析不到资源会直接构建失败。
+	const text = transformOutsideCode(sanitizedText, (line) =>
+		line.replace(MD_IMG, (whole, alt, url) => {
+			if (/^(?:https?:)?\/\//i.test(url) || /^(?:data|mailto):/i.test(url) || url.startsWith("/")) {
+				return whole;
+			}
+			let clean = url.split(/[?#]/)[0];
+			try {
+				clean = decodeURIComponent(clean);
+			} catch {}
+			const target = path.posix
+				.normalize(path.posix.join(path.posix.dirname(rel.split(path.sep).join("/")), clean))
+				.replace(/^\.\//, "");
+			if (outputRel.has(target)) return whole;
+			const name = path.basename(clean);
+			return `*（图片缺失：${name}）*`;
+		}),
+	);
+
+	// 主题元数据：目录树 / 首页 / 搜索都用这份，避免把正文打进客户端
+	if (path.basename(rel) !== "index.md") {
+		const meta = readMeta(text);
+		const noteDir = path.dirname(rel).split(path.sep).join("/");
+		noteMetas.push({
+			url: `/posts/${rel.split(path.sep).join("/").replace(/\.md$/, ".html")}`,
+			title: titles.get(rel) ?? path.basename(rel, ".md"),
+			date: meta.date === false || !meta.date ? "" : String(meta.date),
+			tags: Array.isArray(meta.tags) ? meta.tags : [],
+			description: typeof meta.description === "string" ? meta.description : "",
+			hidden: meta.hidden === true || meta.hidden === "true",
+			dir: noteDir === "." ? "" : noteDir,
+			filename: path.basename(rel, ".md"),
+		});
+	}
 
 	if (zeroWidth > 0) stat.zeroWidth++;
 	if (escapedBlocks > 0) stat.escaped++;
@@ -1570,6 +1637,13 @@ if (!DRY_RUN) {
 		await writeIfChanged(path.join(DEST, dirKey, "index.md"), out.join("\n"));
 		stat.pages++;
 	}
+}
+
+// 主题数据：同步时生成，构建和 CI 都直接读这份，不依赖源库
+if (!DRY_RUN) {
+	const dataFile = path.join(import.meta.dirname, "../docs/.vitepress/theme/data/notes.json");
+	await mkdir(path.dirname(dataFile), { recursive: true });
+	await writeIfChanged(dataFile, `${JSON.stringify(noteMetas, null, "\t")}\n`);
 }
 
 console.log(`${DRY_RUN ? "[dry-run] " : ""}源 ${SRC}`);

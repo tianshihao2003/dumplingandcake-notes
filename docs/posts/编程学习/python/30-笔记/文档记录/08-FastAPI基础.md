@@ -18,7 +18,7 @@ cover: false
 1. **安装 FastAPI 库**：`uv add fastapi uvicorn`
    - **uvicorn**：专为现代 Python Web 框架（FastAPI、Starlette）设计的高性能服务器
 
-![](./assets/08-FastAPI基础/file-20261121201313515.png)
+![](./assets/08-FastAPI基础/file-20261121201313515.webp)
 
 2. **导入 FastAPI，创建实例、定义路由、启动服务**：完整代码如下
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
 访问接口文档后，即可看到项目描述与每个接口的详细说明。
 
-![461](./assets/08-FastAPI基础/file-20261121202027987.png)
+![461](./assets/08-FastAPI基础/file-20261121202027987.webp)
 
 
 ## 异步编程

@@ -1,0 +1,61 @@
+:root {
+	--kb-bg: #f7f8fa;
+	--kb-panel: #ffffff;
+	--kb-panel-soft: #fafbfc;
+	--kb-sidebar-bg: #f5f6f7;
+	--kb-border: #e5e6eb;
+	--kb-border-strong: #d9dbe0;
+	--kb-text: #1f2329;
+	--kb-text-2: #51565d;
+	--kb-text-3: #6b7078;
+	--kb-accent: #3370ff;
+	--kb-accent-hover: #245bdb;
+	--kb-accent-soft: rgba(51, 112, 255, 0.09);
+	--kb-danger: #f54a45;
+	--kb-warning: #ff8800;
+	--kb-success: #34c724;
+	--kb-radius-sm: 6px;
+	--kb-radius: 8px;
+	--kb-radius-lg: 14px;
+	--kb-shadow: 0 1px 2px rgba(31, 35, 41, 0.04), 0 4px 16px rgba(31, 35, 41, 0.04);
+	--kb-shadow-lg: 0 12px 40px rgba(31, 35, 41, 0.16);
+	--kb-header-h: 52px;
+	--kb-sidebar-w: 268px;
+	--kb-outline-w: 208px;
+	--kb-content-w: 780px;
+	--kb-font:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+		"Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+	--kb-mono:
+		ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+	/* 覆盖 VitePress 运行时用到的基础变量 */
+	--vp-c-brand-1: var(--kb-accent);
+	--vp-c-brand-2: var(--kb-accent-hover);
+	--vp-c-brand-soft: var(--kb-accent-soft);
+	--vp-c-bg: var(--kb-panel);
+	--vp-c-bg-alt: var(--kb-panel-soft);
+	--vp-c-divider: var(--kb-border);
+	--vp-c-text-1: var(--kb-text);
+	--vp-c-text-2: var(--kb-text-2);
+	--vp-c-text-3: var(--kb-text-3);
+	--vp-font-family-base: var(--kb-font);
+	--vp-font-family-mono: var(--kb-mono);
+}
+
+html.dark {
+	--kb-bg: #151618;
+	--kb-panel: #1d1e20;
+	--kb-panel-soft: #232427;
+	--kb-sidebar-bg: #1a1b1d;
+	--kb-border: #2e3034;
+	--kb-border-strong: #3a3d42;
+	--kb-text: #e8e9eb;
+	--kb-text-2: #b7bbc1;
+	--kb-text-3: #7f858d;
+	--kb-accent: #5c8dff;
+	--kb-accent-hover: #7aa2ff;
+	--kb-accent-soft: rgba(92, 141, 255, 0.14);
+	--kb-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+	--kb-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+}

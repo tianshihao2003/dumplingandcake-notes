@@ -87,7 +87,7 @@ print(response.choices[0].message.content)
 ```
 
 `api_key`建议写进环境变量中
-![](file-20261121194250824.png)
+*（图片缺失：file-20261121194250824.png）*
 
 ### opencode代码编写测试
 

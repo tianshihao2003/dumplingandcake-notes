@@ -1,6 +1,6 @@
 # AGENTS.md
 
-VitePress + `@sugarat/theme` 笔记站。`docs/posts` 是从外部 Obsidian 库同步来的副本，**不是内容真相**。
+VitePress + 自定义主题（`docs/.vitepress/theme`）笔记站。`docs/posts` 是从外部 Obsidian 库同步来的副本，**不是内容真相**。
 详细运维/排错见 `DEPLOY.md`。
 
 ## 内容来源（最容易踩）
@@ -15,10 +15,11 @@ VitePress + `@sugarat/theme` 笔记站。`docs/posts` 是从外部 Obsidian 库�
 
 ```bash
 pnpm install     # Node >= 22，pnpm 11
-pnpm sync        # 只同步；--dry-run 先看会改什么
+pnpm sync        # 同步 + 图片转 WebP/上传图床
 pnpm dev         # sync + dev server
-pnpm build       # sync + 构建（1~2 分钟）
-pnpm serve       # 预览 dist；搜索框只有这里生效，dev 下是灰的
+pnpm build       # sync + 构建 + pagefind + RSS
+pnpm serve       # 预览 dist；搜索索引只有 build 后才有
+pnpm images      # 只跑图片压缩/上传
 ```
 
 - `pnpm-workspace.yaml` 的 `nodeLinker: hoisted` 是为绕开 Windows 下 pnpm 符号链接漏链，别改回严格模式。
@@ -26,11 +27,13 @@ pnpm serve       # 预览 dist；搜索框只有这里生效，dev 下是灰的
 
 ## 站点结构
 
-- `docs/.vitepress/config.mts`：导航从 `docs/posts` 目录自动生成。`pinnedNavDirs` 必须和文件夹名逐字一致（含 emoji），写不存在的名字会被静默忽略。
-- 目录排序规则（拉丁字母优先，再 `localeCompare(zh)`）在 `config.mts` 和 `sync-notes.mjs` 各有一份，改一处要同步另一处。
-- 每层目录的 `index.md` 落地页由 sync 生成，不要手写。规则：顶层且有子目录的「全部」页不写 `sidebar: true`，其余都写；判据是「顶层 + 有子目录」，不是「有没有子目录」。
-- `docs/.vitepress/theme/index.ts` 必须导出主题。mermaid 依赖 `config.mts` 里的 `withMermaid()` 包装（主题默认关闭且不注册插件），版本钉在 `^10`，别升 12。
-- 首页列表要求 frontmatter 有 `date`，没有会被静默丢弃；sync 已兜底（`published`→`date`、文件 mtime、必要时合成 frontmatter）。
+- 主题在 `docs/.vitepress/theme`，是完全自定义 Layout：左目录树 + 左文章大纲 + 正文，不再使用 `@sugarat/theme`。
+- `docs/.vitepress/theme/data/notes.json` 由 `pnpm sync` 生成，目录树/首页/搜索共用；**不要手改**。
+- `docs/posts` 里每层目录的 `index.md` 也由 sync 生成，不要手写。
+- 主题配置在 `config.mts` 的 `themeConfig`：`siteTitle`、`tagline`、`author`、`github`、`comment.serverURL`、`categoryIcons`。
+- mermaid 依赖 `config.mts` 里的 `withMermaid()`，版本钉在 `^10`，别升 12。
+- 首页只显示 `hidden !== true` 且有 `date` 的笔记；回收站/已弃用目录不会出现在首页，但目录树里仍可访问。
+- 搜索用 Pagefind：`pnpm build` 会生成 `dist/pagefind`，`pnpm dev` 下搜索退化为标题/标签过滤。
 
 ## 同步脚本会做的转换
 
@@ -41,10 +44,19 @@ pnpm serve       # 预览 dist；搜索框只有这里生效，dev 下是灰的
 - `*.excalidraw.md` 不直接同步，生成 `X-手绘图.md` + 内嵌字体/图片的 SVG；要看原件加 `--keep-excalidraw`。
 - 手写字体 `scripts/fonts/*.woff2` 不入库，缺失时只退回系统字体。重跑：`python scripts/fonts-tools/prepare-fonts.py`。
 
+## 图片流水线
+
+`scripts/optimize-images.mjs` 在每次 sync 后跑：
+
+- 只改 `docs/posts` 副本；图片 >1600px 缩到 1600px，PNG/JPG/GIF 转 WebP。
+- 配置了 `.env.local` 的 `IMAGEBED_URL` / `IMAGEBED_USER` / `IMAGEBED_PASS` 时上传 CloudFlare-ImgBed，正文换成图床 URL 并删本地原图。
+- 没配置或上传失败时保留本地 WebP，不会阻断构建。
+- 上传按 SHA-256 缓存到 `scripts/.imagebed-cache.json`，重复 sync 不会重复上传。
+
 ## 不要提交
 
-`node_modules/`、`docs/.vitepress/{dist,cache,.temp}/`、大附件、`scripts/fonts/*.woff2`。
-例外：`docs/posts/**` 是构建输入，必须提交。
+`node_modules/`、`docs/.vitepress/{dist,cache,.temp}/`、大附件、`scripts/fonts/*.woff2`、`.env.local`。
+例外：`docs/posts/**`、`docs/.vitepress/theme/data/notes.json`、`scripts/.imagebed-cache.json` 是构建输入/缓存，需要提交。
 
 ## Windows / 构建坑
 

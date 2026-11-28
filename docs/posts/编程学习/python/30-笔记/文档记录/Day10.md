@@ -158,7 +158,7 @@ def exception_handle(request:Request,e:Exception):
 
 **十大主流数据库:**
 
-![](./assets/Day10/file-20261124212925514.png)
+![](./assets/Day10/file-20261124212925514.webp)
 
 ## 数据模型
 
@@ -224,7 +224,7 @@ drop database [ if exists ] 数据库名 ;
 
 # PyCharm连接数据库
 
-![401](./assets/Day10/file-20261124214438324.png)
+![401](./assets/Day10/file-20261124214438324.webp)
 
 - 测试连接可以测试是否连通
 - 展示左右数据库按钮

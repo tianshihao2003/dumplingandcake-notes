@@ -2,24 +2,26 @@
   "name": "dumplingandcake-notes",
   "version": "0.1.0",
   "private": true,
-  "description": "团子和蛋糕的笔记（@sugarat/theme + VitePress）",
+  "description": "团子和蛋糕的学习笔记（VitePress 自定义主题）",
   "packageManager": "pnpm@11.7.0",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "sync": "node scripts/sync-notes.mjs",
-    "dev": "node scripts/sync-notes.mjs && vitepress dev docs",
-    "build": "node scripts/sync-notes.mjs && vitepress build docs",
-    "serve": "vitepress serve docs"
+    "sync": "node scripts/sync-notes.mjs && node scripts/optimize-images.mjs",
+    "dev": "pnpm sync && vitepress dev docs",
+    "build": "pnpm sync && vitepress build docs && pagefind --site docs/.vitepress/dist && node scripts/generate-feed.mjs",
+    "serve": "vitepress serve docs",
+    "images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
-    "@sugarat/theme": "^0.5.31",
+    "@waline/client": "^3.16.2",
     "lz-string": "^1.5.0"
   },
   "devDependencies": {
     "mermaid": "^10.9.8",
     "pagefind": "^1.5.2",
+    "sharp": "^0.35.5",
     "subset-font": "^2.9.0",
     "typescript": "^5.9.3",
     "vite": "^6.0.0",

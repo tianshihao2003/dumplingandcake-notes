@@ -1,6 +1,6 @@
 ---
 title: "MySQL数据库的操作"
-date: 2026-11-25
+date: 2026-11-27
 cover: false
 ---
 图片位置：
@@ -8,7 +8,7 @@ cover: false
 - DDL
 	- 主要分类
 		- 数值
-			- ![](assets/MySQL数据库的操作/file-20261125110155412.png)
+			- ![](assets/MySQL数据库的操作/file-20261125110155412.webp)
 			- 小扩展
 				- 有符号(可正可负)
 				- 无符号（只可正）
@@ -17,7 +17,7 @@ cover: false
 				- bigint
 				- decimal(精度,标度)
 		- 字符串
-			- ![](./assets/MySQL数据库的操作/file-20261125105246546.png)
+			- ![](./assets/MySQL数据库的操作/file-20261125105246546.webp)
 			- varchar
 				- 定义的是最大限制长度
 				- 定多少存多少
@@ -26,7 +26,7 @@ cover: false
 			- text
 				- 长文本数据
 		- 日期
-			- ![](assets/MySQL数据库的操作/file-20261125110358965.png)
+			- ![](assets/MySQL数据库的操作/file-20261125110358965.webp)
 			- 常用
 				- data
 				- datatime

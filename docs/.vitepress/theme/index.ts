@@ -1,4 +1,11 @@
-// VitePress 的主题入口：必须导出主题，光在 config 里 extends 不够
-import BlogTheme from "@sugarat/theme";
+import type { Theme } from "vitepress";
+import Layout from "./Layout.vue";
+import "./styles/vars.css";
+import "./styles/base.css";
+import "./styles/layout.css";
+import "./styles/markdown.css";
+import "./styles/code.css";
 
-export default BlogTheme;
+export default {
+	Layout,
+} satisfies Theme;

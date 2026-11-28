@@ -1,0 +1,281 @@
+.kb-doc-body {
+	color: var(--kb-text);
+	font-size: 15px;
+	line-height: 1.78;
+	word-wrap: break-word;
+}
+
+.kb-doc-body > *:first-child {
+	margin-top: 0;
+}
+
+.kb-doc-body.kb-drop-first-h1 > h1:first-child {
+	display: none;
+}
+
+.kb-doc-body h1,
+.kb-doc-body h2,
+.kb-doc-body h3,
+.kb-doc-body h4,
+.kb-doc-body h5,
+.kb-doc-body h6 {
+	position: relative;
+	margin: 1.7em 0 0.7em;
+	color: var(--kb-text);
+	font-weight: 600;
+	line-height: 1.35;
+	letter-spacing: -0.01em;
+	scroll-margin-top: calc(var(--kb-header-h) + 18px);
+}
+
+.kb-doc-body h1 {
+	font-size: 27px;
+}
+
+.kb-doc-body h2 {
+	padding-bottom: 0.35em;
+	border-bottom: 1px solid var(--kb-border);
+	font-size: 23px;
+}
+
+.kb-doc-body h3 {
+	font-size: 19px;
+}
+
+.kb-doc-body h4 {
+	font-size: 16px;
+}
+
+.kb-doc-body h5,
+.kb-doc-body h6 {
+	font-size: 14px;
+}
+
+.kb-doc-body p {
+	margin: 0 0 1em;
+}
+
+.kb-doc-body a {
+	color: var(--kb-accent);
+	text-decoration: none;
+}
+
+.kb-doc-body a:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.kb-doc-body strong {
+	font-weight: 600;
+}
+
+.kb-doc-body ul,
+.kb-doc-body ol {
+	margin: 0 0 1em;
+	padding-left: 1.7em;
+}
+
+.kb-doc-body li {
+	margin: 0.28em 0;
+}
+
+.kb-doc-body li > p {
+	margin: 0.3em 0;
+}
+
+.kb-doc-body hr {
+	margin: 2em 0;
+	border: 0;
+	border-top: 1px solid var(--kb-border);
+}
+
+.kb-doc-body blockquote {
+	margin: 1em 0;
+	padding: 10px 16px;
+	border-left: 3px solid var(--kb-accent);
+	border-radius: 0 var(--kb-radius-sm) var(--kb-radius-sm) 0;
+	background: var(--kb-accent-soft);
+	color: var(--kb-text-2);
+}
+
+.kb-doc-body blockquote > *:last-child {
+	margin-bottom: 0;
+}
+
+.kb-doc-body img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 1.1em auto;
+	border: 1px solid var(--kb-border);
+	border-radius: var(--kb-radius-sm);
+	background: var(--kb-panel);
+	cursor: zoom-in;
+}
+
+.kb-doc-body figure {
+	margin: 1.2em 0;
+}
+
+.kb-doc-body figcaption {
+	margin-top: 6px;
+	color: var(--kb-text-3);
+	font-size: 12px;
+	text-align: center;
+}
+
+.kb-doc-body table {
+	display: block;
+	width: 100%;
+	margin: 1.1em 0;
+	border-collapse: collapse;
+	overflow-x: auto;
+	font-size: 13.5px;
+}
+
+.kb-doc-body th,
+.kb-doc-body td {
+	padding: 7px 11px;
+	border: 1px solid var(--kb-border);
+	text-align: left;
+	vertical-align: top;
+}
+
+.kb-doc-body th {
+	background: var(--kb-panel-soft);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.kb-doc-body tr:nth-child(2n) td {
+	background: color-mix(in srgb, var(--kb-panel-soft) 55%, transparent);
+}
+
+.kb-doc-body mark {
+	padding: 0 2px;
+	border-radius: 3px;
+	background: #fff1b8;
+	color: inherit;
+}
+
+html.dark .kb-doc-body mark {
+	background: #6b5a1f;
+}
+
+.kb-doc-body kbd {
+	padding: 1px 5px;
+	border: 1px solid var(--kb-border-strong);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	background: var(--kb-panel-soft);
+	font-family: var(--kb-font);
+	font-size: 0.85em;
+}
+
+.kb-doc-body details {
+	margin: 1em 0;
+	padding: 10px 14px;
+	border: 1px solid var(--kb-border);
+	border-radius: var(--kb-radius);
+	background: var(--kb-panel-soft);
+}
+
+.kb-doc-body summary {
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.kb-doc-body .header-anchor {
+	position: absolute;
+	margin-left: 6px;
+	color: var(--kb-text-3);
+	opacity: 0;
+	text-decoration: none;
+}
+
+.kb-doc-body h1:hover .header-anchor,
+.kb-doc-body h2:hover .header-anchor,
+.kb-doc-body h3:hover .header-anchor,
+.kb-doc-body h4:hover .header-anchor {
+	opacity: 1;
+}
+
+.kb-doc-body .header-anchor::before {
+	content: "#";
+}
+
+/* VitePress 的 GitHub 风格提示块 */
+.kb-doc-body .custom-block {
+	margin: 1em 0;
+	padding: 12px 16px;
+	border: 1px solid transparent;
+	border-radius: var(--kb-radius);
+	font-size: 14px;
+}
+
+.kb-doc-body .custom-block > *:last-child {
+	margin-bottom: 0;
+}
+
+.kb-doc-body .custom-block .custom-block-title {
+	margin-bottom: 0.4em;
+	font-weight: 600;
+}
+
+.kb-doc-body .custom-block.tip {
+	border-color: color-mix(in srgb, var(--kb-success) 35%, transparent);
+	background: color-mix(in srgb, var(--kb-success) 8%, transparent);
+}
+
+.kb-doc-body .custom-block.info {
+	border-color: color-mix(in srgb, var(--kb-accent) 35%, transparent);
+	background: color-mix(in srgb, var(--kb-accent) 7%, transparent);
+}
+
+.kb-doc-body .custom-block.warning {
+	border-color: color-mix(in srgb, var(--kb-warning) 40%, transparent);
+	background: color-mix(in srgb, var(--kb-warning) 9%, transparent);
+}
+
+.kb-doc-body .custom-block.danger {
+	border-color: color-mix(in srgb, var(--kb-danger) 40%, transparent);
+	background: color-mix(in srgb, var(--kb-danger) 8%, transparent);
+}
+
+.kb-doc-body .custom-block.details {
+	border-color: var(--kb-border);
+	background: var(--kb-panel-soft);
+}
+
+.kb-doc-body .mermaid {
+	margin: 1.2em 0;
+	text-align: center;
+}
+
+.kb-doc-body .mermaid svg {
+	max-width: 100%;
+	height: auto;
+}
+
+.kb-doc-body .kb-copy {
+	position: absolute;
+	top: 6px;
+	right: 7px;
+	padding: 2px 7px;
+	border: 1px solid var(--kb-border);
+	border-radius: 4px;
+	background: var(--kb-panel);
+	color: var(--kb-text-3);
+	font-size: 11px;
+	opacity: 0;
+	transition: opacity 0.15s ease;
+}
+
+.kb-doc-body div[class*="language-"] {
+	position: relative;
+}
+
+.kb-doc-body div[class*="language-"]:hover .kb-copy,
+.kb-doc-body .kb-copy:focus-visible {
+	opacity: 1;
+}
